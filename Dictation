@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的 AI 會議助理 v8</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; text-align: center; }
+        
+        /* 說明區塊：設定為靠左對齊 */
+        .instructions { background-color: #eef7ff; border-left: 5px solid #007bff; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 14px; color: #444; text-align: left; }
+        .instructions strong { color: #0056b3; display: block; margin-bottom: 5px; }
+        .instructions ul { margin: 5px 0 10px 20px; padding: 0; }
+        .instructions .setting-tip { background-color: #fff3cd; border: 1px dashed #ffeeba; padding: 10px; border-radius: 4px; margin-top: 10px; }
+
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: 0.3s; font-weight: bold; }
+        #start-btn { background-color: #28a745; color: white; }
+        #stop-btn { background-color: #6c757d; color: white; }
+        #clear-btn { background-color: #dc3545; color: white; }
+        #download-btn { background-color: #007bff; color: white; }
+        
+        #status { font-size: 14px; color: #666; margin-bottom: 10px; text-align: center; font-weight: bold; }
+        #auto-stop-msg { font-size: 14px; color: #dc3545; font-weight: bold; text-align: center; margin-bottom: 10px; display: none; }
+        
+        #result-display { 
+            height: 400px; overflow-y: auto; border: 2px solid #eee; padding: 20px; 
+            border-radius: 8px; background: #ffffff; white-space: pre-wrap; 
+            text-align: left; font-size: 16px; color: #333;
+        }
+        .timestamp { color: #007bff; font-weight: bold; margin-right: 10px; font-family: monospace; }
+        .interim { color: #aaa; font-style: italic; }
+        .line-item { margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎙️ AI 會議語音轉文字助理</h1>
+    
+    <div class="instructions">
+        <strong>💡 基本操作：</strong>
+        <ul>
+            <li>請使用 <b>Chrome 瀏覽器</b> 並允許麥克風權限。</li>
+            <li>系統會自動過濾無聲片段，僅保留有意義的文字。</li>
+            <li>若連續 <b>5 分鐘</b> 無發言，系統將自動關閉以節省資源。</li>
+        </ul>
+
+        <div class="setting-tip">
+            <strong>💻 如何錄製「遠端會議」的聲音 (Zoom/Teams/Meet)：</strong>
+            <ol>
+                <li>右鍵點擊電腦右下角的「喇叭圖示」，選擇「音效設定」。</li>
+                <li>找到「輸入」裝置，尋找有無 <b>立體聲混音 (Stereo Mix)</b>。</li>
+                <li>若沒看到，請在該選單中尋找「管理音效裝置」並將其<b>啟用</b>。</li>
+                <li>設定完成後，在本工具點擊「開始」時，瀏覽器會改為收錄電腦內部的聲音。</li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="status">狀態：待命中...</div>
+    <div id="auto-stop-msg"></div>
+
+    <div class="controls">
+        <button id="start-btn">開始錄音</button>
+        <button id="stop-btn" disabled>停止錄音</button>
+        <button id="clear-btn">清空紀錄</button>
+        <button id="download-btn">下載紀錄</button>
+    </div>
+
+    <div id="result-display">尚未有紀錄...</div>
+</div>
+
+<script>
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const display = document.getElementById('result-display');
+    const statusText = document.getElementById('status');
+    const autoStopMsg = document.getElementById('auto-stop-msg');
+
+    let finalTranscript = ""; 
+    let downloadText = "";   
+    let isUserStopping = false;
+    let autoStopTimer = null;
+    const IDLE_LIMIT = 5 * 60 * 1000;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("您的瀏覽器不支援，請使用 Chrome 瀏覽器。");
+    } else {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'zh-TW';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        function resetAutoStopTimer() {
+            clearTimeout(autoStopTimer);
+            autoStopTimer = setTimeout(() => {
+                isUserStopping = true;
+                recognition.stop();
+                autoStopMsg.innerText = "※ 已達到 5 分鐘無發言，已自動關閉錄音。";
+                autoStopMsg.style.display = "block";
+            }, IDLE_LIMIT);
+        }
+
+        recognition.onstart = () => {
+            statusText.innerText = "狀態：正在收音中...";
+            statusText.style.color = "#28a745";
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            resetAutoStopTimer();
+        };
+
+        recognition.onend = () => {
+            if (!isUserStopping) {
+                recognition.start();
+            } else {
+                statusText.innerText = "狀態：錄音已停止";
+                statusText.style.color = "#666";
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                clearTimeout(autoStopTimer);
+            }
+        };
+
+        recognition.onresult = (event) => {
+            resetAutoStopTimer();
+            let interimTranscript = "";
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const text = event.results[i][0].transcript.trim(); 
+                if (event.results[i].isFinal) {
+                    if (text.length > 0) {
+                        const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                        finalTranscript += `<div class="line-item"><span class="timestamp">[${now}]</span>${text}</div>`;
+                        downloadText += `[${now}] ${text}\n`;
+                    }
+                } else {
+                    interimTranscript = text;
+                }
+            }
+            display.innerHTML = (finalTranscript || "尚未有紀錄...") + `<span class="interim">${interimTranscript}</span>`;
+            display.scrollTop = display.scrollHeight;
+        };
+
+        startBtn.onclick = () => {
+            isUserStopping = false;
+            autoStopMsg.style.display = "none";
+            recognition.start();
+        };
+        
+        stopBtn.onclick = () => { isUserStopping = true; recognition.stop(); };
+
+        clearBtn.onclick = () => {
+            if (confirm("確定要刪除目前的會議紀錄嗎？")) {
+                finalTranscript = "";
+                downloadText = "";
+                display.innerHTML = "尚未有紀錄...";
+            }
+        };
+
+        downloadBtn.onclick = () => {
+            if (!downloadText) { alert("目前沒有紀錄喔！"); return; }
+            const blob = new Blob(["\ufeff" + downloadText], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `會議紀錄_${new Date().toLocaleDateString()}.txt`;
+            a.click();
+        };
+    }
+</script>
+
+</body>
+</html>
