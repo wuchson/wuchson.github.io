@@ -1,1 +1,788 @@
-ABC
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>大小寫轉換器（升級版）</title>
+  <style>
+    :root{
+      --bg:#fff8f6;
+      --card:#fffaf8;
+      --panel:#fff6f4;
+      --text:#2b2b2b;
+      --muted:#6b6b6b;
+      --accent:#ff8aa2; /* pink */
+      --accent-2:#ffd6c2; /* cream */
+      --glass: rgba(255,255,255,0.6);
+      --shadow: 0 8px 28px rgba(39,33,33,0.06);
+      --radius:14px;
+    }
+    [data-theme="dark"]{
+      --bg:#1c1517;
+      --card:#23181a;
+      --panel:#261a1b;
+      --text:#f3edee;
+      --muted:#c6bfc1;
+      --accent:#ff9fb6;
+      --accent-2:#4b2d2f;
+      --glass: rgba(255,255,255,0.02);
+      --shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, "Noto Sans TC", system-ui, -apple-system, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #fff8f4 60%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      padding:28px;
+    }
+
+    .wrap{
+      max-width:1080px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:20px;
+    }
+    @media (max-width:980px){
+      .wrap{ grid-template-columns:1fr; padding:12px; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--card), var(--panel));
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow: var(--shadow);
+      border:1px solid rgba(0,0,0,0.03);
+    }
+
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:12px;
+    }
+    .topbar .spacer{flex:1}
+    .toggle{
+      background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));
+      border-radius:999px;
+      padding:4px;
+      border:1px solid rgba(0,0,0,0.04);
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .theme-btn{
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:13px;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+    }
+    .theme-btn.active{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;
+      font-weight:600;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:0.2px;
+    }
+    p.lead{margin:6px 0 0 0; color:var(--muted); font-size:13px}
+
+    .input-area{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:12px;
+    }
+    textarea#inputText{
+      width:100%;
+      min-height:240px;
+      resize:vertical;
+      padding:14px;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,0.04);
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+      color:var(--text);
+      font-size:15px;
+      line-height:1.55;
+      outline:none;
+    }
+    [data-theme="dark"] textarea#inputText{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    .controls{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    button.btn{
+      border: none;
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+      color:var(--text);
+      font-weight:600;
+      font-size:14px;
+      box-shadow: 0 4px 14px rgba(18,18,18,0.03);
+    }
+    [data-theme="dark"] button.btn{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:var(--text);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    button.btn.primary{
+      background: linear-gradient(90deg,var(--accent), var(--accent-2));
+      color:#fff;
+    }
+    .small{ padding:8px 10px; font-size:13px; border-radius:8px }
+
+    .right-panel{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .panel{
+      padding:12px;
+      border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+      border:1px solid rgba(0,0,0,0.04);
+    }
+    [data-theme="dark"] .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    label.opt{ font-size:13px; color:var(--muted); display:block; margin-bottom:6px; }
+
+    .preview{
+      min-height:160px;
+      padding:12px;
+      border-radius:10px;
+      white-space:pre-wrap;
+      word-break:break-word;
+      background: rgba(0,0,0,0.03);
+      color:var(--text);
+      font-size:15px;
+      line-height:1.5;
+    }
+    [data-theme="dark"] .preview{
+      background: rgba(255,255,255,0.02);
+    }
+
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .muted{ color:var(--muted); font-size:13px; }
+
+    .history-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:8px;
+      max-height:200px;
+      overflow:auto;
+    }
+    .hist-item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px;
+      border-radius:8px;
+      background: rgba(0,0,0,0.02);
+      cursor:pointer;
+      font-size:13px;
+    }
+    .hist-item small{ color:var(--muted); }
+    [data-theme="dark"] .hist-item{ background: rgba(255,255,255,0.01); }
+
+    footer.note{ margin-top:12px; color:var(--muted); font-size:13px; }
+
+    .options{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .switch{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:transparent;
+      border-radius:999px;
+      padding:6px;
+    }
+    input[type="checkbox"]{ transform:scale(1.05); margin:0; }
+    .kbd{ background:rgba(0,0,0,0.06); padding:4px 8px; border-radius:6px; font-family:monospace; font-size:12px; color:var(--muted) }
+    .flex-between{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+
+    /* tiny responsive tweaks */
+    @media (max-width:640px){
+      .preview{ min-height:120px }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap card" role="main" aria-label="英文大小寫轉換工具">
+    <div>
+      <div class="topbar">
+        <div>
+          <h1 aria-hidden="true"> </h1><!-- no title per user request -->
+          <p class="lead">英文字串轉換 — 只會改變英文片段，中文保留原樣。</p>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="toggle" role="group" aria-label="主題切換">
+          <button id="lightBtn" class="theme-btn">淺色</button>
+          <button id="darkBtn" class="theme-btn">深色</button>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <textarea id="inputText" placeholder="請在這裡貼上或輸入文字（支援中英混合）。"></textarea>
+
+        <div class="controls">
+          <button id="doUpper" class="btn primary" title="全部大寫">全部大寫</button>
+          <button id="doLower" class="btn" title="全部小寫">全部小寫</button>
+          <button id="doTitle" class="btn" title="每字首字母大寫">每字首字母</button>
+          <button id="doSentence" class="btn" title="每句首字母大寫">句首大寫</button>
+
+          <div style="width:8px"></div>
+
+          <button id="copyBtn" class="btn small" title="複製結果">複製</button>
+          <button id="downloadBtn" class="btn small" title="下載結果">下載</button>
+          <button id="clearBtn" class="btn small" title="清除">清除</button>
+
+          <div style="margin-left:auto; color:var(--muted); font-size:13px;">
+            長度: <span id="len">0</span>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content:flex-start;">
+          <div class="options">
+            <label class="switch"><input type="checkbox" id="realtime" /> 即時轉換</label>
+            <label class="switch"><input type="checkbox" id="lowerRest" checked /> 首字母大寫/句首大寫時其餘英文字母轉小寫</label>
+          </div>
+
+          <div style="margin-left:auto" class="muted">快速鍵：<span class="kbd">Ctrl+1</span> 全大寫 / <span class="kbd">Ctrl+2</span> 全小寫 / <span class="kbd">Ctrl+3</span> 每字首 / <span class="kbd">Ctrl+4</span> 句首</div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="right-panel" aria-label="結果與選項">
+      <div class="panel" aria-live="polite">
+        <label class="opt">結果預覽</label>
+        <div id="preview" class="preview" tabindex="0" aria-label="轉換後的文字顯示區"></div>
+
+        <div class="row" style="margin-top:10px;">
+          <button id="selectBtn" class="btn small">選取</button>
+          <button id="saveHistBtn" class="btn small">存為歷史</button>
+          <div class="muted" style="margin-left:auto">歷史上限：5 筆</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="flex-between">
+          <label class="opt">歷史紀錄</label>
+          <button id="clearHistBtn" class="btn small">清除全部</button>
+        </div>
+
+        <div id="history" class="history-list" aria-live="polite"></div>
+      </div>
+
+      <div class="panel">
+        <label class="opt">說明</label>
+        <div class="muted">
+          這個工具只會改變含有英文字母的片段（例：Hello 世界 → HELLO 世界）。<br>
+          「每字首字母」會對以空白或連字號/撇號分隔的單字處理；「句首大寫」會針對每一句的第一個英文字母大寫。 <br>
+          主題與歷史會儲存在本機（localStorage）。
+        </div>
+        <div class="note footer">若要其他大小寫規則（例如標題化例外詞、全部小寫保留固有大寫等），可再告訴我我替你加上。</div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // ========== DOM ==========
+    const root = document.documentElement;
+    const input = document.getElementById('inputText');
+    const preview = document.getElementById('preview');
+    const lenEl = document.getElementById('len');
+
+    const btnUpper = document.getElementById('doUpper');
+    const btnLower = document.getElementById('doLower');
+    const btnTitle = document.getElementById('doTitle');
+    const btnSentence = document.getElementById('doSentence');
+
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const selectBtn = document.getElementById('selectBtn');
+
+    const realtimeChk = document.getElementById('realtime');
+    const lowerRestChk = document.getElementById('lowerRest');
+
+    const lightBtn = document.getElementById('lightBtn');
+    const darkBtn = document.getElementById('darkBtn');
+
+    const historyEl = document.getElementById('history');
+    const saveHistBtn = document.getElementById('saveHistBtn');
+    const clearHistBtn = document.getElementById('clearHistBtn');
+
+    // ========== Settings & Storage ==========
+    const LS_THEME = 'tt_theme_v1';
+    const LS_HISTORY = 'tt_history_v1';
+    const MAX_HISTORY = 5;
+
+    function loadTheme(){
+      const t = localStorage.getItem(LS_THEME) || 'light';
+      setTheme(t);
+    }
+    function setTheme(t){
+      if (t === 'dark') {
+        root.setAttribute('data-theme','dark');
+        darkBtn.classList.add('active');
+        lightBtn.classList.remove('active');
+      } else {
+        root.removeAttribute('data-theme');
+        lightBtn.classList.add('active');
+        darkBtn.classList.remove('active');
+      }
+      localStorage.setItem(LS_THEME, t);
+    }
+    lightBtn.addEventListener('click', ()=> setTheme('light'));
+    darkBtn.addEventListener('click', ()=> setTheme('dark'));
+    loadTheme();
+
+    // History management
+    function loadHistory(){
+      try {
+        const raw = localStorage.getItem(LS_HISTORY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e){ return []; }
+    }
+    function saveHistory(arr){
+      localStorage.setItem(LS_HISTORY, JSON.stringify(arr.slice(0, MAX_HISTORY)));
+      renderHistory();
+    }
+    function pushHistory(text){
+      if (!text) return;
+      const arr = loadHistory();
+      arr.unshift({text, time: Date.now()});
+      // keep unique recent? we'll keep duplicates but limit length
+      saveHistory(arr.slice(0, MAX_HISTORY));
+    }
+    function clearHistory(){
+      localStorage.removeItem(LS_HISTORY);
+      renderHistory();
+    }
+
+    function renderHistory(){
+      const arr = loadHistory();
+      historyEl.innerHTML = '';
+      if (!arr.length){
+        const e = document.createElement('div');
+        e.className = 'muted';
+        e.textContent = '尚無歷史紀錄';
+        historyEl.appendChild(e);
+        return;
+      }
+      arr.forEach((it, idx)=>{
+        const wrap = document.createElement('div');
+        wrap.className = 'hist-item';
+        wrap.title = new Date(it.time).toLocaleString();
+        const snippet = document.createElement('div');
+        snippet.style.flex='1';
+        snippet.innerHTML = escapeHtml(it.text.length>100 ? it.text.slice(0,100)+'…' : it.text).replace(/\n/g,'<br>');
+        const time = document.createElement('small');
+        time.textContent = formatTimeAgo(it.time);
+        wrap.appendChild(snippet);
+        wrap.appendChild(time);
+
+        wrap.addEventListener('click', ()=>{
+          input.value = it.text;
+          applyPreview(currentMode); // apply current transform mode to restored text
+          if (realtimeChk.checked) updatePreview(transformRealTimePreview());
+          input.focus();
+        });
+
+        historyEl.appendChild(wrap);
+      });
+    }
+
+    clearHistBtn.addEventListener('click', ()=> {
+      if (confirm('確定要清除所有歷史紀錄？')) clearHistory();
+    });
+
+    saveHistBtn.addEventListener('click', ()=> {
+      pushHistory(preview.textContent);
+      alert('已儲存至歷史（最多保留 5 筆）');
+    });
+
+    // ========== Utilities ==========
+    function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function formatTimeAgo(ts){
+      const diff = Date.now() - ts;
+      const sec = Math.floor(diff/1000);
+      if (sec < 60) return `${sec}s`;
+      const min = Math.floor(sec/60);
+      if (min < 60) return `${min}m`;
+      const h = Math.floor(min/60);
+      if (h < 24) return `${h}h`;
+      const d = Math.floor(h/24);
+      return `${d}d`;
+    }
+
+    // Detect english "words" or segments — we'll treat as consecutive runs containing ASCII letters.
+    // We want to replace only those characters that belong to English alphabet segments,
+    // leaving punctuation, digits, and non-Latin (e.g. Chinese) alone.
+
+    // Regex to match a chunk that *contains* at least one ASCII letter and may include surrounding letters, apostrophes, hyphens.
+    const EN_SEGMENT_RE = /[A-Za-z][A-Za-z'’\-]*/g;
+
+    // Helper: replace only matched EN segments with transform function
+    function transformEnglishSegments(text, segTransform) {
+      // we'll iterate using replace with callback so non-matching text stays intact
+      return text.replace(EN_SEGMENT_RE, (match) => segTransform(match));
+    }
+
+    // Title-case for a single "word" (like don't, co-founder)
+    function titleCaseWord(word, lowerRest=true){
+      if (!/[A-Za-z]/.test(word)) return word;
+      if (lowerRest) {
+        let lower = word.toLowerCase();
+        const idx = lower.search(/[a-z]/i);
+        if (idx === -1) return lower;
+        return lower.slice(0, idx) + lower.charAt(idx).toUpperCase() + lower.slice(idx+1);
+      } else {
+        return word.replace(/([A-Za-z])/, m => m.toUpperCase());
+      }
+    }
+
+    // Sentence-case: for each sentence, capitalize first english letter (optionally lower other english letters)
+    function sentenceCaseAll(text, lowerRest=true){
+      // We'll split keeping delimiters (.,!? and newline), but keep everything
+      // Use regex to find sentence-like chunks
+      // We'll iterate over string manually to preserve all characters precisely.
+      let res = '';
+      let i = 0;
+      let needCap = true; // at beginning we want to cap
+      while (i < text.length) {
+        const ch = text[i];
+        if (isAsciiLetter(ch)) {
+          if (needCap) {
+            // capitalize this letter
+            res += lowerRest ? ch.toUpperCase() : ch.toUpperCase();
+            needCap = false;
+            i++;
+          } else {
+            // if lowerRest true, convert letter to lower
+            res += lowerRest ? ch.toLowerCase() : ch;
+            i++;
+          }
+        } else {
+          res += ch;
+          // decide if next english letter should be capitalized:
+          // if this character ends a sentence (.!?), set needCap true (but only after we pass trailing spaces)
+          if (/[.!?]/.test(ch)) {
+            // from next character, we want the first english letter to be capitalized
+            needCap = true;
+          } else if (/\r|\n/.test(ch)) {
+            // new line often also indicates sentence boundary; we'll set needCap true
+            needCap = true;
+          } else if (/\s/.test(ch)) {
+            // spaces keep the current state (if needCap is true we keep true)
+          } else {
+            // punctuation that's not terminal (comma, colon) — do not change needCap
+          }
+          i++;
+        }
+      }
+      return res;
+    }
+
+    function isAsciiLetter(ch){
+      return /[A-Za-z]/.test(ch);
+    }
+
+    // Title-case entire text: transform each english "word" using titleCaseWord
+    function titleCaseAll(text, lowerRest=true){
+      return transformEnglishSegments(text, w => titleCaseWord(w, lowerRest));
+    }
+
+    // Uppercase/lowercase for english segments only
+    function upperEnglish(text){ return transformEnglishSegments(text, w => w.toUpperCase()); }
+    function lowerEnglish(text){ return transformEnglishSegments(text, w => w.toLowerCase()); }
+
+    // ========== Modes ==========
+    const MODE = {
+      UPPER: 'upper',
+      LOWER: 'lower',
+      TITLE: 'title',
+      SENTENCE: 'sentence'
+    };
+    let currentMode = MODE.UPPER;
+
+    function applyTransform(text, mode){
+      const lowerRest = lowerRestChk.checked;
+      switch(mode){
+        case MODE.UPPER: return upperEnglish(text);
+        case MODE.LOWER: return lowerEnglish(text);
+        case MODE.TITLE: return titleCaseAll(text, lowerRest);
+        case MODE.SENTENCE: return sentenceCaseAll(text, lowerRest);
+      }
+      return text;
+    }
+
+    // Apply preview based on currentMode
+    function applyPreview(mode){
+      currentMode = mode || currentMode;
+      const out = applyTransform(input.value, currentMode);
+      updatePreview(out);
+      return out;
+    }
+
+    function updatePreview(text){
+      preview.textContent = text;
+      lenEl.textContent = String(text.length);
+    }
+
+    // For realtime preview that doesn't change the input content (just preview)
+    function transformRealTimePreview(){
+      return applyTransform(input.value, currentMode);
+    }
+
+    // ========== Events ==========
+    btnUpper.addEventListener('click', ()=> {
+      currentMode = MODE.UPPER;
+      const out = applyPreview(MODE.UPPER);
+      input.value = out;
+      input.focus();
+      pushAndMaybeNotify(out);
+    });
+    btnLower.addEventListener('click', ()=> {
+      currentMode = MODE.LOWER;
+      const out = applyPreview(MODE.LOWER);
+      input.value = out;
+      input.focus();
+      pushAndMaybeNotify(out);
+    });
+    btnTitle.addEventListener('click', ()=> {
+      currentMode = MODE.TITLE;
+      const out = applyPreview(MODE.TITLE);
+      input.value = out;
+      input.focus();
+      pushAndMaybeNotify(out);
+    });
+    btnSentence.addEventListener('click', ()=> {
+      currentMode = MODE.SENTENCE;
+      const out = applyPreview(MODE.SENTENCE);
+      input.value = out;
+      input.focus();
+      pushAndMaybeNotify(out);
+    });
+
+    function pushAndMaybeNotify(out){
+      // optionally push automatic to history? we won't auto push, user can press 存為歷史
+      // but to be helpful, push small toast? we'll skip toast to keep simple
+      updatePreview(out);
+    }
+
+    // Realtime behaviour
+    input.addEventListener('input', ()=>{
+      if (realtimeChk.checked) {
+        const out = transformRealTimePreview();
+        updatePreview(out);
+      } else {
+        // show raw input in preview so user can compare if desired (choose to show raw)
+        updatePreview(input.value);
+      }
+      // update length (raw or transformed? we follow preview content)
+      // already handled by updatePreview
+    });
+
+    // copy
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(preview.textContent);
+        showTinyAlert('已複製到剪貼簿');
+      } catch(e){
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = preview.textContent;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        showTinyAlert('已複製（fallback）');
+      }
+    });
+
+    // download
+    downloadBtn.addEventListener('click', ()=>{
+      const blob = new Blob([preview.textContent], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'text-transform.txt';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // clear
+    clearBtn.addEventListener('click', ()=>{
+      input.value = '';
+      updatePreview('');
+      input.focus();
+    });
+
+    selectBtn.addEventListener('click', ()=>{
+      // select preview text by copying to textarea and selecting
+      const ta = document.createElement('textarea');
+      ta.value = preview.textContent;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('selectAll');
+      ta.remove();
+      showTinyAlert('已選取（可按 Ctrl+C 複製）');
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e)=>{
+      if (!e.ctrlKey) return;
+      if (e.key === '1'){ e.preventDefault(); btnUpper.click(); }
+      if (e.key === '2'){ e.preventDefault(); btnLower.click(); }
+      if (e.key === '3'){ e.preventDefault(); btnTitle.click(); }
+      if (e.key === '4'){ e.preventDefault(); btnSentence.click(); }
+    });
+
+    // history rendering
+    renderHistory();
+
+    // Save history button already wired
+    saveHistBtn.addEventListener('click', ()=> {
+      const text = preview.textContent;
+      if (!text) { alert('結果為空，無法儲存。'); return; }
+      pushHistory(text);
+      showTinyAlert('已儲存至歷史（最多保留 5 筆）');
+    });
+
+    // clear history done earlier
+
+    // initialize preview with empty input
+    updatePreview('');
+
+    // theme: already loaded
+
+    // small alert (non-blocking)
+    let alertTimer = null;
+    function showTinyAlert(msg){
+      // create ephemeral toast-like message on bottom right
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.position = 'fixed';
+      t.style.right = '18px';
+      t.style.bottom = '18px';
+      t.style.background = 'linear-gradient(90deg, rgba(0,0,0,0.8), rgba(0,0,0,0.7))';
+      t.style.color = 'white';
+      t.style.padding = '10px 14px';
+      t.style.borderRadius = '10px';
+      t.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+      t.style.zIndex = 9999;
+      document.body.appendChild(t);
+      clearTimeout(alertTimer);
+      alertTimer = setTimeout(()=> t.remove(), 1600);
+    }
+
+    // Utility: update current preview if realtime is toggled on/off
+    realtimeChk.addEventListener('change', ()=>{
+      if (realtimeChk.checked) {
+        const out = transformRealTimePreview();
+        updatePreview(out);
+      } else {
+        updatePreview(input.value);
+      }
+    });
+
+    // When lowerRest changes, if realtime on, update preview
+    lowerRestChk.addEventListener('change', ()=>{
+      if (realtimeChk.checked) {
+        updatePreview(transformRealTimePreview());
+      }
+    });
+
+    // Update preview length live (if user focuses out etc.)
+    input.addEventListener('keyup', ()=> {
+      if (!realtimeChk.checked) updatePreview(input.value);
+    });
+
+    // render history now
+    renderHistory();
+
+    // ========== Edge-case handling & nicer sentence-case ==========
+    // The earlier sentenceCaseAll implementation is simple; we'll improve:
+    // We'll treat sentence boundaries at .!?，換行，以及連續符號，並 capitalise first english letter after boundary.
+
+    // We'll override sentenceCaseAll with a slightly improved algorithm:
+    function sentenceCaseAll(text, lowerRest=true){
+      // We'll iterate through characters and set needCap when at start or after sentence terminator (.!?)
+      let needCap = true;
+      let res = '';
+      for (let i = 0; i < text.length; i++){
+        const ch = text[i];
+        if (isAsciiLetter(ch)){
+          if (needCap){
+            res += ch.toUpperCase();
+            needCap = false;
+          } else {
+            res += lowerRest ? ch.toLowerCase() : ch;
+          }
+        } else {
+          res += ch;
+          // update needCap
+          if (/[.!?]/.test(ch)) {
+            // After a sentence end, the next letter (skipping spaces) should be capitalized
+            // We'll set needCap true, but it will be consumed only when we encounter a letter
+            needCap = true;
+          } else if (/\n/.test(ch)) {
+            // newline considered sentence boundary
+            needCap = true;
+          } else if (/\s/.test(ch)) {
+            // keep needCap as-is
+          } else {
+            // other punctuation -> do nothing
+          }
+        }
+      }
+      return res;
+    }
+
+    // ========== Final small helpers ==========
+    // When page loads, if there is content in clipboard? (no — skip)
+    // expose some functions to console for debugging
+    window.__textTool = {
+      applyTransform,
+      pushHistory,
+      loadHistory,
+      clearHistory
+    };
+
+    // ensure history UI is correct on load
+    renderHistory();
+
+  </script>
+</body>
+</html>
