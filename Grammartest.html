@@ -1,1 +1,212 @@
-321
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML/CSS/Javascript 在線代碼運行工具 - 新窗口模式</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .code-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+            box-sizing: border-box;
+            background-color: #2c2c2c;
+            color: #ccc;
+        }
+
+        .code-panel h3 {
+            margin: 0 0 5px 0;
+            padding: 5px;
+            font-size: 14px;
+            border-bottom: 1px solid #444;
+            color: #a0a0a0;
+        }
+
+        textarea {
+            flex-grow: 1;
+            width: 100%;
+            min-height: 0;
+            resize: none;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid #555;
+            box-sizing: border-box;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            caret-color: white;
+        }
+
+        /* 運行按鈕樣式 */
+        .controls {
+            padding: 10px;
+            background-color: #444;
+            text-align: right;
+        }
+
+        #run-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #run-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 移除結果預覽區的樣式，因為現在使用新頁面 */
+        .result-panel {
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HTML/CSS/Javascript 在線代碼運行工具</h1>
+    </header>
+
+    <div class="controls">
+        <button id="run-button">▶️ 運行代碼 (在新分頁開啟)</button>
+    </div>
+
+    <div class="container">
+        <div class="code-panel">
+            <h3>HTML</h3>
+            <textarea id="html-code" placeholder="在此輸入 HTML 程式碼..."></textarea>
+        </div>
+
+        <div class="code-panel">
+            <h3>CSS</h3>
+            <textarea id="css-code" placeholder="在此輸入 CSS 程式碼..."></textarea>
+        </div>
+
+        <div class="code-panel">
+            <h3>JavaScript</h3>
+            <textarea id="js-code" placeholder="在此輸入 JavaScript 程式碼..."></textarea>
+        </div>
+    </div>
+
+    <div class="result-panel">
+        <iframe id="output"></iframe>
+    </div>
+
+    <script>
+        // 獲取編輯器元素
+        const htmlCode = document.getElementById('html-code');
+        const cssCode = document.getElementById('css-code');
+        const jsCode = document.getElementById('js-code');
+        const runButton = document.getElementById('run-button');
+
+        // 預設代碼（幫助使用者快速上手）
+        htmlCode.value = `
+<h1>哈囉，新頁面！</h1>
+<p id="message">這段內容會在新的分頁中顯示。</p>
+<button onclick="changeText()">點擊我</button>
+        `.trim();
+
+        cssCode.value = `
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding: 50px;
+    background-color: #fce4ec; /* 粉色系背景 */
+}
+h1 {
+    color: #e91e63; /* 深粉色標題 */
+}
+button {
+    padding: 12px 20px;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+button:hover {
+    background-color: #0097a7;
+}
+        `.trim();
+
+        jsCode.value = `
+function changeText() {
+    const msg = document.getElementById('message');
+    msg.textContent = 'JavaScript 成功運行！新分頁互動正常！';
+}
+        `.trim();
+
+        /**
+         * 組合 HTML, CSS 和 JS，並在新視窗中顯示
+         */
+        function compileAndRun() {
+            const html = htmlCode.value;
+            const css = cssCode.value;
+            const js = jsCode.value;
+
+            // 組合完整的 HTML 文件
+            const finalCode = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>代碼運行結果</title>
+    <style>${css}</style>
+</head>
+<body>
+    ${html}
+    <script>${js}<\/script>
+</body>
+</html>
+            `;
+
+            // 使用 window.open() 開啟一個新的空白分頁/視窗
+            const newWindow = window.open('', '_blank');
+
+            if (newWindow) {
+                // 將程式碼寫入新的視窗
+                newWindow.document.open();
+                newWindow.document.write(finalCode);
+                newWindow.document.close();
+            } else {
+                alert('瀏覽器阻止了彈出視窗。請檢查您的瀏覽器設定並允許彈出視窗。');
+            }
+        }
+
+        // 綁定運行按鈕事件
+        runButton.addEventListener('click', compileAndRun);
+
+        // 由於是開新分頁，不需要初始運行
+        // compileAndRun(); // 移除初始運行，避免一開啟就彈出視窗
+    </script>
+
+</body>
+</html>
