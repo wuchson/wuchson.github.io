@@ -11,91 +11,150 @@
       --border-glow: rgba(99, 102, 241, 0.4);
       --text-main: #e5e7eb;
       --accent: #6366f1;
+      --radius: 16px;
     }
+
+    * { box-sizing: border-box; } /* 確保 padding 不會撐開寬度 */
 
     body {
       margin: 0;
-      font-family: sans-serif;
-      background: var(--bg-main);
+      font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+      background: radial-gradient(circle at top, #111827, var(--bg-main));
       color: var(--text-main);
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
 
     .tool-container {
       width: 100%;
-      max-width: 800px;
+      max-width: 850px;
       background: var(--bg-card);
       border: 1px solid var(--border-glow);
-      border-radius: 16px;
-      padding: 2rem;
-      backdrop-filter: blur(10px);
-      margin-top: 50px;
+      border-radius: var(--radius);
+      padding: clamp(20px, 5vw, 40px);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      /* 確保內容水平置中 */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    h1 { color: #fff; text-shadow: 0 0 10px var(--accent); }
+    header { text-align: center; margin-bottom: 25px; width: 100%; }
+    h1 { color: #fff; text-shadow: 0 0 15px var(--accent); margin-bottom: 10px; }
+    p.description { color: #9ca3af; font-size: 14px; }
+
+    .stats { 
+      width: 100%;
+      text-align: left;
+      margin-bottom: 12px; 
+      color: var(--accent); 
+      font-weight: bold; 
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
 
     textarea {
       width: 100%;
-      height: 200px;
-      background: rgba(0,0,0,0.3);
+      height: 300px;
+      background: rgba(0, 0, 0, 0.4);
       border: 1px solid var(--border-glow);
-      border-radius: 8px;
+      border-radius: 12px;
       color: #fff;
-      padding: 15px;
-      font-size: 1rem;
+      padding: 20px;
+      font-size: 16px;
+      line-height: 1.6;
       resize: vertical;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      outline: none;
+      transition: 0.3s;
+      display: block;
     }
 
-    .stats { margin-bottom: 15px; color: var(--accent); font-weight: bold; }
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
 
     .button-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
+      width: 100%;
+      justify-content: center; /* 電腦版按鈕居中 */
     }
 
     button {
-      background: rgba(99, 102, 241, 0.2);
+      background: rgba(99, 102, 241, 0.1);
       border: 1px solid var(--accent);
       color: #fff;
-      padding: 10px 18px;
-      border-radius: 6px;
+      padding: 12px 20px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      font-size: 14px;
+      flex: 1 1 auto; /* 按鈕根據文字長度自動調整 */
+      min-width: 120px;
     }
 
     button:hover {
       background: var(--accent);
-      box-shadow: 0 0 15px var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px var(--accent);
     }
 
-    .copy-btn { background: #27ae60; border-color: #27ae60; }
+    .copy-btn { 
+      background: rgba(39, 174, 96, 0.2); 
+      border-color: #27ae60; 
+      color: #2ecc71;
+    }
     
-    .back-link { margin-top: 20px; color: #888; text-decoration: none; }
+    .copy-btn:hover {
+      background: #27ae60;
+      border-color: #27ae60;
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    }
+
+    /* 手機版 RWD 修正 */
+    @media (max-width: 600px) {
+      .button-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 兩兩一排 */
+      }
+      .copy-btn { grid-column: span 2; } /* 複製按鈕在手機上獨佔一行 */
+      textarea { height: 250px; }
+    }
+
+    .back-link { margin-top: 30px; color: #6b7280; text-decoration: none; font-size: 14px; transition: 0.3s; }
+    .back-link:hover { color: var(--accent); }
   </style>
 </head>
 <body>
 
   <div class="tool-container">
-    <h1>📝 高效文字處理器</h1>
-    <p>輸入或貼上文字，立即進行轉換與優化。</p>
+    <header>
+      <h1>📝 高效文字處理器</h1>
+      <p class="description">輸入或貼上文字，立即進行轉換與優化。</p>
+    </header>
     
     <div class="stats">
       總字數: <span id="charCount">0</span> | 行數: <span id="lineCount">0</span>
     </div>
 
-    <textarea id="mainInput" placeholder="在此輸入文字..."></textarea>
+    <textarea id="mainInput" placeholder="在此輸入或貼上文字..."></textarea>
 
     <div class="button-group">
       <button onclick="transformText('upper')">全大寫</button>
       <button onclick="transformText('lower')">全小寫</button>
       <button onclick="fullToHalf()">全形轉半形</button>
       <button onclick="clearText()">清空內容</button>
-      <button class="copy-btn" onclick="copyToClipboard()">📋 複製結果</button>
+      <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 複製結果</button>
     </div>
   </div>
 
@@ -119,7 +178,7 @@
       if (type === 'lower') inputArea.value = inputArea.value.toLowerCase();
     }
 
-    // 全形轉半形 (常用於清理中文文件中的數字與字母)
+    // 全形轉半形
     function fullToHalf() {
       let str = inputArea.value;
       let result = "";
@@ -137,16 +196,29 @@
     }
 
     function clearText() {
-      inputArea.value = "";
-      charCount.innerText = "0";
-      lineCount.innerText = "0";
+      if(confirm('確定要清除所有內容嗎？')) {
+        inputArea.value = "";
+        charCount.innerText = "0";
+        lineCount.innerText = "0";
+      }
     }
 
-    // 一鍵複製
+    // 優化的複製功能
     function copyToClipboard() {
+      if(!inputArea.value) return;
+      
       inputArea.select();
-      document.execCommand('copy');
-      alert('已複製到剪貼簿！');
+      inputArea.setSelectionRange(0, 99999); /* 針對手機 */
+
+      try {
+        navigator.clipboard.writeText(inputArea.value);
+        const btn = document.getElementById('copyBtn');
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已複製！";
+        setTimeout(() => btn.innerText = originalText, 2000);
+      } catch (err) {
+        alert('複製失敗，請手動複製。');
+      }
     }
   </script>
 
