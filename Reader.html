@@ -3,260 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文字轉語音閱讀器</title>
+    <title>AI Meeting Assistant | 會議助理</title>
     <style>
-        /* --- 全域基礎樣式 --- */
+        :root {
+            --bg-deep: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --border-glow: rgba(56, 189, 248, 0.3);
+            --accent: #38bdf8;
+            --accent-green: #22c55e;
+            --text-gold: #e2e8f0;
+            --radius: 12px;
+        }
+
         body {
-            font-family: '微軟正黑體', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            line-height: 1.8;
+            font-family: 'Inter', 'Segoe UI', 'Noto Sans TC', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: var(--text-gold);
             margin: 0;
-            padding: 0;
-            background-color: #f7f7f7;
-            color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        /* --- 核心閱讀器容器樣式 (手機響應式優先) --- */
-        .reader-container {
-            width: 100%; /* 手機上佔滿寬度 */
-            padding: 20px; /* 內邊距，避免貼邊 */
-            box-sizing: border-box; 
-            margin: 0 auto; /* 預設置頂 (margin: 0) 和水平置中 (auto) */
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); 
-            border-radius: 0; /* 手機上移除圓角 */
-            min-height: 100vh; /* 確保容器至少佔滿整個螢幕高度 */
-        }
-
-        /* --- 電腦螢幕響應式調整 (置中、置頂、最大寬度、圓角) --- */
-        @media (min-width: 768px) {
-            .reader-container {
-                max-width: 900px; /* 限制電腦版寬度 */
-                margin: 20px auto 40px auto; /* 頂部 20px 邊距 (置頂效果) + 水平置中 */
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-                border-radius: 12px; /* 恢復圓角 */
-                min-height: auto;
-            }
-        }
-
-        /* --- 其他元件樣式 --- */
-        h1 {
-            color: #0056b3;
-            border-bottom: 3px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-
-        /* 文字輸入框樣式 */
-        #articleInput {
+        .assistant-dashboard {
             width: 100%;
-            min-height: 300px; 
-            padding: 15px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-            line-height: 1.6;
-            resize: vertical;
-            font-family: inherit;
-        }
-        @media (min-width: 768px) {
-             #articleInput {
-                min-height: 400px; 
-             }
+            max-width: 1000px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* 控制區塊樣式 */
-        .controls {
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .brand-info h1 {
+            font-size: 24px;
+            margin: 0;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #64748b;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .dot.active {
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 25px;
+        }
+
+        @media (max-width: 850px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .assistant-dashboard { padding: 20px; }
+        }
+
+        /* 輸入區域 */
+        .editor-section {
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: #f0f8ff;
-            border-radius: 8px;
-            border: 1px solid #cceeff;
-        }
-        
-        /* 語言選擇容器樣式 */
-        .language-control {
-            display: flex;
-            gap: 10px;
-            align-items: center;
         }
 
-        /* 按鈕容器樣式 */
-        .button-controls {
+        label.section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        #articleInput {
+            width: 100%;
+            height: 400px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: var(--radius);
+            padding: 20px;
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.8;
+            resize: none;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        #articleInput:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        }
+
+        /* 控制面板 */
+        .sidebar-controls {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap; 
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid var(--border-glow);
+            border-radius: 6px;
+            margin-top: 10px;
+            outline: none;
+        }
+
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
         }
 
         .tts-button {
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
+            padding: 14px;
             border: none;
-            border-radius: 6px;
-            background-color: #28a745;
-            color: white;
-            transition: background-color 0.3s;
-            flex-grow: 1; 
-        }
-        .tts-button:hover {
-            background-color: #1e7e34;
-        }
-        .tts-button:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
         }
 
-        /* 語言選擇下拉選單 */
-        label {
-            font-weight: bold;
-            color: #333;
+        #startReadingBtn {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: white;
         }
-        #languageSelect {
+
+        #startReadingBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        #stopReadingBtn {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid #f43f5e;
+            color: #f43f5e;
+        }
+
+        #stopReadingBtn:hover:not(:disabled) {
+            background: #f43f5e;
+            color: white;
+        }
+
+        .tts-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .tip-box {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-top: 10px;
             padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
+            border-left: 2px solid var(--accent);
+            background: rgba(56, 189, 248, 0.05);
         }
     </style>
 </head>
 <body>
 
-    <div class="reader-container">
-        <h1>文字轉語音閱讀器</h1>
-        <p style="color: red; font-weight: bold;">注意：此工具無法自動翻譯。若您選擇英文選項，請確保輸入框中的內容是英文。</p>
-        
-        <div class="controls">
-            
-            <div class="language-control">
-                <label for="languageSelect">選擇語言：</label>
-                <select id="languageSelect">
-                    <option value="zh-TW">中文 (台灣)</option>
-                    <option value="zh-CN">中文 (中國大陸)</option>
-                    <option value="en-US">英文 (美國)</option>
-                    <option value="ja-JP">日文 (Japan)</option>
-                    <option value="ko-KR">韓文 (Korea)</option>
-                </select>
-            </div>
-            
-            <div class="button-controls">
-                <button id="startReadingBtn" class="tts-button">
-                    <span id="buttonText">開始朗讀 (Start Reading)</span>
-                </button>
-                <button id="stopReadingBtn" class="tts-button" disabled>停止朗讀 (Stop Reading)</button>
-            </div>
-            
+<div class="assistant-dashboard">
+    <header>
+        <div class="brand-info">
+            <h1>AI MEETING ASSISTANT</h1>
+            <span style="font-size: 12px; color: #64748b;">智能會議宣讀與文件語音化系統</span>
         </div>
-        
-        <textarea id="articleInput" placeholder="在此輸入要閱讀的文章"></textarea>
+        <div class="status-badge">
+            <div id="statusDot" class="dot"></div>
+            <span id="statusLabel">STANDBY</span>
+        </div>
+    </header>
 
+    <div class="main-layout">
+        <section class="editor-section">
+            <label class="section-title">會議議程 / 演講稿內容</label>
+            <textarea id="articleInput" placeholder="請在此輸入或貼上會議紀錄、草稿內容..."></textarea>
+        </section>
+
+        <aside class="sidebar-controls">
+            <div class="control-group">
+                <label class="section-title">AI 語音設定</label>
+                <select id="languageSelect">
+                    <option value="zh-TW">繁體中文 (台灣語音)</option>
+                    <option value="zh-CN">簡體中文 (大陸地區)</option>
+                    <option value="en-US">English (US Speaker)</option>
+                    <option value="ja-JP">日本語 (Japanese)</option>
+                    <option value="ko-KR">한국어 (Korean)</option>
+                </select>
+                <div class="tip-box">
+                    💡 提示：系統將自動根據所選語音引擎匹配最佳音質。
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="section-title">執行指令</label>
+                <div class="btn-stack">
+                    <button id="startReadingBtn" class="tts-button">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="buttonText">開始執行宣讀</span>
+                    </button>
+                    <button id="stopReadingBtn" class="tts-button" disabled>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h6v4H9z"></path></svg>
+                        緊急中止
+                    </button>
+                </div>
+            </div>
+
+            <div style="text-align: center; color: #475569; font-size: 11px; margin-top: auto;">
+                系統版本：v2.4 Pro Professional
+            </div>
+        </aside>
     </div>
+</div>
 
-    <script>
-        const articleInput = document.getElementById('articleInput');
-        const startBtn = document.getElementById('startReadingBtn');
-        const stopBtn = document.getElementById('stopReadingBtn');
-        const buttonText = document.getElementById('buttonText');
-        const langSelect = document.getElementById('languageSelect');
-        const synth = window.speechSynthesis;
-        let voiceListLoaded = false; 
+<script>
+    const articleInput = document.getElementById('articleInput');
+    const startBtn = document.getElementById('startReadingBtn');
+    const stopBtn = document.getElementById('stopReadingBtn');
+    const buttonText = document.getElementById('buttonText');
+    const langSelect = document.getElementById('languageSelect');
+    const statusDot = document.getElementById('statusDot');
+    const statusLabel = document.getElementById('statusLabel');
+    const synth = window.speechSynthesis;
+    let voiceListLoaded = false; 
 
-        if (!synth) {
-            startBtn.textContent = '抱歉，您的瀏覽器不支援語音合成功能。';
-            startBtn.disabled = true;
+    if (!synth) {
+        startBtn.innerHTML = '瀏覽器不支援語音功能';
+        startBtn.disabled = true;
+    }
+
+    function setStatus(isActive) {
+        if (isActive) {
+            statusDot.classList.add('active');
+            statusLabel.textContent = 'PRESENTING';
+            statusLabel.style.color = '#22c55e';
+        } else {
+            statusDot.classList.remove('active');
+            statusLabel.textContent = 'STANDBY';
+            statusLabel.style.color = '#64748b';
+        }
+    }
+
+    function stopReading() {
+        synth.cancel();
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        buttonText.textContent = '開始執行宣讀';
+        setStatus(false);
+    }
+
+    function getTargetVoice(selectedLang) {
+        const allVoices = synth.getVoices();
+        return allVoices.find(voice => voice.lang.startsWith(selectedLang));
+    }
+
+    function startReading() {
+        stopReading(); 
+
+        const fullText = articleInput.value.trim();
+        if (!fullText) {
+            alert('請輸入會議內容後再執行。');
+            return;
         }
 
-        // 停止朗讀
-        function stopReading() {
-            synth.cancel();
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            buttonText.textContent = '開始朗讀 (Start Reading)';
-        }
+        const selectedLang = langSelect.value;
+        const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.lang = selectedLang; 
 
-        // 語音選擇函式：只根據語言代碼進行匹配
-        function getTargetVoice(selectedLang) {
-            const allVoices = synth.getVoices();
-            if (allVoices.length === 0) return null;
-
-            // 只使用瀏覽器/系統提供的第一個語言匹配項
-            return allVoices.find(voice => voice.lang.startsWith(selectedLang));
-        }
-
-        // 開始朗讀
-        function startReading() {
-            stopReading(); 
-
-            // 檢查語音列表是否已載入
-            if (!voiceListLoaded) {
-                 alert('語音列表正在載入中，請稍後再試一次。');
-                 return;
-            }
-
-            const fullText = articleInput.value.trim();
-            if (!fullText) {
-                alert('請先在文字框內輸入文章！');
-                return;
-            }
-
-            const selectedLang = langSelect.value;
-            const utterance = new SpeechSynthesisUtterance(fullText);
-
-            // 設定語言代碼
-            utterance.lang = selectedLang; 
-
-            // 呼叫語音選擇函式
-            const finalVoice = getTargetVoice(selectedLang);
-            if (finalVoice) {
-                utterance.voice = finalVoice;
-            }
-            
-            utterance.rate = 1.0; 
-            utterance.pitch = 1.0;
-
-            // 當朗讀開始/結束時更新按鈕狀態
-            utterance.onstart = () => {
-                startBtn.disabled = true;
-                // --- 修正行：將 stopBtn 啟用 (false) ---
-                stopBtn.disabled = false; 
-                // ----------------------------------------
-                buttonText.textContent = '正在朗讀... (Reading...)';
-            };
-            
-            utterance.onend = () => {
-                stopReading();
-            };
-            
-            utterance.onerror = (event) => {
-                console.error('SpeechSynthesis Utterance Error:', event.error);
-                alert(`朗讀發生錯誤: ${event.error}。`);
-                stopReading();
-            };
-
-            // 開始朗讀
-            synth.speak(utterance);
-        }
-
-        // 載入語音列表
-        function populateVoiceList() {
-            if (typeof synth.getVoices === 'undefined') {
-                return;
-            }
-            voiceListLoaded = true; 
-        }
-
-        if (synth.onvoiceschanged !== undefined) {
-            synth.onvoiceschanged = populateVoiceList;
-        }
-        populateVoiceList();
-
-        // 綁定事件監聽器
-        startBtn.addEventListener('click', startReading);
-        stopBtn.addEventListener('click', stopReading);
+        const finalVoice = getTargetVoice(selectedLang);
+        if (finalVoice) utterance.voice = finalVoice;
         
-    </script>
+        utterance.rate = 1.0; 
+        utterance.pitch = 1.0;
+
+        utterance.onstart = () => {
+            startBtn.disabled = true;
+            stopBtn.disabled = false; 
+            buttonText.textContent = 'AI 正在宣讀內容...';
+            setStatus(true);
+        };
+        
+        utterance.onend = () => stopReading();
+        
+        utterance.onerror = (event) => {
+            console.error(event.error);
+            stopReading();
+        };
+
+        synth.speak(utterance);
+    }
+
+    function populateVoiceList() {
+        if (typeof synth.getVoices === 'undefined') return;
+        voiceListLoaded = true; 
+    }
+
+    if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = populateVoiceList;
+    }
+    populateVoiceList();
+
+    startBtn.addEventListener('click', startReading);
+    stopBtn.addEventListener('click', stopReading);
+</script>
 </body>
 </html>
