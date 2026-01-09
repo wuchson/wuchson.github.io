@@ -3,73 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的 AI 會議助理 v8</title>
+    <title>AI 會議助理｜AI TOOL</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; text-align: center; }
-        
-        /* 說明區塊：設定為靠左對齊 */
-        .instructions { background-color: #eef7ff; border-left: 5px solid #007bff; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 14px; color: #444; text-align: left; }
-        .instructions strong { color: #0056b3; display: block; margin-bottom: 5px; }
-        .instructions ul { margin: 5px 0 10px 20px; padding: 0; }
-        .instructions .setting-tip { background-color: #fff3cd; border: 1px dashed #ffeeba; padding: 10px; border-radius: 4px; margin-top: 10px; }
-
-        .controls { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: 0.3s; font-weight: bold; }
-        #start-btn { background-color: #28a745; color: white; }
-        #stop-btn { background-color: #6c757d; color: white; }
-        #clear-btn { background-color: #dc3545; color: white; }
-        #download-btn { background-color: #007bff; color: white; }
-        
-        #status { font-size: 14px; color: #666; margin-bottom: 10px; text-align: center; font-weight: bold; }
-        #auto-stop-msg { font-size: 14px; color: #dc3545; font-weight: bold; text-align: center; margin-bottom: 10px; display: none; }
-        
-        #result-display { 
-            height: 400px; overflow-y: auto; border: 2px solid #eee; padding: 20px; 
-            border-radius: 8px; background: #ffffff; white-space: pre-wrap; 
-            text-align: left; font-size: 16px; color: #333;
+        :root {
+            --bg-main: #0b0f1a;
+            --bg-card: rgba(255, 255, 255, 0.06);
+            --border-glow: rgba(99, 102, 241, 0.4);
+            --text-main: #e5e7eb;
+            --accent: #6366f1;
+            --accent-success: #28a745;
+            --accent-danger: #dc3545;
         }
-        .timestamp { color: #007bff; font-weight: bold; margin-right: 10px; font-family: monospace; }
-        .interim { color: #aaa; font-style: italic; }
-        .line-item { margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 4px; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+            background: radial-gradient(circle at top, #111827, var(--bg-main));
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px var(--accent);
+            font-size: 1.8rem;
+        }
+
+        /* 說明區塊 */
+        .instructions {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .instructions strong { color: var(--accent); display: block; margin-bottom: 8px; }
+        .instructions ul, .instructions ol { margin-left: 20px; color: #9ca3af; }
+
+        .setting-tip {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px dashed var(--border-glow);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        /* 控制區 */
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.3s;
+            font-weight: bold;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+
+        #start-btn:not(:disabled) { border-color: var(--accent-success); color: var(--accent-success); }
+        #start-btn:hover:not(:disabled) { background: var(--accent-success); color: white; box-shadow: 0 0 15px var(--accent-success); }
+
+        #stop-btn:not(:disabled) { border-color: var(--accent-danger); color: var(--accent-danger); }
+        #stop-btn:hover:not(:disabled) { background: var(--accent-danger); color: white; box-shadow: 0 0 15px var(--accent-danger); }
+
+        #clear-btn:hover { background: #6c757d; }
+        #download-btn:hover { background: var(--accent); }
+
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* 狀態顯示 */
+        #status { text-align: center; font-size: 14px; margin-bottom: 10px; color: #9ca3af; letter-spacing: 1px; }
+        #auto-stop-msg { color: var(--accent-danger); text-align: center; font-weight: bold; margin-bottom: 10px; display: none; }
+
+        /* 紀錄顯示區 */
+        #result-display {
+            height: 450px;
+            overflow-y: auto;
+            border: 1px solid var(--border-glow);
+            padding: 25px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            white-space: pre-wrap;
+            font-size: 16px;
+            color: #d1d5db;
+        }
+
+        /* 捲軸美化 */
+        #result-display::-webkit-scrollbar { width: 6px; }
+        #result-display::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 10px; }
+
+        .line-item { margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; animation: fadeIn 0.3s ease; }
+        .timestamp { color: var(--accent); font-family: monospace; margin-right: 12px; font-weight: bold; }
+        .interim { color: #6b7280; font-style: italic; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .back-link { display: block; text-align: center; margin-top: 25px; color: #6b7280; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: var(--accent); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🎙️ AI 會議語音轉文字助理</h1>
+    <h1>🎙️ AI 會議助理</h1>
     
     <div class="instructions">
-        <strong>💡 基本操作：</strong>
+        <strong>💡 智慧收音說明：</strong>
         <ul>
-            <li>請使用 <b>Chrome 瀏覽器</b> 並允許麥克風權限。</li>
-            <li>系統會自動過濾無聲片段，僅保留有意義的文字。</li>
-            <li>若連續 <b>5 分鐘</b> 無發言，系統將自動關閉以節省資源。</li>
+            <li>點擊「開始錄音」後，系統將自動偵測語音並轉換為文字。</li>
+            <li>若連續 5 分鐘偵測不到發言，系統將自動休眠。</li>
         </ul>
 
         <div class="setting-tip">
-            <strong>💻 如何錄製「遠端會議」的聲音 (Zoom/Teams/Meet)：</strong>
-            <ol>
-                <li>右鍵點擊電腦右下角的「喇叭圖示」，選擇「音效設定」。</li>
-                <li>找到「輸入」裝置，尋找有無 <b>立體聲混音 (Stereo Mix)</b>。</li>
-                <li>若沒看到，請在該選單中尋找「管理音效裝置」並將其<b>啟用</b>。</li>
-                <li>設定完成後，在本工具點擊「開始」時，瀏覽器會改為收錄電腦內部的聲音。</li>
-            </ol>
+            <strong>💻 錄製遠端會議 (Zoom/Teams/Meet)：</strong>
+            <p style="font-size: 13px; color: #9ca3af; margin-top: 5px;">
+                請將系統錄音裝置設為 <b>「立體聲混音 (Stereo Mix)」</b>，即可收錄電腦內部會議聲音。
+            </p>
         </div>
     </div>
 
-    <div id="status">狀態：待命中...</div>
+    <div id="status">狀態：等待指令...</div>
     <div id="auto-stop-msg"></div>
 
     <div class="controls">
         <button id="start-btn">開始錄音</button>
         <button id="stop-btn" disabled>停止錄音</button>
         <button id="clear-btn">清空紀錄</button>
-        <button id="download-btn">下載紀錄</button>
+        <button id="download-btn">下載 TXT</button>
     </div>
 
-    <div id="result-display">尚未有紀錄...</div>
+    <div id="result-display">尚未開始錄音...</div>
+
+    <a href="index.html" class="back-link">← 回到主儀表板</a>
 </div>
 
 <script>
@@ -90,7 +183,8 @@
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-        alert("您的瀏覽器不支援，請使用 Chrome 瀏覽器。");
+        statusText.innerText = "❌ 您的瀏覽器不支援 Speech API";
+        alert("請使用 Chrome 瀏覽器以獲得最佳體驗。");
     } else {
         const recognition = new SpeechRecognition();
         recognition.lang = 'zh-TW';
@@ -102,13 +196,13 @@
             autoStopTimer = setTimeout(() => {
                 isUserStopping = true;
                 recognition.stop();
-                autoStopMsg.innerText = "※ 已達到 5 分鐘無發言，已自動關閉錄音。";
+                autoStopMsg.innerText = "※ 偵測到長時間無發言，已自動關閉。";
                 autoStopMsg.style.display = "block";
             }, IDLE_LIMIT);
         }
 
         recognition.onstart = () => {
-            statusText.innerText = "狀態：正在收音中...";
+            statusText.innerText = "● 正在收音中";
             statusText.style.color = "#28a745";
             startBtn.disabled = true;
             stopBtn.disabled = false;
@@ -117,10 +211,10 @@
 
         recognition.onend = () => {
             if (!isUserStopping) {
-                recognition.start();
+                recognition.start(); // 自動重啟以維持長時錄音
             } else {
-                statusText.innerText = "狀態：錄音已停止";
-                statusText.style.color = "#666";
+                statusText.innerText = "狀態：錄音已關閉";
+                statusText.style.color = "#9ca3af";
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
                 clearTimeout(autoStopTimer);
@@ -142,7 +236,7 @@
                     interimTranscript = text;
                 }
             }
-            display.innerHTML = (finalTranscript || "尚未有紀錄...") + `<span class="interim">${interimTranscript}</span>`;
+            display.innerHTML = (finalTranscript || "正在聆聽...") + `<span class="interim">${interimTranscript}</span>`;
             display.scrollTop = display.scrollHeight;
         };
 
@@ -155,20 +249,20 @@
         stopBtn.onclick = () => { isUserStopping = true; recognition.stop(); };
 
         clearBtn.onclick = () => {
-            if (confirm("確定要刪除目前的會議紀錄嗎？")) {
+            if (confirm("確定要清空本次會議紀錄嗎？")) {
                 finalTranscript = "";
                 downloadText = "";
-                display.innerHTML = "尚未有紀錄...";
+                display.innerHTML = "紀錄已清空";
             }
         };
 
         downloadBtn.onclick = () => {
-            if (!downloadText) { alert("目前沒有紀錄喔！"); return; }
+            if (!downloadText) { alert("目前尚無可下載的文字。"); return; }
             const blob = new Blob(["\ufeff" + downloadText], { type: "text/plain;charset=utf-8" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `會議紀錄_${new Date().toLocaleDateString()}.txt`;
+            a.download = `AI會議紀錄_${new Date().toISOString().slice(0,10)}.txt`;
             a.click();
         };
     }
