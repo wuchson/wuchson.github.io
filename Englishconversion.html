@@ -12,34 +12,39 @@
             --text-main: #e5e7eb;
             --accent: #6366f1;
             --accent-secondary: #a855f7;
-            --glass: rgba(255, 255, 255, 0.02);
             --radius: 16px;
         }
 
-        /* 深色模式為預設 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
             font-family: "Segoe UI", "Noto Sans TC", sans-serif;
             background: radial-gradient(circle at top, #111827, var(--bg-main));
             color: var(--text-main);
-            padding: 40px 20px;
+            /* 修正置中問題的核心設定 */
             display: flex;
             justify-content: center;
+            align-items: center; 
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .wrap {
-            max-width: 1100px;
+            max-width: 1000px; /* 縮小寬度讓視覺更集中 */
             width: 100%;
             display: grid;
             grid-template-columns: 1fr 340px;
             gap: 25px;
+            align-items: start;
         }
 
         @media (max-width: 980px) {
-            .wrap { grid-template-columns: 1fr; }
+            .wrap { 
+                grid-template-columns: 1fr; 
+                margin: 40px 0;
+            }
         }
 
-        /* 磨砂玻璃卡片 */
         .card {
             background: var(--bg-card);
             backdrop-filter: blur(12px);
@@ -49,28 +54,23 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
 
-        h1 {
-            font-size: 1.5rem;
-            color: #fff;
-            text-shadow: 0 0 15px var(--accent);
-            margin-bottom: 5px;
-        }
+        header { margin-bottom: 20px; }
+        h1 { font-size: 1.6rem; color: #fff; text-shadow: 0 0 15px var(--accent); margin-bottom: 5px; }
+        p.lead { color: #9ca3af; font-size: 14px; }
 
-        p.lead { color: #9ca3af; font-size: 14px; margin-bottom: 20px; }
-
-        /* 輸入框美化 */
         textarea#inputText {
             width: 100%;
-            min-height: 280px;
+            min-height: 320px;
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border-glow);
             border-radius: 12px;
             color: #fff;
-            padding: 15px;
+            padding: 18px;
             font-size: 16px;
             line-height: 1.6;
             outline: none;
             transition: 0.3s;
+            resize: vertical;
         }
 
         textarea#inputText:focus {
@@ -78,7 +78,6 @@
             box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
         }
 
-        /* 按鈕風格 */
         .controls {
             display: flex;
             gap: 10px;
@@ -95,18 +94,33 @@
             cursor: pointer;
             font-weight: 600;
             transition: 0.3s;
+            font-size: 14px;
         }
 
         button.btn:hover {
             background: var(--accent);
             border-color: var(--accent);
             box-shadow: 0 0 15px var(--accent);
+            color: white;
         }
 
         button.btn.primary {
             background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
             border: none;
         }
+
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .switch { font-size: 13px; color: #9ca3af; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .kbd { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; color: var(--accent); }
 
         /* 右側面板 */
         .panel {
@@ -117,45 +131,39 @@
             margin-bottom: 15px;
         }
 
+        .panel-label { font-size: 12px; color: var(--accent); font-weight: bold; display: block; margin-bottom: 8px; letter-spacing: 1px; }
+
         .preview {
-            min-height: 150px;
+            min-height: 180px;
             padding: 12px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.03);
             color: #d1d5db;
             font-size: 15px;
             border: 1px solid rgba(255,255,255,0.05);
+            white-space: pre-wrap;
+            word-break: break-all;
         }
 
-        /* 歷史紀錄項 */
         .hist-item {
             padding: 10px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.03);
             margin-top: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             border: 1px solid transparent;
             transition: 0.2s;
+            color: #9ca3af;
         }
 
         .hist-item:hover {
             border-color: var(--accent);
             background: rgba(99, 102, 241, 0.1);
+            color: #fff;
         }
 
-        .kbd {
-            background: rgba(255,255,255,0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 11px;
-            color: var(--accent);
-        }
-
-        .switch { font-size: 13px; color: #9ca3af; cursor: pointer; }
-        
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #6b7280; text-decoration: none; font-size: 14px; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #6b7280; text-decoration: none; font-size: 14px; transition: 0.3s; }
         .back-link:hover { color: var(--accent); }
     </style>
 </head>
@@ -176,38 +184,42 @@
             <button id="doTitle" class="btn">每字首字母</button>
             <button id="doSentence" class="btn">句首大寫</button>
             
-            <div style="flex:1"></div> <button id="copyBtn" class="btn" style="border-color: #2ecc71; color: #2ecc71;">複製結果</button>
+            <div style="flex:1"></div>
+            
+            <button id="copyBtn" class="btn" style="border-color: #28a745; color: #28a745;">複製結果</button>
             <button id="clearBtn" class="btn">清除</button>
         </div>
 
-        <div class="row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div class="options" style="display: flex; gap: 15px;">
-                <label class="switch"><input type="checkbox" id="realtime"> 即時預覽</label>
+        <div class="options-row">
+            <div style="display: flex; gap: 20px;">
+                <label class="switch"><input type="checkbox" id="realtime" checked> 即時預覽</label>
                 <label class="switch"><input type="checkbox" id="lowerRest" checked> 自動修正其餘字母</label>
             </div>
-            <div class="muted" style="font-size: 12px; color: #6b7280;">
-                快速鍵: <span class="kbd">Ctrl+1~4</span> | 長度: <span id="len" style="color: var(--accent);">0</span>
+            <div style="font-size: 12px; color: #6b7280;">
+                快速鍵: <span class="kbd">Ctrl+1~4</span> | 字數: <span id="len" style="color: var(--accent);">0</span>
             </div>
         </div>
     </div>
 
     <aside>
-        <div class="card" style="padding: 15px;">
+        <div class="card" style="padding: 20px;">
             <div class="panel">
-                <label style="font-size: 12px; color: var(--accent); font-weight: bold; display: block; margin-bottom: 8px;">結果預覽</label>
-                <div id="preview" class="preview">尚未有轉換內容...</div>
-                <div style="margin-top: 10px; display: flex; gap: 8px;">
-                    <button id="saveHistBtn" class="btn" style="font-size: 12px; padding: 5px 10px;">存為歷史</button>
-                    <button id="downloadBtn" class="btn" style="font-size: 12px; padding: 5px 10px;">下載 TXT</button>
+                <span class="panel-label">結果預覽</span>
+                <div id="preview" class="preview">尚未輸入內容...</div>
+                <div style="margin-top: 12px; display: flex; gap: 8px;">
+                    <button id="saveHistBtn" class="btn" style="flex: 1; font-size: 12px; padding: 6px;">存為歷史</button>
+                    <button id="downloadBtn" class="btn" style="flex: 1; font-size: 12px; padding: 6px;">下載檔案</button>
                 </div>
             </div>
 
-            <div class="panel">
+            <div class="panel" style="margin-bottom: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <label style="font-size: 12px; color: var(--accent); font-weight: bold;">歷史紀錄</label>
-                    <button id="clearHistBtn" style="background:none; border:none; color:#6b7280; cursor:pointer; font-size:11px;">清空</button>
+                    <span class="panel-label">最近紀錄</span>
+                    <button id="clearHistBtn" style="background:none; border:none; color:#6b7280; cursor:pointer; font-size:11px;">清空全部</button>
                 </div>
-                <div id="history"></div>
+                <div id="history">
+                    <div style="font-size: 12px; color: #4b5563; text-align: center; padding: 10px;">暫無紀錄</div>
+                </div>
             </div>
 
             <a href="index.html" class="back-link">← 回到主儀表板</a>
@@ -216,34 +228,32 @@
 </div>
 
 <script>
-    // [這裡請貼上你原本 HTML 中的 <script> 內容]
-    // 注意：因為我簡化了一些 ID 和 Class 名稱，請確保 script 中的 getElementById 與上方 HTML 對應。
-    // 以下提供核心逻辑段落供參考（與你提供的邏輯一致）：
-    
     const input = document.getElementById('inputText');
     const preview = document.getElementById('preview');
     const lenEl = document.getElementById('len');
     const realtimeChk = document.getElementById('realtime');
     const lowerRestChk = document.getElementById('lowerRest');
+    const historyBox = document.getElementById('history');
 
-    // 模式定義與轉換邏輯 (維持你原本的強大 regex)
     const MODE = { UPPER: 'upper', LOWER: 'lower', TITLE: 'title', SENTENCE: 'sentence' };
-    let currentMode = MODE.UPPER;
 
+    // 核心邏輯：正則表達式處理英文片段
     const EN_SEGMENT_RE = /[A-Za-z][A-Za-z'’\-]*/g;
-    function transformEnglishSegments(text, segTransform) {
-        return text.replace(EN_SEGMENT_RE, (match) => segTransform(match));
-    }
 
-    function applyTransform(text, mode) {
+    function transformEnglish(text, mode) {
         const lowerRest = lowerRestChk.checked;
+        if (!text) return "";
+
         switch(mode) {
-            case MODE.UPPER: return transformEnglishSegments(text, w => w.toUpperCase());
-            case MODE.LOWER: return transformEnglishSegments(text, w => w.toLowerCase());
-            case MODE.TITLE: return transformEnglishSegments(text, w => {
-                let low = w.toLowerCase();
-                return low.charAt(0).toUpperCase() + low.slice(1);
-            });
+            case MODE.UPPER: 
+                return text.replace(EN_SEGMENT_RE, m => m.toUpperCase());
+            case MODE.LOWER: 
+                return text.replace(EN_SEGMENT_RE, m => m.toLowerCase());
+            case MODE.TITLE: 
+                return text.replace(EN_SEGMENT_RE, m => {
+                    let low = m.toLowerCase();
+                    return low.charAt(0).toUpperCase() + (lowerRest ? low.slice(1) : m.slice(1));
+                });
             case MODE.SENTENCE: 
                 let needCap = true;
                 return text.split('').map(ch => {
@@ -257,33 +267,67 @@
         }
     }
 
-    // 事件監聽 (縮寫版)
-    document.getElementById('doUpper').onclick = () => { input.value = applyTransform(input.value, MODE.UPPER); updatePreview(); };
-    document.getElementById('doLower').onclick = () => { input.value = applyTransform(input.value, MODE.LOWER); updatePreview(); };
-    document.getElementById('doTitle').onclick = () => { input.value = applyTransform(input.value, MODE.TITLE); updatePreview(); };
-    document.getElementById('doSentence').onclick = () => { input.value = applyTransform(input.value, MODE.SENTENCE); updatePreview(); };
-
-    function updatePreview() {
-        preview.textContent = input.value || "尚未有轉換內容...";
-        lenEl.textContent = input.value.length;
+    function updateAll(mode) {
+        if (mode) {
+            input.value = transformEnglish(input.value, mode);
+        }
+        const result = input.value;
+        preview.textContent = result || "尚未輸入內容...";
+        lenEl.textContent = result.length;
     }
 
-    input.oninput = () => { if(realtimeChk.checked) updatePreview(); };
-    
+    // 按鈕事件
+    document.getElementById('doUpper').onclick = () => updateAll(MODE.UPPER);
+    document.getElementById('doLower').onclick = () => updateAll(MODE.LOWER);
+    document.getElementById('doTitle').onclick = () => updateAll(MODE.TITLE);
+    document.getElementById('doSentence').onclick = () => updateAll(MODE.SENTENCE);
+
+    input.oninput = () => { if(realtimeChk.checked) updateAll(); };
+
     document.getElementById('copyBtn').onclick = () => {
-        navigator.clipboard.writeText(preview.textContent);
+        if(!input.value) return;
+        navigator.clipboard.writeText(input.value);
         alert('已複製到剪貼簿！');
     };
 
-    document.getElementById('clearBtn').onclick = () => { input.value = ""; updatePreview(); };
+    document.getElementById('clearBtn').onclick = () => {
+        input.value = "";
+        updateAll();
+    };
 
-    // 快捷鍵支援
+    document.getElementById('downloadBtn').onclick = () => {
+        if(!input.value) return;
+        const blob = new Blob([input.value], {type: 'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '轉換紀錄.txt';
+        a.click();
+    };
+
+    // 歷史紀錄簡易實作
+    document.getElementById('saveHistBtn').onclick = () => {
+        if(!input.value) return;
+        const item = document.createElement('div');
+        item.className = 'hist-item';
+        item.textContent = input.value.substring(0, 30) + (input.value.length > 30 ? '...' : '');
+        item.onclick = () => { input.value = result; updateAll(); };
+        if(historyBox.innerText === '暫無紀錄') historyBox.innerHTML = '';
+        historyBox.prepend(item);
+    };
+
+    document.getElementById('clearHistBtn').onclick = () => {
+        historyBox.innerHTML = '<div style="font-size: 12px; color: #4b5563; text-align: center; padding: 10px;">暫無紀錄</div>';
+    };
+
+    // 快捷鍵
     window.addEventListener('keydown', (e) => {
         if (!e.ctrlKey) return;
-        if (e.key === '1') document.getElementById('doUpper').click();
-        if (e.key === '2') document.getElementById('doLower').click();
-        if (e.key === '3') document.getElementById('doTitle').click();
-        if (e.key === '4') document.getElementById('doSentence').click();
+        const keys = { '1': 'doUpper', '2': 'doLower', '3': 'doTitle', '4': 'doSentence' };
+        if (keys[e.key]) {
+            e.preventDefault();
+            document.getElementById(keys[e.key]).click();
+        }
     });
 </script>
 
