@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant | Precise Visual Module</title>
+    <style>
+        :root {
+            --bg-deep: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --border-glow: rgba(56, 189, 248, 0.3);
+            --accent: #38bdf8;
+            --accent-purple: #818cf8;
+            --text-main: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            display: flex; flex-direction: column; min-height: 100vh; margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); align-items: center; padding: 20px;
+        }
+
+        .main-panel {
+            width: 100%; max-width: 600px;
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow); border-radius: 24px;
+            padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+        }
+
+        /* 微調控制區佈局 */
+        .precise-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .hue-display-group {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        #hueValue {
+            font-size: 28px;
+            font-family: 'Fira Code', monospace;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        /* 圓形微調按鈕 */
+        .step-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 1px solid var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            user-select: none; /* 防止長按選取文字 */
+        }
+
+        .step-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
+        .step-btn:active { transform: scale(0.9); }
+
+        /* 滑桿樣式 */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; height: 6px;
+            background: rgba(255,255,255,0.1); border-radius: 5px; margin: 20px 0;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 22px; height: 22px;
+            background: var(--accent); border-radius: 50%; cursor: pointer;
+            box-shadow: 0 0 10px var(--accent); border: 2px solid #fff;
+        }
+
+        /* 色票網格 */
+        .grid-container {
+            display: grid; grid-template-columns: repeat(10, 1fr);
+            gap: 6px; width: 100%; margin-top: 15px;
+        }
+        .color-item {
+            aspect-ratio: 1 / 1; border-radius: 6px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.2s;
+        }
+        .color-item:hover { transform: scale(1.15); z-index: 2; border-color: #fff; }
+
+        #copy-toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: #000; padding: 12px 25px;
+            border-radius: 30px; display: none; font-weight: bold; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <header style="width: 100%; max-width: 600px; margin-bottom: 20px;">
+        <h1 style="font-size: 1.2rem; background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:0;">PRECISION COLOR MODULE</h1>
+    </header>
+
+    <div class="main-panel">
+        <div class="precise-controls">
+            <button class="step-btn" id="minusBtn" title="減少 1°">−</button>
+            <div class="hue-display-group">
+                <div style="font-size: 10px; color: var(--accent); letter-spacing: 2px;">CURRENT HUE</div>
+                <div id="hueValue">200°</div>
+            </div>
+            <button class="step-btn" id="plusBtn" title="增加 1°">+</button>
+        </div>
+
+        <input type="range" id="hueRange" min="0" max="360" value="200">
+
+        <div class="grid-container" id="colorGrid"></div>
+        
+        <div style="margin-top: 20px; font-size: 11px; color: #64748b; text-align: center;">
+            提示：點擊按鈕微調 1°，長按可快速連續調整。
+        </div>
+    </div>
+
+    <div id="copy-toast">已複製!</div>
+
+    <script>
+        const hueRange = document.getElementById('hueRange');
+        const hueValue = document.getElementById('hueValue');
+        const colorGrid = document.getElementById('colorGrid');
+        const plusBtn = document.getElementById('plusBtn');
+        const minusBtn = document.getElementById('minusBtn');
+        const toast = document.getElementById('copy-toast');
+
+        let intervalId = null;
+
+        // 初始化
+        updatePalette(200);
+
+        // 核心更新函式
+        function updateAll(h) {
+            h = Math.max(0, Math.min(360, h)); // 限制範圍
+            hueRange.value = h;
+            hueValue.innerText = `${h}°`;
+            updatePalette(h);
+        }
+
+        // 滑桿監聽
+        hueRange.addEventListener('input', (e) => updateAll(e.target.value));
+
+        // 按鈕監聽 (單擊)
+        plusBtn.addEventListener('click', () => updateAll(parseInt(hueRange.value) + 1));
+        minusBtn.addEventListener('click', () => updateAll(parseInt(hueRange.value) - 1));
+
+        // 長按功能實現 (快速增減)
+        function startAutoChange(delta) {
+            if (intervalId) return;
+            intervalId = setInterval(() => {
+                updateAll(parseInt(hueRange.value) + delta);
+            }, 100); // 每 0.1 秒跳一次
+        }
+
+        function stopAutoChange() {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+
+        plusBtn.addEventListener('mousedown', () => startAutoChange(1));
+        plusBtn.addEventListener('mouseup', stopAutoChange);
+        plusBtn.addEventListener('mouseleave', stopAutoChange);
+
+        minusBtn.addEventListener('mousedown', () => startAutoChange(-1));
+        minusBtn.addEventListener('mouseup', stopAutoChange);
+        minusBtn.addEventListener('mouseleave', stopAutoChange);
+
+        // 手機觸控支援
+        plusBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startAutoChange(1); });
+        plusBtn.addEventListener('touchend', stopAutoChange);
+        minusBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startAutoChange(-1); });
+        minusBtn.addEventListener('touchend', stopAutoChange);
+
+        function updatePalette(h) {
+            colorGrid.innerHTML = '';
+            for (let l = 90; l >= 10; l -= 8) {
+                for (let s = 10; s <= 100; s += 9) {
+                    const hex = hslToHex(h, s, l);
+                    const div = document.createElement('div');
+                    div.className = 'color-item';
+                    div.style.backgroundColor = hex;
+                    div.onclick = () => copyText(hex);
+                    colorGrid.appendChild(div);
+                }
+            }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            toast.innerText = 'HEX COPIED: ' + text;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 1500);
+        }
+
+        function hslToHex(h, s, l) {
+            l /= 100; const a = s * Math.min(l, 1 - l) / 100;
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+        }
+    </script>
+</body>
+</html>
