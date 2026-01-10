@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>究極 PO 文神器 - 分類旗艦版</title>
+    <style>
+        html, body { height: auto; overflow-y: auto; background-color: #fff9fb; margin: 0; padding: 0; -webkit-overflow-scrolling: touch; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; }
+        .app-card { max-width: 600px; margin: 10px auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { color: #ff4757; text-align: center; font-size: 22px; margin-bottom: 25px; }
+        .group-label { display: block; font-size: 15px; font-weight: bold; color: #ff4757; margin: 20px 0 10px; border-left: 5px solid #ff85a2; padding-left: 10px; }
+
+        /* 分類切換鈕樣式 */
+        .tab-container {
+            display: flex;
+            overflow-x: auto; /* 手機可以左右滑動分類 */
+            gap: 8px;
+            padding: 5px 0 15px 0;
+            scrollbar-width: none; /* 隱藏捲軸 */
+        }
+        .tab-container::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            flex: 0 0 auto;
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            border: none;
+        }
+        .tab-btn.active {
+            background: #ff4757;
+            color: white;
+        }
+
+        /* 6x5 網格 */
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 8px;
+            background: #fffafa;
+            padding: 12px;
+            border-radius: 15px;
+            border: 1px solid #ffe0e6;
+            min-height: 280px;
+        }
+        .emoji-btn {
+            aspect-ratio: 1 / 1;
+            background: white;
+            border: 1px solid #ffe0e6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        .emoji-btn:active { background: #ffe0e6; transform: scale(0.9); }
+
+        /* 時間選擇 */
+        .time-box { background: #fffafa; padding: 15px; border-radius: 15px; border: 1px solid #ffe0e6; }
+        .time-input-group { display: flex; gap: 8px; margin-bottom: 10px; }
+        input[type="date"], input[type="time"] { flex: 1; padding: 10px; border: 1.5px solid #ff85a2; border-radius: 10px; font-size: 14px; color: #333; }
+        .chip { padding: 8px 14px; background: white; border: 1.5px solid #ff85a2; color: #ff4757; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-block; margin-top: 5px;}
+
+        /* 文字區 */
+        textarea { width: 100%; height: 200px; margin-top: 15px; padding: 15px; font-size: 18px; border: 2px solid #f0f0f0; border-radius: 15px; outline: none; resize: none; box-sizing: border-box; color: #000; }
+        .preview-pane { background: #fdfdfd; border: 1px dashed #ccc; border-radius: 15px; padding: 15px; margin-top: 20px; min-height: 80px; font-size: 16px; line-height: 1.6; white-space: pre-wrap; color: #222; }
+        .btn-copy-big { width: 100%; padding: 18px; background: linear-gradient(135deg, #ff85a2, #ff4757); color: white; border: none; border-radius: 50px; font-size: 20px; font-weight: bold; margin: 30px 0; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <h2>✨ 究極 PO 文神器 ✨</h2>
+
+    <span class="group-label">📅 插入日期</span>
+    <div class="time-box">
+        <div class="time-input-group">
+            <input type="date" id="dateInput">
+            <input type="time" id="timeInput">
+        </div>
+        <div class="chip" style="background: #ff85a2; color: white;" onclick="setNow()">📍 現在</div>
+        <div class="chip" onclick="insertDateTime('date')">📅 僅日期</div>
+        <div class="chip" onclick="insertDateTime('full')">⏰ 日期時間</div>
+    </div>
+
+    <span class="group-label">🎨 貼圖分類 (6×5 排)</span>
+    <div class="tab-container" id="tabContainer">
+        <button class="tab-btn active" onclick="switchTab('表情')">表情</button>
+        <button class="tab-btn" onclick="switchTab('水果')">水果</button>
+        <button class="tab-btn" onclick="switchTab('動物')">動物</button>
+        <button class="tab-btn" onclick="switchTab('美食')">美食</button>
+        <button class="tab-btn" onclick="switchTab('服飾')">服飾</button>
+        <button class="tab-btn" onclick="switchTab('旅遊')">旅遊</button>
+        <button class="tab-btn" onclick="switchTab('工商')">工商</button>
+    </div>
+    
+    <div class="emoji-grid" id="emojiGrid">
+        </div>
+
+    <span class="group-label">✍️ 內文編排</span>
+    <textarea id="ed" oninput="sync()" placeholder="在這裡寫下文案..."></textarea>
+    
+    <span class="group-label">📱 貼文預覽</span>
+    <div class="preview-pane" id="pv">文字會同步顯示在這裡...</div>
+
+    <button class="btn-copy-big" onclick="copy()">一鍵複製文案 🚀</button>
+</div>
+
+<script>
+    const ed = document.getElementById('ed');
+    const pv = document.getElementById('pv');
+    const emojiGrid = document.getElementById('emojiGrid');
+    const dateInput = document.getElementById('dateInput');
+    const timeInput = document.getElementById('timeInput');
+
+    const emojiData = {
+        '表情': ['😆','🥳','🥰','😍','🤩','😇','😂','🤣','😋','😜','🤫','🫠','🤔','🤨','😐','😑','🙄','🥱','🥺','😭','😤','😠','😡','🤬','😱','😰','😨','🤯','🫠','👋'],
+        '水果': ['🍓','🍑','🍒','🍎','🍋','🍇','🍍','🍐','🍊','🍉','🍈','🥝','🍏','🥭','🫐','🌽','🥕','🍅','🍆','🥦','🥬','🥒','🫑','🥑','🥗','🍎','🍐','🍊','🍋','🍌'],
+        '動物': ['🐰','🐱','🐶','🧸','🐹','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐵','🐣','🐤','🐧','🐦','🐤','🐣','🐥','🦉','🦇','🦋','🐌','🐞','🐜','🐝','🐙','🐠'],
+        '美食': ['🍰','🍮','🍦','🍩','🍪','🍫','🍔','🍕','🍟','🍱','🍣','🍜','🍛','🍙','🍢','🥞','🧇','🥓','🍳','🥘','🍝','🥪','🥨','🥐','🥖','🍖','🍗','🍚','🍲','🍳'],
+        '服飾': ['🎀','👗','👘','👠','👟','🧦','🧤','🧣','🎩','🧢','👒','💍','💼','👜','🎒','🕶️','👕','👖','👗','👗','👕','🧶','🧵','💄','💅','💄','💍','💎','✨','🧥'],
+        '旅遊': ['✈️','🚂','🚲','🚗','🛳️','🏖️','🏝️','⛰️','🏔️','⛺','🏕️','🏨','🏠','⛩️','⛲','🗼','🎡','🎢','🎠','🎬','🎨','🎭','🎫','🍿','📸','🗺️','🏮','🎆','🎇','🌌'],
+        '工商': ['📢','💰','🔥','💯','🎁','💎','📍','✅','💡','🚀','⭐','🎉','📣','💵','💳','💹','📈','🛒','🛍️','📦','✉️','📞','🔗','🆕','🆙','🉐','🉐','㊗️','㊙️','📢']
+    };
+
+    window.onload = () => {
+        const d = localStorage.getItem('final_scroll_ok');
+        if(d) { ed.value = d; sync(); }
+        setNow();
+        switchTab('表情'); // 預設顯示表情
+    };
+
+    function switchTab(category) {
+        // 更新按鈕樣式
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(btn => {
+            btn.classList.toggle('active', btn.innerText === category);
+        });
+
+        // 更新網格內容
+        emojiGrid.innerHTML = '';
+        emojiData[category].forEach(emoji => {
+            const btn = document.createElement('div');
+            btn.className = 'emoji-btn';
+            btn.innerText = emoji;
+            btn.onclick = () => add(emoji);
+            emojiGrid.appendChild(btn);
+        });
+    }
+
+    function setNow() {
+        const now = new Date();
+        dateInput.value = now.toISOString().split('T')[0];
+        timeInput.value = now.toTimeString().slice(0,5);
+    }
+
+    function insertDateTime(type) {
+        const dateVal = dateInput.value.replace(/-/g, '/');
+        const text = type === 'date' ? `[ ${dateVal} ] ` : `[ ${dateVal} ${timeInput.value} ] `;
+        add(text);
+    }
+
+    function sync() {
+        pv.innerText = ed.value || "文字會同步顯示在這裡...";
+        localStorage.setItem('final_scroll_ok', ed.value);
+    }
+
+    function add(s) {
+        const start = ed.selectionStart;
+        ed.value = ed.value.slice(0, start) + s + ed.value.slice(ed.selectionEnd);
+        ed.focus();
+        ed.selectionStart = ed.selectionEnd = start + s.length;
+        sync();
+    }
+
+    function copy() {
+        if(!ed.value) return;
+        navigator.clipboard.writeText(ed.value).then(() => alert("文案已複製！(๑•̀ㅂ•́)و✧"));
+    }
+</script>
+
+</body>
+</html>
