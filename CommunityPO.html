@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PO 文神器</title>
+    <title>PO文神器</title>
     <style>
         html, body { height: auto; overflow-y: auto; background-color: #fff9fb; margin: 0; padding: 0; -webkit-overflow-scrolling: touch; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; }
@@ -11,100 +11,46 @@
         h2 { color: #ff4757; text-align: center; font-size: 22px; margin-bottom: 25px; }
         .group-label { display: block; font-size: 15px; font-weight: bold; color: #ff4757; margin: 20px 0 10px; border-left: 5px solid #ff85a2; padding-left: 10px; }
 
-        /* 分類切換鈕樣式 */
-        .tab-container {
-            display: flex;
-            overflow-x: auto;
-            gap: 8px;
-            padding: 5px 0 15px 0;
-            scrollbar-width: none;
-        }
+        /* 分類切換鈕 */
+        .tab-container { display: flex; overflow-x: auto; gap: 8px; padding: 5px 0 15px 0; scrollbar-width: none; }
         .tab-container::-webkit-scrollbar { display: none; }
-        .tab-btn {
-            flex: 0 0 auto;
-            padding: 8px 15px;
-            background: #f0f0f0;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #666;
-            cursor: pointer;
-            border: none;
-        }
-        .tab-btn.active {
-            background: #ff4757;
-            color: white;
-        }
+        .tab-btn { flex: 0 0 auto; padding: 8px 15px; background: #f0f0f0; border-radius: 12px; font-size: 14px; font-weight: bold; color: #666; cursor: pointer; border: none; }
+        .tab-btn.active { background: #ff4757; color: white; }
 
-        /* 6x5 網格 */
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 8px;
-            background: #fffafa;
-            padding: 12px;
-            border-radius: 15px;
-            border: 1px solid #ffe0e6;
-            min-height: 280px;
-        }
-        .emoji-btn {
-            aspect-ratio: 1 / 1;
-            background: white;
-            border: 1px solid #ffe0e6;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-        }
-        .emoji-btn:active { background: #ffe0e6; transform: scale(0.9); }
+        /* 貼圖網格 */
+        .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; background: #fffafa; padding: 12px; border-radius: 15px; border: 1px solid #ffe0e6; min-height: 280px; }
+        .emoji-btn { aspect-ratio: 1 / 1; background: white; border: 1px solid #ffe0e6; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
 
-        /* 時間選擇 - 修正置中問題 */
-        .time-box { 
-            background: #fffafa; 
-            padding: 15px; 
-            border-radius: 15px; 
-            border: 1px solid #ffe0e6;
-            text-align: center; /* 讓內容置中 */
-        }
-        .time-input-group { 
-            display: flex; 
-            gap: 8px; 
-            margin-bottom: 12px; 
-        }
-        input[type="date"], input[type="time"] { 
-            flex: 1; 
-            padding: 10px; 
-            border: 1.5px solid #ff85a2; 
-            border-radius: 10px; 
-            font-size: 14px; 
-            color: #333; 
-            background: white;
-        }
+        /* 時間選擇區域 */
+        .time-box { background: #fffafa; padding: 15px; border-radius: 15px; border: 1px solid #ffe0e6; }
+        .time-input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        input[type="date"], input[type="time"] { flex: 1; padding: 10px; border: 1.5px solid #ff85a2; border-radius: 10px; font-size: 14px; color: #333; background: white; min-width: 0; }
         
-        /* 修正按鈕群組的置中與間距 */
+        /* 核心修正：讓按鈕排成一列並置中 */
         .chip-group {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* 置中 */
-            gap: 8px;
+            justify-content: center; /* 水平置中 */
+            align-items: center;
+            gap: 6px; /* 按鈕間距 */
+            flex-wrap: nowrap; /* 強制不換行 */
         }
         .chip { 
-            padding: 8px 14px; 
+            flex: 1; /* 讓三個按鈕等寬 */
+            max-width: 110px; /* 限制最大寬度防止太長 */
+            padding: 8px 4px; 
             background: white; 
             border: 1.5px solid #ff85a2; 
             color: #ff4757; 
-            border-radius: 20px; 
-            font-size: 14px; 
+            border-radius: 12px; 
+            font-size: 13px; /* 稍微縮小字體確保一列放得下 */
             font-weight: bold; 
-            cursor: pointer; 
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap; /* 防止文字換行 */
         }
-        .chip:active { background: #ffe0e6; }
+        .chip.primary { background: #ff4757; color: white; border: none; }
 
-        /* 文字區 */
+        /* 文字與預覽 */
         textarea { width: 100%; height: 200px; margin-top: 15px; padding: 15px; font-size: 18px; border: 2px solid #f0f0f0; border-radius: 15px; outline: none; resize: none; box-sizing: border-box; color: #000; }
         .preview-pane { background: #fdfdfd; border: 1px dashed #ccc; border-radius: 15px; padding: 15px; margin-top: 20px; min-height: 80px; font-size: 16px; line-height: 1.6; white-space: pre-wrap; color: #222; }
         .btn-copy-big { width: 100%; padding: 18px; background: linear-gradient(135deg, #ff85a2, #ff4757); color: white; border: none; border-radius: 50px; font-size: 20px; font-weight: bold; margin: 30px 0; cursor: pointer; }
@@ -113,7 +59,7 @@
 <body>
 
 <div class="app-card">
-    <h2>✨PO 文神器✨</h2>
+    <h2>✨PO文神器✨</h2>
 
     <span class="group-label">📅 插入日期</span>
     <div class="time-box">
@@ -122,7 +68,7 @@
             <input type="time" id="timeInput">
         </div>
         <div class="chip-group">
-            <div class="chip" style="background: #ff4757; color: white; border: none;" onclick="setNow()">📍 現在</div>
+            <div class="chip primary" onclick="setNow()">📍 現在</div>
             <div class="chip" onclick="insertDateTime('date')">📅 僅日期</div>
             <div class="chip" onclick="insertDateTime('full')">⏰ 日期時間</div>
         </div>
@@ -159,12 +105,12 @@
 
     const emojiData = {
         '表情': ['😆','🥳','🥰','😍','🤩','😇','😂','🤣','😋','😜','🤫','🫠','🤔','🤨','😐','😑','🙄','🥱','🥺','😭','😤','😠','😡','🤬','😱','😰','😨','🤯','🫠','👋'],
-        '水果': ['🍓','🍑','🍒','🍎','🍋','🍇','🍍','🍐','🍊','🍉','🍈','開','🍏','🥭','🫐','🌽','🥕','🍅','🍆','🥦','🥬','🥒','🫑','🥑','🥗','🍎','🍐','🍊','🍋','🍌'],
+        '水果': ['🍓','🍑','🍒','🍎','🍋','🍇','🍍','🍐','🍊','🍉','🍈','🥝','🍏','🥭','🫐','🌽','🥕','🍅','🍆','🥦','🥬','🥒','🫑','🥑','🥗','🍎','🍐','🍊','🍋','🍌'],
         '動物': ['🐰','🐱','🐶','🧸','🐹','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐵','🐣','🐤','🐧','🐦','🐤','🐣','🐥','🦉','🦇','🦋','🐌','🐞','🐜','🐝','🐙','🐠'],
         '美食': ['🍰','🍮','🍦','🍩','🍪','🍫','🍔','🍕','🍟','🍱','🍣','🍜','🍛','🍙','🍢','🥞','🧇','🥓','🍳','🥘','🍝','🥪','🥨','🥐','🥖','🍖','🍗','🍚','🍲','🍳'],
-        '服飾': ['🎀','👗','👘','👠','👟','🧦','🧤','🧣','🎩','🧢','👒','💍','💼','👜','🎒','🕶️','👕','👖','👗','👗','👕','🧶','🧵','💄','💅','💄','💍','💎','✨','🧥'],
-        '旅遊': ['✈️','🚂','🚲','🚗','🛳️','🏖️','🏝️','⛰️','🏔️','⛺','闖','🏨','🏠','⛩️','⛲','🗼','🎡','🎢','🎠','🎬','🎨','🎭','🎫','🍿','📸','🗺️','🏮','🎆','🎇','🌌'],
-        '工商': ['📢','💰','🔥','💯','🎁','💎','📍','✅','💡','🚀','⭐','🎉','📣','💵','💳','💹','📈','🛒','🛍️','📦','✉️','📞','🔗','🆕','🆙','🉐','🉐','㊗️','㊙️','📢']
+        '服飾': ['🎀','👗','👘','👠','👟','🧦','🧤','🧣','🎩','🧢','駕駛','💍','💼','👜','🎒','🕶️','👕','👖','👗','👗','👕','🧶','🧵','💄','💅','💄','💍','💎','✨','🧥'],
+        '旅遊': ['✈️','🚂','🚲','🚗','🛳️','🏖️','🏝️','⛰️','🏔️','⛺','🏕️','🏨','🏠','⛩️','⛲','🗼','🎡','🎢','🎠','🎬','🎨','🎭','🎫','🍿','📸','🗺️','🏮','🎆','🎇','🌌'],
+        '工商': ['📢','💰','🔥','💯','🎁','💎','📍','✅','💡','🚀','⭐','🎉','📣','💵','信用卡','💹','📈','🛒','🛍️','📦','✉️','📞','🔗','🆕','🆙','🉐','🉐','㊗️','㊙️','📢']
     };
 
     window.onload = () => {
@@ -175,10 +121,7 @@
     };
 
     function switchTab(category) {
-        const btns = document.querySelectorAll('.tab-btn');
-        btns.forEach(btn => {
-            btn.classList.toggle('active', btn.innerText === category);
-        });
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.innerText === category));
         emojiGrid.innerHTML = '';
         emojiData[category].forEach(emoji => {
             const btn = document.createElement('div');
@@ -191,10 +134,7 @@
 
     function setNow() {
         const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        dateInput.value = `${y}-${m}-${d}`;
+        dateInput.value = now.toISOString().split('T')[0];
         timeInput.value = now.toTimeString().slice(0,5);
     }
 
