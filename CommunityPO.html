@@ -14,10 +14,10 @@
         /* 分類切換鈕樣式 */
         .tab-container {
             display: flex;
-            overflow-x: auto; /* 手機可以左右滑動分類 */
+            overflow-x: auto;
             gap: 8px;
             padding: 5px 0 15px 0;
-            scrollbar-width: none; /* 隱藏捲軸 */
+            scrollbar-width: none;
         }
         .tab-container::-webkit-scrollbar { display: none; }
         .tab-btn {
@@ -62,11 +62,47 @@
         }
         .emoji-btn:active { background: #ffe0e6; transform: scale(0.9); }
 
-        /* 時間選擇 */
-        .time-box { background: #fffafa; padding: 15px; border-radius: 15px; border: 1px solid #ffe0e6; }
-        .time-input-group { display: flex; gap: 8px; margin-bottom: 10px; }
-        input[type="date"], input[type="time"] { flex: 1; padding: 10px; border: 1.5px solid #ff85a2; border-radius: 10px; font-size: 14px; color: #333; }
-        .chip { padding: 8px 14px; background: white; border: 1.5px solid #ff85a2; color: #ff4757; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-block; margin-top: 5px;}
+        /* 時間選擇 - 修正置中問題 */
+        .time-box { 
+            background: #fffafa; 
+            padding: 15px; 
+            border-radius: 15px; 
+            border: 1px solid #ffe0e6;
+            text-align: center; /* 讓內容置中 */
+        }
+        .time-input-group { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 12px; 
+        }
+        input[type="date"], input[type="time"] { 
+            flex: 1; 
+            padding: 10px; 
+            border: 1.5px solid #ff85a2; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            color: #333; 
+            background: white;
+        }
+        
+        /* 修正按鈕群組的置中與間距 */
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* 置中 */
+            gap: 8px;
+        }
+        .chip { 
+            padding: 8px 14px; 
+            background: white; 
+            border: 1.5px solid #ff85a2; 
+            color: #ff4757; 
+            border-radius: 20px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+        .chip:active { background: #ffe0e6; }
 
         /* 文字區 */
         textarea { width: 100%; height: 200px; margin-top: 15px; padding: 15px; font-size: 18px; border: 2px solid #f0f0f0; border-radius: 15px; outline: none; resize: none; box-sizing: border-box; color: #000; }
@@ -77,7 +113,7 @@
 <body>
 
 <div class="app-card">
-    <h2>✨ 究極 PO 文神器 ✨</h2>
+    <h2>✨PO 文神器✨</h2>
 
     <span class="group-label">📅 插入日期</span>
     <div class="time-box">
@@ -85,9 +121,11 @@
             <input type="date" id="dateInput">
             <input type="time" id="timeInput">
         </div>
-        <div class="chip" style="background: #ff85a2; color: white;" onclick="setNow()">📍 現在</div>
-        <div class="chip" onclick="insertDateTime('date')">📅 僅日期</div>
-        <div class="chip" onclick="insertDateTime('full')">⏰ 日期時間</div>
+        <div class="chip-group">
+            <div class="chip" style="background: #ff4757; color: white; border: none;" onclick="setNow()">📍 現在</div>
+            <div class="chip" onclick="insertDateTime('date')">📅 僅日期</div>
+            <div class="chip" onclick="insertDateTime('full')">⏰ 日期時間</div>
+        </div>
     </div>
 
     <span class="group-label">🎨 貼圖分類 (6×5 排)</span>
@@ -101,8 +139,7 @@
         <button class="tab-btn" onclick="switchTab('工商')">工商</button>
     </div>
     
-    <div class="emoji-grid" id="emojiGrid">
-        </div>
+    <div class="emoji-grid" id="emojiGrid"></div>
 
     <span class="group-label">✍️ 內文編排</span>
     <textarea id="ed" oninput="sync()" placeholder="在這裡寫下文案..."></textarea>
@@ -122,11 +159,11 @@
 
     const emojiData = {
         '表情': ['😆','🥳','🥰','😍','🤩','😇','😂','🤣','😋','😜','🤫','🫠','🤔','🤨','😐','😑','🙄','🥱','🥺','😭','😤','😠','😡','🤬','😱','😰','😨','🤯','🫠','👋'],
-        '水果': ['🍓','🍑','🍒','🍎','🍋','🍇','🍍','🍐','🍊','🍉','🍈','🥝','🍏','🥭','🫐','🌽','🥕','🍅','🍆','🥦','🥬','🥒','🫑','🥑','🥗','🍎','🍐','🍊','🍋','🍌'],
+        '水果': ['🍓','🍑','🍒','🍎','🍋','🍇','🍍','🍐','🍊','🍉','🍈','開','🍏','🥭','🫐','🌽','🥕','🍅','🍆','🥦','🥬','🥒','🫑','🥑','🥗','🍎','🍐','🍊','🍋','🍌'],
         '動物': ['🐰','🐱','🐶','🧸','🐹','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐵','🐣','🐤','🐧','🐦','🐤','🐣','🐥','🦉','🦇','🦋','🐌','🐞','🐜','🐝','🐙','🐠'],
         '美食': ['🍰','🍮','🍦','🍩','🍪','🍫','🍔','🍕','🍟','🍱','🍣','🍜','🍛','🍙','🍢','🥞','🧇','🥓','🍳','🥘','🍝','🥪','🥨','🥐','🥖','🍖','🍗','🍚','🍲','🍳'],
         '服飾': ['🎀','👗','👘','👠','👟','🧦','🧤','🧣','🎩','🧢','👒','💍','💼','👜','🎒','🕶️','👕','👖','👗','👗','👕','🧶','🧵','💄','💅','💄','💍','💎','✨','🧥'],
-        '旅遊': ['✈️','🚂','🚲','🚗','🛳️','🏖️','🏝️','⛰️','🏔️','⛺','🏕️','🏨','🏠','⛩️','⛲','🗼','🎡','🎢','🎠','🎬','🎨','🎭','🎫','🍿','📸','🗺️','🏮','🎆','🎇','🌌'],
+        '旅遊': ['✈️','🚂','🚲','🚗','🛳️','🏖️','🏝️','⛰️','🏔️','⛺','闖','🏨','🏠','⛩️','⛲','🗼','🎡','🎢','🎠','🎬','🎨','🎭','🎫','🍿','📸','🗺️','🏮','🎆','🎇','🌌'],
         '工商': ['📢','💰','🔥','💯','🎁','💎','📍','✅','💡','🚀','⭐','🎉','📣','💵','💳','💹','📈','🛒','🛍️','📦','✉️','📞','🔗','🆕','🆙','🉐','🉐','㊗️','㊙️','📢']
     };
 
@@ -134,17 +171,14 @@
         const d = localStorage.getItem('final_scroll_ok');
         if(d) { ed.value = d; sync(); }
         setNow();
-        switchTab('表情'); // 預設顯示表情
+        switchTab('表情');
     };
 
     function switchTab(category) {
-        // 更新按鈕樣式
         const btns = document.querySelectorAll('.tab-btn');
         btns.forEach(btn => {
             btn.classList.toggle('active', btn.innerText === category);
         });
-
-        // 更新網格內容
         emojiGrid.innerHTML = '';
         emojiData[category].forEach(emoji => {
             const btn = document.createElement('div');
@@ -157,7 +191,10 @@
 
     function setNow() {
         const now = new Date();
-        dateInput.value = now.toISOString().split('T')[0];
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        dateInput.value = `${y}-${m}-${d}`;
         timeInput.value = now.toTimeString().slice(0,5);
     }
 
