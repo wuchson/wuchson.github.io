@@ -8,18 +8,18 @@
         body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; padding: 15px; background-color: #f1f3f5; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; box-sizing: border-box; }
         
-        /* 新增：小圖示和簡介的樣式 */
-        .intro-section { text-align: center; margin-bottom: 25px; }
-        .intro-icon { font-size: 48px; margin-bottom: 10px; color: #ff6b6b; /* 蔬菜水果的紅色系 */ }
-        .intro-text { font-size: 15px; color: #555; line-height: 1.5; }
+        .intro-section { text-align: center; margin-bottom: 20px; }
+        .intro-icon { font-size: 48px; margin-bottom: 10px; }
+        .intro-text { font-size: 14px; color: #555; line-height: 1.5; margin: 0; }
 
-        h2 { text-align: center; color: #2d3436; margin-bottom: 20px; border-bottom: 2px solid #00b894; padding-bottom: 10px; font-size: 22px; }
-        .group { margin-bottom: 20px; }
+        h2 { text-align: center; color: #2d3436; margin: 15px 0; border-bottom: 2px solid #00b894; padding-bottom: 10px; font-size: 22px; }
+        .group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #636e72; font-size: 15px; }
+        
         .row { display: flex; gap: 8px; flex-wrap: wrap; }
         
         input { padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; flex: 1; min-width: 120px; box-sizing: border-box; }
-        select { padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; background-color: #f8f9fa; cursor: pointer; min-width: 100px; box-sizing: border-box; }
+        select { padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; background-color: #f8f9fa; cursor: pointer; min-width: 110px; box-sizing: border-box; }
         
         input:focus { border-color: #00b894; outline: none; }
         
@@ -32,11 +32,12 @@
 
 <div class="card">
     <div class="intro-section">
-        <div class="intro-icon">🥦</div> <p class="intro-text">
-            菜市場、超市買菜必備！無論報價是「斤」或「公斤」，秤重是「兩」或「公克」，
-            這個小工具都能幫您快速計算，不怕算錯錢，買菜更安心。
+        <div class="intro-icon">🥦</div>
+        <p class="intro-text">
+            不論是傳統市場的「台斤、兩」，還是超市的「公斤、克」，只要輸入單價與重量，一秒幫您算出總價！
         </p>
     </div>
+    
     <h2>全能秤重助手</h2>
 
     <div class="group">
@@ -45,8 +46,9 @@
             <input type="number" id="unitPrice" placeholder="金額" oninput="calculate()" pattern="\d*">
             <select id="priceBase" onchange="calculate()">
                 <option value="600" selected>元 / 台斤</option>
-                <option value="600.46">元 / 公斤</option>
+                <option value="1000">元 / 公斤</option>
                 <option value="37.5">元 / 兩</option>
+                <option value="1">元 / 公克(g)</option>
             </select>
         </div>
     </div>
@@ -57,7 +59,7 @@
             <input type="number" id="weight" placeholder="數量" step="0.01" oninput="calculate()" pattern="\d*">
             <select id="weightUnit" onchange="calculate()">
                 <option value="600" selected>台斤</option>
-                <option value="600.46">公斤 (kg)</option>
+                <option value="1000">公斤 (kg)</option>
                 <option value="37.5">兩</option>
                 <option value="1">公克 (g)</option>
             </select>
@@ -72,7 +74,8 @@
     <div class="hint-table">
         💡 <b>換算小知識：</b><br>
         • 1 台斤 = 600 公克 = 16 兩<br>
-        • 1 公斤 = 1000 公克 (約 1.67 台斤)
+        • 1 公斤 = 1000 公克 (約 1.67 台斤)<br>
+        • 1 兩 = 37.5 公克
     </div>
 </div>
 
@@ -85,9 +88,12 @@
         const totalElement = document.getElementById('total');
 
         if (!isNaN(p_val) && !isNaN(w_val)) {
+            // 統一換算成「克」來做中間值最準確
             const pricePerGram = p_val / p_base;
             const totalGrams = w_val * w_unit;
             const finalResult = pricePerGram * totalGrams;
+            
+            // 使用 Math.round 四捨五入到整數，並加上千分位撇號
             totalElement.innerText = Math.round(finalResult).toLocaleString() + " 元";
         } else {
             totalElement.innerText = "0 元";
