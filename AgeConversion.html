@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>極簡深色年齡換算器</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f1f5f9;
+            --input: #334155;
+            --border: #475569;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background-color: var(--card);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 380px;
+        }
+
+        h2 { text-align: center; margin-top: 0; color: var(--accent); letter-spacing: 2px; }
+
+        /* 切換按鈕 */
+        .type-selector {
+            display: flex;
+            background: var(--input);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .type-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* 輸入區域修正 */
+        .input-label { font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; display: block; }
+        .input-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+        }
+
+        /* 確保 input 和 select 是可以被點擊且寬度正確的 */
+        input[type="number"], select {
+            background-color: var(--input);
+            border: 2px solid var(--border);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px; /* 避免 iOS 自動放大 */
+            outline: none;
+            box-sizing: border-box; /* 重要：確保 padding 不會撐破寬度 */
+        }
+
+        input[type="number"] { flex: 2; min-width: 0; }
+        select { flex: 1.5; min-width: 0; cursor: pointer; }
+
+        input:focus, select:focus { border-color: var(--accent); }
+
+        /* 結果顯示 */
+        .result-box {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .result-item span { color: var(--accent); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📅 年齡換算器</h2>
+    
+    <div class="type-selector">
+        <button class="type-btn active" id="btnAD" onclick="setMode('AD')">西元 AD</button>
+        <button class="type-btn" id="btnROC" onclick="setMode('ROC')">民國 ROC</button>
+    </div>
+
+    <label class="input-label">請輸入/選擇出生日期：</label>
+    <div class="input-group">
+        <input type="number" id="year" placeholder="年份" oninput="calculate()">
+        <select id="month" onchange="calculate()"><option value="">月</option></select>
+        <select id="day" onchange="calculate()"><option value="">日</option></select>
+    </div>
+
+    <div id="resultBox" class="result-box">
+        <div class="result-item">目前實歲：<span id="resAge">0</span></div>
+        <div class="result-item">對應年份：<span id="resConvert">-</span></div>
+        <div class="result-item">生存天數：<span id="resDays">0</span></div>
+    </div>
+</div>
+
+<script>
+    let mode = 'AD';
+    const yearEl = document.getElementById('year');
+    const monthEl = document.getElementById('month');
+    const dayEl = document.getElementById('day');
+    const resBox = document.getElementById('resultBox');
+
+    // 初始化月份與日期
+    for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
+    for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
+
+    function setMode(newMode) {
+        if (mode === newMode) return;
+        let val = parseInt(yearEl.value);
+        if (val) {
+            // 切換時自動換算數字
+            yearEl.value = (newMode === 'ROC') ? val - 1911 : val + 1911;
+        }
+        mode = newMode;
+        document.getElementById('btnAD').classList.toggle('active', mode === 'AD');
+        document.getElementById('btnROC').classList.toggle('active', mode === 'ROC');
+        calculate();
+    }
+
+    function calculate() {
+        const y = parseInt(yearEl.value);
+        const m = parseInt(monthEl.value);
+        const d = parseInt(dayEl.value);
+
+        if (!y || !m || !d) {
+            resBox.style.display = 'none';
+            return;
+        }
+
+        // 換算成西元進行 Date 運算
+        let adYear = (mode === 'ROC') ? y + 1911 : y;
+        const birth = new Date(adYear, m - 1, d);
+        const today = new Date();
+
+        // 檢查日期合法性
+        if (birth.getMonth() !== m - 1 || birth > today) {
+            resBox.style.display = 'none';
+            return;
+        }
+
+        // 計算實歲
+        let age = today.getFullYear() - birth.getFullYear();
+        const hasHadBirthday = (today.getMonth() > birth.getMonth()) || 
+                               (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+        if (!hasHadBirthday) age--;
+
+        const diffDays = Math.floor((today - birth) / (1000 * 60 * 60 * 24));
+
+        resBox.style.display = 'block';
+        document.getElementById('resAge').innerText = age + " 歲";
+        document.getElementById('resDays').innerText = diffDays.toLocaleString() + " 天";
+        document.getElementById('resConvert').innerText = 
+            (mode === 'AD') ? `民國 ${adYear - 1911} 年` : `西元 ${adYear} 年`;
+    }
+</script>
+
+</body>
+</html>
