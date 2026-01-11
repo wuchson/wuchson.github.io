@@ -95,7 +95,7 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* --- 手機版選單優化重點 --- */
+    /* --- 手機版選單 (含滑動與對齊優化) --- */
     @media (max-width: 768px) {
       .menu-toggle {
         display: flex;
@@ -105,20 +105,16 @@
         position: fixed;
         top: 0;
         right: -100%;
-        width: 75%;            /* 稍微加寬一點點方便閱讀 */
+        width: 75%;
         height: 100vh;
         background: rgba(11, 15, 26, 0.98);
         backdrop-filter: blur(20px);
         flex-direction: column;
-        
         justify-content: flex-start; 
-        align-items: flex-end;       /* 靠右對齊 */
-        
-        /* 解決滑動與位置問題 */
-        padding: 60px 1.5rem 2rem 0; /* padding-top 縮小到 60px 讓選單移上 */
-        overflow-y: auto;           /* 開啟垂直滑動，橫向時可滾動 */
-        -webkit-overflow-scrolling: touch; /* 讓手機滑動更順暢 */
-        
+        align-items: flex-end;       
+        padding: 65px 1.5rem 2rem 0; /* 縮小 top padding 讓選單移上 */
+        overflow-y: auto;           /* 開啟捲軸滑動 */
+        -webkit-overflow-scrolling: touch;
         transition: 0.4s ease-in-out;
         border-left: 1px solid var(--border-glow);
         gap: 0;
@@ -135,14 +131,56 @@
 
       .nav-menu a {
         font-size: 0.95rem;
-        line-height: 1.1;     /* 更緊湊的行高 */
+        line-height: 1.1;
         display: block;
-        padding: 10px 0;      /* 縮小垂直間距 */
+        padding: 12px 0;
       }
 
       .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
       .menu-toggle.open span:nth-child(2) { opacity: 0; }
       .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+    }
+
+    /* --- 彈窗提示樣式 --- */
+    #install-prompt {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: white;
+      padding: 16px 24px;
+      border-radius: 16px;
+      z-index: 9999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    #install-prompt p {
+      margin: 0 0 12px 0;
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    #install-prompt button {
+      background: white;
+      color: var(--accent);
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    #install-prompt button:active {
+      transform: scale(0.95);
     }
 
     header {
@@ -254,6 +292,11 @@
     </ul>
   </nav>
 
+  <div id="install-prompt">
+    <p id="prompt-text"></p>
+    <button onclick="closePrompt()">我知道了</button>
+  </div>
+
   <header>
     <h1>AI TOOL</h1>
     <h3>歡迎使用-完全免費-無須註冊</h3>
@@ -310,10 +353,11 @@
           <h3>👫 年齡換算器</h3>
           <p>本工具強化了台灣特有的年份轉換邏輯，快速計算你的年齡。</p>
         </div>
-                <div class="feature-card">
+        <div class="feature-card">
           <h3>🔐 私人加密保險箱</h3>
           <p>此加密工具可自行儲存到雲端,文件檔案為亂碼的方式，既保留了雲端的便利性，又兼顧了極高的安全性。。</p>
         </div>
+
       </div>
     </section>
   </main>
@@ -323,6 +367,7 @@
   </footer>
 
   <script>
+    // 1. 導覽列漢堡選單邏輯
     const menuToggle = document.getElementById('mobile-menu');
     const navMenu = document.querySelector('.nav-menu');
 
@@ -337,6 +382,34 @@
         menuToggle.classList.remove('open');
       });
     });
+
+    // 2. 第一次開啟提示邏輯
+    window.addEventListener('DOMContentLoaded', () => {
+      // 判斷是否已經顯示過
+      if (!localStorage.getItem('hasSeenInstallPrompt')) {
+        const promptDiv = document.getElementById('install-prompt');
+        const promptText = document.getElementById('prompt-text');
+        
+        // 偵測裝置類型
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          promptText.innerHTML = "💡 建議點選瀏覽器選單<br>將本站「加入主畫面」以便快速使用！";
+        } else {
+          promptText.innerHTML = "✨ 喜歡這個工具嗎？<br>按下 <b>Ctrl+D</b> 將本站加入收藏夾！";
+        }
+
+        // 延遲 1.5 秒顯示，增加轉場感
+        setTimeout(() => {
+          promptDiv.style.display = 'block';
+        }, 1500);
+      }
+    });
+
+    function closePrompt() {
+      document.getElementById('install-prompt').style.display = 'none';
+      localStorage.setItem('hasSeenInstallPrompt', 'true');
+    }
   </script>
 
 </body>
