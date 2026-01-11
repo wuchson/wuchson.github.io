@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全能秤重助手</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; padding: 15px; background-color: #f1f3f5; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; box-sizing: border-box; }
+        h2 { text-align: center; color: #2d3436; margin-bottom: 20px; border-bottom: 2px solid #00b894; padding-bottom: 10px; font-size: 22px; }
+        .group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #636e72; font-size: 15px; }
+        
+        /* 核心修正：使用 flex-wrap 讓元件在空間不足時自動換行 */
+        .row { display: flex; gap: 8px; flex-wrap: wrap; }
+        
+        input { padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; flex: 1; min-width: 120px; box-sizing: border-box; }
+        select { padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; background-color: #f8f9fa; cursor: pointer; min-width: 100px; box-sizing: border-box; }
+        
+        input:focus { border-color: #00b894; outline: none; }
+        
+        .result-container { background: #2d3436; color: #55efc4; padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; }
+        .price-tag { font-size: 32px; font-weight: bold; display: block; margin-top: 5px; overflow-wrap: break-word; }
+        .hint-table { font-size: 12px; color: #b2bec3; margin-top: 20px; line-height: 1.6; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>全能秤重助手</h2>
+
+    <div class="group">
+        <label>1. 設定報價方式</label>
+        <div class="row">
+            <input type="number" id="unitPrice" placeholder="金額" oninput="calculate()" pattern="\d*">
+            <select id="priceBase" onchange="calculate()">
+                <option value="600" selected>元 / 台斤</option>
+                <option value="600.46">元 / 公斤</option>
+                <option value="37.5">元 / 兩</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="group">
+        <label>2. 輸入購買重量</label>
+        <div class="row">
+            <input type="number" id="weight" placeholder="數量" step="0.01" oninput="calculate()" pattern="\d*">
+            <select id="weightUnit" onchange="calculate()">
+                <option value="600" selected>台斤</option>
+                <option value="600.46">公斤 (kg)</option>
+                <option value="37.5">兩</option>
+                <option value="1">公克 (g)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="result-container">
+        <span>總共應付</span>
+        <span class="price-tag" id="total">0 元</span>
+    </div>
+
+    <div class="hint-table">
+        💡 <b>換算小知識：</b><br>
+        • 1 台斤 = 600 公克 = 16 兩<br>
+        • 1 公斤 = 1000 公克 (約 1.67 台斤)
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const p_val = parseFloat(document.getElementById('unitPrice').value);
+        const p_base = parseFloat(document.getElementById('priceBase').value);
+        const w_val = parseFloat(document.getElementById('weight').value);
+        const w_unit = parseFloat(document.getElementById('weightUnit').value);
+        const totalElement = document.getElementById('total');
+
+        if (!isNaN(p_val) && !isNaN(w_val)) {
+            const pricePerGram = p_val / p_base;
+            const totalGrams = w_val * w_unit;
+            const finalResult = pricePerGram * totalGrams;
+            totalElement.innerText = Math.round(finalResult).toLocaleString() + " 元";
+        } else {
+            totalElement.innerText = "0 元";
+        }
+    }
+</script>
+
+</body>
+</html>
