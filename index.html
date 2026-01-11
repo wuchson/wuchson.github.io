@@ -30,10 +30,10 @@
       background: radial-gradient(circle at top, #111827, var(--bg-main));
       color: var(--text-main);
       line-height: 1.75;
-      padding-top: 70px; /* 為固定導覽列留空間 */
+      padding-top: 70px;
     }
 
-    /* --- 新增：導覽列樣式 --- */
+    /* --- 導覽列樣式 --- */
     .navbar {
       position: fixed;
       top: 0;
@@ -58,7 +58,6 @@
       text-shadow: 0 0 10px var(--accent);
     }
 
-    /* 桌機版選單 */
     .nav-menu {
       display: flex;
       list-style: none;
@@ -79,7 +78,6 @@
       text-shadow: 0 0 8px var(--accent-light);
     }
 
-    /* 漢堡按鈕 */
     .menu-toggle {
       display: none;
       flex-direction: column;
@@ -97,7 +95,7 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* 手機版選單切換 */
+    /* 手機版選單優化區 */
     @media (max-width: 768px) {
       .menu-toggle {
         display: flex;
@@ -106,16 +104,17 @@
       .nav-menu {
         position: fixed;
         top: 0;
-        right: -100%; /* 預設在螢幕外 */
+        right: -100%;
         width: 70%;
         height: 100vh;
-        background: rgba(11, 15, 26, 0.95);
+        background: rgba(11, 15, 26, 0.98); /* 稍微調深一點背景 */
         backdrop-filter: blur(20px);
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: center; /* 讓內容置中 */
         transition: 0.4s ease-in-out;
         border-left: 1px solid var(--border-glow);
+        gap: 0; /* 移除 flex 預設間距 */
       }
 
       .nav-menu.active {
@@ -123,19 +122,22 @@
       }
 
       .nav-menu li {
-        margin: 0rem 0;
+        margin: 2px 0; /* 極窄邊距 */
+        width: 100%; /* 讓點擊區域寬度撐滿 */
+        text-align: center;
       }
 
       .nav-menu a {
-        font-size: 0.8rem;
+        font-size: 0.95rem; /* 稍微放大確保易讀 */
+        line-height: 1.2;  /* 關鍵：縮小行高 */
+        display: block;
+        padding: 10px 0;   /* 使用 padding 撐開點擊範圍，而不是 margin */
       }
 
-      /* 漢堡動畫：變叉叉 */
       .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
       .menu-toggle.open span:nth-child(2) { opacity: 0; }
       .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
     }
-    /* --- 導覽列結束 --- */
 
     header {
       text-align: center;
@@ -225,7 +227,7 @@
 
   <nav class="navbar">
     <a href="#" class="nav-logo">AI TOOL</a>
-    
+   
     <div class="menu-toggle" id="mobile-menu">
       <span></span>
       <span></span>
@@ -233,22 +235,22 @@
     </div>
 
     <ul class="nav-menu">
-        <li><a href="Dictation.html">🎙AI 會議助理-聽寫</a></li>
-        <li><a href="Reader.html">🔊文章閱讀器-文字轉語音</a></li>
-        <li><a href="Grammartest.html">💻HTML網頁語法測試</a></li>
-        <li><a href="Englishconversion.html">🔠英文大小寫轉換</a></li>
-		<li><a href="ColorTicket.html">🧪色票選擇器</a></li>
-		<li><a href="portfolio.html">📝文字處理器</a></li>
-		<li><a href="CommunityPO.html">✍️PO文神器</a></li>
-		<li><a href="Weightconversion.html">🥦全能秤重助手</a></li>
-		<li><a href="AgeConversion.html">👫年齡換算器</a></li>
-        <li><a href="mailto:wuchson@gmail.com">聯絡我</a></li>
+        <li><a href="Dictation.html">🎙 AI 會議助理-聽寫</a></li>
+        <li><a href="Reader.html">🔊 文章閱讀器-文字轉語音</a></li>
+        <li><a href="Grammartest.html">💻 HTML網頁語法測試</a></li>
+        <li><a href="Englishconversion.html">🔠 英文大小寫轉換</a></li>
+        <li><a href="ColorTicket.html">🧪 色票選擇器</a></li>
+        <li><a href="portfolio.html">📝 文字處理器</a></li>
+        <li><a href="CommunityPO.html">✍️ PO文神器</a></li>
+        <li><a href="Weightconversion.html">🥦 全能秤重助手</a></li>
+        <li><a href="AgeConversion.html">👫 年齡換算器</a></li>
+        <li><a href="mailto:wuchson@gmail.com">📫 聯絡我</a></li>
     </ul>
   </nav>
 
   <header>
     <h1>AI TOOL</h1>
-	<h3>歡迎使用-完全免費-無須註冊</h3> 
+    <h3>歡迎使用-完全免費-無須註冊</h3>
     <p>FREE AI ARTIFICIAL INTELLIGENCE TOOLS</p>
   </header>
 
@@ -282,8 +284,8 @@
           <h3>🔠 英文大小寫轉換</h3>
           <p>一鍵轉換文字格式，提升內容編輯效率。</p>
         </div>
-		<div class="feature-card">
-          <h3>🧪色票選擇器</h3>
+        <div class="feature-card">
+          <h3>🧪 色票選擇器</h3>
           <p>全色系 AI 選色助手：支援手機，秒速複製。</p>
         </div>
         <div class="feature-card">
@@ -291,15 +293,15 @@
           <p>輸入或貼上文字，立即進行轉換與優化。</p>
         </div>
         <div class="feature-card">
-          <h3>✍️PO文神器</h3>
+          <h3>✍️ PO文神器</h3>
           <p>現在就開始你的創作，讓每一篇 PO 文都成為眾人矚目的焦點吧！</p>
         </div>
-		<div class="feature-card">
-          <h3>🥦全能秤重助手</h3>
+        <div class="feature-card">
+          <h3>🥦 全能秤重助手</h3>
           <p>菜市場、超市買菜必備！能幫您快速計算，不怕算錯錢，買菜更安心。</p>
         </div>
-		<div class="feature-card">
-          <h3>👫年齡換算器</h3>
+        <div class="feature-card">
+          <h3>👫 年齡換算器</h3>
           <p>本工具強化了台灣特有的年份轉換邏輯，快速計算你的年齡。</p>
         </div>
       </div>
@@ -319,7 +321,6 @@
       menuToggle.classList.toggle('open');
     });
 
-    // 點擊連結後自動關閉選單 (手機版體驗較好)
     document.querySelectorAll('.nav-menu a').forEach(link => {
       link.addEventListener('click', () => {
         navMenu.classList.remove('active');
