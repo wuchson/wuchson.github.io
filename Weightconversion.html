@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全能秤重助手</title>
+    <title>菜市場秤重小幫手</title>
     <style>
         body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; padding: 15px; background-color: #f1f3f5; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; box-sizing: border-box; }
+        
+        /* 新增：小圖示和簡介的樣式 */
+        .intro-section { text-align: center; margin-bottom: 25px; }
+        .intro-icon { font-size: 48px; margin-bottom: 10px; color: #ff6b6b; /* 蔬菜水果的紅色系 */ }
+        .intro-text { font-size: 15px; color: #555; line-height: 1.5; }
+
         h2 { text-align: center; color: #2d3436; margin-bottom: 20px; border-bottom: 2px solid #00b894; padding-bottom: 10px; font-size: 22px; }
         .group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #636e72; font-size: 15px; }
-        
-        /* 核心修正：使用 flex-wrap 讓元件在空間不足時自動換行 */
         .row { display: flex; gap: 8px; flex-wrap: wrap; }
         
         input { padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; flex: 1; min-width: 120px; box-sizing: border-box; }
@@ -27,6 +31,12 @@
 <body>
 
 <div class="card">
+    <div class="intro-section">
+        <div class="intro-icon">🥦</div> <p class="intro-text">
+            菜市場、超市買菜必備！無論報價是「斤」或「公斤」，秤重是「兩」或「公克」，
+            這個小工具都能幫您快速計算，不怕算錯錢，買菜更安心。
+        </p>
+    </div>
     <h2>全能秤重助手</h2>
 
     <div class="group">
