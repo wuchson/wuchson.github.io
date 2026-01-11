@@ -95,7 +95,7 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* 手機版選單優化區 */
+    /* --- 手機版選單調整重點區 --- */
     @media (max-width: 768px) {
       .menu-toggle {
         display: flex;
@@ -107,14 +107,20 @@
         right: -100%;
         width: 70%;
         height: 100vh;
-        background: rgba(11, 15, 26, 0.98); /* 稍微調深一點背景 */
+        background: rgba(11, 15, 26, 0.98);
         backdrop-filter: blur(20px);
         flex-direction: column;
-        align-items: center;
-        justify-content: center; /* 讓內容置中 */
+        
+        /* 調整對齊方式 */
+        justify-content: flex-start; /* 改為從頂部開始 */
+        align-items: flex-end; /* 文字全部靠右 */
+        
+        /* 預留 X 按鈕的空間，讓選單從 X 下方開始顯示 */
+        padding: 80px 2rem 2rem 0;   
+        
         transition: 0.4s ease-in-out;
         border-left: 1px solid var(--border-glow);
-        gap: 0; /* 移除 flex 預設間距 */
+        gap: 0;
       }
 
       .nav-menu.active {
@@ -122,18 +128,19 @@
       }
 
       .nav-menu li {
-        margin: 2px 0; /* 極窄邊距 */
-        width: 100%; /* 讓點擊區域寬度撐滿 */
-        text-align: center;
+        margin: 0;
+        width: 100%;
+        text-align: right; /* 確保內容文字靠右 */
       }
 
       .nav-menu a {
-        font-size: 0.95rem; /* 稍微放大確保易讀 */
-        line-height: 1.2;  /* 關鍵：縮小行高 */
+        font-size: 0.95rem;
+        line-height: 1.2;
         display: block;
-        padding: 10px 0;   /* 使用 padding 撐開點擊範圍，而不是 margin */
+        padding: 12px 0; /* 稍微增加一點垂直距離，點擊更精準 */
       }
 
+      /* 漢堡動畫 */
       .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
       .menu-toggle.open span:nth-child(2) { opacity: 0; }
       .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
