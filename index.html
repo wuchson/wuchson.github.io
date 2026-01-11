@@ -95,7 +95,7 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* --- 手機版選單調整重點區 --- */
+    /* --- 手機版選單優化重點 --- */
     @media (max-width: 768px) {
       .menu-toggle {
         display: flex;
@@ -105,18 +105,19 @@
         position: fixed;
         top: 0;
         right: -100%;
-        width: 70%;
+        width: 75%;            /* 稍微加寬一點點方便閱讀 */
         height: 100vh;
         background: rgba(11, 15, 26, 0.98);
         backdrop-filter: blur(20px);
         flex-direction: column;
         
-        /* 調整對齊方式 */
-        justify-content: flex-start; /* 改為從頂部開始 */
-        align-items: flex-end; /* 文字全部靠右 */
+        justify-content: flex-start; 
+        align-items: flex-end;       /* 靠右對齊 */
         
-        /* 預留 X 按鈕的空間，讓選單從 X 下方開始顯示 */
-        padding: 80px 2rem 2rem 0;   
+        /* 解決滑動與位置問題 */
+        padding: 60px 1.5rem 2rem 0; /* padding-top 縮小到 60px 讓選單移上 */
+        overflow-y: auto;           /* 開啟垂直滑動，橫向時可滾動 */
+        -webkit-overflow-scrolling: touch; /* 讓手機滑動更順暢 */
         
         transition: 0.4s ease-in-out;
         border-left: 1px solid var(--border-glow);
@@ -128,19 +129,17 @@
       }
 
       .nav-menu li {
-        margin: 0;
         width: 100%;
-        text-align: right; /* 確保內容文字靠右 */
+        text-align: right;
       }
 
       .nav-menu a {
         font-size: 0.95rem;
-        line-height: 1.2;
+        line-height: 1.1;     /* 更緊湊的行高 */
         display: block;
-        padding: 12px 0; /* 稍微增加一點垂直距離，點擊更精準 */
+        padding: 10px 0;      /* 縮小垂直間距 */
       }
 
-      /* 漢堡動畫 */
       .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
       .menu-toggle.open span:nth-child(2) { opacity: 0; }
       .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
