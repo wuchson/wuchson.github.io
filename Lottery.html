@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>專業深色抽獎系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* 深色主題變數 */
+        :root { 
+            --bg: #1a1a2e; 
+            --card: #16213e; 
+            --primary: #706fd3; 
+            --accent: #00d2d3;
+            --text-main: #ffffff;
+            --text-sub: #a29bfe;
+            --instruction-bg: #0f172a;
+        }
+
+        body { 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 40px 20px; 
+        }
+        
+        /* 使用說明區塊：靠左對齊 */
+        .instruction { 
+            background: var(--instruction-bg); 
+            border: 1px solid #1e293b;
+            border-left: 6px solid var(--accent); 
+            padding: 20px 30px; 
+            border-radius: 12px; 
+            margin-bottom: 30px; 
+            width: 100%; 
+            max-width: 500px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-align: left;
+        }
+        .instruction h3 { margin-top: 0; color: var(--accent); font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+        .instruction ol { padding-left: 20px; margin: 15px 0 0 0; }
+        .instruction li { margin-bottom: 8px; line-height: 1.6; color: #94a3b8; }
+
+        /* 抽獎主卡片 */
+        .card { 
+            background: var(--card); 
+            padding: 40px; 
+            border-radius: 28px; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5); 
+            text-align: center; 
+            width: 100%; 
+            max-width: 450px; 
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        #display { 
+            font-size: 72px; 
+            font-weight: bold; 
+            color: var(--accent); 
+            margin: 40px 0; 
+            min-height: 100px; 
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(0, 210, 211, 0.4);
+        }
+        
+        .controls { display: flex; flex-direction: column; gap: 15px; }
+        
+        input[type="file"] { 
+            border: 1px dashed #334155; 
+            padding: 15px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            background: #1e293b; 
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+        
+        button { 
+            padding: 18px; 
+            font-size: 20px; 
+            border: none; 
+            border-radius: 14px; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            font-weight: 600; 
+        }
+
+        #startBtn { 
+            background: var(--primary); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(112, 111, 211, 0.4); 
+        }
+        #startBtn:hover:not(:disabled) { background: #5f27cd; transform: scale(1.02); }
+
+        #stopBtn { 
+            background: #ff5252; 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(255, 82, 82, 0.4); 
+        }
+        #stopBtn:hover:not(:disabled) { background: #ff3f34; transform: scale(1.02); }
+        
+        button:disabled { 
+            background: #334155 !important; 
+            color: #64748b; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+            transform: none !important;
+        }
+
+        #count { margin-top: 25px; font-weight: bold; color: var(--text-sub); font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="instruction">
+        <h3>📖 操作指南</h3>
+        <ol>
+            <li><strong>名單準備：</strong>請提供 Excel 轉存之 <strong>.csv (UTF-8)</strong> 檔案。</li>
+            <li><strong>檔案上傳：</strong>點選下方灰框處選擇名單檔案。</li>
+            <li><strong>啟動：</strong>按「開始轉動」，系統會高速隨機挑選姓名。</li>
+            <li><strong>抽獎：</strong>按「停止並抽獎」，中獎人將出現並移除名單。</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h2 style="color: var(--text-main); margin-bottom: 10px;">✨ 幸運大抽獎 ✨</h2>
+        
+        <input type="file" id="fileInput" accept=".csv" />
+        
+        <div id="display">READY</div>
+        
+        <div class="controls">
+            <button id="startBtn" disabled>開始轉動</button>
+            <button id="stopBtn" disabled>停止並抽獎</button>
+        </div>
+
+        <div id="count">剩餘人數：0 人</div>
+    </div>
+
+    <script>
+        let names = [];
+        let timer = null;
+        let currentIndex = 0;
+
+        const fileInput = document.getElementById('fileInput');
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const countDisplay = document.getElementById('count');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const content = event.target.result;
+                names = content.split(/\r?\n/).map(n => n.trim()).filter(n => n !== "");
+                updateCount();
+                if (names.length > 0) {
+                    startBtn.disabled = false;
+                    display.innerText = "準備開獎";
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function updateCount() {
+            countDisplay.innerText = `目前名單剩餘：${names.length} 人`;
+        }
+
+        startBtn.onclick = function() {
+            if (names.length === 0) return alert("名單已空！");
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            display.style.color = "var(--accent)";
+            
+            timer = setInterval(() => {
+                currentIndex = Math.floor(Math.random() * names.length);
+                display.innerText = names[currentIndex];
+            }, 60);
+        };
+
+        stopBtn.onclick = function() {
+            clearInterval(timer);
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            // 慶祝彩帶
+            confetti({
+                particleCount: 200,
+                spread: 120,
+                origin: { y: 0.6 },
+                colors: ['#00d2d3', '#706fd3', '#ff9f43', '#ffffff']
+            });
+
+            // 移除中獎人
+            names.splice(currentIndex, 1);
+            updateCount();
+        };
+    </script>
+</body>
+</html>
