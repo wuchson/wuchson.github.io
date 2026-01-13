@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業內衣尺寸全指南</title>
+    <style>
+        :root { --main-color: #ff748c; --sub-color: #ffafbd; --text-gray: #666; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: linear-gradient(135deg, #fff5f7 0%, #ffebf0 100%); display: flex; justify-content: center; padding: 20px; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 35px; border-radius: 25px; box-shadow: 0 15px 35px rgba(255, 116, 140, 0.15); width: 100%; max-width: 500px; }
+        h2 { color: var(--main-color); text-align: center; margin-bottom: 10px; letter-spacing: 1px; }
+        .subtitle { text-align: center; color: var(--text-gray); font-size: 14px; margin-bottom: 30px; }
+        
+        .input-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 10px; font-weight: bold; color: #444; }
+        .input-wrapper { position: relative; }
+        input { width: 100%; padding: 14px; border: 2px solid #fce4ec; border-radius: 12px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        input:focus { border-color: var(--main-color); outline: none; background: #fffafb; }
+        .unit { position: absolute; right: 15px; top: 14px; color: #999; }
+
+        button { width: 100%; padding: 16px; background: var(--main-color); color: white; border: none; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 5px 15px rgba(255, 116, 140, 0.3); }
+        button:hover { background: #f06292; transform: translateY(-2px); }
+        
+        #result { margin-top: 30px; display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .result-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .result-table tr { border-bottom: 1px solid #fff0f3; }
+        .result-table td { padding: 15px 10px; }
+        .label-cell { color: var(--text-gray); font-size: 14px; width: 40%; }
+        .value-cell { color: var(--main-color); font-size: 22px; font-weight: bold; text-align: right; }
+        
+        .notice { background: #fff9fa; border-radius: 10px; padding: 15px; margin-top: 20px; font-size: 13px; color: #888; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>內衣尺寸助手</h2>
+    <p class="subtitle">專業公分制計算 · 支援 A 至 K 罩杯</p>
+    
+    <div class="input-group">
+        <label>下胸圍 (Underbust)</label>
+        <div class="input-wrapper">
+            <input type="number" id="underbust" placeholder="請測量乳房底部一圈" step="0.1">
+            <span class="unit">cm</span>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>上胸圍 (Overbust)</label>
+        <div class="input-wrapper">
+            <input type="number" id="overbust" placeholder="請測量乳頭最高點一圈" step="0.1">
+            <span class="unit">cm</span>
+        </div>
+    </div>
+
+    <button onclick="calculateAll()">立即獲取試穿建議</button>
+
+    <div id="result">
+        <table class="result-table">
+            <tr>
+                <td class="label-cell">國際公制 (台/日)</td>
+                <td class="value-cell" id="res-cm">-</td>
+            </tr>
+            <tr>
+                <td class="label-cell">英美制尺碼</td>
+                <td class="value-cell" id="res-inch">-</td>
+            </tr>
+            <tr>
+                <td class="label-cell">日系品牌建議<br><small>(版型偏小)</small></td>
+                <td class="value-cell" id="res-jp">-</td>
+            </tr>
+        </table>
+        
+        <div class="notice">
+            💡 <strong>試穿小提醒：</strong><br>
+            1. 計算結果為理論值，大罩杯或是軟胸型建議參考「日系建議」拿大一碼比較不壓胸。<br>
+            2. 穿好後請將兩側肉肉（副乳）撥進罩杯內，才是最準確的穿著感。
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateAll() {
+    const under = parseFloat(document.getElementById('underbust').value);
+    const over = parseFloat(document.getElementById('overbust').value);
+    
+    if (!under || !over || over <= under) {
+        alert("請輸入正確的公分數值");
+        return;
+    }
+
+    const diff = over - under;
+    const cups = ["AA", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"];
+    
+    // 1. 下胸圍級距計算
+    let bandCM = Math.round(under / 5) * 5;
+    
+    // 2. 下胸圍英制轉換 (32, 34, 36...)
+    const inchMap = { 65:30, 70:32, 75:34, 80:36, 85:38, 90:40, 95:42, 100:44, 105:46, 110:48 };
+    let bandInch = inchMap[bandCM] || Math.round(under / 2.54 / 2) * 2;
+
+    // 3. 罩杯邏輯計算
+    function getCupName(d) {
+        if (d < 7.5) return "AA";
+        let idx = Math.floor((d - 7.5) / 2.5);
+        if (idx >= cups.length) idx = cups.length - 1;
+        return cups[idx + 1] || "K";
+    }
+
+    const stdCup = getCupName(diff);
+    const currentIdx = cups.indexOf(stdCup);
+    const jpCup = (currentIdx < cups.length - 1) ? cups[currentIdx + 1] : "K";
+
+    // 渲染結果
+    document.getElementById('res-cm').innerText = bandCM + stdCup;
+    document.getElementById('res-inch').innerText = bandInch + stdCup;
+    document.getElementById('res-jp').innerText = bandCM + jpCup;
+    
+    document.getElementById('result').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
