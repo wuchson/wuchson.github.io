@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>年齡換算器</title>
+    <title>極簡深色年齡換算器</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
+            --bg: #111827;
+            --card: #1f2937;
             --accent: #38bdf8;
-            --text: #f1f5f9;
-            --input: #334155;
-            --border: #475569;
+            --text: #f3f4f6;
+            --input: #374151;
+            --border: #4b5563;
         }
 
         body {
@@ -29,12 +29,12 @@
             background-color: var(--card);
             padding: 25px;
             border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 90%;
-            max-width: 400px;
+            max-width: 380px;
         }
 
-        h2 { text-align: center; margin-top: 0; color: var(--accent); letter-spacing: 2px; font-size: 1.5rem; }
+        h2 { text-align: center; margin-top: 0; color: var(--accent); font-size: 1.4rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
         .type-selector {
             display: flex;
@@ -49,58 +49,43 @@
             padding: 10px;
             border: none;
             background: transparent;
-            color: #94a3b8;
+            color: #9ca3af;
             cursor: pointer;
             border-radius: 8px;
             font-weight: bold;
-            transition: 0.3s;
+            transition: 0.2s;
         }
 
         .type-btn.active { background: var(--accent); color: white; }
 
-        .input-label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px; display: block; }
+        .input-label { font-size: 0.85rem; color: #9ca3af; margin-bottom: 8px; display: block; }
         .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
 
-        input[type="number"], select {
+        input, select {
             background-color: var(--input);
-            border: 2px solid var(--border);
+            border: 1px solid var(--border);
             color: white;
             padding: 12px;
             border-radius: 10px;
             font-size: 16px;
             outline: none;
-            box-sizing: border-box;
             width: 100%;
         }
 
-        input[type="number"] { flex: 2; }
-        select { flex: 1.5; cursor: pointer; }
-        input:focus, select:focus { border-color: var(--accent); }
+        input:focus { border-color: var(--accent); }
 
         .result-box {
             background: rgba(56, 189, 248, 0.05);
-            border: 1px solid rgba(56, 189, 248, 0.3);
+            border: 1px solid rgba(56, 189, 248, 0.2);
             padding: 15px;
             border-radius: 15px;
             display: none;
         }
 
-        .result-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .result-item {
-            display: flex;
-            flex-direction: column;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 5px;
-        }
-
-        .res-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px; }
-        .res-value { color: var(--accent); font-weight: bold; font-size: 1.05rem; }
-        
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .result-item { display: flex; flex-direction: column; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+        .res-label { font-size: 0.75rem; color: #9ca3af; margin-bottom: 4px; }
+        .res-value { color: var(--accent); font-weight: bold; font-size: 1.1rem; }
         .full-width { grid-column: span 2; border-bottom: none; }
     </style>
 </head>
@@ -108,7 +93,6 @@
 
 <div class="card">
     <h2>📅 年齡與農曆換算</h2>
-    
     <div class="type-selector">
         <button class="type-btn active" id="btnAD" onclick="setMode('AD')">西元 AD</button>
         <button class="type-btn" id="btnROC" onclick="setMode('ROC')">民國 ROC</button>
@@ -117,14 +101,14 @@
     <label class="input-label">出生日期：</label>
     <div class="input-group">
         <input type="number" id="year" placeholder="年份" oninput="calculate()">
-        <select id="month" onchange="calculate()"><option value="">月</option></select>
-        <select id="day" onchange="calculate()"><option value="">日</option></select>
+        <select id="month" onchange="calculate()"></select>
+        <select id="day" onchange="calculate()"></select>
     </div>
 
     <div id="resultBox" class="result-box">
         <div class="result-grid">
-            <div class="result-item"><div class="res-label">目前實歲</div><div class="res-value" id="resAge">0 歲</div></div>
-            <div class="result-item"><div class="res-label">生存天數</div><div class="res-value" id="resDays">0 天</div></div>
+            <div class="result-item"><div class="res-label">目前實歲</div><div class="res-value" id="resAge">-</div></div>
+            <div class="result-item"><div class="res-label">生存天數</div><div class="res-value" id="resDays">-</div></div>
             <div class="result-item"><div class="res-label">星座</div><div class="res-value" id="resStar">-</div></div>
             <div class="result-item"><div class="res-label">換算年份</div><div class="res-value" id="resConvert">-</div></div>
             <div class="result-item full-width"><div class="res-label">出生農曆 (歲次/日期)</div><div class="res-value" id="resLunar">-</div></div>
@@ -134,98 +118,83 @@
 
 <script>
     let mode = 'AD';
-    const yearEl = document.getElementById('year');
-    const monthEl = document.getElementById('month');
-    const dayEl = document.getElementById('day');
-    const resBox = document.getElementById('resultBox');
+    const monthSelect = document.getElementById('month');
+    const daySelect = document.getElementById('day');
 
-    for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
-    for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
+    // 初始化下拉選單
+    for(let i=1; i<=12; i++) monthSelect.add(new Option(i + " 月", i));
+    for(let i=1; i<=31; i++) daySelect.add(new Option(i + " 日", i));
 
     function setMode(newMode) {
         if (mode === newMode) return;
-        let val = parseInt(yearEl.value);
-        if (val) yearEl.value = (newMode === 'ROC') ? val - 1911 : val + 1911;
+        let y = parseInt(document.getElementById('year').value);
+        if (y) document.getElementById('year').value = (newMode === 'ROC') ? y - 1911 : y + 1911;
         mode = newMode;
         document.getElementById('btnAD').classList.toggle('active', mode === 'AD');
         document.getElementById('btnROC').classList.toggle('active', mode === 'ROC');
         calculate();
     }
 
-    // 🌟 穩定版核心：直接從瀏覽器語彙提取農曆資訊
-    function getLunarFullInfo(date) {
-        try {
-            // 1. 取得農曆月日文字 (例如 "臘月十二" 或 "十二月十二")
-            const mdFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
-                month: 'long', day: 'numeric'
-            });
-            const lunarMD = mdFormatter.format(date);
+    function getLunarData(date) {
+        // 取得農曆各項原始數值
+        const formatter = new Intl.DateTimeFormat('zh-Hant-TW-u-ca-chinese', {
+            year: 'numeric', month: 'numeric', day: 'numeric'
+        });
+        const parts = formatter.formatToParts(date);
+        const lYear = parseInt(parts.find(p => p.type === 'year').value);
+        const lMonth = parseInt(parts.find(p => p.type === 'month').value);
+        const lDay = parseInt(parts.find(p => p.type === 'day').value);
+        const isLeap = parts.some(p => p.type === 'leapMonth');
 
-            // 2. 取得農曆年份的天干地支
-            // 這種方式會直接根據日期回傳正確的干支年 (跨年會自動處理)
-            const yearFormatter = new Intl.DateTimeFormat('zh-Hant-TW-u-ca-chinese', {
-                year: 'numeric'
-            });
-            const lunarYearStr = yearFormatter.format(date); 
-            
-            // 3. 提取干支字元 (例如從 "丙申年" 提取出 "丙申")
-            // 某些瀏覽器會回傳 "2016年"，我們需要做備援處理
-            let ganzhi = "";
-            const gzMatch = lunarYearStr.match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/);
-            
-            if (gzMatch) {
-                ganzhi = gzMatch[0];
-            } else {
-                // 如果瀏覽器只給數字年份，則手動計算
-                const lYearNum = parseInt(lunarYearStr.replace(/[^0-9]/g, ''));
-                const gan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
-                const zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
-                const offset = lYearNum - 4;
-                ganzhi = gan[((offset % 10) + 10) % 10] + zhi[((offset % 12) + 12) % 12];
-            }
+        // 1. 計算干支
+        const gan = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+        const zhi = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+        const animals = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬"];
+        const offset = lYear - 4;
+        const ganzhi = gan[((offset % 10) + 10) % 10] + zhi[((offset % 12) + 12) % 12];
+        const zodiac = animals[((offset % 12) + 12) % 12];
 
-            // 4. 對應生肖 (根據地支最後一個字)
-            const zhiChar = ganzhi.charAt(1);
-            const zhiToZodiac = {
-                '子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龍','巳':'蛇',
-                '午':'馬','未':'羊','申':'猴','酉':'雞','戌':'狗','亥':'豬'
-            };
-            const zodiac = zhiToZodiac[zhiChar] || "查無";
-            
-            return `${ganzhi} (${zodiac}) 年 ${lunarMD}`;
-        } catch (e) { 
-            return "計算中..."; 
-        }
-    }
+        // 2. 強制轉換農曆月份與日期為中文 (解決 M10 等問題)
+        const monthNames = ["正月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","臘月"];
+        let monthStr = (isLeap ? "閏" : "") + monthNames[lMonth - 1];
+        
+        const dayNames = ["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十",
+                          "十一","十二","十三","十四","十五","十六","十七","十八","十九","二十",
+                          "廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
+        let dayStr = dayNames[lDay - 1];
 
-    function getStarSign(m, d) {
-        const signs = ["摩羯","水瓶","雙魚","牡羊","金牛","雙子","巨蟹","獅子","處女","天秤","天蠍","射手","摩羯"];
-        const bounds = [20, 19, 20, 20, 21, 21, 23, 23, 23, 23, 22, 22];
-        return signs[m - 1 + (d > bounds[m - 1] ? 1 : 0)] + "座";
+        return `${ganzhi} (${zodiac}) 年 ${monthStr}${dayStr}`;
     }
 
     function calculate() {
-        const y = parseInt(yearEl.value);
-        const m = parseInt(monthEl.value);
-        const d = parseInt(dayEl.value);
+        const y = parseInt(document.getElementById('year').value);
+        const m = parseInt(monthSelect.value);
+        const d = parseInt(daySelect.value);
+        if (!y || !m || !d) return;
 
-        if (!y || !m || !d) { resBox.style.display = 'none'; return; }
-
-        let adYear = (mode === 'ROC') ? y + 1911 : y;
+        const adYear = (mode === 'ROC') ? y + 1911 : y;
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
+        if (birth.getMonth() !== m - 1 || birth > today) return;
 
-        if (birth.getMonth() !== m - 1 || birth > today) { resBox.style.display = 'none'; return; }
+        document.getElementById('resultBox').style.display = 'block';
 
+        // 實歲與天數
         let age = today.getFullYear() - birth.getFullYear();
         if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
-
-        resBox.style.display = 'block';
         document.getElementById('resAge').innerText = age + " 歲";
         document.getElementById('resDays').innerText = Math.floor((today - birth) / 86400000).toLocaleString() + " 天";
-        document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear-1911} 年` : `西元 ${adYear} 年`;
-        document.getElementById('resStar').innerText = getStarSign(m, d);
-        document.getElementById('resLunar').innerText = getLunarFullInfo(birth);
+
+        // 星座
+        const signs = ["摩羯","水瓶","雙魚","牡羊","金牛","雙子","巨蟹","獅子","處女","天秤","天蠍","射手","摩羯"];
+        const bounds = [20, 19, 20, 20, 21, 21, 23, 23, 23, 23, 22, 22];
+        document.getElementById('resStar').innerText = signs[m - 1 + (d > bounds[m - 1] ? 1 : 0)] + "座";
+        
+        // 換算年份
+        document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear - 1911} 年` : `西元 ${adYear} 年`;
+
+        // 農曆 (呼叫新修正函式)
+        document.getElementById('resLunar').innerText = getLunarData(birth);
     }
 </script>
 
