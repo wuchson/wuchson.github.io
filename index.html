@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ch AI TOOL</title>
-  
+	
   <meta name="description" content="Ch AI TOOL 提供多種免費線上工具：AI 會議助理、文章閱讀器、HTML網頁語法測試、英文大小寫轉換、色票選擇器、文字處理器、PO文神器、全能秤重助手、年齡換算器、私人加密保險箱、線上抽獎系統。">
   <meta name="keywords" content="AI 會議助理, 文章閱讀器, HTML測試, 色票選擇, 文字處理, PO文神器, 秤重助手, 年齡換算, 加密保險箱, 抽獎系統, 罩杯計算">
   
@@ -17,8 +17,11 @@
     "featureList": ["AI 會議助理-聽寫", "文章閱讀器-文字轉語音", "HTML網頁語法測試", "英文大小寫轉換", "色票選擇器", "文字處理器", "PO文神器", "全能秤重助手", "年齡換算器", "私人加密保險箱", "線上抽獎系統", "罩杯尺寸計算器"]
   }
   </script>
-
-  <link rel="icon" href="icon.png" type="image/png">
+	
+<link rel="icon" href="icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <style>
     :root {
       --bg-main: #0b0f1a;
@@ -29,102 +32,307 @@
       --accent: #6366f1;
       --accent-light: #8b5cf6;
       --nav-bg: rgba(11, 15, 26, 0.8);
-      --success: #10b981;
     }
 
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Segoe UI", "Noto Sans TC", sans-serif; background: radial-gradient(circle at top, #111827, var(--bg-main)); color: var(--text-main); line-height: 1.75; padding-top: 70px; }
+    * {
+      box-sizing: border-box;
+    }
 
-    /* --- 導覽列 --- */
-    .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: var(--nav-bg); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-glow); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; z-index: 2000; }
-    .nav-logo { font-weight: bold; font-size: 1.4rem; color: #fff; text-decoration: none; text-shadow: 0 0 10px var(--accent); }
-    
-    .nav-menu { display: flex; list-style: none; gap: 1.5rem; margin: 0; padding: 0; }
-    .nav-menu a { color: var(--text-main); text-decoration: none; transition: 0.3s; font-size: 0.95rem; }
-    .nav-menu a:hover { color: var(--accent-light); }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+      background: radial-gradient(circle at top, #111827, var(--bg-main));
+      color: var(--text-main);
+      line-height: 1.75;
+      padding-top: 70px;
+    }
 
-    .menu-close { display: none; }
-    .menu-toggle { display: none; flex-direction: column; cursor: pointer; gap: 6px; }
-    .menu-toggle span { width: 28px; height: 3px; background: #fff; border-radius: 2px; transition: 0.4s; }
+    /* --- 導覽列樣式 --- */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-glow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 2000;
+    }
 
-    /* --- 手機版選單 --- */
+    .nav-logo {
+      font-weight: bold;
+      font-size: 1.4rem;
+      color: #fff;
+      text-decoration: none;
+      text-shadow: 0 0 10px var(--accent);
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-menu a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    .nav-menu a:hover {
+      color: var(--accent-light);
+      text-shadow: 0 0 8px var(--accent-light);
+    }
+
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 6px;
+      z-index: 3000;
+    }
+
+    .menu-toggle span {
+      width: 28px;
+      height: 3px;
+      background: #fff;
+      border-radius: 2px;
+      transition: 0.4s;
+      box-shadow: 0 0 5px var(--accent);
+    }
+
+    /* --- 手機版選單 (含滑動與對齊優化) --- */
     @media (max-width: 768px) {
-      .menu-toggle { display: flex; }
-      .nav-menu {
-        position: fixed; top: 0; right: -100%; width: 80%; height: 100vh;
-        background: rgba(11, 15, 26, 0.98); flex-direction: column;
-        padding: 20px 1.5rem; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-y: auto; gap: 0; z-index: 3000;
+      .menu-toggle {
+        display: flex;
       }
-      .nav-menu.active { right: 0; }
-      .menu-close { display: block; text-align: right; font-size: 3rem; color: #fff; cursor: pointer; margin-bottom: 4px; padding-right: 8px; }
-      .nav-menu li { width: 100%; text-align: right; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-      .nav-menu li a { display: block; font-size: 1rem; padding: 5px 0; }
+
+      .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 75%;
+        height: 100vh;
+        background: rgba(11, 15, 26, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-end;      
+        padding: 65px 1.5rem 2rem 0; /* 縮小 top padding 讓選單移上 */
+        overflow-y: auto;           /* 開啟捲軸滑動 */
+        -webkit-overflow-scrolling: touch;
+        transition: 0.4s ease-in-out;
+        border-left: 1px solid var(--border-glow);
+        gap: 0;
+      }
+
+      .nav-menu.active {
+        right: 0;
+      }
+
+      .nav-menu li {
+        width: 100%;
+        text-align: right;
+      }
+
+      .nav-menu a {
+        font-size: 0.95rem;
+        line-height: 1.1;
+        display: block;
+        padding: 12px 0;
+      }
+
+      .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+      .menu-toggle.open span:nth-child(2) { opacity: 0; }
+      .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
     }
 
-    /* --- 計數器面板 --- */
-    .visitor-counter { margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); padding: 6px 16px; border-radius: 50px; border: 1px solid var(--border-glow); font-size: 0.85rem; }
-    .counter-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-    .counter-number { color: var(--accent-light); font-weight: bold; font-family: 'Courier New', monospace; letter-spacing: 1px; text-shadow: 0 0 5px var(--accent-light); }
+    /* --- 彈窗提示樣式 --- */
+    #install-prompt {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: white;
+      padding: 16px 24px;
+      border-radius: 16px;
+      z-index: 9999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
 
-    /* 隱藏區：FC2 原生樣式不顯示 */
-    #fc2_raw_area { display: none; }
 
-    header { text-align: center; padding: 4rem 1.5rem; background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent); }
-    header h1 { font-size: 2.6rem; margin-bottom: 0.5rem; color: #fff; text-shadow: 0 0 18px var(--accent); }
+    #install-prompt p {
+      margin: 0 0 12px 0;
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
 
-    main { max-width: 1100px; margin: auto; padding: 0 1.5rem 3rem; }
-    section { margin-bottom: 2.5rem; padding: 2.2rem; border-radius: 16px; background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-glow); }
-    section h2 { border-left: 4px solid var(--accent-light); padding-left: 0.8rem; color: #fff; }
+    #install-prompt button {
+      background: white;
+      color: var(--accent);
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
 
-    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
-    .feature-card { padding: 1.6rem; border-radius: 14px; background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05)); border: 1px solid rgba(99,102,241,0.2); transition: 0.3s; }
-    .feature-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+    #install-prompt button:active {
+      transform: scale(0.95);
+    }
 
-    footer { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 0.9rem; }
+    header {
+      text-align: center;
+      padding: 4rem 1.5rem;
+      background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent);
+    }
+
+    header h1 {
+      font-size: 2.6rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.15em;
+      color: #fff;
+      text-shadow: 0 0 18px rgba(99,102,241,0.8);
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    section {
+      margin-bottom: 2.5rem;
+      padding: 2.2rem;
+      border-radius: 16px;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glow);
+      box-shadow: 0 0 30px rgba(99,102,241,0.08);
+    }
+
+    section h2 {
+      margin-top: 0;
+      margin-bottom: 1.2rem;
+      font-size: 1.4rem;
+      color: #fff;
+      border-left: 4px solid var(--accent-light);
+      padding-left: 0.8rem;
+      text-shadow: 0 0 8px rgba(139,92,246,0.8);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      padding: 1.6rem;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(99,102,241,0.15), rgba(139,92,246,0.08));
+      border: 1px solid rgba(99,102,241,0.4);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 25px rgba(139,92,246,0.6);
+    }
+
+    .feature-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.6rem;
+      color: #fff;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
   </style>
 </head>
+
 <body>
 
   <nav class="navbar">
     <a href="#" class="nav-logo">AI TOOL</a>
+   
     <div class="menu-toggle" id="mobile-menu">
-      <span></span><span></span><span></span>
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
-    
-    <ul class="nav-menu" id="nav-list">
-        <div class="menu-close" id="menu-close">&times;</div>
-        <li><a href="Dictation.html">🎙 AI 聽寫助手</a></li>
-        <li><a href="Reader.html">🔊 文章閱讀器</a></li>
-        <li><a href="Grammartest.html">💻 語法測試</a></li>
-        <li><a href="ColorTicket.html">🧪 色票選擇</a></li>
-        <li><a href="portfolio.html">📝 文字處理</a></li>
+
+    <ul class="nav-menu">
+        <li><a href="Dictation.html">🎙 AI 會議助理-聽寫</a></li>
+        <li><a href="Reader.html">🔊 文章閱讀器-文字轉語音</a></li>
+        <li><a href="Grammartest.html">💻 HTML網頁語法測試</a></li>
+        <li><a href="Englishconversion.html">🔠 英文大小寫轉換</a></li>
+        <li><a href="ColorTicket.html">🧪 色票選擇器</a></li>
+        <li><a href="portfolio.html">📝 文字處理器</a></li>
         <li><a href="CommunityPO.html">✍️ PO文神器</a></li>
-        <li><a href="Weightconversion.html">🥦 秤重助手</a></li>
-        <li><a href="AgeConversion.html">👫 年齡換算</a></li>
-        <li><a href="Password.html">🔐 私人保險箱</a></li>
-        <li><a href="Lottery.html">🎁 抽獎系統</a></li>
-        <li><a href="Bracup.html">👙 罩杯計算</a></li>
+        <li><a href="Weightconversion.html">🥦 全能秤重助手</a></li>
+        <li><a href="AgeConversion.html">👫 年齡換算器</a></li>
+        <li><a href="Password.html">🔐 私人加密保險箱</a></li>
+        <li><a href="Lottery.html">🎁線上抽獎系統</a></li>
+		<li><a href="Bracup.html">👙 罩杯計算</a></li>
     </ul>
   </nav>
 
+  <div id="install-prompt">
+    <p id="prompt-text"></p>
+    <button onclick="closePrompt()">我知道了</button>
+  </div>
+
   <header>
     <h1>AI TOOL</h1>
-    <h3>歡迎使用 - 完全免費 - 無須註冊</h3>
-    <div class="visitor-counter">
-      <div class="counter-dot"></div>
-      <span class="counter-label">全球造訪人次：</span>
-      <span id="count" class="counter-number">連線中...</span>
-    </div>
+    <h3>歡迎使用-完全免費-無須註冊</h3>
+    <p>FREE AI ARTIFICIAL INTELLIGENCE TOOLS</p>
   </header>
-
+<!-- FC2計數器 開始 -->
+<script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=40693162&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=40693162&main=1" /></noscript>
+<!-- FC2計數器 結束 -->
   <main>
     <section>
       <h2>網站簡介</h2>
-      <p><strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台。結合現代化介面設計，使用者可直接在瀏覽器中完成各種實用處理，無需安裝任何軟體。</p>
+      <p>
+        <strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台，
+        結合現代化介面設計與 AI 輔助功能。
+        使用者可直接在瀏覽器中完成語音、文字與網頁相關處理，
+        無需安裝任何額外軟體。
+      </p>
     </section>
-    
+
     <section>
       <h2>核心功能</h2>
       <div class="features">
@@ -172,7 +380,7 @@
           <h3>🎁 線上抽獎系統</h3>
           <p>簡單又方便免註冊直接可用，使用Excel將名單轉存成.csv (UTF-8)檔案，後即可讀入抽獎系統。</p>
         </div>
-                <div class="feature-card">
+		<div class="feature-card">
           <h3>👙 罩杯尺寸計算器</h3>
           <p>專為 A-K 罩杯設計，精準計算。<br>
         不論妳是哪種身型，我們都致力於幫妳找到最完美的支撐與包覆。</p>
@@ -181,45 +389,55 @@
     </section>
   </main>
 
-  <footer>© 2026 AI TOOL · Designed & Built by Chson</footer>
-
-  <div id="fc2_raw_area">
-<script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=40693162&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=40693162&main=1" /></noscript>
-    </div>
+  <footer>
+    © 2026 AI TOOL · Designed & Built by Chson
+  </footer>
 
   <script>
-    // 1. 手機選單控制
+    // 1. 導覽列漢堡選單邏輯
     const menuToggle = document.getElementById('mobile-menu');
-    const menuClose = document.getElementById('menu-close');
-    const navMenu = document.getElementById('nav-list');
+    const navMenu = document.querySelector('.nav-menu');
 
-    menuToggle.addEventListener('click', () => navMenu.classList.add('active'));
-    menuClose.addEventListener('click', () => navMenu.classList.remove('active'));
-    navMenu.querySelectorAll('li a').forEach(link => {
-        link.addEventListener('click', () => navMenu.classList.remove('active'));
+    menuToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+      menuToggle.classList.toggle('open');
     });
 
-    // 2. FC2 數據同步邏輯
-    function updateFC2Counter() {
-      const rawArea = document.getElementById('fc2_raw_area');
-      const counterElement = document.getElementById('count');
-      
-      // 提取 FC2 生成的文字
-      let rawText = rawArea.innerText || rawArea.textContent;
-      // 過濾出數字
-      let countNumber = rawText.replace(/\D/g, "");
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        menuToggle.classList.remove('open');
+      });
+    });
 
-      if (countNumber && countNumber.length > 0) {
-        // 渲染到螢幕上並加上千分位逗號
-        counterElement.innerText = Number(countNumber).toLocaleString();
-      } else {
-        // 如果 FC2 還沒加載完，過 0.5 秒再試
-        setTimeout(updateFC2Counter, 500);
+    // 2. 第一次開啟提示邏輯
+    window.addEventListener('DOMContentLoaded', () => {
+      // 判斷是否已經顯示過
+      if (!localStorage.getItem('hasSeenInstallPrompt')) {
+        const promptDiv = document.getElementById('install-prompt');
+        const promptText = document.getElementById('prompt-text');
+       
+        // 偵測裝置類型
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          promptText.innerHTML = "💡 建議點選瀏覽器選單<br>將本站「加入主畫面」以便快速使用！";
+        } else {
+          promptText.innerHTML = "✨ 喜歡這個工具嗎？<br>按下 <b>Ctrl+D</b> 將本站加入收藏夾！";
+        }
+
+        // 延遲 1.5 秒顯示，增加轉場感
+        setTimeout(() => {
+          promptDiv.style.display = 'block';
+        }, 1500);
       }
-    }
+    });
 
-    // 頁面加載完成後啟動
-    window.addEventListener('load', updateFC2Counter);
+    function closePrompt() {
+      document.getElementById('install-prompt').style.display = 'none';
+      localStorage.setItem('hasSeenInstallPrompt', 'true');
+    }
   </script>
+
 </body>
 </html>
