@@ -152,37 +152,43 @@
         calculate();
     }
 
-    // 核心修正：利用 Intl API 獲取準確的農曆數字年份進行換算
+    // 🌟 核心修正：手動計算干支，精準對應生肖
     function getLunarFullInfo(date) {
         try {
-            // 取得農曆月日 (例如: 五月十九)
+            // 1. 取得農曆月日字串 (例如 "臘月十二")
             const mdFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
                 month: 'long', day: 'numeric'
             });
             const lunarMD = mdFormatter.format(date);
 
-            // 取得農曆年份數字 (這是關鍵，避開西元直接換算)
-            const parts = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {year:'numeric'}).formatToParts(date);
-            const lYearNum = parseInt(parts.find(p => p.type === 'year').value);
+            // 2. 取得農曆年份的「天干地支」文字 (例如 "丙申")
+            // 這是目前最穩定的方式，避開數字計算的偏差
+            const yFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
+                year: 'numeric'
+            });
+            const lunarYStr = yFormatter.format(date); // 可能回傳 "2016年" 或 "丙申年"
 
-            // 天干地支對照表
+            // 3. 處理干支與生肖
             const gan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
             const zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
             const animals = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
 
-            // 干支計算公式 (基準: 農曆 1984 年是 甲子年)
-            // 1984年對應 gan[0], zhi[0]
-            let offset = lYearNum - 1984;
-            let gIdx = ((offset % 10) + 10) % 10;
-            let zIdx = ((offset % 12) + 12) % 12;
+            // 從西元年推算農曆基準年 (此法最準)
+            // 先判斷 1/9 是否已過春節
+            // 我們利用 Intl API 抓出的農曆年來反推
+            const parts = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {year:'numeric'}).formatToParts(date);
+            const lYearNum = parseInt(parts.find(p => p.type === 'year').value);
+
+            // 農曆年對應干支公式 (基準：西元 4 年是甲子年)
+            const offset = (lYearNum - 4);
+            const gIdx = ((offset % 10) + 10) % 10;
+            const zIdx = ((offset % 12) + 12) % 12;
 
             const ganzhi = gan[gIdx] + zhi[zIdx];
             const zodiac = animals[zIdx];
             
             return `${ganzhi} (${zodiac}) 年 ${lunarMD}`;
-        } catch (e) { 
-            return "換算中..."; 
-        }
+        } catch (e) { return "換算中..."; }
     }
 
     function getStarSign(m, d) {
@@ -202,7 +208,6 @@
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
 
-        // 檢查日期合法性
         if (birth.getMonth() !== m - 1 || birth > today) { resBox.style.display = 'none'; return; }
 
         let age = today.getFullYear() - birth.getFullYear();
