@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ch AI TOOL</title>
   
-  <meta name="description" content="Ch AI TOOL 提供多種免費線上工具：AI 會議助理、文章閱讀器、HTML網頁語法測試、英文大小寫轉換、色票選擇器、文字處理器、PO文神器、全能秤重助手、年齡換算器、私人加密保險箱、線上抽獎系統。">
-  <meta name="keywords" content="AI 會議助理, 文章閱讀器, HTML測試, 色票選擇, 文字處理, PO文神器, 秤重助手, 年齡換算, 加密保險箱, 抽獎系統, 罩杯計算">
-  
   <style>
     :root {
       --bg-main: #0b0f1a;
@@ -75,11 +72,11 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* 側邊選單 */
+    /* 側邊選單 - 關鍵修正：加入 visibility 避免擋住點擊 */
     .nav-menu {
       position: fixed;
       top: 0;
-      right: -320px; /* 修正：直接設定寬度的負值 */
+      right: -320px; 
       width: 320px;
       max-width: 85%;
       height: 100vh;
@@ -90,28 +87,22 @@
       padding: 80px 1.5rem 2rem;
       margin: 0;
       list-style: none;
-      transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       border-left: 1px solid var(--border-glow);
       z-index: 2500;
       overflow-y: auto;
+      visibility: hidden; /* 隱藏時不可見且不占空間 */
+      pointer-events: none; /* 確保收起來時點不到 */
     }
 
     .nav-menu.active {
       right: 0;
+      visibility: visible;
+      pointer-events: auto;
     }
 
-    .nav-menu li {
-      width: 100%;
-      opacity: 0;
-      transform: translateX(20px);
-      transition: 0.3s;
-    }
-
-    .nav-menu.active li {
-      opacity: 1;
-      transform: translateX(0);
-      transition-delay: calc(0.05s * var(--i));
-    }
+    .nav-menu li { width: 100%; opacity: 0; transform: translateX(20px); transition: 0.3s; }
+    .nav-menu.active li { opacity: 1; transform: translateX(0); transition-delay: calc(0.05s * var(--i)); }
 
     .nav-menu a {
       color: var(--text-main);
@@ -122,19 +113,14 @@
       border-bottom: 1px solid rgba(255,255,255,0.05);
       transition: 0.3s;
     }
-
-    .nav-menu a:hover {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--accent-light);
-      padding-left: 20px;
-    }
+    .nav-menu a:hover { background: rgba(99, 102, 241, 0.1); color: var(--accent-light); padding-left: 20px; }
 
     /* 漢堡動畫 */
     .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
     .menu-toggle.open span:nth-child(2) { opacity: 0; }
     .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
-    /* 背景遮罩 - 重要修正：預設不阻擋滑鼠 */
+    /* 背景遮罩 */
     .menu-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -146,59 +132,32 @@
       pointer-events: none;
       transition: 0.3s;
     }
-    .menu-overlay.active {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
+    .menu-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
-    /* --- 其他內容 --- */
-    header {
-      text-align: center;
-      padding: 4rem 1.5rem 2rem;
-      background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent);
-    }
+    /* --- 內容樣式 --- */
+    header { text-align: center; padding: 4rem 1.5rem 2rem; background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent); }
     header h1 { font-size: clamp(2rem, 8vw, 2.6rem); letter-spacing: 0.15em; color: #fff; text-shadow: 0 0 18px rgba(99,102,241,0.8); margin: 0; }
     header h3 { font-weight: 500; color: var(--text-main); margin-top: 10px; }
     header p { color: var(--text-muted); font-size: 1rem; }
 
     .counter-wrapper { display: flex; justify-content: center; margin-bottom: 2rem; }
-    .counter-pill {
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid var(--border-glow);
-      padding: 8px 20px;
-      border-radius: 50px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      backdrop-filter: blur(10px);
-    }
+    .counter-pill { background: rgba(99, 102, 241, 0.1); border: 1px solid var(--border-glow); padding: 8px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
     .status-dot { width: 9px; height: 9px; background-color: var(--live-green); border-radius: 50%; animation: blink 1.6s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    main { max-width: 1100px; margin: auto; padding: 0 1.5rem 3rem; }
+    main { max-width: 1100px; margin: auto; padding: 0 1.5rem 3rem; position: relative; z-index: 1; }
     section { margin-bottom: 2.5rem; padding: 2rem; border-radius: 16px; background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-glow); }
     section h2 { margin-top: 0; margin-bottom: 1.5rem; font-size: 1.4rem; color: #fff; border-left: 4px solid var(--accent-light); padding-left: 0.8rem; }
 
     .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    .feature-card {
-      padding: 1.6rem;
-      border-radius: 14px;
-      background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05));
-      border: 1px solid rgba(99,102,241,0.2);
-      transition: 0.3s;
-    }
+    .feature-card { padding: 1.6rem; border-radius: 14px; background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05)); border: 1px solid rgba(99,102,241,0.2); transition: 0.3s; cursor: pointer; }
     .feature-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     .feature-card h3 { margin: 0 0 0.8rem; color: #fff; font-size: 1.2rem; }
     .feature-card p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
 
     footer { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05); }
 
-    #install-prompt {
-      display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: linear-gradient(135deg, var(--accent), var(--accent-light));
-      color: white; padding: 16px 24px; border-radius: 16px; z-index: 9999; width: 90%; max-width: 400px; text-align: center;
-    }
+    #install-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; padding: 16px 24px; border-radius: 16px; z-index: 9999; width: 90%; max-width: 400px; text-align: center; }
     #install-prompt button { background: white; color: var(--accent); border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
   </style>
 </head>
@@ -207,13 +166,9 @@
 
   <nav class="navbar">
     <a href="#" class="nav-logo">AI TOOL</a>
-    
     <div class="menu-toggle" id="mobile-menu">
-      <span></span>
-      <span></span>
-      <span></span>
+      <span></span><span></span><span></span>
     </div>
-
     <ul class="nav-menu" id="nav-menu">
         <li style="--i:1"><a href="Dictation.html">🎙 AI 會議助理-聽寫</a></li>
         <li style="--i:2"><a href="Reader.html">🔊 文章閱讀器-文字轉語音</a></li>
@@ -250,64 +205,25 @@
   <main>
     <section>
       <h2>網站簡介</h2>
-      <p>
-        <strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台，
-        結合現代化介面設計與 AI 輔助功能。
-      </p>
+      <p><strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台。</p>
     </section>
 
     <section>
       <h2>核心功能</h2>
       <div class="features">
-        <div class="feature-card">
-          <h3>🎙 AI 會議助理</h3>
-          <p>即時語音轉文字，快速生成會議與訪談紀錄。</p>
-        </div>
-        <div class="feature-card">
-          <h3>🔊 文章閱讀器</h3>
-          <p>將文字轉換為自然語音，適合學習與多工使用。</p>
-        </div>
-        <div class="feature-card">
-          <h3>💻 HTML 語法測試</h3>
-          <p>即時預覽 HTML 結果，快速驗證網頁結構。</p>
-        </div>
-        <div class="feature-card">
-          <h3>🔠 英文大小寫轉換</h3>
-          <p>一鍵轉換文字格式，提升內容編輯效率。</p>
-        </div>
-        <div class="feature-card">
-          <h3>🧪 色票選擇器</h3>
-          <p>全色系 AI 選色助手：支援手機，秒速複製。</p>
-        </div>
-        <div class="feature-card">
-          <h3>📝 高效文字處理器</h3>
-          <p>輸入或貼上文字，立即進行轉換與優化。</p>
-        </div>
-        <div class="feature-card">
-          <h3>✍️ PO文神器</h3>
-          <p>現在就開始你的創作，讓每一篇 PO 文都成為眾人矚目的焦點吧！</p>
-        </div>
-        <div class="feature-card">
-          <h3>🥦 全能秤重助手</h3>
-          <p>菜市場、超市買菜必備！能幫您快速計算，不怕算錯錢，買菜更安心。</p>
-        </div>
-        <div class="feature-card">
-          <h3>👫 年齡換算器</h3>
-          <p>本工具強化了台灣特有的年份轉換邏輯，快速計算你的年齡。</p>
-        </div>
-        <div class="feature-card">
-          <h3>🔐 私人加密保險箱</h3>
-          <p>此加密工具可自行儲存到雲端，文件檔案為亂碼的方式，既保留了雲端的便利性，又兼顧了極高的安全性。</p>
-        </div>
-        <div class="feature-card">
-          <h3>🎁 線上抽獎系統</h3>
-          <p>簡單又方便免註冊直接可用，使用Excel將名單轉存成.csv (UTF-8)檔案，後即可讀入抽獎系統。</p>
-        </div>
-                <div class="feature-card">
-          <h3>👙 罩杯尺寸計算器</h3>
-          <p>專為 A-K 罩杯設計，精準計算。<br>
-        不論妳是哪種身型，我們都致力於幫妳找到最完美的支撐與包覆。</p>
-        </div>
+        <div class="feature-card" onclick="location.href='Dictation.html'"><h3>🎙 AI 會議助理</h3><p>即時語音轉文字。</p></div>
+        <div class="feature-card" onclick="location.href='Reader.html'"><h3>🔊 文章閱讀器</h3><p>文字轉換為自然語音。</p></div>
+        <div class="feature-card" onclick="location.href='Grammartest.html'"><h3>💻 HTML 語法測試</h3><p>即時預覽 HTML 結果。</p></div>
+        <div class="feature-card" onclick="location.href='Englishconversion.html'"><h3>🔠 英文大小寫轉換</h3><p>一鍵轉換文字格式。</p></div>
+        <div class="feature-card" onclick="location.href='ColorTicket.html'"><h3>🧪 色票選擇器</h3><p>AI 選色助手。</p></div>
+        <div class="feature-card" onclick="location.href='portfolio.html'"><h3>📝 文字處理器</h3><p>轉換與優化文字。</p></div>
+        <div class="feature-card" onclick="location.href='CommunityPO.html'"><h3>✍️ PO文神器</h3><p>創作矚目焦點內容。</p></div>
+        <div class="feature-card" onclick="location.href='Weightconversion.html'"><h3>🥦 全能秤重助手</h3><p>市場買菜計算神器。</p></div>
+        <div class="feature-card" onclick="location.href='AgeConversion.html'"><h3>👫 年齡換算器</h3><p>快速計算虛歲實歲。</p></div>
+        <div class="feature-card" onclick="location.href='Password.html'"><h3>🔐 私人加密保險箱</h3><p>極高安全性的加密工具。</p></div>
+        <div class="feature-card" onclick="location.href='Lottery.html'"><h3>🎁 線上抽獎系統</h3><p>支援匯入 CSV 名單。</p></div>
+        <div class="feature-card" onclick="location.href='Bracup.html'"><h3>👙 罩杯尺寸計算器</h3><p>專為女性設計的精準計算。</p></div>
+      </div>
     </section>
   </main>
 
@@ -316,9 +232,7 @@
     <button onclick="closePrompt()">我知道了</button>
   </div>
 
-  <footer>
-    © 2026 AI TOOL · Designed & Built by Chson
-  </footer>
+  <footer>© 2026 AI TOOL · Designed & Built by Chson</footer>
 
   <script>
     const menuToggle = document.getElementById('mobile-menu');
@@ -326,26 +240,17 @@
     const overlay = document.getElementById('menu-overlay');
 
     function toggleMenu() {
-      navMenu.classList.toggle('active');
+      const isActive = navMenu.classList.toggle('active');
       menuToggle.classList.toggle('open');
       overlay.classList.toggle('active');
-      
-      // 只有選單打開時才鎖定捲軸
-      document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : 'auto';
+      document.body.style.overflow = isActive ? 'hidden' : 'auto';
     }
 
     menuToggle.addEventListener('click', toggleMenu);
     overlay.addEventListener('click', toggleMenu);
 
-    // 點擊連結後先跳轉再自動關閉（修正：不阻止連結預設行為）
     document.querySelectorAll('.nav-menu a').forEach(link => {
-      link.addEventListener('click', () => {
-        // 先移除選單狀態，讓頁面恢復正常
-        navMenu.classList.remove('active');
-        menuToggle.classList.remove('open');
-        overlay.classList.remove('active');
-        document.body.style.overflow = 'auto';
-      });
+      link.addEventListener('click', toggleMenu);
     });
 
     window.addEventListener('DOMContentLoaded', () => {
