@@ -18,7 +18,7 @@
   }
   </script>
 	
-<link rel="icon" href="icon.png" type="image/png">
+  <link rel="icon" href="icon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -32,6 +32,7 @@
       --accent: #6366f1;
       --accent-light: #8b5cf6;
       --nav-bg: rgba(11, 15, 26, 0.8);
+      --live-green: #10b981;
     }
 
     * {
@@ -207,6 +208,11 @@
       text-shadow: 0 0 18px rgba(99,102,241,0.8);
     }
 
+    header h3 {
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
     header p {
       color: var(--text-muted);
       font-size: 1.1rem;
@@ -222,11 +228,11 @@
     .counter-pill {
       background: rgba(99, 102, 241, 0.1);
       border: 1px solid var(--border-glow);
-      padding: 6px 18px;
+      padding: 8px 20px;
       border-radius: 50px;
       display: flex;
-      align-items: center;
-      gap: 12px;
+      align-items: center; /* 關鍵：確保內容垂直居中對齊 */
+      gap: 10px; /* 控制元素之間的間距 */
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       transition: 0.3s;
@@ -238,18 +244,38 @@
       background: rgba(99, 102, 241, 0.2);
     }
 
+    /* 綠色閃爍點動畫 */
+    @keyframes blink {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      background-color: var(--live-green);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px var(--live-green);
+      animation: blink 1.6s infinite ease-in-out;
+    }
+
     .counter-pill span {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--accent-light);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
+      display: flex;
+      align-items: center;
     }
 
-    /* 修正 FC2 圖片對齊 */
+    /* 修正 FC2 圖片對齊與縮放 */
     .counter-pill img {
-      vertical-align: middle;
+      display: block;
       filter: brightness(1.2) drop-shadow(0 0 2px rgba(255,255,255,0.3));
+      vertical-align: middle;
     }
 
     main {
@@ -357,6 +383,7 @@
 
   <div class="counter-wrapper">
     <div class="counter-pill">
+        <span class="status-dot"></span>
         <span>全球訪問人數:</span>
         <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=40693162&main=1"></script>
         <noscript><img src="//counter1.fc2.com/counter_img.php?id=40693162&main=1" alt="visitor counter" /></noscript>
