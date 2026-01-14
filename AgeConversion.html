@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極簡深色年齡換算器 - 終極修正版</title>
+    <title>年齡換算器</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -152,36 +152,49 @@
         calculate();
     }
 
-    // 核心修正：利用 Intl API 獲取準確的農曆數字年份進行換算
+    // 🌟 穩定版核心：直接從瀏覽器語彙提取農曆資訊
     function getLunarFullInfo(date) {
         try {
-            // 取得農曆月日 (例如: 五月十九)
+            // 1. 取得農曆月日文字 (例如 "臘月十二" 或 "十二月十二")
             const mdFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
                 month: 'long', day: 'numeric'
             });
             const lunarMD = mdFormatter.format(date);
 
-            // 取得農曆年份數字 (這是關鍵，避開西元直接換算)
-            const parts = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {year:'numeric'}).formatToParts(date);
-            const lYearNum = parseInt(parts.find(p => p.type === 'year').value);
+            // 2. 取得農曆年份的天干地支
+            // 這種方式會直接根據日期回傳正確的干支年 (跨年會自動處理)
+            const yearFormatter = new Intl.DateTimeFormat('zh-Hant-TW-u-ca-chinese', {
+                year: 'numeric'
+            });
+            const lunarYearStr = yearFormatter.format(date); 
+            
+            // 3. 提取干支字元 (例如從 "丙申年" 提取出 "丙申")
+            // 某些瀏覽器會回傳 "2016年"，我們需要做備援處理
+            let ganzhi = "";
+            const gzMatch = lunarYearStr.match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/);
+            
+            if (gzMatch) {
+                ganzhi = gzMatch[0];
+            } else {
+                // 如果瀏覽器只給數字年份，則手動計算
+                const lYearNum = parseInt(lunarYearStr.replace(/[^0-9]/g, ''));
+                const gan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+                const zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+                const offset = lYearNum - 4;
+                ganzhi = gan[((offset % 10) + 10) % 10] + zhi[((offset % 12) + 12) % 12];
+            }
 
-            // 天干地支對照表
-            const gan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
-            const zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
-            const animals = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
-
-            // 干支計算公式 (基準: 農曆 1984 年是 甲子年)
-            // 1984年對應 gan[0], zhi[0]
-            let offset = lYearNum - 1984;
-            let gIdx = ((offset % 10) + 10) % 10;
-            let zIdx = ((offset % 12) + 12) % 12;
-
-            const ganzhi = gan[gIdx] + zhi[zIdx];
-            const zodiac = animals[zIdx];
+            // 4. 對應生肖 (根據地支最後一個字)
+            const zhiChar = ganzhi.charAt(1);
+            const zhiToZodiac = {
+                '子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龍','巳':'蛇',
+                '午':'馬','未':'羊','申':'猴','酉':'雞','戌':'狗','亥':'豬'
+            };
+            const zodiac = zhiToZodiac[zhiChar] || "查無";
             
             return `${ganzhi} (${zodiac}) 年 ${lunarMD}`;
         } catch (e) { 
-            return "換算中..."; 
+            return "計算中..."; 
         }
     }
 
@@ -202,7 +215,6 @@
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
 
-        // 檢查日期合法性
         if (birth.getMonth() !== m - 1 || birth > today) { resBox.style.display = 'none'; return; }
 
         let age = today.getFullYear() - birth.getFullYear();
