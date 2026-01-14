@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極簡深色年齡換算器</title>
+    <title>極簡年齡農曆換算器</title>
     <style>
         :root {
             --bg: #111827;
@@ -34,7 +34,7 @@
             max-width: 380px;
         }
 
-        h2 { text-align: center; margin-top: 0; color: var(--accent); font-size: 1.4rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        h2 { text-align: center; margin-top: 0; color: var(--accent); font-size: 1.4rem; }
 
         .type-selector {
             display: flex;
@@ -121,7 +121,6 @@
     const monthSelect = document.getElementById('month');
     const daySelect = document.getElementById('day');
 
-    // 初始化下拉選單
     for(let i=1; i<=12; i++) monthSelect.add(new Option(i + " 月", i));
     for(let i=1; i<=31; i++) daySelect.add(new Option(i + " 日", i));
 
@@ -135,35 +134,38 @@
         calculate();
     }
 
-    function getLunarData(date) {
-        // 取得農曆各項原始數值
-        const formatter = new Intl.DateTimeFormat('zh-Hant-TW-u-ca-chinese', {
-            year: 'numeric', month: 'numeric', day: 'numeric'
-        });
-        const parts = formatter.formatToParts(date);
-        const lYear = parseInt(parts.find(p => p.type === 'year').value);
-        const lMonth = parseInt(parts.find(p => p.type === 'month').value);
-        const lDay = parseInt(parts.find(p => p.type === 'day').value);
-        const isLeap = parts.some(p => p.type === 'leapMonth');
+    // 🌟 核心修復：手動將農曆數字「翻譯」成中文
+    function getLunarFullInfo(date) {
+        try {
+            const fmt = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {year:'numeric', month:'numeric', day:'numeric'});
+            const parts = fmt.formatToParts(date);
+            
+            // 抓取原始數字，不依賴瀏覽器文字
+            const lY = parseInt(parts.find(p => p.type === 'year').value);
+            const lM = parseInt(parts.find(p => p.type === 'month').value);
+            const lD = parseInt(parts.find(p => p.type === 'day').value);
+            const isLeap = parts.some(p => p.type === 'leapMonth');
 
-        // 1. 計算干支
-        const gan = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
-        const zhi = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-        const animals = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬"];
-        const offset = lYear - 4;
-        const ganzhi = gan[((offset % 10) + 10) % 10] + zhi[((offset % 12) + 12) % 12];
-        const zodiac = animals[((offset % 12) + 12) % 12];
+            // 1. 干支生肖
+            const gan = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+            const zhi = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+            const ani = ["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬"];
+            const offset = lY - 4;
+            const ganzhi = gan[((offset % 10) + 10) % 10] + zhi[((offset % 12) + 12) % 12];
+            const zodiac = ani[((offset % 12) + 12) % 12];
 
-        // 2. 強制轉換農曆月份與日期為中文 (解決 M10 等問題)
-        const monthNames = ["正月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","臘月"];
-        let monthStr = (isLeap ? "閏" : "") + monthNames[lMonth - 1];
-        
-        const dayNames = ["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十",
-                          "十一","十二","十三","十四","十五","十六","十七","十八","十九","二十",
-                          "廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
-        let dayStr = dayNames[lDay - 1];
+            // 2. 手動翻譯月份 (解決 M10 等問題)
+            const mNames = ["正月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","臘月"];
+            let mStr = (isLeap ? "閏" : "") + mNames[lM - 1];
 
-        return `${ganzhi} (${zodiac}) 年 ${monthStr}${dayStr}`;
+            // 3. 手動翻譯日期
+            const dNames = ["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十",
+                            "十一","十二","十三","十四","十五","十六","十七","十八","十九","二十",
+                            "廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
+            let dStr = dNames[lD - 1];
+
+            return `${ganzhi} (${zodiac}) 年 ${mStr}${dStr}`;
+        } catch (e) { return "換算中..."; }
     }
 
     function calculate() {
@@ -179,24 +181,19 @@
 
         document.getElementById('resultBox').style.display = 'block';
 
-        // 實歲與天數
         let age = today.getFullYear() - birth.getFullYear();
         if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
+        
         document.getElementById('resAge').innerText = age + " 歲";
         document.getElementById('resDays').innerText = Math.floor((today - birth) / 86400000).toLocaleString() + " 天";
-
-        // 星座
+        
         const signs = ["摩羯","水瓶","雙魚","牡羊","金牛","雙子","巨蟹","獅子","處女","天秤","天蠍","射手","摩羯"];
         const bounds = [20, 19, 20, 20, 21, 21, 23, 23, 23, 23, 22, 22];
         document.getElementById('resStar').innerText = signs[m - 1 + (d > bounds[m - 1] ? 1 : 0)] + "座";
         
-        // 換算年份
         document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear - 1911} 年` : `西元 ${adYear} 年`;
-
-        // 農曆 (呼叫新修正函式)
-        document.getElementById('resLunar').innerText = getLunarData(birth);
+        document.getElementById('resLunar').innerText = getLunarFullInfo(birth);
     }
 </script>
-
 </body>
 </html>
