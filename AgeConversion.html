@@ -140,6 +140,7 @@
     const dayEl = document.getElementById('day');
     const resBox = document.getElementById('resultBox');
 
+    // 初始化下拉選單
     for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
     for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
 
@@ -153,36 +154,39 @@
         calculate();
     }
 
-    // 計算干支 (甲辰、乙巳等)
-    function getGanZhi(year) {
-        const gan = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
-        const zhi = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
-        return gan[year % 10] + zhi[year % 12];
-    }
-
-    // 取得生肖 (根據地支)
-    function getZodiacByZhi(year) {
-        const animals = ["猴", "雞", "狗", "豬", "鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊"];
-        return animals[year % 12];
-    }
-
-    // 獲取完整農曆資訊
+    // 修正核心：獲取完整農曆資訊（精準判斷跨年生肖）
     function getLunarInfo(date) {
         try {
-            const adYear = date.getFullYear();
-            // 歲次計算：傳統以立春為界，此處配合日期轉換以該農曆年號為準
-            const ganzhi = getGanZhi(adYear); 
-            const zodiac = getZodiacByZhi(adYear);
-
+            // 使用內建的中國農曆日曆 API
             const lunarFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
-                month: 'long', day: 'numeric'
+                year: 'numeric', month: 'long', day: 'numeric'
             });
             
-            // 取得農曆月日 (例如：六月初三)
-            const lunarMD = lunarFormatter.format(date);
+            const parts = lunarFormatter.formatToParts(date);
+            let lYearNum = 0;
+            let lMonth = "";
+            let lDay = "";
+
+            parts.forEach(p => {
+                // 這裡拿到的 year 是農曆年份數字（例如西元2017/1/9會拿到2016）
+                if(p.type === 'year') lYearNum = parseInt(p.value);
+                if(p.type === 'month') lMonth = p.value;
+                if(p.type === 'day') lDay = p.value;
+            });
+
+            // 定義干支與生肖
+            const gan = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
+            const zhi = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
+            const animals = ["猴", "雞", "狗", "豬", "鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊"];
             
-            return `${ganzhi} (${zodiac}) 年 ${lunarMD}`;
-        } catch (e) { return "不支援此日期"; }
+            // 計算干支與生肖 (以此農曆年數字計算)
+            const ganzhi = gan[lYearNum % 10] + zhi[lYearNum % 12];
+            const zodiac = animals[lYearNum % 12];
+            
+            return `${ganzhi} (${zodiac}) 年 ${lMonth}${lDay}`;
+        } catch (e) { 
+            return "不支援此日期"; 
+        }
     }
 
     function getStarSign(m, d) {
@@ -202,7 +206,7 @@
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
 
-        // 檢查日期合法性 (防呆)
+        // 檢查日期合法性
         if (birth.getMonth() !== m - 1 || birth > today) { resBox.style.display = 'none'; return; }
 
         let age = today.getFullYear() - birth.getFullYear();
