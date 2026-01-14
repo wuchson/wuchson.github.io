@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>年齡換算器</title>
+    <title>極簡深色年齡換算器 - 終極修正版</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -139,7 +139,6 @@
     const dayEl = document.getElementById('day');
     const resBox = document.getElementById('resultBox');
 
-    // 初始化月份與日期
     for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
     for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
 
@@ -153,32 +152,37 @@
         calculate();
     }
 
-    // 重寫核心換算邏輯：根據農曆日期判斷干支
+    // 核心修正：利用 Intl API 獲取準確的農曆數字年份進行換算
     function getLunarFullInfo(date) {
         try {
-            // 使用 zh-TW-u-ca-chinese 強制抓取農曆年月日
-            const formatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
-                year: 'numeric', month: 'long', day: 'numeric'
+            // 取得農曆月日 (例如: 五月十九)
+            const mdFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
+                month: 'long', day: 'numeric'
             });
-            const parts = formatter.formatToParts(date);
-            
-            let lYearNum = 0, lMonth = "", lDay = "";
-            parts.forEach(p => {
-                if(p.type === 'year') lYearNum = parseInt(p.value);
-                if(p.type === 'month') lMonth = p.value;
-                if(p.type === 'day') lDay = p.value;
-            });
+            const lunarMD = mdFormatter.format(date);
 
-            // 以農曆年份數字進行干支對照
-            const gan = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
-            const zhi = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
-            const animals = ["猴", "雞", "狗", "豬", "鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊"];
+            // 取得農曆年份數字 (這是關鍵，避開西元直接換算)
+            const parts = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {year:'numeric'}).formatToParts(date);
+            const lYearNum = parseInt(parts.find(p => p.type === 'year').value);
+
+            // 天干地支對照表
+            const gan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+            const zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+            const animals = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
+
+            // 干支計算公式 (基準: 農曆 1984 年是 甲子年)
+            // 1984年對應 gan[0], zhi[0]
+            let offset = lYearNum - 1984;
+            let gIdx = ((offset % 10) + 10) % 10;
+            let zIdx = ((offset % 12) + 12) % 12;
+
+            const ganzhi = gan[gIdx] + zhi[zIdx];
+            const zodiac = animals[zIdx];
             
-            const ganzhi = gan[lYearNum % 10] + zhi[lYearNum % 12];
-            const zodiac = animals[lYearNum % 12];
-            
-            return `${ganzhi} (${zodiac}) 年 ${lMonth}${lDay}`;
-        } catch (e) { return "日期超出換算範圍"; }
+            return `${ganzhi} (${zodiac}) 年 ${lunarMD}`;
+        } catch (e) { 
+            return "換算中..."; 
+        }
     }
 
     function getStarSign(m, d) {
@@ -201,7 +205,6 @@
         // 檢查日期合法性
         if (birth.getMonth() !== m - 1 || birth > today) { resBox.style.display = 'none'; return; }
 
-        // 計算實歲
         let age = today.getFullYear() - birth.getFullYear();
         if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
 
@@ -210,8 +213,6 @@
         document.getElementById('resDays').innerText = Math.floor((today - birth) / 86400000).toLocaleString() + " 天";
         document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear-1911} 年` : `西元 ${adYear} 年`;
         document.getElementById('resStar').innerText = getStarSign(m, d);
-        
-        // 呼叫修正後的農曆函式
         document.getElementById('resLunar').innerText = getLunarFullInfo(birth);
     }
 </script>
