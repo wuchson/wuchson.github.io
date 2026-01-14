@@ -67,7 +67,7 @@
             color: white;
             padding: 10px;
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 16px;
             outline: none;
             box-sizing: border-box;
         }
@@ -102,7 +102,6 @@
         .res-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px; }
         .res-value { color: var(--accent); font-weight: bold; font-size: 1rem; }
         
-        /* 讓農曆佔據整列 */
         .full-width { grid-column: span 2; }
     </style>
 </head>
@@ -127,8 +126,8 @@
         <div class="result-grid">
             <div class="result-item"><div class="res-label">目前實歲</div><div class="res-value" id="resAge">0 歲</div></div>
             <div class="result-item"><div class="res-label">生存天數</div><div class="res-value" id="resDays">0 天</div></div>
-            <div class="result-item"><div class="res-label">對應年份</div><div class="res-value" id="resConvert">-</div></div>
-            <div class="result-item"><div class="res-label">生肖星座</div><div class="res-value" id="resZodiacStar">-</div></div>
+            <div class="result-item"><div class="res-label">星座</div><div class="res-value" id="resStar">-</div></div>
+            <div class="result-item"><div class="res-label">換算年份</div><div class="res-value" id="resConvert">-</div></div>
             <div class="result-item full-width"><div class="res-label">出生農曆 (歲次/日期)</div><div class="res-value" id="resLunar">-</div></div>
         </div>
     </div>
@@ -141,7 +140,6 @@
     const dayEl = document.getElementById('day');
     const resBox = document.getElementById('resultBox');
 
-    // 初始化下拉選單
     for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
     for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
 
@@ -155,25 +153,36 @@
         calculate();
     }
 
-    // 簡易農曆轉換邏輯 (Intl.DateTimeFormat 支援)
-    function getLunarInfo(date) {
-        try {
-            const lunarFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
-            const parts = lunarFormatter.formatToParts(date);
-            let year = "", month = "", day = "";
-            parts.forEach(p => {
-                if(p.type === 'year') year = p.value;
-                if(p.type === 'month') month = p.value;
-                if(p.type === 'day') day = p.value;
-            });
-            return `${year} ${month}${day}`;
-        } catch (e) { return "不支援"; }
+    // 計算干支 (甲辰、乙巳等)
+    function getGanZhi(year) {
+        const gan = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
+        const zhi = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
+        return gan[year % 10] + zhi[year % 12];
     }
 
-    function getZodiac(year) {
-        return ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"][(year - 4) % 12];
+    // 取得生肖 (根據地支)
+    function getZodiacByZhi(year) {
+        const animals = ["猴", "雞", "狗", "豬", "鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊"];
+        return animals[year % 12];
+    }
+
+    // 獲取完整農曆資訊
+    function getLunarInfo(date) {
+        try {
+            const adYear = date.getFullYear();
+            // 歲次計算：傳統以立春為界，此處配合日期轉換以該農曆年號為準
+            const ganzhi = getGanZhi(adYear); 
+            const zodiac = getZodiacByZhi(adYear);
+
+            const lunarFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
+                month: 'long', day: 'numeric'
+            });
+            
+            // 取得農曆月日 (例如：六月初三)
+            const lunarMD = lunarFormatter.format(date);
+            
+            return `${ganzhi} (${zodiac}) 年 ${lunarMD}`;
+        } catch (e) { return "不支援此日期"; }
     }
 
     function getStarSign(m, d) {
@@ -193,9 +202,9 @@
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
 
+        // 檢查日期合法性 (防呆)
         if (birth.getMonth() !== m - 1 || birth > today) { resBox.style.display = 'none'; return; }
 
-        // 計算實歲
         let age = today.getFullYear() - birth.getFullYear();
         if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
 
@@ -203,9 +212,7 @@
         document.getElementById('resAge').innerText = age + " 歲";
         document.getElementById('resDays').innerText = Math.floor((today - birth) / 86400000).toLocaleString() + " 天";
         document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear-1911} 年` : `西元 ${adYear} 年`;
-        document.getElementById('resZodiacStar').innerText = `${getZodiac(adYear)} / ${getStarSign(m, d)}`;
-        
-        // 顯示農曆
+        document.getElementById('resStar').innerText = getStarSign(m, d);
         document.getElementById('resLunar').innerText = getLunarInfo(birth);
     }
 </script>
