@@ -59,7 +59,7 @@
       flex-direction: column;
       cursor: pointer;
       gap: 6px;
-      z-index: 3000;
+      z-index: 3000; /* 確保在最上層 */
       padding: 10px;
     }
 
@@ -72,7 +72,7 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* 側邊選單 - 關鍵修正：加入 visibility 避免擋住點擊 */
+    /* 側邊選單樣式修正 */
     .nav-menu {
       position: fixed;
       top: 0;
@@ -84,15 +84,16 @@
       backdrop-filter: blur(25px);
       display: flex;
       flex-direction: column;
-      padding: 80px 1.5rem 2rem;
+      /* 重要：padding-top 設為 80px，讓內容從三條線下方開始顯示 */
+      padding: 80px 1.5rem 2rem; 
       margin: 0;
       list-style: none;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       border-left: 1px solid var(--border-glow);
       z-index: 2500;
       overflow-y: auto;
-      visibility: hidden; /* 隱藏時不可見且不占空間 */
-      pointer-events: none; /* 確保收起來時點不到 */
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .nav-menu.active {
@@ -107,13 +108,18 @@
     .nav-menu a {
       color: var(--text-main);
       text-decoration: none;
-      font-size: 1rem;
+      font-size: 1.05rem;
       display: block;
-      padding: 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 15px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       transition: 0.3s;
     }
-    .nav-menu a:hover { background: rgba(99, 102, 241, 0.1); color: var(--accent-light); padding-left: 20px; }
+    .nav-menu a:hover { 
+      background: rgba(99, 102, 241, 0.15); 
+      color: #fff; 
+      padding-left: 20px; 
+      border-left: 3px solid var(--accent-light);
+    }
 
     /* 漢堡動畫 */
     .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
@@ -134,12 +140,10 @@
     }
     .menu-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
-    /* --- 內容樣式 --- */
+    /* --- 內容與功能卡片 --- */
     header { text-align: center; padding: 4rem 1.5rem 2rem; background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent); }
     header h1 { font-size: clamp(2rem, 8vw, 2.6rem); letter-spacing: 0.15em; color: #fff; text-shadow: 0 0 18px rgba(99,102,241,0.8); margin: 0; }
-    header h3 { font-weight: 500; color: var(--text-main); margin-top: 10px; }
-    header p { color: var(--text-muted); font-size: 1rem; }
-
+    
     .counter-wrapper { display: flex; justify-content: center; margin-bottom: 2rem; }
     .counter-pill { background: rgba(99, 102, 241, 0.1); border: 1px solid var(--border-glow); padding: 8px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
     .status-dot { width: 9px; height: 9px; background-color: var(--live-green); border-radius: 50%; animation: blink 1.6s infinite; }
@@ -147,15 +151,13 @@
 
     main { max-width: 1100px; margin: auto; padding: 0 1.5rem 3rem; position: relative; z-index: 1; }
     section { margin-bottom: 2.5rem; padding: 2rem; border-radius: 16px; background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-glow); }
-    section h2 { margin-top: 0; margin-bottom: 1.5rem; font-size: 1.4rem; color: #fff; border-left: 4px solid var(--accent-light); padding-left: 0.8rem; }
-
+    
     .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
     .feature-card { padding: 1.6rem; border-radius: 14px; background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05)); border: 1px solid rgba(99,102,241,0.2); transition: 0.3s; cursor: pointer; }
     .feature-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-    .feature-card h3 { margin: 0 0 0.8rem; color: #fff; font-size: 1.2rem; }
-    .feature-card p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+    .feature-card h3 { margin: 0 0 0.8rem; color: #fff; }
 
-    footer { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem; }
 
     #install-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; padding: 16px 24px; border-radius: 16px; z-index: 9999; width: 90%; max-width: 400px; text-align: center; }
     #install-prompt button { background: white; color: var(--accent); border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -169,6 +171,7 @@
     <div class="menu-toggle" id="mobile-menu">
       <span></span><span></span><span></span>
     </div>
+    
     <ul class="nav-menu" id="nav-menu">
         <li style="--i:1"><a href="Dictation.html">🎙 AI 會議助理-聽寫</a></li>
         <li style="--i:2"><a href="Reader.html">🔊 文章閱讀器-文字轉語音</a></li>
@@ -205,7 +208,7 @@
   <main>
     <section>
       <h2>網站簡介</h2>
-      <p><strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台。</p>
+      <p><strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台，結合現代化介面設計與 AI 輔助功能。</p>
     </section>
 
     <section>
