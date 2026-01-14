@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極簡深色年齡換算器</title>
+    <title>年齡換算器</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -36,7 +36,6 @@
 
         h2 { text-align: center; margin-top: 0; color: var(--accent); letter-spacing: 2px; }
 
-        /* 切換按鈕 */
         .type-selector {
             display: flex;
             background: var(--input);
@@ -62,7 +61,6 @@
             color: white;
         }
 
-        /* 輸入區域修正 */
         .input-label { font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; display: block; }
         .input-group { 
             display: flex; 
@@ -70,16 +68,15 @@
             margin-bottom: 25px; 
         }
 
-        /* 確保 input 和 select 是可以被點擊且寬度正確的 */
         input[type="number"], select {
             background-color: var(--input);
             border: 2px solid var(--border);
             color: white;
             padding: 12px;
             border-radius: 10px;
-            font-size: 16px; /* 避免 iOS 自動放大 */
+            font-size: 16px;
             outline: none;
-            box-sizing: border-box; /* 重要：確保 padding 不會撐破寬度 */
+            box-sizing: border-box;
         }
 
         input[type="number"] { flex: 2; min-width: 0; }
@@ -87,7 +84,6 @@
 
         input:focus, select:focus { border-color: var(--accent); }
 
-        /* 結果顯示 */
         .result-box {
             background: rgba(56, 189, 248, 0.1);
             border: 1px solid var(--accent);
@@ -102,6 +98,7 @@
             margin-bottom: 10px;
         }
 
+        .result-item:last-child { margin-bottom: 0; }
         .result-item span { color: var(--accent); font-weight: bold; }
     </style>
 </head>
@@ -125,6 +122,8 @@
     <div id="resultBox" class="result-box">
         <div class="result-item">目前實歲：<span id="resAge">0</span></div>
         <div class="result-item">對應年份：<span id="resConvert">-</span></div>
+        <div class="result-item">生肖屬相：<span id="resZodiac">-</span></div>
+        <div class="result-item">所屬星座：<span id="resStar">-</span></div>
         <div class="result-item">生存天數：<span id="resDays">0</span></div>
     </div>
 </div>
@@ -136,7 +135,6 @@
     const dayEl = document.getElementById('day');
     const resBox = document.getElementById('resultBox');
 
-    // 初始化月份與日期
     for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
     for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
 
@@ -144,13 +142,32 @@
         if (mode === newMode) return;
         let val = parseInt(yearEl.value);
         if (val) {
-            // 切換時自動換算數字
             yearEl.value = (newMode === 'ROC') ? val - 1911 : val + 1911;
         }
         mode = newMode;
         document.getElementById('btnAD').classList.toggle('active', mode === 'AD');
         document.getElementById('btnROC').classList.toggle('active', mode === 'ROC');
         calculate();
+    }
+
+    // 取得生肖函式
+    function getChineseZodiac(year) {
+        const animals = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
+        return animals[(year - 4) % 12];
+    }
+
+    // 取得星座函式
+    function getStarSign(m, d) {
+        const signs = [
+            { name: "摩羯座", date: [1, 20] }, { name: "水瓶座", date: [2, 19] },
+            { name: "雙魚座", date: [3, 20] }, { name: "牡羊座", date: [4, 20] },
+            { name: "金牛座", date: [5, 21] }, { name: "雙子座", date: [6, 21] },
+            { name: "巨蟹座", date: [7, 23] }, { name: "獅子座", date: [8, 23] },
+            { name: "處女座", date: [9, 23] }, { name: "天秤座", date: [10, 23] },
+            { name: "天蠍座", date: [11, 22] }, { name: "射手座", date: [12, 22] },
+            { name: "摩羯座", date: [12, 31] }
+        ];
+        return signs[m - 1 + (d > signs[m - 1].date[1] ? 1 : 0)].name;
     }
 
     function calculate() {
@@ -163,18 +180,15 @@
             return;
         }
 
-        // 換算成西元進行 Date 運算
         let adYear = (mode === 'ROC') ? y + 1911 : y;
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
 
-        // 檢查日期合法性
         if (birth.getMonth() !== m - 1 || birth > today) {
             resBox.style.display = 'none';
             return;
         }
 
-        // 計算實歲
         let age = today.getFullYear() - birth.getFullYear();
         const hasHadBirthday = (today.getMonth() > birth.getMonth()) || 
                                (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
@@ -185,8 +199,11 @@
         resBox.style.display = 'block';
         document.getElementById('resAge').innerText = age + " 歲";
         document.getElementById('resDays').innerText = diffDays.toLocaleString() + " 天";
-        document.getElementById('resConvert').innerText = 
-            (mode === 'AD') ? `民國 ${adYear - 1911} 年` : `西元 ${adYear} 年`;
+        document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear - 1911} 年` : `西元 ${adYear} 年`;
+        
+        // 更新生肖與星座
+        document.getElementById('resZodiac').innerText = getChineseZodiac(adYear);
+        document.getElementById('resStar').innerText = getStarSign(m, d);
     }
 </script>
 
