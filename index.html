@@ -14,7 +14,7 @@
       --text-muted: #9ca3af;
       --accent: #6366f1;
       --accent-light: #8b5cf6;
-      --nav-bg: rgba(11, 15, 26, 0.9);
+      --nav-bg: rgba(11, 15, 26, 0.95);
       --live-green: #10b981;
     }
 
@@ -43,7 +43,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 1.5rem;
-      z-index: 2000;
+      z-index: 3000; /* 提升層級 */
     }
 
     .nav-logo {
@@ -59,7 +59,7 @@
       flex-direction: column;
       cursor: pointer;
       gap: 6px;
-      z-index: 3000; /* 確保在最上層 */
+      z-index: 4000;
       padding: 10px;
     }
 
@@ -69,10 +69,9 @@
       background: #fff;
       border-radius: 2px;
       transition: 0.4s;
-      box-shadow: 0 0 5px var(--accent);
     }
 
-    /* 側邊選單樣式修正 */
+    /* --- 側邊選單 --- */
     .nav-menu {
       position: fixed;
       top: 0;
@@ -80,87 +79,74 @@
       width: 320px;
       max-width: 85%;
       height: 100vh;
-      background: rgba(11, 15, 26, 0.98);
-      backdrop-filter: blur(25px);
+      background: #0b0f1a; /* 實色背景，避免透明度疊加問題 */
       display: flex;
       flex-direction: column;
-      /* 重要：padding-top 設為 80px，讓內容從三條線下方開始顯示 */
-      padding: 80px 1.5rem 2rem; 
+      padding: 90px 1.5rem 2rem; 
       margin: 0;
       list-style: none;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: right 0.4s ease;
       border-left: 1px solid var(--border-glow);
-      z-index: 2500;
+      z-index: 3500;
       overflow-y: auto;
-      visibility: hidden;
-      pointer-events: none;
     }
 
     .nav-menu.active {
       right: 0;
-      visibility: visible;
-      pointer-events: auto;
     }
 
-    .nav-menu li { width: 100%; opacity: 0; transform: translateX(20px); transition: 0.3s; }
-    .nav-menu.active li { opacity: 1; transform: translateX(0); transition-delay: calc(0.05s * var(--i)); }
+    .nav-menu li { width: 100%; margin-bottom: 5px; }
 
     .nav-menu a {
       color: var(--text-main);
       text-decoration: none;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       display: block;
-      padding: 15px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      transition: 0.3s;
-    }
-    .nav-menu a:hover { 
-      background: rgba(99, 102, 241, 0.15); 
-      color: #fff; 
-      padding-left: 20px; 
-      border-left: 3px solid var(--accent-light);
+      padding: 15px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: 0.2s;
     }
 
-    /* 漢堡動畫 */
+    .nav-menu a:hover {
+      background: var(--accent);
+      color: white;
+      border-radius: 8px;
+    }
+
+    /* 漢堡切換動畫 */
     .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
     .menu-toggle.open span:nth-child(2) { opacity: 0; }
     .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
-    /* 背景遮罩 */
+    /* --- 背景遮罩：核心修正 --- */
     .menu-overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 2400;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: 0.3s;
+      background: rgba(0,0,0,0.7);
+      z-index: 3400;
+      display: none; /* 預設完全消失，不擋點擊 */
     }
-    .menu-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
-    /* --- 內容與功能卡片 --- */
-    header { text-align: center; padding: 4rem 1.5rem 2rem; background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent); }
-    header h1 { font-size: clamp(2rem, 8vw, 2.6rem); letter-spacing: 0.15em; color: #fff; text-shadow: 0 0 18px rgba(99,102,241,0.8); margin: 0; }
-    
-    .counter-wrapper { display: flex; justify-content: center; margin-bottom: 2rem; }
-    .counter-pill { background: rgba(99, 102, 241, 0.1); border: 1px solid var(--border-glow); padding: 8px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
-    .status-dot { width: 9px; height: 9px; background-color: var(--live-green); border-radius: 50%; animation: blink 1.6s infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-    main { max-width: 1100px; margin: auto; padding: 0 1.5rem 3rem; position: relative; z-index: 1; }
-    section { margin-bottom: 2.5rem; padding: 2rem; border-radius: 16px; background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-glow); }
+    /* --- 內容區塊 --- */
+    main { max-width: 1100px; margin: auto; padding: 2rem 1.5rem; position: relative; z-index: 1; }
     
     .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    .feature-card { padding: 1.6rem; border-radius: 14px; background: linear-gradient(145deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05)); border: 1px solid rgba(99,102,241,0.2); transition: 0.3s; cursor: pointer; }
-    .feature-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-    .feature-card h3 { margin: 0 0 0.8rem; color: #fff; }
+    .feature-card { 
+      padding: 1.6rem; 
+      border-radius: 14px; 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-glow); 
+      cursor: pointer; 
+      transition: 0.3s;
+    }
+    .feature-card:hover { transform: translateY(-5px); background: rgba(99,102,241,0.1); }
 
-    footer { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem; }
+    header { text-align: center; padding: 3rem 1rem; }
+    footer { text-align: center; padding: 3rem; color: var(--text-muted); }
 
-    #install-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; padding: 16px 24px; border-radius: 16px; z-index: 9999; width: 90%; max-width: 400px; text-align: center; }
-    #install-prompt button { background: white; color: var(--accent); border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    #install-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 15px 25px; border-radius: 12px; z-index: 5000; text-align: center; width: 90%; max-width: 400px; }
+    #install-prompt button { margin-top: 10px; padding: 5px 15px; cursor: pointer; }
   </style>
 </head>
 
@@ -171,20 +157,19 @@
     <div class="menu-toggle" id="mobile-menu">
       <span></span><span></span><span></span>
     </div>
-    
     <ul class="nav-menu" id="nav-menu">
-        <li style="--i:1"><a href="Dictation.html">🎙 AI 會議助理-聽寫</a></li>
-        <li style="--i:2"><a href="Reader.html">🔊 文章閱讀器-文字轉語音</a></li>
-        <li style="--i:3"><a href="Grammartest.html">💻 HTML網頁語法測試</a></li>
-        <li style="--i:4"><a href="Englishconversion.html">🔠 英文大小寫轉換</a></li>
-        <li style="--i:5"><a href="ColorTicket.html">🧪 色票選擇器</a></li>
-        <li style="--i:6"><a href="portfolio.html">📝 文字處理器</a></li>
-        <li style="--i:7"><a href="CommunityPO.html">✍️ PO文神器</a></li>
-        <li style="--i:8"><a href="Weightconversion.html">🥦 全能秤重助手</a></li>
-        <li style="--i:9"><a href="AgeConversion.html">👫 年齡換算器</a></li>
-        <li style="--i:10"><a href="Password.html">🔐 私人加密保險箱</a></li>
-        <li style="--i:11"><a href="Lottery.html">🎁 線上抽獎系統</a></li>
-        <li style="--i:12"><a href="Bracup.html">👙 罩杯尺寸計算器</a></li>
+      <li><a href="Dictation.html">🎙 AI 會議助理-聽寫</a></li>
+      <li><a href="Reader.html">🔊 文章閱讀器-文字轉語音</a></li>
+      <li><a href="Grammartest.html">💻 HTML網頁語法測試</a></li>
+      <li><a href="Englishconversion.html">🔠 英文大小寫轉換</a></li>
+      <li><a href="ColorTicket.html">🧪 色票選擇器</a></li>
+      <li><a href="portfolio.html">📝 文字處理器</a></li>
+      <li><a href="CommunityPO.html">✍️ PO文神器</a></li>
+      <li><a href="Weightconversion.html">🥦 全能秤重助手</a></li>
+      <li><a href="AgeConversion.html">👫 年齡換算器</a></li>
+      <li><a href="Password.html">🔐 私人加密保險箱</a></li>
+      <li><a href="Lottery.html">🎁 線上抽獎系統</a></li>
+      <li><a href="Bracup.html">👙 罩杯尺寸計算器</a></li>
     </ul>
   </nav>
 
@@ -192,42 +177,24 @@
 
   <header>
     <h1>AI TOOL</h1>
-    <h3>歡迎使用 - 完全免費 - 無須註冊</h3>
-    <p>FREE AI ARTIFICIAL INTELLIGENCE TOOLS</p>
+    <p>完全免費 · 無須註冊 · 即開即用</p>
   </header>
 
-  <div class="counter-wrapper">
-    <div class="counter-pill">
-        <span class="status-dot"></span>
-        <span>全球訪問人數:</span>
-        <script src="//counter1.fc2.com/counter.php?id=40693162&main=1"></script>
-        <noscript><img src="//counter1.fc2.com/counter_img.php?id=40693162&main=1" alt="visitor counter" /></noscript>
-    </div>
-  </div>
-
   <main>
-    <section>
-      <h2>網站簡介</h2>
-      <p><strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台，結合現代化介面設計與 AI 輔助功能。</p>
-    </section>
-
-    <section>
-      <h2>核心功能</h2>
-      <div class="features">
-        <div class="feature-card" onclick="location.href='Dictation.html'"><h3>🎙 AI 會議助理</h3><p>即時語音轉文字。</p></div>
-        <div class="feature-card" onclick="location.href='Reader.html'"><h3>🔊 文章閱讀器</h3><p>文字轉換為自然語音。</p></div>
-        <div class="feature-card" onclick="location.href='Grammartest.html'"><h3>💻 HTML 語法測試</h3><p>即時預覽 HTML 結果。</p></div>
-        <div class="feature-card" onclick="location.href='Englishconversion.html'"><h3>🔠 英文大小寫轉換</h3><p>一鍵轉換文字格式。</p></div>
-        <div class="feature-card" onclick="location.href='ColorTicket.html'"><h3>🧪 色票選擇器</h3><p>AI 選色助手。</p></div>
-        <div class="feature-card" onclick="location.href='portfolio.html'"><h3>📝 文字處理器</h3><p>轉換與優化文字。</p></div>
-        <div class="feature-card" onclick="location.href='CommunityPO.html'"><h3>✍️ PO文神器</h3><p>創作矚目焦點內容。</p></div>
-        <div class="feature-card" onclick="location.href='Weightconversion.html'"><h3>🥦 全能秤重助手</h3><p>市場買菜計算神器。</p></div>
-        <div class="feature-card" onclick="location.href='AgeConversion.html'"><h3>👫 年齡換算器</h3><p>快速計算虛歲實歲。</p></div>
-        <div class="feature-card" onclick="location.href='Password.html'"><h3>🔐 私人加密保險箱</h3><p>極高安全性的加密工具。</p></div>
-        <div class="feature-card" onclick="location.href='Lottery.html'"><h3>🎁 線上抽獎系統</h3><p>支援匯入 CSV 名單。</p></div>
-        <div class="feature-card" onclick="location.href='Bracup.html'"><h3>👙 罩杯尺寸計算器</h3><p>專為女性設計的精準計算。</p></div>
-      </div>
-    </section>
+    <div class="features">
+      <div class="feature-card" onclick="location.href='Dictation.html'"><h3>🎙 AI 會議助理</h3><p>即時語音轉文字。</p></div>
+      <div class="feature-card" onclick="location.href='Reader.html'"><h3>🔊 文章閱讀器</h3><p>文字轉自然語音。</p></div>
+      <div class="feature-card" onclick="location.href='Grammartest.html'"><h3>💻 HTML 語法測試</h3><p>即時預覽網頁代碼。</p></div>
+      <div class="feature-card" onclick="location.href='Englishconversion.html'"><h3>🔠 英文大小寫轉換</h3><p>快捷文字格式處理。</p></div>
+      <div class="feature-card" onclick="location.href='ColorTicket.html'"><h3>🧪 色票選擇器</h3><p>設計師必備選色器。</p></div>
+      <div class="feature-card" onclick="location.href='portfolio.html'"><h3>📝 文字處理器</h3><p>高效內容編輯工具。</p></div>
+      <div class="feature-card" onclick="location.href='CommunityPO.html'"><h3>✍️ PO文神器</h3><p>社群媒體貼文助理。</p></div>
+      <div class="feature-card" onclick="location.href='Weightconversion.html'"><h3>🥦 全能秤重助手</h3><p>精準單價重量換算。</p></div>
+      <div class="feature-card" onclick="location.href='AgeConversion.html'"><h3>👫 年齡換算器</h3><p>虛歲實歲快速計算。</p></div>
+      <div class="feature-card" onclick="location.href='Password.html'"><h3>🔐 私人加密保險箱</h3><p>高強度本地加密儲存。</p></div>
+      <div class="feature-card" onclick="location.href='Lottery.html'"><h3>🎁 線上抽獎系統</h3><p>公平公正抽獎工具。</p></div>
+      <div class="feature-card" onclick="location.href='Bracup.html'"><h3>👙 罩杯尺寸計算器</h3><p>專業身形比例計算。</p></div>
+    </div>
   </main>
 
   <div id="install-prompt">
@@ -235,34 +202,42 @@
     <button onclick="closePrompt()">我知道了</button>
   </div>
 
-  <footer>© 2026 AI TOOL · Designed & Built by Chson</footer>
+  <footer>© 2026 AI TOOL · Built by Chson</footer>
 
   <script>
     const menuToggle = document.getElementById('mobile-menu');
     const navMenu = document.getElementById('nav-menu');
     const overlay = document.getElementById('menu-overlay');
 
+    // 切換選單
     function toggleMenu() {
-      const isActive = navMenu.classList.toggle('active');
+      const isOpen = navMenu.classList.toggle('active');
       menuToggle.classList.toggle('open');
-      overlay.classList.toggle('active');
-      document.body.style.overflow = isActive ? 'hidden' : 'auto';
+      
+      if (isOpen) {
+        overlay.style.display = 'block'; // 打開時顯示遮罩
+        document.body.style.overflow = 'hidden';
+      } else {
+        overlay.style.display = 'none'; // 關閉時徹底移除遮罩
+        document.body.style.overflow = 'auto';
+      }
     }
 
     menuToggle.addEventListener('click', toggleMenu);
     overlay.addEventListener('click', toggleMenu);
 
+    // 點擊連結後自動關閉選單
     document.querySelectorAll('.nav-menu a').forEach(link => {
       link.addEventListener('click', toggleMenu);
     });
 
+    // 提示邏輯
     window.addEventListener('DOMContentLoaded', () => {
       if (!localStorage.getItem('hasSeenInstallPrompt')) {
         const promptDiv = document.getElementById('install-prompt');
-        const promptText = document.getElementById('prompt-text');
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        promptText.innerHTML = isMobile ? "💡 建議將本站「加入主畫面」！" : "✨ 按下 <b>Ctrl+D</b> 加入收藏夾！";
-        setTimeout(() => { promptDiv.style.display = 'block'; }, 1500);
+        document.getElementById('prompt-text').innerText = isMobile ? "建議將本站加入主畫面！" : "按 Ctrl+D 加入收藏！";
+        setTimeout(() => { promptDiv.style.display = 'block'; }, 1000);
       }
     });
 
@@ -271,6 +246,5 @@
       localStorage.setItem('hasSeenInstallPrompt', 'true');
     }
   </script>
-
 </body>
 </html>
