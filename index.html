@@ -109,7 +109,7 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* --- 手機版選單 (含滑動與對齊優化) --- */
+    /* --- 手機版選單 --- */
     @media (max-width: 768px) {
       .menu-toggle {
         display: flex;
@@ -126,8 +126,8 @@
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-end;      
-        padding: 65px 1.5rem 2rem 0; /* 縮小 top padding 讓選單移上 */
-        overflow-y: auto;           /* 開啟捲軸滑動 */
+        padding: 65px 1.5rem 2rem 0;
+        overflow-y: auto;           
         -webkit-overflow-scrolling: touch;
         transition: 0.4s ease-in-out;
         border-left: 1px solid var(--border-glow);
@@ -174,7 +174,6 @@
       border: 1px solid rgba(255,255,255,0.2);
     }
 
-
     #install-prompt p {
       margin: 0 0 12px 0;
       font-size: 0.95rem;
@@ -194,13 +193,9 @@
       transition: 0.2s;
     }
 
-    #install-prompt button:active {
-      transform: scale(0.95);
-    }
-
     header {
       text-align: center;
-      padding: 4rem 1.5rem;
+      padding: 4rem 1.5rem 2rem;
       background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent);
     }
 
@@ -215,6 +210,46 @@
     header p {
       color: var(--text-muted);
       font-size: 1.1rem;
+    }
+
+    /* --- FC2 計數器自訂樣式 --- */
+    .counter-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .counter-pill {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid var(--border-glow);
+      padding: 6px 18px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: 0.3s;
+    }
+
+    .counter-pill:hover {
+      box-shadow: 0 0 20px var(--accent);
+      transform: translateY(-2px);
+      background: rgba(99, 102, 241, 0.2);
+    }
+
+    .counter-pill span {
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* 修正 FC2 圖片對齊 */
+    .counter-pill img {
+      vertical-align: middle;
+      filter: brightness(1.2) drop-shadow(0 0 2px rgba(255,255,255,0.3));
     }
 
     main {
@@ -286,7 +321,7 @@
 
   <nav class="navbar">
     <a href="#" class="nav-logo">AI TOOL</a>
-   
+    
     <div class="menu-toggle" id="mobile-menu">
       <span></span>
       <span></span>
@@ -304,8 +339,8 @@
         <li><a href="Weightconversion.html">🥦 全能秤重助手</a></li>
         <li><a href="AgeConversion.html">👫 年齡換算器</a></li>
         <li><a href="Password.html">🔐 私人加密保險箱</a></li>
-        <li><a href="Lottery.html">🎁線上抽獎系統</a></li>
-		<li><a href="Bracup.html">👙 罩杯計算</a></li>
+        <li><a href="Lottery.html">🎁 線上抽獎系統</a></li>
+        <li><a href="Bracup.html">👙 罩杯計算</a></li>
     </ul>
   </nav>
 
@@ -316,12 +351,18 @@
 
   <header>
     <h1>AI TOOL</h1>
-    <h3>歡迎使用-完全免費-無須註冊</h3>
+    <h3>歡迎使用 - 完全免費 - 無須註冊</h3>
     <p>FREE AI ARTIFICIAL INTELLIGENCE TOOLS</p>
   </header>
-<!-- FC2計數器 開始 -->
-<script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=40693162&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=40693162&main=1" /></noscript>
-<!-- FC2計數器 結束 -->
+
+  <div class="counter-wrapper">
+    <div class="counter-pill">
+        <span>全球訪問人數:</span>
+        <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=40693162&main=1"></script>
+        <noscript><img src="//counter1.fc2.com/counter_img.php?id=40693162&main=1" alt="visitor counter" /></noscript>
+    </div>
+  </div>
+
   <main>
     <section>
       <h2>網站簡介</h2>
@@ -362,28 +403,27 @@
         </div>
         <div class="feature-card">
           <h3>✍️ PO文神器</h3>
-          <p>現在就開始你的創作，讓每一篇 PO 文都成為眾人矚目的焦點吧！</p>
+          <p>讓每一篇 PO 文都成為眾人矚目的焦點吧！</p>
         </div>
         <div class="feature-card">
           <h3>🥦 全能秤重助手</h3>
-          <p>菜市場、超市買菜必備！能幫您快速計算，不怕算錯錢，買菜更安心。</p>
+          <p>快速計算重量與價格，買菜更安心。</p>
         </div>
         <div class="feature-card">
           <h3>👫 年齡換算器</h3>
-          <p>本工具強化了台灣特有的年份轉換邏輯，快速計算你的年齡。</p>
+          <p>強化台灣特有年份轉換邏輯，快速計算年齡。</p>
         </div>
         <div class="feature-card">
           <h3>🔐 私人加密保險箱</h3>
-          <p>此加密工具可自行儲存到雲端，文件檔案為亂碼的方式，既保留了雲端的便利性，又兼顧了極高的安全性。</p>
+          <p>文件檔案以亂碼方式加密，保留便利性與安全性。</p>
         </div>
         <div class="feature-card">
           <h3>🎁 線上抽獎系統</h3>
-          <p>簡單又方便免註冊直接可用，使用Excel將名單轉存成.csv (UTF-8)檔案，後即可讀入抽獎系統。</p>
+          <p>免註冊直接可用，支援 Excel 轉存 CSV 名單。</p>
         </div>
-		<div class="feature-card">
+        <div class="feature-card">
           <h3>👙 罩杯尺寸計算器</h3>
-          <p>專為 A-K 罩杯設計，精準計算。<br>
-        不論妳是哪種身型，我們都致力於幫妳找到最完美的支撐與包覆。</p>
+          <p>專為 A-K 罩杯設計，精準找到最完美的支撐。</p>
         </div>
       </div>
     </section>
@@ -412,12 +452,9 @@
 
     // 2. 第一次開啟提示邏輯
     window.addEventListener('DOMContentLoaded', () => {
-      // 判斷是否已經顯示過
       if (!localStorage.getItem('hasSeenInstallPrompt')) {
         const promptDiv = document.getElementById('install-prompt');
         const promptText = document.getElementById('prompt-text');
-       
-        // 偵測裝置類型
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
         if (isMobile) {
@@ -426,7 +463,6 @@
           promptText.innerHTML = "✨ 喜歡這個工具嗎？<br>按下 <b>Ctrl+D</b> 將本站加入收藏夾！";
         }
 
-        // 延遲 1.5 秒顯示，增加轉場感
         setTimeout(() => {
           promptDiv.style.display = 'block';
         }, 1500);
