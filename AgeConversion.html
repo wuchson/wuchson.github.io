@@ -27,26 +27,26 @@
 
         .card {
             background-color: var(--card);
-            padding: 30px;
+            padding: 25px;
             border-radius: 20px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             width: 90%;
-            max-width: 380px;
+            max-width: 400px;
         }
 
-        h2 { text-align: center; margin-top: 0; color: var(--accent); letter-spacing: 2px; }
+        h2 { text-align: center; margin-top: 0; color: var(--accent); letter-spacing: 2px; font-size: 1.5rem; }
 
         .type-selector {
             display: flex;
             background: var(--input);
             padding: 4px;
             border-radius: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .type-btn {
             flex: 1;
-            padding: 10px;
+            padding: 8px;
             border: none;
             background: transparent;
             color: #94a3b8;
@@ -56,63 +56,67 @@
             transition: 0.3s;
         }
 
-        .type-btn.active {
-            background: var(--accent);
-            color: white;
-        }
+        .type-btn.active { background: var(--accent); color: white; }
 
-        .input-label { font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; display: block; }
-        .input-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 25px; 
-        }
+        .input-label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px; display: block; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
 
         input[type="number"], select {
             background-color: var(--input);
             border: 2px solid var(--border);
             color: white;
-            padding: 12px;
+            padding: 10px;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
             box-sizing: border-box;
         }
 
         input[type="number"] { flex: 2; min-width: 0; }
         select { flex: 1.5; min-width: 0; cursor: pointer; }
-
         input:focus, select:focus { border-color: var(--accent); }
 
         .result-box {
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid var(--accent);
-            padding: 20px;
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 15px;
             border-radius: 15px;
             display: none;
         }
 
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
-        .result-item:last-child { margin-bottom: 0; }
-        .result-item span { color: var(--accent); font-weight: bold; }
+        .result-item {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 5px;
+        }
+
+        .result-item:last-child { border-bottom: none; }
+
+        .res-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px; }
+        .res-value { color: var(--accent); font-weight: bold; font-size: 1rem; }
+        
+        /* 讓農曆佔據整列 */
+        .full-width { grid-column: span 2; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>📅 年齡換算器</h2>
+    <h2>📅 年齡與農曆換算</h2>
     
     <div class="type-selector">
         <button class="type-btn active" id="btnAD" onclick="setMode('AD')">西元 AD</button>
         <button class="type-btn" id="btnROC" onclick="setMode('ROC')">民國 ROC</button>
     </div>
 
-    <label class="input-label">請輸入/選擇出生日期：</label>
+    <label class="input-label">出生日期：</label>
     <div class="input-group">
         <input type="number" id="year" placeholder="年份" oninput="calculate()">
         <select id="month" onchange="calculate()"><option value="">月</option></select>
@@ -120,11 +124,13 @@
     </div>
 
     <div id="resultBox" class="result-box">
-        <div class="result-item">目前實歲：<span id="resAge">0</span></div>
-        <div class="result-item">對應年份：<span id="resConvert">-</span></div>
-        <div class="result-item">生肖屬相：<span id="resZodiac">-</span></div>
-        <div class="result-item">所屬星座：<span id="resStar">-</span></div>
-        <div class="result-item">生存天數：<span id="resDays">0</span></div>
+        <div class="result-grid">
+            <div class="result-item"><div class="res-label">目前實歲</div><div class="res-value" id="resAge">0 歲</div></div>
+            <div class="result-item"><div class="res-label">生存天數</div><div class="res-value" id="resDays">0 天</div></div>
+            <div class="result-item"><div class="res-label">對應年份</div><div class="res-value" id="resConvert">-</div></div>
+            <div class="result-item"><div class="res-label">生肖星座</div><div class="res-value" id="resZodiacStar">-</div></div>
+            <div class="result-item full-width"><div class="res-label">出生農曆 (歲次/日期)</div><div class="res-value" id="resLunar">-</div></div>
+        </div>
     </div>
 </div>
 
@@ -135,39 +141,45 @@
     const dayEl = document.getElementById('day');
     const resBox = document.getElementById('resultBox');
 
+    // 初始化下拉選單
     for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
     for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
 
     function setMode(newMode) {
         if (mode === newMode) return;
         let val = parseInt(yearEl.value);
-        if (val) {
-            yearEl.value = (newMode === 'ROC') ? val - 1911 : val + 1911;
-        }
+        if (val) yearEl.value = (newMode === 'ROC') ? val - 1911 : val + 1911;
         mode = newMode;
         document.getElementById('btnAD').classList.toggle('active', mode === 'AD');
         document.getElementById('btnROC').classList.toggle('active', mode === 'ROC');
         calculate();
     }
 
-    // 取得生肖函式
-    function getChineseZodiac(year) {
-        const animals = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
-        return animals[(year - 4) % 12];
+    // 簡易農曆轉換邏輯 (Intl.DateTimeFormat 支援)
+    function getLunarInfo(date) {
+        try {
+            const lunarFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            const parts = lunarFormatter.formatToParts(date);
+            let year = "", month = "", day = "";
+            parts.forEach(p => {
+                if(p.type === 'year') year = p.value;
+                if(p.type === 'month') month = p.value;
+                if(p.type === 'day') day = p.value;
+            });
+            return `${year} ${month}${day}`;
+        } catch (e) { return "不支援"; }
     }
 
-    // 取得星座函式
+    function getZodiac(year) {
+        return ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"][(year - 4) % 12];
+    }
+
     function getStarSign(m, d) {
-        const signs = [
-            { name: "摩羯座", date: [1, 20] }, { name: "水瓶座", date: [2, 19] },
-            { name: "雙魚座", date: [3, 20] }, { name: "牡羊座", date: [4, 20] },
-            { name: "金牛座", date: [5, 21] }, { name: "雙子座", date: [6, 21] },
-            { name: "巨蟹座", date: [7, 23] }, { name: "獅子座", date: [8, 23] },
-            { name: "處女座", date: [9, 23] }, { name: "天秤座", date: [10, 23] },
-            { name: "天蠍座", date: [11, 22] }, { name: "射手座", date: [12, 22] },
-            { name: "摩羯座", date: [12, 31] }
-        ];
-        return signs[m - 1 + (d > signs[m - 1].date[1] ? 1 : 0)].name;
+        const signs = ["摩羯","水瓶","雙魚","牡羊","金牛","雙子","巨蟹","獅子","處女","天秤","天蠍","射手","摩羯"];
+        const bounds = [20, 19, 20, 20, 21, 21, 23, 23, 23, 23, 22, 22];
+        return signs[m - 1 + (d > bounds[m - 1] ? 1 : 0)] + "座";
     }
 
     function calculate() {
@@ -175,35 +187,26 @@
         const m = parseInt(monthEl.value);
         const d = parseInt(dayEl.value);
 
-        if (!y || !m || !d) {
-            resBox.style.display = 'none';
-            return;
-        }
+        if (!y || !m || !d) { resBox.style.display = 'none'; return; }
 
         let adYear = (mode === 'ROC') ? y + 1911 : y;
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
 
-        if (birth.getMonth() !== m - 1 || birth > today) {
-            resBox.style.display = 'none';
-            return;
-        }
+        if (birth.getMonth() !== m - 1 || birth > today) { resBox.style.display = 'none'; return; }
 
+        // 計算實歲
         let age = today.getFullYear() - birth.getFullYear();
-        const hasHadBirthday = (today.getMonth() > birth.getMonth()) || 
-                               (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
-        if (!hasHadBirthday) age--;
-
-        const diffDays = Math.floor((today - birth) / (1000 * 60 * 60 * 24));
+        if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
 
         resBox.style.display = 'block';
         document.getElementById('resAge').innerText = age + " 歲";
-        document.getElementById('resDays').innerText = diffDays.toLocaleString() + " 天";
-        document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear - 1911} 年` : `西元 ${adYear} 年`;
+        document.getElementById('resDays').innerText = Math.floor((today - birth) / 86400000).toLocaleString() + " 天";
+        document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear-1911} 年` : `西元 ${adYear} 年`;
+        document.getElementById('resZodiacStar').innerText = `${getZodiac(adYear)} / ${getStarSign(m, d)}`;
         
-        // 更新生肖與星座
-        document.getElementById('resZodiac').innerText = getChineseZodiac(adYear);
-        document.getElementById('resStar').innerText = getStarSign(m, d);
+        // 顯示農曆
+        document.getElementById('resLunar').innerText = getLunarInfo(birth);
     }
 </script>
 
