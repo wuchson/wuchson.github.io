@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>年齡換算器</title>
+    <title>水墨歲月 - 禪意換算</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #38bdf8;
-            --text: #f1f5f9;
-            --input: #334155;
-            --border: #475569;
+            --paper: #fcfaf2;   /* 仿古宣紙 */
+            --ink-dark: #1a1a1b; /* 濃墨 */
+            --ink-light: #525252;/* 焦墨 */
+            --wash: #e5e5e5;    /* 墨韻 */
+            --accent: #262626;  /* 炭色 */
+            --seal: #a63d40;    /* 封泥紅 */
         }
 
         body {
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            font-family: 'Kaiti', 'STKaiti', '華文楷體', 'PingFang TC', serif;
+            background-color: #dcdcdc;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 80%),
+                url("https://www.transparenttextures.com/patterns/handmade-paper.png");
+            color: var(--ink-dark);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,109 +29,208 @@
         }
 
         .card {
-            background-color: var(--card);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            background-color: var(--paper);
+            padding: 40px;
+            border: 1px solid #c9c3af;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
+            position: relative;
+            overflow: hidden;
         }
 
-        h2 { text-align: center; margin-top: 0; color: var(--accent); letter-spacing: 2px; font-size: 1.5rem; }
+        /* 水墨裝飾 */
+        .card::after {
+            content: "";
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(0,0,0,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        h2 { 
+            text-align: center; 
+            margin-top: 0; 
+            color: var(--ink-dark); 
+            letter-spacing: 12px; 
+            font-size: 2rem;
+            position: relative;
+            font-weight: normal;
+        }
+
+        h2::after {
+            content: "ZEN";
+            position: absolute;
+            font-size: 0.7rem;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            letter-spacing: 2px;
+            color: var(--seal);
+            opacity: 0.6;
+        }
 
         .type-selector {
             display: flex;
-            background: var(--input);
-            padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
         }
 
         .type-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
             background: transparent;
-            color: #94a3b8;
+            border: none;
+            color: var(--ink-light);
             cursor: pointer;
-            border-radius: 8px;
-            font-weight: bold;
+            font-size: 1rem;
+            padding: 5px 10px;
+            transition: 0.4s;
+            border-bottom: 1px solid transparent;
+        }
+
+        .type-btn.active { 
+            color: var(--seal);
+            border-bottom: 1px solid var(--seal);
+        }
+
+        .input-label { 
+            font-size: 0.85rem; 
+            color: var(--ink-light); 
+            margin-bottom: 10px; 
+            display: block; 
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .input-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 30px; 
+            position: relative;
+            z-index: 1;
+        }
+
+        input[type="number"], select {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #d1c7a7;
+            color: var(--ink-dark);
+            padding: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            font-family: inherit;
+            outline: none;
+            width: 100%;
             transition: 0.3s;
         }
 
-        .type-btn.active { background: var(--accent); color: white; }
-
-        .input-label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px; display: block; }
-        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
-
-        input[type="number"], select {
-            background-color: var(--input);
-            border: 2px solid var(--border);
-            color: white;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-            box-sizing: border-box;
-            width: 100%;
-        }
-
-        input[type="number"] { flex: 2; }
-        select { flex: 1.5; cursor: pointer; }
-        input:focus, select:focus { border-color: var(--accent); }
+        input:focus, select:focus { border-bottom-color: var(--seal); }
 
         .result-box {
-            background: rgba(56, 189, 248, 0.05);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            padding: 15px;
-            border-radius: 15px;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 25px;
             display: none;
+            animation: fadeIn 1s ease;
         }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .result-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 20px;
         }
 
         .result-item {
-            display: flex;
-            flex-direction: column;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 5px;
+            text-align: center;
         }
 
-        .res-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px; }
-        .res-value { color: var(--accent); font-weight: bold; font-size: 1.05rem; }
+        .res-label { 
+            font-size: 0.75rem; 
+            color: var(--ink-light); 
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .res-value { 
+            color: var(--ink-dark); 
+            font-weight: 500; 
+            font-size: 1.2rem;
+            display: block;
+        }
         
-        .full-width { grid-column: span 2; border-bottom: none; }
+        .full-width { grid-column: span 2; margin-top: 10px; }
+
+        .fortune-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: var(--ink-light);
+            line-height: 2;
+            text-align: justify;
+            border-left: 1px solid var(--seal);
+        }
+
+        .fortune-box strong {
+            color: var(--seal);
+            font-weight: normal;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* 印章樣式 */
+        .seal {
+            width: 35px;
+            height: 35px;
+            border: 2px solid var(--seal);
+            color: var(--seal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.7rem;
+            line-height: 1.1;
+            margin: 0 auto 20px;
+            padding: 2px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>📅 年齡與農曆換算</h2>
+    <div class="seal">歲月<br>靜好</div>
+    <h2>庚續歲月</h2>
     
     <div class="type-selector">
-        <button class="type-btn active" id="btnAD" onclick="setMode('AD')">西元 AD</button>
-        <button class="type-btn" id="btnROC" onclick="setMode('ROC')">民國 ROC</button>
+        <button class="type-btn active" id="btnAD" onclick="setMode('AD')">西元</button>
+        <button class="type-btn" id="btnROC" onclick="setMode('ROC')">民國</button>
     </div>
 
-    <label class="input-label">出生日期：</label>
+    <label class="input-label">請選取降生辰時</label>
     <div class="input-group">
-        <input type="number" id="year" placeholder="年份" oninput="calculate()">
+        <input type="number" id="year" placeholder="年" oninput="calculate()">
         <select id="month" onchange="calculate()"><option value="">月</option></select>
         <select id="day" onchange="calculate()"><option value="">日</option></select>
     </div>
 
     <div id="resultBox" class="result-box">
         <div class="result-grid">
-            <div class="result-item"><div class="res-label">目前實歲</div><div class="res-value" id="resAge">0 歲</div></div>
-            <div class="result-item"><div class="res-label">生存天數</div><div class="res-value" id="resDays">0 天</div></div>
-            <div class="result-item"><div class="res-label">星座</div><div class="res-value" id="resStar">-</div></div>
-            <div class="result-item"><div class="res-label">換算年份</div><div class="res-value" id="resConvert">-</div></div>
-            <div class="result-item full-width"><div class="res-label">出生農曆 (歲次/日期)</div><div class="res-value" id="resLunar">-</div></div>
+            <div class="result-item"><span class="res-label">目前足歲</span><span class="res-value" id="resAge">0 歲</span></div>
+            <div class="result-item"><span class="res-label">塵世光陰</span><span class="res-value" id="resDays">0 天</span></div>
+            <div class="result-item"><span class="res-label">星宿</span><span class="res-value" id="resStar">-</span></div>
+            <div class="result-item"><span class="res-label">紀年換算</span><span class="res-value" id="resConvert">-</span></div>
+            <div class="result-item full-width"><span class="res-label">農曆歲次 (月日/節氣)</span><span class="res-value" id="resLunar">-</span></div>
         </div>
+        <div id="fortuneBox" class="fortune-box"></div>
     </div>
 </div>
 
@@ -142,6 +244,23 @@
     for(let i=1; i<=12; i++) monthEl.add(new Option(i, i));
     for(let i=1; i<=31; i++) dayEl.add(new Option(i, i));
 
+    const zodiacTips = {
+        '鼠': '機敏聰慧，若能靜水流深，則可避開紛擾。',
+        '牛': '勤懇務實。凡事不必急於求成，厚積而薄發。',
+        '虎': '威儀不凡。今年應收斂鋒芒，謙和自能招福。',
+        '兔': '溫婉細膩。適宜廣結善緣，人和方能事興。',
+        '龍': '志向遠大。戒驕戒躁，如龍潛深淵，待時而動。',
+        '蛇': '直覺敏銳。內求而不外炫，學問精進之時。',
+        '馬': '熱情奔放。動中有吉，然須心繫一處，莫要散亂。',
+        '羊': '性情溫和。保持內心平靜，福報自會隨行。',
+        '猴': '活潑靈動。利於研習新技，更進一竿。',
+        '雞': '精明幹練。事業守成為上，如細水長流。',
+        '狗': '忠義正直。穩紮穩打，平安即是最大的福分。',
+        '豬': '寬厚開朗。知足常樂，財源如春水自然。'
+    };
+
+    const solarTerms = ["小寒/大寒", "立春/雨水", "驚蟄/春分", "清明/穀雨", "立夏/小滿", "芒種/夏至", "小暑/大暑", "立秋/處暑", "白露/秋分", "寒露/霜降", "立冬/小雪", "大雪/冬至"];
+
     function setMode(newMode) {
         if (mode === newMode) return;
         let val = parseInt(yearEl.value);
@@ -154,10 +273,8 @@
 
     function getLunarFullInfo(date) {
         try {
-            // 1. 取得天干地支
             const yearFormatter = new Intl.DateTimeFormat('zh-Hant-TW-u-ca-chinese', { year: 'numeric' });
             const lunarYearStr = yearFormatter.format(date); 
-            
             let ganzhi = "";
             const gzMatch = lunarYearStr.match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/);
             if (gzMatch) {
@@ -169,49 +286,25 @@
                 const offset = lYearNum - 4;
                 ganzhi = gan[((offset % 10) + 10) % 10] + zhi[((offset % 12) + 12) % 12];
             }
-
-            const zhiChar = ganzhi.charAt(1);
-            const zhiToZodiac = {
-                '子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龍','巳':'蛇',
-                '午':'馬','未':'羊','申':'猴','酉':'雞','戌':'狗','亥':'豬'
-            };
-            const zodiac = zhiToZodiac[zhiChar] || "查無";
-
-            // 2. 核心修正：處理不同格式的月份回傳
-            const mdFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', {
-                month: 'numeric', day: 'numeric'
-            });
-            let rawMD = mdFormatter.format(date).replace(/\s/g, ''); // 移除空格
-
-            // 取得對應表
+            const zodiac = {'子':'鼠','丑':'牛','寅':'虎','卯':'兔','辰':'龍','巳':'蛇','午':'馬','未':'羊','申':'猴','酉':'雞','戌':'狗','亥':'豬'}[ganzhi.charAt(1)];
+            const mdFormatter = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', { month: 'numeric', day: 'numeric' });
+            let rawMD = mdFormatter.format(date).replace(/\s/g, '');
             const monthNames = ["正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
-            
-            // 處理 M05 或純數字 5
             let lunarMD = rawMD;
             for (let i = 1; i <= 12; i++) {
-                let mCode = "M" + (i < 10 ? "0" + i : i); // M01, M02...
-                let mNum = i.toString(); // 1, 2...
-                
-                // 優先檢查代碼 M，再檢查純數字
+                let mCode = "M" + (i < 10 ? "0" + i : i);
+                let mNum = i.toString();
                 if (lunarMD.startsWith(mCode)) {
                     lunarMD = lunarMD.replace(mCode, monthNames[i-1]);
                     break;
                 } else if (lunarMD.match(/^\d+/) && lunarMD.match(/^\d+/)[0] === mNum) {
-                    // 確保數字是在開頭且完全匹配月份
                     lunarMD = lunarMD.replace(mNum, monthNames[i-1]);
                     break;
                 }
             }
-
-            // 補齊「日」字
-            if (!lunarMD.includes('日')) {
-                lunarMD += '日';
-            }
-            
-            return `${ganzhi} (${zodiac}) 年 ${lunarMD}`;
-        } catch (e) { 
-            return "格式轉換中..."; 
-        }
+            if (!lunarMD.includes('日')) lunarMD += '日';
+            return { display: `${ganzhi}(${zodiac})年 ${lunarMD} [${solarTerms[date.getMonth()]}]`, zodiac: zodiac };
+        } catch (e) { return { display: "卜算中...", zodiac: "" }; }
     }
 
     function getStarSign(m, d) {
@@ -224,27 +317,24 @@
         const y = parseInt(yearEl.value);
         const m = parseInt(monthEl.value);
         const d = parseInt(dayEl.value);
-
         if (!y || !m || !d) { resBox.style.display = 'none'; return; }
-
         let adYear = (mode === 'ROC') ? y + 1911 : y;
         const birth = new Date(adYear, m - 1, d);
         const today = new Date();
-
         if (birth.getFullYear() !== adYear || birth.getMonth() !== m - 1 || birth.getDate() !== d || birth > today) {
             resBox.style.display = 'none'; 
             return; 
         }
-
         let age = today.getFullYear() - birth.getFullYear();
         if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
-
+        const lunarInfo = getLunarFullInfo(birth);
         resBox.style.display = 'block';
         document.getElementById('resAge').innerText = age + " 歲";
         document.getElementById('resDays').innerText = Math.floor((today - birth) / 86400000).toLocaleString() + " 天";
         document.getElementById('resConvert').innerText = (mode === 'AD') ? `民國 ${adYear-1911} 年` : `西元 ${adYear} 年`;
         document.getElementById('resStar').innerText = getStarSign(m, d);
-        document.getElementById('resLunar').innerText = getLunarFullInfo(birth);
+        document.getElementById('resLunar').innerText = lunarInfo.display;
+        document.getElementById('fortuneBox').innerHTML = `<strong>🏮 ${lunarInfo.zodiac}屬禪語：</strong>${zodiacTips[lunarInfo.zodiac]}`;
     }
 </script>
 
