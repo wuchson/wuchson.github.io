@@ -33,7 +33,7 @@
       overflow-x: hidden;
     }
 
-    /* --- 導覽列優化：全裝置統一漢堡選單 --- */
+    /* --- 導覽列 --- */
     .navbar {
       position: fixed;
       top: 0; left: 0;
@@ -57,7 +57,6 @@
       text-shadow: 0 0 10px var(--accent);
     }
 
-    /* 漢堡按鈕 - 始終顯示 */
     .menu-toggle {
       display: flex;
       flex-direction: column;
@@ -76,11 +75,11 @@
       box-shadow: 0 0 5px var(--accent);
     }
 
-    /* 側邊選單樣式 */
+    /* 側邊選單 */
     .nav-menu {
       position: fixed;
       top: 0;
-      right: -100%; /* 預設在螢幕外 */
+      right: -320px; /* 修正：直接設定寬度的負值 */
       width: 320px;
       max-width: 85%;
       height: 100vh;
@@ -111,7 +110,6 @@
     .nav-menu.active li {
       opacity: 1;
       transform: translateX(0);
-      /* 依序滑入動畫 */
       transition-delay: calc(0.05s * var(--i));
     }
 
@@ -131,29 +129,35 @@
       padding-left: 20px;
     }
 
-    /* 漢堡動畫狀態 */
+    /* 漢堡動畫 */
     .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
     .menu-toggle.open span:nth-child(2) { opacity: 0; }
     .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
-    /* 背景遮罩 */
+    /* 背景遮罩 - 重要修正：預設不阻擋滑鼠 */
     .menu-overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none;
+      background: rgba(0,0,0,0.6);
       z-index: 2400;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: 0.3s;
     }
-    .menu-overlay.active { display: block; }
+    .menu-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
 
-    /* --- 其他內容樣式保持不變但優化佈局 --- */
+    /* --- 其他內容 --- */
     header {
       text-align: center;
       padding: 4rem 1.5rem 2rem;
       background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent);
     }
-
     header h1 { font-size: clamp(2rem, 8vw, 2.6rem); letter-spacing: 0.15em; color: #fff; text-shadow: 0 0 18px rgba(99,102,241,0.8); margin: 0; }
     header h3 { font-weight: 500; color: var(--text-main); margin-top: 10px; }
     header p { color: var(--text-muted); font-size: 1rem; }
@@ -168,9 +172,8 @@
       align-items: center;
       gap: 10px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
-    .status-dot { width: 9px; height: 9px; background-color: var(--live-green); border-radius: 50%; box-shadow: 0 0 8px var(--live-green); animation: blink 1.6s infinite ease-in-out; }
+    .status-dot { width: 9px; height: 9px; background-color: var(--live-green); border-radius: 50%; animation: blink 1.6s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     main { max-width: 1100px; margin: auto; padding: 0 1.5rem 3rem; }
@@ -191,7 +194,6 @@
 
     footer { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05); }
 
-    /* 彈窗 */
     #install-prompt {
       display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
       background: linear-gradient(135deg, var(--accent), var(--accent-light));
@@ -251,8 +253,6 @@
       <p>
         <strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台，
         結合現代化介面設計與 AI 輔助功能。
-        使用者可直接在瀏覽器中完成語音、文字與網頁相關處理，
-        無需安裝任何額外軟體。
       </p>
     </section>
 
@@ -308,7 +308,6 @@
           <p>專為 A-K 罩杯設計，精準計算。<br>
         不論妳是哪種身型，我們都致力於幫妳找到最完美的支撐與包覆。</p>
         </div>
-      </div>
     </section>
   </main>
 
@@ -326,39 +325,35 @@
     const navMenu = document.getElementById('nav-menu');
     const overlay = document.getElementById('menu-overlay');
 
-    // 切換選單
     function toggleMenu() {
       navMenu.classList.toggle('active');
       menuToggle.classList.toggle('open');
       overlay.classList.toggle('active');
       
-      // 禁止背景捲動
-      if(navMenu.classList.contains('active')) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = 'auto';
-      }
+      // 只有選單打開時才鎖定捲軸
+      document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : 'auto';
     }
 
     menuToggle.addEventListener('click', toggleMenu);
     overlay.addEventListener('click', toggleMenu);
 
-    // 點擊連結後自動關閉選單
+    // 點擊連結後先跳轉再自動關閉（修正：不阻止連結預設行為）
     document.querySelectorAll('.nav-menu a').forEach(link => {
-      link.addEventListener('click', toggleMenu);
+      link.addEventListener('click', () => {
+        // 先移除選單狀態，讓頁面恢復正常
+        navMenu.classList.remove('active');
+        menuToggle.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
     });
 
-    // 提示邏輯
     window.addEventListener('DOMContentLoaded', () => {
       if (!localStorage.getItem('hasSeenInstallPrompt')) {
         const promptDiv = document.getElementById('install-prompt');
         const promptText = document.getElementById('prompt-text');
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        promptText.innerHTML = isMobile 
-          ? "💡 建議將本站「加入主畫面」以便快速使用！" 
-          : "✨ 喜歡這個工具嗎？按下 <b>Ctrl+D</b> 加入收藏夾！";
-
+        promptText.innerHTML = isMobile ? "💡 建議將本站「加入主畫面」！" : "✨ 按下 <b>Ctrl+D</b> 加入收藏夾！";
         setTimeout(() => { promptDiv.style.display = 'block'; }, 1500);
       }
     });
