@@ -3,42 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>線上抽獎系統</title>
+    <title>尊爵質感抽獎系統 - 主題切換版</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
+        /* 預設主題 */
         :root {
-            --primary-gold: #d4af37;
-            --bg-dark: #0a0a0b;
-            --glass: rgba(255, 255, 255, 0.05);
+            --theme-primary-color: #d4af37; /* 金色 */
+            --theme-secondary-color: #f9e29c;
+            --theme-bg-gradient-start: #1a1a2e;
+            --theme-bg-gradient-end: #050505;
+            --theme-glass-bg: rgba(255, 255, 255, 0.05);
+            --theme-text-color: #fff;
+            --theme-border-color: rgba(212, 175, 55, 0.2);
+            --theme-control-panel-bg: rgba(0,0,0,0.3);
+        }
+
+        /* 主題 1: 藍色 (Blue Ocean) */
+        .theme-blue {
+            --theme-primary-color: #4CAF50; /* 翡翠綠 */
+            --theme-secondary-color: #A5D6A7;
+            --theme-bg-gradient-start: #263238; /* 深灰藍 */
+            --theme-bg-gradient-end: #000a12; /* 更深藍 */
+            --theme-border-color: rgba(76, 175, 80, 0.2);
+        }
+
+        /* 主題 2: 紫色 (Mystic Violet) */
+        .theme-purple {
+            --theme-primary-color: #9C27B0; /* 紫色 */
+            --theme-secondary-color: #E1BEE7;
+            --theme-bg-gradient-start: #311B92; /* 深靛紫 */
+            --theme-bg-gradient-end: #12005e; /* 更深紫 */
+            --theme-border-color: rgba(156, 39, 176, 0.2);
+        }
+
+        /* 主題 3: 紅色 (Crimson Fire) */
+        .theme-red {
+            --theme-primary-color: #F44336; /* 紅色 */
+            --theme-secondary-color: #FFCDD2;
+            --theme-bg-gradient-start: #3E2723; /* 深棕紅 */
+            --theme-bg-gradient-end: #1b0000; /* 更深紅 */
+            --theme-border-color: rgba(244, 67, 54, 0.2);
+        }
+
+        /* 主題 4: 青色 (Teal Dream) */
+        .theme-teal {
+            --theme-primary-color: #00BCD4; /* 青色 */
+            --theme-secondary-color: #B2EBF2;
+            --theme-bg-gradient-start: #004d40; /* 深青綠 */
+            --theme-bg-gradient-end: #002520; /* 更深青 */
+            --theme-border-color: rgba(0, 188, 212, 0.2);
         }
 
         body {
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
-            color: #fff;
+            background: radial-gradient(circle at center, var(--theme-bg-gradient-start) 0%, var(--theme-bg-gradient-end) 100%);
+            color: var(--theme-text-color);
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            transition: background 0.8s ease; /* 背景顏色過渡動畫 */
         }
 
         .container {
             width: 95%;
             max-width: 900px;
-            background: var(--glass);
+            background: var(--theme-glass-bg);
             backdrop-filter: blur(25px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
+            border: 1px solid var(--theme-border-color);
             border-radius: 25px;
             padding: 30px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.8);
             box-sizing: border-box;
+            transition: border-color 0.8s ease;
         }
 
-        /* 1. 最頂部：設定控制區 */
         .control-panel {
-            background: rgba(0,0,0,0.3);
+            background: var(--theme-control-panel-bg);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 40px;
@@ -50,20 +93,43 @@
 
         .config-item { display: flex; flex-direction: column; gap: 8px; }
 
-        /* 2. 中間：視覺呈現區 (LOGO 與 顯示) */
-        .display-section {
-            text-align: center;
-            margin-bottom: 20px;
+        /* 主題切換按鈕區 */
+        .theme-switcher {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap; /* 應對小螢幕 */
         }
 
+        .theme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .theme-btn.active { border-color: white; } /* 選中時的白框 */
+        /* 各個主題按鈕的背景色 */
+        .theme-btn[data-theme="default"] { background-color: #d4af37; } /* 金色 */
+        .theme-btn[data-theme="blue"] { background-color: #4CAF50; } /* 藍色 */
+        .theme-btn[data-theme="purple"] { background-color: #9C27B0; } /* 紫色 */
+        .theme-btn[data-theme="red"] { background-color: #F44336; } /* 紅色 */
+        .theme-btn[data-theme="teal"] { background-color: #00BCD4; } /* 青色 */
+
+
+        .display-section { text-align: center; margin-bottom: 20px; }
+
         #main-title {
-            color: var(--primary-gold);
+            color: var(--theme-primary-color);
             letter-spacing: 8px;
             margin: 0 0 20px 0;
             font-size: 3rem;
             font-weight: 800;
             text-transform: uppercase;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            text-shadow: 0 0 20px var(--theme-primary-color);
+            transition: color 0.8s ease, text-shadow 0.8s ease;
         }
 
         #display-area {
@@ -76,10 +142,10 @@
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 20px;
             margin-bottom: 20px;
-            transition: 0.3s;
+            color: var(--theme-text-color);
+            transition: color 0.8s ease;
         }
 
-        /* 表單元素 */
         textarea, input[type="text"], input[type="number"] {
             width: 100%;
             background: rgba(0,0,0,0.5);
@@ -88,17 +154,18 @@
             color: white;
             padding: 10px;
             box-sizing: border-box;
+            transition: border-color 0.8s ease;
         }
         
-        input[type="text"]:focus, textarea:focus { border-color: var(--primary-gold); outline: none; }
+        input[type="text"]:focus, textarea:focus, input[type="number"]:focus { border-color: var(--theme-primary-color); outline: none; }
 
         .control-label {
-            color: var(--primary-gold);
+            color: var(--theme-primary-color);
             font-size: 0.85rem;
             font-weight: bold;
+            transition: color 0.8s ease;
         }
 
-        /* 按鈕視覺 */
         .btn {
             display: inline-block;
             width: 100%;
@@ -111,30 +178,31 @@
             box-sizing: border-box;
         }
 
-        .btn-outline { border: 1px solid var(--primary-gold); color: var(--primary-gold); background: transparent; }
-        .btn-outline:hover { background: rgba(212, 175, 55, 0.1); }
+        .btn-outline { border: 1px solid var(--theme-primary-color); color: var(--theme-primary-color); background: transparent; transition: border-color 0.8s ease, color 0.8s ease; }
+        .btn-outline:hover { background: rgba(212, 175, 55, 0.1); } /* 這裡可以保持金色，或改成 var(--theme-primary-color) 的淡化版 */
 
         .btn-main {
-            background: linear-gradient(45deg, #d4af37, #f9e29c);
+            background: linear-gradient(45deg, var(--theme-primary-color), var(--theme-secondary-color));
             border: none;
             color: black;
             font-size: 1.8rem;
             margin: 10px 0 30px 0;
             border-radius: 60px;
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); /* 使用一般陰影避免顏色過度影響 */
+            transition: background 0.8s ease, box-shadow 0.8s ease;
         }
 
-        /* 3. 底部：獲獎區 */
         .winner-section { border-top: 1px solid #333; padding-top: 20px; }
         .winner-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 15px; }
         .winner-tag { 
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(0, 0, 0, 0.4));
-            border: 1px solid var(--primary-gold);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(0, 0, 0, 0.4)); /* 保持金色背景底色，讓中獎者突出 */
+            border: 1px solid var(--theme-primary-color); /* 邊框跟隨主題色 */
             padding: 12px;
             border-radius: 10px;
             text-align: center;
             font-weight: bold;
             animation: bounceIn 0.5s ease;
+            transition: border-color 0.8s ease;
         }
 
         @keyframes bounceIn {
@@ -150,6 +218,17 @@
 
     <div class="container">
         <div class="control-panel">
+            <div class="config-item" style="grid-column: 1 / -1;"> /* 顏色切換按鈕佔滿一行 */
+                <span class="control-label">E. 選擇主題顏色</span>
+                <div class="theme-switcher">
+                    <div class="theme-btn active" data-theme="default" style="background-color: #d4af37;" onclick="setTheme('default', this)"></div>
+                    <div class="theme-btn" data-theme="blue" style="background-color: #4CAF50;" onclick="setTheme('blue', this)"></div>
+                    <div class="theme-btn" data-theme="purple" style="background-color: #9C27B0;" onclick="setTheme('purple', this)"></div>
+                    <div class="theme-btn" data-theme="red" style="background-color: #F44336;" onclick="setTheme('red', this)"></div>
+                    <div class="theme-btn" data-theme="teal" style="background-color: #00BCD4;" onclick="setTheme('teal', this)"></div>
+                </div>
+            </div>
+
             <div class="config-item">
                 <span class="control-label">A. 設定活動標題</span>
                 <input type="text" id="titleInput" placeholder="在此輸入，下方即時顯示..." oninput="updateTitle(this.value)">
@@ -165,7 +244,7 @@
                     <input type="file" id="excelUpload" accept=".xlsx, .xls">
                 </label>
             </div>
-            <div class="config-item" style="grid-column: span 1;">
+            <div class="config-item" style="grid-column: span 1;"> /* 佔滿剩餘空間 */
                 <span class="control-label">D. 手動編輯名單</span>
                 <textarea id="nameInput" placeholder="一人一行..."></textarea>
             </div>
@@ -179,7 +258,7 @@
 
         <div class="winner-section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: var(--primary-gold); font-weight: bold; font-size: 1.3rem;">🏆 獲獎者名單</span>
+                <span style="color: var(--theme-primary-color); font-weight: bold; font-size: 1.3rem; transition: color 0.8s ease;">🏆 獲獎者名單</span>
                 <button class="btn btn-outline" style="width: auto; padding: 5px 20px; font-size: 0.8rem;" onclick="exportWinners()">匯出 Excel</button>
             </div>
             <div id="winnerList" class="winner-list"></div>
@@ -190,6 +269,28 @@
         let winners = [];
         let drawing = false;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // --- 主題切換功能 ---
+        function setTheme(themeName, clickedButton) {
+            document.body.className = ''; // 清除所有主題類
+            if (themeName !== 'default') {
+                document.body.classList.add('theme-' + themeName);
+            }
+            // 更新按鈕的 active 狀態
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+        }
+
+        // 確保初始時「default」主題按鈕被選中
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultButton = document.querySelector('.theme-btn[data-theme="default"]');
+            if (defaultButton) {
+                defaultButton.classList.add('active');
+            }
+        });
+
 
         function updateTitle(val) {
             document.getElementById('main-title').innerText = val.trim() === "" ? "ROYAL DRAW" : val;
@@ -232,7 +333,7 @@
             const btn = document.getElementById('drawBtn');
             const display = document.getElementById('display-area');
             btn.disabled = true;
-            display.style.color = "#fff";
+            display.style.color = "var(--theme-text-color)"; // 滾動時恢復預設文字色
 
             let startTime = Date.now();
             const timer = setInterval(() => {
@@ -243,12 +344,13 @@
                     clearInterval(timer);
                     const currentWinners = [];
                     for(let i=0; i<count; i++) {
+                        if (names.length === 0) break; // 防止抽爆
                         const idx = Math.floor(Math.random() * names.length);
                         currentWinners.push(names.splice(idx, 1)[0]);
                     }
                     document.getElementById('nameInput').value = names.join('\n');
-                    display.innerText = currentWinners.length > 1 ? `抽取完畢` : currentWinners[0];
-                    display.style.color = "var(--primary-gold)";
+                    display.innerText = currentWinners.length > 1 ? `選出 ${currentWinners.length} 名` : currentWinners[0];
+                    display.style.color = "var(--theme-primary-color)"; // 中獎時顯示主題色
                     
                     currentWinners.forEach(w => {
                         winners.push(w);
