@@ -2,204 +2,276 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>🎁線上抽獎系統</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>尊爵質感抽獎系統 - 配置優化版</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* 深色主題變數 */
-        :root { 
-            --bg: #1a1a2e; 
-            --card: #16213e; 
-            --primary: #706fd3; 
-            --accent: #00d2d3;
-            --text-main: #ffffff;
-            --text-sub: #a29bfe;
-            --instruction-bg: #0f172a;
+        :root {
+            --primary-gold: #d4af37;
+            --bg-dark: #0a0a0b;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
-        body { 
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
-            background: var(--bg); 
-            color: var(--text-main); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 40px 20px; 
-        }
-        
-        /* 使用說明區塊：靠左對齊 */
-        .instruction { 
-            background: var(--instruction-bg); 
-            border: 1px solid #1e293b;
-            border-left: 6px solid var(--accent); 
-            padding: 20px 30px; 
-            border-radius: 12px; 
-            margin-bottom: 30px; 
-            width: 100%; 
-            max-width: 500px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            text-align: left;
-        }
-        .instruction h3 { margin-top: 0; color: var(--accent); font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
-        .instruction ol { padding-left: 20px; margin: 15px 0 0 0; }
-        .instruction li { margin-bottom: 8px; line-height: 1.6; color: #94a3b8; }
-
-        /* 抽獎主卡片 */
-        .card { 
-            background: var(--card); 
-            padding: 40px; 
-            border-radius: 28px; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.5); 
-            text-align: center; 
-            width: 100%; 
-            max-width: 450px; 
-            border: 1px solid rgba(255,255,255,0.05);
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        #display { 
-            font-size: 72px; 
-            font-weight: bold; 
-            color: var(--accent); 
-            margin: 40px 0; 
-            min-height: 100px; 
-            letter-spacing: 3px;
-            text-shadow: 0 0 20px rgba(0, 210, 211, 0.4);
+        .container {
+            width: 95%;
+            max-width: 900px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            box-sizing: border-box;
         }
-        
-        .controls { display: flex; flex-direction: column; gap: 15px; }
-        
-        input[type="file"] { 
-            border: 1px dashed #334155; 
-            padding: 15px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            background: #1e293b; 
-            color: #94a3b8;
+
+        /* 1. 最頂部：設定控制區 */
+        .control-panel {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .config-item { display: flex; flex-direction: column; gap: 8px; }
+
+        /* 2. 中間：視覺呈現區 (LOGO 與 顯示) */
+        .display-section {
+            text-align: center;
             margin-bottom: 20px;
         }
+
+        #main-title {
+            color: var(--primary-gold);
+            letter-spacing: 8px;
+            margin: 0 0 20px 0;
+            font-size: 3rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        #display-area {
+            font-size: 5rem;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        /* 表單元素 */
+        textarea, input[type="text"], input[type="number"] {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            padding: 10px;
+            box-sizing: border-box;
+        }
         
-        button { 
-            padding: 18px; 
-            font-size: 20px; 
-            border: none; 
-            border-radius: 14px; 
-            cursor: pointer; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            font-weight: 600; 
+        input[type="text"]:focus, textarea:focus { border-color: var(--primary-gold); outline: none; }
+
+        .control-label {
+            color: var(--primary-gold);
+            font-size: 0.85rem;
+            font-weight: bold;
         }
 
-        #startBtn { 
-            background: var(--primary); 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(112, 111, 211, 0.4); 
+        /* 按鈕視覺 */
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: 0.3s;
+            box-sizing: border-box;
         }
-        #startBtn:hover:not(:disabled) { background: #5f27cd; transform: scale(1.02); }
 
-        #stopBtn { 
-            background: #ff5252; 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(255, 82, 82, 0.4); 
+        .btn-outline { border: 1px solid var(--primary-gold); color: var(--primary-gold); background: transparent; }
+        .btn-outline:hover { background: rgba(212, 175, 55, 0.1); }
+
+        .btn-main {
+            background: linear-gradient(45deg, #d4af37, #f9e29c);
+            border: none;
+            color: black;
+            font-size: 1.8rem;
+            margin: 10px 0 30px 0;
+            border-radius: 60px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
         }
-        #stopBtn:hover:not(:disabled) { background: #ff3f34; transform: scale(1.02); }
+
+        /* 3. 底部：獲獎區 */
+        .winner-section { border-top: 1px solid #333; padding-top: 20px; }
+        .winner-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 15px; }
+        .winner-tag { 
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(0, 0, 0, 0.4));
+            border: 1px solid var(--primary-gold);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
         
-        button:disabled { 
-            background: #334155 !important; 
-            color: #64748b; 
-            cursor: not-allowed; 
-            box-shadow: none; 
-            transform: none !important;
-        }
-
-        #count { margin-top: 25px; font-weight: bold; color: var(--text-sub); font-size: 14px; }
+        input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="instruction">
-        <h3>📖 操作指南</h3>
-        <ol>
-            <li><strong>名單準備：</strong>請提供 Excel 轉存之 <strong>.csv (UTF-8)</strong> 檔案。</li>
-            <li><strong>檔案上傳：</strong>點選下方灰框處選擇名單檔案。</li>
-            <li><strong>啟動：</strong>按「開始轉動」，系統會高速隨機挑選姓名。</li>
-            <li><strong>抽獎：</strong>按「停止並抽獎」，中獎人將出現並移除名單。</li>
-        </ol>
-    </div>
-
-    <div class="card">
-        <h2 style="color: var(--text-main); margin-bottom: 10px;">✨ 幸運大抽獎 ✨</h2>
-        
-        <input type="file" id="fileInput" accept=".csv" />
-        
-        <div id="display">READY</div>
-        
-        <div class="controls">
-            <button id="startBtn" disabled>開始轉動</button>
-            <button id="stopBtn" disabled>停止並抽獎</button>
+    <div class="container">
+        <div class="control-panel">
+            <div class="config-item">
+                <span class="control-label">A. 設定活動標題</span>
+                <input type="text" id="titleInput" placeholder="在此輸入，下方即時顯示..." oninput="updateTitle(this.value)">
+            </div>
+            <div class="config-item">
+                <span class="control-label">B. 每次抽取人數</span>
+                <input type="number" id="drawCount" value="1" min="1">
+            </div>
+            <div class="config-item">
+                <span class="control-label">C. 匯入名單 (.xlsx)</span>
+                <label class="btn btn-outline" style="padding: 9px;">
+                    選擇檔案
+                    <input type="file" id="excelUpload" accept=".xlsx, .xls">
+                </label>
+            </div>
+            <div class="config-item" style="grid-column: span 1;">
+                <span class="control-label">D. 手動編輯名單</span>
+                <textarea id="nameInput" placeholder="一人一行..."></textarea>
+            </div>
         </div>
 
-        <div id="count">剩餘人數：0 人</div>
+        <div class="display-section">
+            <h1 id="main-title">ROYAL DRAW</h1>
+            <div id="display-area">Ready</div>
+            <button id="drawBtn" class="btn btn-main" onclick="handleDraw()">開始抽獎</button>
+        </div>
+
+        <div class="winner-section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--primary-gold); font-weight: bold; font-size: 1.3rem;">🏆 獲獎者名單</span>
+                <button class="btn btn-outline" style="width: auto; padding: 5px 20px; font-size: 0.8rem;" onclick="exportWinners()">匯出 Excel</button>
+            </div>
+            <div id="winnerList" class="winner-list"></div>
+        </div>
     </div>
 
     <script>
-        let names = [];
-        let timer = null;
-        let currentIndex = 0;
+        let winners = [];
+        let drawing = false;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        const fileInput = document.getElementById('fileInput');
-        const display = document.getElementById('display');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const countDisplay = document.getElementById('count');
+        function updateTitle(val) {
+            document.getElementById('main-title').innerText = val.trim() === "" ? "ROYAL DRAW" : val;
+        }
 
-        fileInput.addEventListener('change', function(e) {
+        function playSound(freq, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        document.getElementById('excelUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = function(event) {
-                const content = event.target.result;
-                names = content.split(/\r?\n/).map(n => n.trim()).filter(n => n !== "");
-                updateCount();
-                if (names.length > 0) {
-                    startBtn.disabled = false;
-                    display.innerText = "準備開獎";
-                }
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+                const imported = rows.flat().filter(n => n && n.toString().trim() !== "");
+                document.getElementById('nameInput').value = imported.join('\n');
             };
-            reader.readAsText(file);
+            reader.readAsArrayBuffer(file);
         });
 
-        function updateCount() {
-            countDisplay.innerText = `目前名單剩餘：${names.length} 人`;
+        function handleDraw() {
+            if (drawing) return;
+            const text = document.getElementById('nameInput').value.trim();
+            const names = text.split('\n').map(n => n.trim()).filter(n => n !== "");
+            const count = parseInt(document.getElementById('drawCount').value);
+
+            if (names.length < count) { alert("剩餘人數不足！"); return; }
+
+            drawing = true;
+            const btn = document.getElementById('drawBtn');
+            const display = document.getElementById('display-area');
+            btn.disabled = true;
+            display.style.color = "#fff";
+
+            let startTime = Date.now();
+            const timer = setInterval(() => {
+                display.innerText = names[Math.floor(Math.random() * names.length)];
+                playSound(250, 0.05);
+
+                if (Date.now() - startTime > 2000) {
+                    clearInterval(timer);
+                    const currentWinners = [];
+                    for(let i=0; i<count; i++) {
+                        const idx = Math.floor(Math.random() * names.length);
+                        currentWinners.push(names.splice(idx, 1)[0]);
+                    }
+                    document.getElementById('nameInput').value = names.join('\n');
+                    display.innerText = currentWinners.length > 1 ? `抽取完畢` : currentWinners[0];
+                    display.style.color = "var(--primary-gold)";
+                    
+                    currentWinners.forEach(w => {
+                        winners.push(w);
+                        const tag = document.createElement('div');
+                        tag.className = 'winner-tag';
+                        tag.innerText = w;
+                        document.getElementById('winnerList').prepend(tag);
+                    });
+                    
+                    playSound(550, 0.6);
+                    drawing = false;
+                    btn.disabled = false;
+                }
+            }, 60);
         }
 
-        startBtn.onclick = function() {
-            if (names.length === 0) return alert("名單已空！");
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-            display.style.color = "var(--accent)";
-            
-            timer = setInterval(() => {
-                currentIndex = Math.floor(Math.random() * names.length);
-                display.innerText = names[currentIndex];
-            }, 60);
-        };
-
-        stopBtn.onclick = function() {
-            clearInterval(timer);
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-
-            // 慶祝彩帶
-            confetti({
-                particleCount: 200,
-                spread: 120,
-                origin: { y: 0.6 },
-                colors: ['#00d2d3', '#706fd3', '#ff9f43', '#ffffff']
-            });
-
-            // 移除中獎人
-            names.splice(currentIndex, 1);
-            updateCount();
-        };
+        function exportWinners() {
+            if (winners.length === 0) return alert("還沒人中獎喔");
+            const ws = XLSX.utils.json_to_sheet(winners.map(w => ({ "中獎者名單": w })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Winners");
+            XLSX.writeFile(wb, "Final_Winners.xlsx");
+        }
     </script>
 </body>
 </html>
