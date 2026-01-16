@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>關鍵字篩選器 - 灰字版</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; padding: 30px; background-color: #f0f2f5; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        h2 { color: #333; border-left: 5px solid #666; padding-left: 10px; }
+        .input-group { margin-bottom: 20px; }
+        
+        /* 搜尋框樣式 */
+        #keywordInput { 
+            width: 100%; padding: 12px; font-size: 16px; 
+            border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box;
+            outline: none; transition: border 0.3s;
+        }
+        #keywordInput:focus { border-color: #666; }
+
+        /* 文章顯示區：預設文字為灰色 */
+        #displayArea { 
+            width: 100%; min-height: 300px; border: 1px solid #eee; 
+            padding: 15px; border-radius: 6px; overflow-y: auto;
+            background: #fafafa; white-space: pre-wrap; word-wrap: break-word;
+            color: #888888; /* 這裡讓貼上的文字變灰色 */
+            font-size: 16px; outline: none;
+        }
+
+        /* 關鍵字變色樣式：這裡可以改成你喜歡的顏色 */
+        mark { 
+            background-color: #ffcf00; /* 黃色背景 */
+            color: #000;              /* 黑色文字 */
+            font-weight: bold; 
+            padding: 0 2px;
+            border-radius: 2px;
+            box-shadow: 0 0 5px rgba(255,207,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>關鍵字篩選器</h2>
+    
+    <div class="input-group">
+        <input type="text" id="keywordInput" placeholder="在此輸入關鍵字，下方灰字將會變色...">
+    </div>
+
+    <div id="displayArea" contenteditable="true" placeholder="請在此貼上文章內容..."></div>
+    
+    <p style="color: #999; font-size: 12px; margin-top: 15px;">
+        ※ 操作說明：先貼上文章（文字會呈現灰色），然後在上方輸入框輸入關鍵字。
+    </p>
+</div>
+
+<script>
+    const keywordInput = document.getElementById('keywordInput');
+    const displayArea = document.getElementById('displayArea');
+    let rawContent = "";
+
+    // 當使用者在裡面打字或貼上文字時
+    displayArea.addEventListener('input', function() {
+        // 如果目前沒有在搜尋，就更新暫存內容
+        if (keywordInput.value === "") {
+            rawContent = displayArea.innerText;
+        }
+    });
+
+    // 關鍵字輸入時觸發
+    keywordInput.addEventListener('input', function() {
+        const keyword = this.value;
+        
+        // 確保有原始內容可以操作
+        if (!rawContent && displayArea.innerText !== "") {
+            rawContent = displayArea.innerText;
+        }
+
+        if (!keyword) {
+            displayArea.innerText = rawContent;
+            return;
+        }
+
+        // 執行變色邏輯
+        highlight(keyword);
+    });
+
+    function highlight(key) {
+        // 處理特殊符號避免 JS報錯
+        const safeKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${safeKey})`, 'gi');
+        
+        // 將符合的字包上 <mark> 標籤
+        const highlightedText = rawContent.replace(regex, '<mark>$1</mark>');
+        displayArea.innerHTML = highlightedText;
+    }
+</script>
+
+</body>
+</html>
