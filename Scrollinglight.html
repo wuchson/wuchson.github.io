@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D 時尚立體跑馬燈</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffd700;
+            --font-size: 3rem;
+            --speed: 15s;
+            --perspective: 300px;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: #000;
+            font-family: 'Arial Black', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 3D 場景容器 */
+        .scene {
+            flex: 1;
+            perspective: var(--perspective);
+            overflow: hidden;
+            background-color: var(--bg-color);
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 星空背景裝飾 */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(white, transparent 2px) 0 0/50px 50px;
+            opacity: 0.3;
+        }
+
+        /* 滾動軌道 */
+        .scroll-content {
+            position: absolute;
+            top: 100%;
+            width: 80%;
+            text-align: center;
+            transform-origin: 50% 100%;
+            transform: rotateX(25deg); /* 關鍵 3D 傾斜 */
+            animation: scroll-up var(--speed) linear infinite;
+        }
+
+        @keyframes scroll-up {
+            0% { top: 100%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: -150%; opacity: 0; }
+        }
+
+        .text-item {
+            font-size: var(--font-size);
+            color: var(--text-color);
+            font-weight: 900;
+            line-height: 1.5;
+            margin-bottom: 50px;
+            text-shadow: 0 0 20px var(--text-color);
+            word-wrap: break-word;
+        }
+
+        /* 手機控制面板 */
+        .panel {
+            background: rgba(25, 25, 25, 0.98);
+            padding: 20px;
+            border-top: 2px solid #333;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .full { grid-column: span 2; }
+        label { font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .active-btn {
+            grid-column: span 2;
+            background: linear-gradient(45deg, #444, #222);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scene" id="view">
+        <div class="stars"></div>
+        <div class="scroll-content" id="contentBox">
+            </div>
+    </div>
+
+    <div class="panel">
+        <div class="field full">
+            <label>輸入內容 (換行請用空格)</label>
+            <input type="text" id="textIn" value="LIMITLESS 🚀 BEYOND REALITY ✨ FASHION 2026">
+        </div>
+
+        <div class="field">
+            <label>底色</label>
+            <input type="color" id="bgIn" value="#000000">
+        </div>
+
+        <div class="field">
+            <label>文字顏色</label>
+            <input type="color" id="textColIn" value="#ffd700">
+        </div>
+
+        <div class="field">
+            <label>文字大小</label>
+            <input type="range" id="sizeIn" min="20" max="100" value="50">
+        </div>
+
+        <div class="field">
+            <label>速度</label>
+            <input type="range" id="speedIn" min="5" max="30" value="15" dir="rtl">
+        </div>
+
+        <button class="active-btn" onclick="togglePause()">播放 / 暫停</button>
+    </div>
+
+    <script>
+        const contentBox = document.getElementById('contentBox');
+        const textIn = document.getElementById('textIn');
+        const bgIn = document.getElementById('bgIn');
+        const textColIn = document.getElementById('textColIn');
+        const sizeIn = document.getElementById('sizeIn');
+        const speedIn = document.getElementById('speedIn');
+        const root = document.documentElement.style;
+
+        function update() {
+            const words = textIn.value.split(' ');
+            contentBox.innerHTML = words.map(w => `<div class="text-item">${w}</div>`).join('');
+        }
+
+        textIn.oninput = update;
+        bgIn.oninput = (e) => root.setProperty('--bg-color', e.target.value);
+        textColIn.oninput = (e) => root.setProperty('--text-color', e.target.value);
+        sizeIn.oninput = (e) => root.setProperty('--font-size', e.target.value + 'px');
+        speedIn.oninput = (e) => root.setProperty('--speed', e.target.value + 's');
+
+        let paused = false;
+        function togglePause() {
+            paused = !paused;
+            contentBox.style.animationPlayState = paused ? 'paused' : 'running';
+        }
+
+        // 初始化
+        update();
+    </script>
+</body>
+</html>
