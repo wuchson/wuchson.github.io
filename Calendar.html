@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>國曆/農民曆</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&family=Montserrat:wght@200;500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #1a1a1a;
+            --card-bg: #ffffff;
+            --accent: #d4a373; /* 現代大地色調 */
+            --text-dark: #2d3436;
+            --text-grey: #a0a0a0;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Montserrat', 'Noto Sans TC', sans-serif; 
+            background-color: #f4f4f2;
+            margin: 0; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 時鐘區域 */
+        .header-clock { 
+            background: var(--primary-bg);
+            color: white; width: 100%; max-width: 480px; 
+            border-radius: 24px; padding: 25px; text-align: center; 
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        #time-now { font-size: 42px; font-weight: 200; letter-spacing: 3px; display: block; }
+        #date-now { font-size: 13px; opacity: 0.6; margin-top: 8px; font-weight: 300; letter-spacing: 1px; }
+
+        /* 日曆容器 - 改為高度自適應 */
+        .cal-container { 
+            background: var(--card-bg); width: 100%; max-width: 480px; 
+            border-radius: 28px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+            padding-bottom: 15px; /* 底部留白防止太擠 */
+        }
+        
+        .cal-nav { 
+            padding: 25px 30px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .cal-nav h2 { margin: 0; font-size: 22px; font-weight: 800; color: var(--text-dark); }
+        .nav-btn { 
+            background: #f8f8f8; border: none; font-size: 18px;
+            width: 40px; height: 40px; border-radius: 12px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:active { transform: scale(0.9); background: #eee; }
+
+        .week-header { 
+            display: grid; grid-template-columns: repeat(7, 1fr); 
+            padding: 0 15px 15px;
+        }
+        .week-header div { 
+            text-align: center; font-size: 11px; font-weight: 700; color: var(--text-grey); text-transform: uppercase;
+        }
+
+        /* 日期網格 - 移除高度限制，改用 min-height */
+        .date-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            padding: 0 10px; 
+            gap: 2px; 
+        }
+        .cell { 
+            min-height: 75px; /* 確保內容能放下 */
+            border-radius: 14px; padding: 8px 2px; 
+            display: flex; flex-direction: column; align-items: center; 
+            transition: all 0.2s; position: relative;
+        }
+        .cell:active { background-color: #f0f0f0; }
+
+        .s-num { font-size: 17px; font-weight: 600; color: var(--text-dark); }
+        .l-num { font-size: 10px; color: var(--text-grey); margin-top: 2px; }
+        
+        /* 節日與節氣標籤 */
+        .tag-wrap { min-height: 18px; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; align-items: center; }
+        .tag-h { color: #e74c3c; font-size: 9px; font-weight: 700; }
+        .tag-j { color: #2ecc71; font-size: 9px; font-weight: 700; }
+
+        /* 今日樣式 */
+        .is-today { background: var(--primary-bg) !important; }
+        .is-today .s-num, .is-today .l-num, .is-today .tag-h, .is-today .tag-j { color: white !important; }
+        
+        /* 非本月日期：直接隱藏以保持整潔，或變淡 */
+        .not-curr { opacity: 0.15; }
+
+        /* 彈窗樣式 */
+        #modal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 100;
+        }
+        #modal-content { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: white; width: 85%; max-width: 380px; border-radius: 30px; padding: 35px; 
+            z-index: 101; text-align: center;
+        }
+        #m-title { font-size: 32px; font-weight: 900; margin: 0; color: var(--text-dark); }
+        #m-lunar { font-size: 16px; color: var(--accent); margin-bottom: 25px; font-weight: 500; }
+        
+        .m-box { text-align: left; background: #fafafa; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+        .m-box p { margin: 10px 0; font-size: 15px; line-height: 1.6; color: #444; }
+        .label-y { color: #27ae60; font-weight: 900; margin-right: 8px; }
+        .label-j { color: #c0392b; font-weight: 900; margin-right: 8px; }
+
+        .m-btn { 
+            width: 100%; padding: 15px; background: var(--primary-bg); color: white; border: none; 
+            border-radius: 15px; font-size: 16px; font-weight: 600; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-clock">
+    <span id="time-now">00:00:00</span>
+    <div id="date-now">...</div>
+</div>
+
+<div class="cal-container">
+    <div class="cal-nav">
+        <button class="nav-btn" onclick="moveMonth(-1)">←</button>
+        <h2 id="month-title">2026 / 01</h2>
+        <button class="nav-btn" onclick="moveMonth(1)">→</button>
+    </div>
+    <div class="week-header">
+        <div style="color:#e74c3c">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+    </div>
+    <div class="date-grid" id="main-grid"></div>
+</div>
+
+<div id="modal-overlay" onclick="closeM()"></div>
+<div id="modal-content">
+    <h3 id="m-title"></h3>
+    <p id="m-lunar"></p>
+    <div class="m-box">
+        <p><span class="label-y">宜</span> <span id="m-yi"></span></p>
+        <p><span class="label-j">忌</span> <span id="m-ji"></span></p>
+    </div>
+    <button class="m-btn" onclick="closeM()">CLOSE</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+<script>
+    let vDate = new Date(); 
+    const holidays = { "1-1":"元旦", "2-16":"除夕", "2-17":"春節", "2-18":"初二", "2-19":"初三", "2-20":"初四", "2-21":"初五", "2-28":"和平紀念", "4-5":"清明節", "5-1":"勞動節", "6-19":"端午節", "9-25":"中秋節", "10-10":"國慶日" };
+
+    function tick() {
+        const now = new Date();
+        document.getElementById('time-now').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+        const L = Lunar.fromDate(now);
+        document.getElementById('date-now').innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · 農曆 ${L.getMonthInChinese()}月${L.getDayInChinese()}`;
+    }
+
+    function render() {
+        const grid = document.getElementById('main-grid');
+        const title = document.getElementById('month-title');
+        grid.innerHTML = '';
+        const y = vDate.getFullYear();
+        const m = vDate.getMonth();
+        title.innerText = `${y} / ${(m + 1).toString().padStart(2, '0')}`;
+
+        // 核心修正：計算該月需要顯示多少天
+        const firstDayView = new Date(y, m, 1);
+        const startDay = firstDayView.getDay(); // 該月第一天是星期幾
+        
+        // 為了確保完整顯示，我們計算總格子數
+        // 跨越 6 排的情況需要 42 格，跨越 5 排需要 35 格
+        const totalCells = 42; 
+
+        for (let i = 0; i < totalCells; i++) {
+            const date = new Date(y, m, i - startDay + 1);
+            const isCurr = date.getMonth() === m;
+            
+            // 如果已經到第六排且日期已經跨入下個月，則不顯示第六排以節省空間（可選）
+            if (i >= 35 && date.getMonth() !== m) break;
+
+            const cell = document.createElement('div');
+            cell.className = 'cell' + (isCurr ? '' : ' not-curr');
+            if (isCurr && date.toDateString() === new Date().toDateString()) cell.classList.add('is-today');
+
+            const L = Lunar.fromDate(date);
+            const h = (date.getFullYear() === 2026) ? holidays[`${date.getMonth()+1}-${date.getDate()}`] : "";
+            const j = L.getJieQi();
+
+            cell.innerHTML = `
+                <div class="s-num">${date.getDate()}</div>
+                <div class="l-num">${L.getDayInChinese() === '初一' ? L.getMonthInChinese()+'月' : L.getDayInChinese()}</div>
+                <div class="tag-wrap">
+                    ${h ? `<div class="tag-h">${h}</div>` : ''}
+                    ${j ? `<div class="tag-j">${j}</div>` : ''}
+                </div>
+            `;
+
+            cell.onclick = () => {
+                if(!isCurr) return;
+                document.getElementById('m-title').innerText = `${date.getMonth()+1}月${date.getDate()}日`;
+                document.getElementById('m-lunar').innerText = `農曆 ${L.getMonthInChinese()}月${L.getDayInChinese()} · ${L.getYearInGanZhi()}${L.getYearShengXiao()}年`;
+                document.getElementById('m-yi').innerText = L.getDayYi().join('、');
+                document.getElementById('m-ji').innerText = L.getDayJi().join('、');
+                document.getElementById('modal-overlay').style.display = 'block';
+                document.getElementById('modal-content').style.display = 'block';
+            };
+            grid.appendChild(cell);
+        }
+    }
+
+    function moveMonth(v) { vDate.setMonth(vDate.getMonth() + v); render(); }
+    function closeM() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('modal-content').style.display = 'none'; }
+
+    setInterval(tick, 1000);
+    tick();
+    render();
+</script>
+</body>
+</html>
