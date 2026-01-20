@@ -3,142 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>遠親關係百科</title>
+    <title>終極親屬關係百科 & 禮儀計算機</title>
     <style>
         :root {
             --primary: #2c3e50;
             --accent: #e67e22;
+            --red: #c0392b;
+            --green: #27ae60;
             --line: #d1d8e0;
             --bg: #f8f9fa;
         }
 
-        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); }
-        .wrapper { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); line-height: 1.6; }
+        .wrapper { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
         
         header { text-align: center; margin-bottom: 30px; }
-        .search-box { width: 100%; padding: 12px; border: 2px solid var(--line); border-radius: 10px; font-size: 16px; margin-bottom: 20px; outline: none; transition: 0.3s; }
+        .section-title { background: var(--primary); color: white; padding: 10px 15px; border-radius: 8px; margin-top: 30px; font-weight: bold; }
+        
+        /* 搜尋與計算機 UI */
+        .search-box { width: 100%; padding: 12px; border: 2px solid var(--line); border-radius: 10px; font-size: 16px; margin-bottom: 20px; box-sizing: border-box; outline: none; transition: 0.3s; }
         .search-box:focus { border-color: var(--accent); }
 
-        /* 樹狀結構 */
-        .tree ul { padding-top: 20px; position: relative; transition: all 0.5s; padding-left: 0; }
-        .tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; width: 100%; }
+        .calc-container { padding: 20px; border: 2px dashed var(--accent); border-radius: 15px; background: #fffcf9; margin-bottom: 20px; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        button { border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
 
-        /* 使用縮排表現層疊感 */
+        /* 紅包生成器 */
+        .envelope-box { display: flex; gap: 20px; align-items: center; justify-content: center; padding: 20px; background: #eee; border-radius: 15px; flex-wrap: wrap; }
+        .envelope { width: 160px; height: 280px; background: var(--red); border-radius: 10px; position: relative; color: #f1c40f; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .envelope-inner { border: 1px solid #f1c40f; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 10px; }
+
+        /* 列表樣式 */
         .nested-list { padding-left: 20px; border-left: 2px solid var(--line); margin: 10px 0; }
-        .item { 
-            background: white; 
-            border: 1px solid #ddd; 
-            padding: 10px 15px; 
-            border-radius: 8px; 
-            margin-bottom: 8px; 
-            display: flex; 
-            justify-content: space-between;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .item:hover { background: #fffbf0; border-color: var(--accent); transform: scale(1.01); }
+        .item { background: white; border: 1px solid #ddd; padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; cursor: pointer; }
+        .item:hover { background: #fffbf0; border-color: var(--accent); }
+        .level-tag { font-size: 0.75em; padding: 3px 8px; border-radius: 4px; color: white; margin-right: 10px; }
+        .tag-up { background: #3498db; }
+        .tag-side { background: #9b59b6; }
+        .tag-down { background: #27ae60; }
+        .tag-self { background: var(--red); }
         
-        .level-tag { font-size: 0.7em; padding: 2px 6px; border-radius: 4px; color: white; margin-right: 10px; }
-        .tag-up { background: #3498db; }    /* 長輩 */
-        .tag-side { background: #9b59b6; }  /* 旁系 */
-        .tag-down { background: #27ae60; }  /* 晚輩 */
-        .tag-self { background: #e74c3c; }  /* 自己 */
-
-        .relation-text { font-weight: bold; }
-        .desc { font-size: 0.85em; color: #7f8c8d; }
-
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 0.9em; }
+        th { background: #f2f2f2; }
         .hidden { display: none; }
-        .category-title { background: #f1f2f6; padding: 10px; border-radius: 5px; margin-top: 20px; font-weight: bold; color: #57606f; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
     <header>
-        <h1>親屬關係層疊百科</h1>
-        <p>涵蓋九族、旁系、外親與遠房稱呼</p>
+        <h1>🏮 終極親屬關係百科</h1>
+        <p>九族溯源 • 關係計算 • 紅包禮儀</p>
     </header>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="輸入稱呼或關係搜尋（如：堂、舅、曾...）">
+    <div class="section-title">⚡ 關係路徑計算機</div>
+    <div class="calc-container">
+        <div style="font-size: 1.1em; margin-bottom: 10px;">
+            路徑：<span id="pathText" style="color: var(--accent); font-weight: bold;">(請點選下方關係)</span>
+        </div>
+        <div class="btn-group">
+            <button onclick="addPath('父', '父/母')" class="tag-up">父/母</button>
+            <button onclick="addPath('兄', '兄/姊')" class="tag-side">兄/姊</button>
+            <button onclick="addPath('弟', '弟/妹')" class="tag-side">弟/妹</button>
+            <button onclick="addPath('子', '子/女')" class="tag-down">子/女</button>
+            <button onclick="resetCalc()" style="background: #95a5a6; color: white;">清除重設</button>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: #eef2f3; border-radius: 8px;">
+            計算稱呼：<span id="finalRelation" style="font-weight: bold; color: var(--red);">--</span>
+        </div>
+    </div>
 
+    <div class="section-title">🧧 紅包書寫模擬器</div>
+    <div class="envelope-box">
+        <div>
+            <label>場合：</label><br>
+            <select id="eventContext" onchange="updateEnvelope()" style="padding: 8px; width: 120px; margin-top: 10px;">
+                <option value="wedding">結婚誌喜</option>
+                <option value="newyear">過年紅包</option>
+                <option value="birthday">祝壽賀禮</option>
+            </select>
+        </div>
+        <div class="envelope">
+            <div class="envelope-inner">
+                <div id="envReceiver" style="writing-mode: vertical-rl; text-align: right; height: 70%; margin-left: auto; letter-spacing: 5px;">祝 ○○ 婚宴誌喜</div>
+                <div id="envSender" style="font-size: 0.7em; text-align: left;">○○ 敬賀</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">🔍 親屬關係百科檢索</div>
+    <input type="text" id="searchInput" class="search-box" placeholder="搜尋關係或稱呼（如：舅、堂、曾孫...）">
+    
     <div id="treeContent">
-        <div class="category-title">【宗親 / 父系】九族五代</div>
+        <div class="category-title">【宗親 / 直系】九代祖孫</div>
         <div class="nested-list">
-            <div class="item"><span class="relation"><span class="level-tag tag-up">高祖輩</span><span class="relation-text">高祖父 / 高祖母</span></span><span class="desc">爺爺的爺爺/奶奶</span></div>
+            <div class="item"><span class="relation"><span class="level-tag tag-up">高祖輩</span><span class="relation-text">高祖父 / 高祖母</span></span><span class="desc">爺爺的爺爺</span></div>
             <div class="nested-list">
-                <div class="item"><span class="relation"><span class="level-tag tag-up">曾祖輩</span><span class="relation-text">曾祖父 / 曾祖母</span></span><span class="desc">爺爺的爸爸/媽媽 (太公/太婆)</span></div>
+                <div class="item"><span class="relation"><span class="level-tag tag-up">曾祖輩</span><span class="relation-text">曾祖父 / 曾祖母</span></span><span class="desc">爺爺的爸爸</span></div>
                 <div class="nested-list">
-                    <div class="item"><span class="relation"><span class="level-tag tag-up">祖輩</span><span class="relation-text">祖父 / 祖母</span></span><span class="desc">爸爸的爸爸/媽媽 (爺爺/奶奶)</span></div>
+                    <div class="item"><span class="relation"><span class="level-tag tag-up">祖輩</span><span class="relation-text">祖父 / 祖母</span></span><span class="desc">爸爸的父母</span></div>
                     <div class="nested-list">
                         <div class="item"><span class="relation"><span class="level-tag tag-up">父輩</span><span class="relation-text">父親 / 母親</span></span><span class="desc">生身父母</span></div>
-                        <div class="nested-list">
-                            <div class="item" style="border: 2px solid #e74c3c;"><span class="relation"><span class="level-tag tag-self">己身</span><span class="relation-text">我自己</span></span><span class="desc">基準點</span></div>
-                            <div class="nested-list">
-                                <div class="item"><span class="relation"><span class="level-tag tag-down">子輩</span><span class="relation-text">兒子 / 女兒</span></span><span class="desc">第一代晚輩</span></div>
-                                <div class="nested-list">
-                                    <div class="item"><span class="relation"><span class="level-tag tag-down">孫輩</span><span class="relation-text">孫子 / 孫女</span></span><span class="desc">兒子的子女</span></div>
-                                    <div class="nested-list">
-                                        <div class="item"><span class="relation"><span class="level-tag tag-down">曾孫輩</span><span class="relation-text">曾孫 / 曾孫女</span></span><span class="desc">孫子的子女</span></div>
-                                        <div class="nested-list">
-                                            <div class="item"><span class="relation"><span class="level-tag tag-down">玄孫輩</span><span class="relation-text">玄孫 / 玄孫女</span></span><span class="desc">五代孫</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="item" style="border: 2px solid var(--red);"><span class="relation"><span class="level-tag tag-self">己身</span><span class="relation-text">我自己</span></span><span class="desc">基準點</span></div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="category-title">【旁系】極遠房分支</div>
-        <div class="nested-list">
-            <div class="item"><span class="relation"><span class="level-tag tag-side">族輩</span><span class="relation-text">族祖父 / 族祖母</span></span><span class="desc">爺爺的堂兄弟姊妹</span></div>
-            <div class="item"><span class="relation"><span class="level-tag tag-side">堂親</span><span class="relation-text">堂伯 / 堂叔 / 堂姑</span></span><span class="desc">父親的堂兄弟姊妹</span></div>
-            <div class="nested-list">
-                <div class="item"><span class="relation"><span class="level-tag tag-side">再從親</span><span class="relation-text">堂兄弟姊妹 (再從兄弟)</span></span><span class="desc">同曾祖父但不同祖父</span></div>
-                <div class="item"><span class="relation"><span class="level-tag tag-side">晚輩</span><span class="relation-text">堂姪 / 堂外甥</span></span><span class="desc">堂兄弟姊妹的子女</span></div>
-            </div>
-        </div>
-
-        <div class="category-title">【外親 / 母系】</div>
-        <div class="nested-list">
-            <div class="item"><span class="relation"><span class="level-tag tag-up">外祖輩</span><span class="relation-text">外曾祖父 / 外曾祖母</span></span><span class="desc">母親的祖父母</span></div>
-            <div class="item"><span class="relation"><span class="level-tag tag-side">表親</span><span class="relation-text">表伯 / 表叔 / 表姑</span></span><span class="desc">父親的表兄弟姊妹</span></div>
-            <div class="item"><span class="relation"><span class="level-tag tag-side">表親</span><span class="relation-text">舅公 / 姨婆</span></span><span class="desc">母親的舅舅/姨媽</span></div>
-        </div>
     </div>
+
+    <div class="section-title">📖 社交禮儀稱謂表</div>
+    <table>
+        <thead>
+            <tr><th>關係</th><th>對人謙稱 (家/舍)</th><th>尊稱對方 (令)</th><th>書面自稱</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>父母</td><td>家嚴 / 家慈</td><td>令尊 / 令堂</td><td>兒 / 👧小女</td></tr>
+            <tr><td>兄弟</td><td>家兄 / 舍弟</td><td>令兄 / 令弟</td><td>愚兄弟</td></tr>
+            <tr><td>子女</td><td>小兒 / 👧小女</td><td>令郎 / 令愛</td><td>父/母示</td></tr>
+        </tbody>
+    </table>
 </div>
 
 <script>
-    // 搜尋功能邏輯
-    const searchInput = document.getElementById('searchInput');
-    const items = document.querySelectorAll('.item');
+    // 1. 計算機與路徑邏輯
+    let pathKeys = [];
+    let pathLabels = [];
+    
+    const relationData = {
+        "父": { title: "父親/母親", formal: ["父母親", "兒/女"] },
+        "父,父": { title: "祖父/祖母", formal: ["祖父母", "孫/孫女"] },
+        "父,兄": { title: "伯父/叔叔/姑母", formal: ["伯叔父", "姪/姪女"] },
+        "父,子": { title: "自己/兄弟姊妹", formal: ["兄弟/姊妹", "弟/妹"] },
+        "父,兄,子": { title: "堂兄弟姊妹", formal: ["堂兄/弟", "堂弟/兄"] },
+        "子": { title: "兒子/女兒", formal: ["小兒/小女", "父/母"] },
+        "子,子": { title: "孫子/孫女", formal: ["孫輩", "祖父/母"] },
+        "兄,子": { title: "姪子/姪女", formal: ["賢姪", "愚伯/叔"] }
+    };
 
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase();
+    function addPath(key, label) {
+        pathKeys.push(key);
+        pathLabels.push(label);
+        document.getElementById('pathText').innerText = pathLabels.join(' 的 ');
+        
+        let searchKey = pathKeys.join(',');
+        let result = relationData[searchKey];
+        
+        if (result) {
+            document.getElementById('finalRelation').innerText = result.title;
+            updateEnvelope(result.formal);
+        } else {
+            document.getElementById('finalRelation').innerText = "關係較遠，請參考百科";
+        }
+    }
+
+    function resetCalc() {
+        pathKeys = []; pathLabels = [];
+        document.getElementById('pathText').innerText = "(請點選按鈕)";
+        document.getElementById('finalRelation').innerText = "--";
+    }
+
+    // 2. 紅包更新邏輯
+    function updateEnvelope(formalPair = ["某某大人", "某某"]) {
+        const event = document.getElementById('eventContext').value;
+        const receiverLine = document.getElementById('envReceiver');
+        const senderLine = document.getElementById('envSender');
+        
+        const eventSuffix = { "wedding": "婚宴誌喜", "newyear": "歲末吉祥", "birthday": "福壽雙全" };
+        receiverLine.innerText = `祝 ${formalPair[0]} ${eventSuffix[event]}`;
+        senderLine.innerText = `${formalPair[1]} 敬賀`;
+    }
+
+    // 3. 搜尋邏輯
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const query = this.value;
+        const items = document.querySelectorAll('.item');
         items.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            if (text.includes(query)) {
+            const text = item.innerText;
+            if (text.includes(query) && query !== "") {
                 item.style.display = 'flex';
-                // 搜尋時展開所有父級
-                let parent = item.parentElement;
-                while (parent) {
-                    if (parent.classList.contains('nested-list')) parent.style.display = 'block';
-                    parent = parent.parentElement;
-                }
+                item.style.background = '#fffbf0';
+            } else if (query === "") {
+                item.style.display = 'flex';
+                item.style.background = 'white';
             } else {
                 item.style.display = 'none';
-            }
-        });
-    });
-
-    // 點擊縮放邏輯
-    items.forEach(item => {
-        item.addEventListener('click', function() {
-            const nextList = this.nextElementSibling;
-            if (nextList && nextList.classList.contains('nested-list')) {
-                nextList.classList.toggle('hidden');
             }
         });
     });
