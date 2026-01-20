@@ -2,239 +2,142 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE KINSHIP | 終極親屬百科</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>親戚稱呼助手 Pro</title>
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --primary-dark: #1a2a6c;
-            --accent-gold: #b8860b;
-            --accent-rose: #e94e77;
-            --text-main: #2d3436;
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --primary: #6c5ce7; --bg: #f8f9fd; --text-dark: #2d3436;
+            --text-light: #636e72; --white: #ffffff; --danger: #ff7675;
+            --card-shadow: 0 10px 25px rgba(108, 92, 231, 0.1);
         }
-
-        body {
-            font-family: "PingFang TC", "Helvetica Neue", sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            padding: 20px;
-            color: var(--text-main);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        header h1 {
-            font-weight: 300;
-            letter-spacing: 5px;
-            color: var(--primary-dark);
-            margin: 0;
-        }
-
-        .glass-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-gold);
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        /* 修正按鈕區排版 */
-        .btn-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        button.node {
-            flex: 1 1 calc(33% - 10px); /* 讓按鈕在小螢幕也能整齊 */
-            min-width: 70px;
-            background: white;
-            border: 1px solid #eee;
-            padding: 12px 5px;
-            border-radius: 10px;
-            cursor: pointer;
-            color: var(--primary-dark);
-            font-weight: 500;
-            transition: 0.2s;
-        }
-
-        button.node:hover {
-            background: var(--primary-dark);
-            color: white;
-        }
-
-        /* 修正顯示區 */
-        .result-display {
-            background: rgba(26, 42, 108, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        #finalRelation { font-size: 1.5em; font-weight: 600; color: var(--primary-dark); }
-
-        /* 關鍵：修正兩欄佈局在小螢幕的表現 */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr; /* 手機端自動變單欄 */
-            }
-        }
-
-        /* 修正紅包排版 */
-        .envelope-modern {
-            width: 160px;
-            height: 260px;
-            background: linear-gradient(145deg, #d44848, #c0392b);
-            margin: auto;
-            border-radius: 10px;
-            padding: 15px;
-            color: #f1c40f;
-            box-shadow: 0 10px 20px rgba(192, 57, 43, 0.2);
-        }
-
-        .env-border {
-            border: 1px solid rgba(241, 196, 15, 0.3);
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        #envReceiver { 
-            writing-mode: vertical-rl; 
-            font-size: 1.2em; 
-            letter-spacing: 4px;
-            text-orientation: mixed;
-        }
-
-        /* 修正搜尋與列表 */
-        .search-input {
-            width: 100%;
-            border: none;
-            border-bottom: 2px solid #eee;
-            padding: 10px 0;
-            font-size: 1em;
-            outline: none;
-            margin-bottom: 10px;
-            background: transparent;
-        }
-
-        .item {
-            padding: 12px 0;
-            border-bottom: 1px solid #f9f9f9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tag { font-size: 0.7em; padding: 2px 8px; border-radius: 10px; background: #eee; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; }
+        body { background: var(--bg); color: var(--text-dark); padding-bottom: 50px; min-height: 100vh; display: flex; flex-direction: column; }
+        header { padding: 30px 20px 10px; text-align: center; }
+        header h1 { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .container { padding: 0 20px; max-width: 500px; margin: 0 auto; width: 100%; }
+        .display-screen { background: var(--white); border-radius: 30px; padding: 25px 20px; margin-bottom: 20px; box-shadow: var(--card-shadow); text-align: center; border: 1px solid rgba(255, 255, 255, 0.8); min-height: 160px; display: flex; flex-direction: column; justify-content: center; }
+        .path-text { font-size: 0.9rem; color: var(--text-light); min-height: 1.5em; margin-bottom: 10px; }
+        .result-text { font-size: 2.2rem; font-weight: 900; color: var(--primary); }
+        .gender-selector { display: flex; background: #ededf9; border-radius: 20px; padding: 5px; margin-bottom: 20px; }
+        .gender-btn { flex: 1; border: none; background: transparent; padding: 10px; border-radius: 15px; font-size: 0.9rem; font-weight: 700; color: var(--text-light); transition: 0.3s; }
+        .gender-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .key { aspect-ratio: 1.1; border: none; background: var(--white); border-radius: 18px; font-size: 1.1rem; font-weight: 700; color: var(--text-dark); box-shadow: 0 4px 8px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
+        .key:active { transform: scale(0.92); background: #f0f0f5; }
+        .key.op { color: var(--primary); background: #f5f3ff; }
+        .key.func { color: var(--danger); background: #fff5f5; }
+        .key.back { color: var(--text-light); background: #f1f2f6; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>THE KINSHIP</h1>
-        <p>數位親屬百科</p>
-    </header>
+<header>
+    <h1>親戚稱呼助手 Pro</h1>
+    <p style="font-size: 0.75rem; color: #a29bfe;">已修正姻親姊妹與上下五代稱謂</p>
+</header>
 
-    <div class="glass-card">
-        <div class="section-title">智能路徑引擎</div>
-        <div class="btn-grid">
-            <button class="node" onclick="addPath('父', '父')">父系</button>
-            <button class="node" onclick="addPath('母', '母')">母系</button>
-            <button class="node" onclick="addPath('兄', '兄')">兄/姊</button>
-            <button class="node" onclick="addPath('弟', '弟')">弟/妹</button>
-            <button class="node" onclick="addPath('子', '子')">子/女</button>
-            <button class="node" onclick="resetCalc()" style="color: var(--accent-rose);">重設</button>
-        </div>
-        <div class="result-display">
-            <div id="pathText" style="font-size: 0.8em; color: #999; margin-bottom: 5px;">WAITING...</div>
-            <div id="finalRelation">請開始點選</div>
-        </div>
+<div class="container">
+    <div class="display-screen">
+        <div id="path" class="path-text">請組合關係</div>
+        <div id="ans" class="result-text">自己</div>
     </div>
 
-    <div class="main-grid">
-        <div class="glass-card">
-            <div class="section-title">百科檢索</div>
-            <input type="text" id="searchInput" class="search-input" placeholder="搜尋關鍵字...">
-            <div id="treeContent">
-                <div class="item"><span>直系親屬</span><span class="tag">二親等</span></div>
-                <div class="item"><span>堂表親</span><span class="tag">四親等</span></div>
-            </div>
-        </div>
+    <div class="gender-selector">
+        <button id="mBtn" class="gender-btn active" onclick="setGender('male')">我是男生</button>
+        <button id="fBtn" class="gender-btn" onclick="setGender('female')">我是女生</button>
+    </div>
 
-        <div class="glass-card" style="text-align: center;">
-            <div class="section-title">紅包預覽</div>
-            <div class="envelope-modern">
-                <div class="env-border">
-                    <div id="envReceiver">祝 尊親 誌喜</div>
-                    <div id="envSender" style="position: absolute; bottom: 10px; left: 10px; font-size: 0.6em;">本人 敬賀</div>
-                </div>
-            </div>
-        </div>
+    <div class="keypad">
+        <button class="key op" onclick="add('父')">父</button>
+        <button class="key op" onclick="add('母')">母</button>
+        <button class="key back" onclick="back()">退格</button>
+        <button class="key func" onclick="reset()">歸零</button>
+        <button class="key" onclick="add('兄')">兄</button>
+        <button class="key" onclick="add('弟')">弟</button>
+        <button class="key" onclick="add('姐')">姐</button>
+        <button class="key" onclick="add('妹')">妹</button>
+        <button class="key op" onclick="add('夫')">夫</button>
+        <button class="key op" onclick="add('妻')">妻</button>
+        <button class="key op" onclick="add('子')">子</button>
+        <button class="key op" onclick="add('女')">女</button>
     </div>
 </div>
 
 <script>
-    // 保留您之前的 addPath, resetCalc, searchInput 邏輯代碼即可
-    let pathKeys = [];
-    let pathLabels = [];
-    const relationData = {
-        "父,兄": { name: "伯父", formal: "伯父大人" },
-        "父,弟": { name: "叔叔", formal: "叔父大人" },
-        "父,兄,子": { name: "堂兄弟", formal: "堂兄/弟" },
-        "母,兄": { name: "舅舅", formal: "舅父大人" }
-        // ...其餘資料
+    let gender = 'male'; 
+    let stack = [];
+
+    const dict = {
+        // --- 第一層：夫妻 ---
+        "male_妻": "老婆", "female_夫": "老公",
+
+        // --- 核心修正：妻的姊妹 (男生視角) ---
+        "妻,姐": "大姨子",
+        "妻,妹": "小姨子",
+        "妻,兄": "內兄 (大舅子)",
+        "妻,弟": "內弟 (小舅子)",
+
+        // --- 核心修正：夫的姊妹 (女生視角) ---
+        "夫,姐": "大姑子",
+        "夫,妹": "小姑子",
+        "夫,兄": "大伯子",
+        "夫,弟": "小叔子",
+
+        // --- 父母上五代 ---
+        "父": "父親", "父,父": "爺爺", "父,父,父": "曾祖父", "父,父,父,父": "高祖父", "父,父,父,父,父": "天祖父",
+        "母": "母親", "母,母": "外婆", "母,母,母": "外曾祖母", "母,母,母,母": "外高祖母", "母,母,母,母,母": "外天祖母",
+        "父,母": "奶奶", "父,父,母": "曾祖母", "父,父,父,母": "高祖母", "父,父,父,父,母": "天祖母",
+
+        // --- 父母的兄弟姊妹 ---
+        "父,兄": "伯父", "父,弟": "叔叔", "父,姐": "姑姑", "父,妹": "姑姑",
+        "母,兄": "舅舅", "母,弟": "舅舅", "母,姐": "阿姨", "母,妹": "阿姨",
+
+        // --- 兄弟姊妹及其子女 ---
+        "兄": "哥哥", "弟": "弟弟", "姐": "姊姊", "妹": "妹妹",
+        "兄,子": "姪子", "兄,女": "姪女", "弟,子": "姪子", "弟,女": "姪女",
+        "姐,子": "外甥", "姐,女": "外甥女", "妹,子": "外甥", "妹,女": "外甥女",
+
+        // --- 晚輩下五代 ---
+        "子": "兒子", "子,子": "孫子", "子,子,子": "曾孫", "子,子,子,子": "玄孫", "子,子,子,子,子": "來孫",
+        "女": "女兒", "女,子": "外孫", "女,子,子": "外曾孫", "女,子,子,子": "外玄孫", "女,子,子,子,子": "外來孫"
     };
 
-    function addPath(key, label) {
-        pathKeys.push(key);
-        pathLabels.push(label);
-        document.getElementById('pathText').innerText = pathLabels.join(' 〉');
-        let res = relationData[pathKeys.join(',')];
-        if(res) {
-            document.getElementById('finalRelation').innerText = res.name;
-            document.getElementById('envReceiver').innerText = "祝 " + res.formal + " 誌喜";
-        }
+    function setGender(g) {
+        gender = g;
+        document.getElementById('mBtn').classList.toggle('active', g === 'male');
+        document.getElementById('fBtn').classList.toggle('active', g === 'female');
+        reset();
     }
 
-    function resetCalc() {
-        pathKeys = []; pathLabels = [];
-        document.getElementById('pathText').innerText = "WAITING...";
-        document.getElementById('finalRelation').innerText = "請開始點選";
-        document.getElementById('envReceiver').innerText = "祝 尊親 誌喜";
+    function add(r) { 
+        if(stack.length === 0) {
+            if(r === '夫' && gender === 'male') { alert("男生請點「妻」"); return; }
+            if(r === '妻' && gender === 'female') { alert("女生請點「夫」"); return; }
+        }
+        if(stack.length < 10) { stack.push(r); update(); }
+    }
+
+    function reset() { stack = []; update(); }
+    function back() { stack.pop(); update(); }
+
+    function update() {
+        const pathEl = document.getElementById('path');
+        const ansEl = document.getElementById('ans');
+        if (stack.length === 0) {
+            pathEl.innerText = "請組合關係";
+            ansEl.innerText = "自己";
+            return;
+        }
+        pathEl.innerText = "我的 " + stack.join(' 的 ');
+        const key = stack.join(',');
+        const genderKey = gender + "_" + key;
+        
+        // 優先找性別路徑，再找通用路徑
+        let res = dict[genderKey] || dict[key] || "遠親關係";
+
+        ansEl.innerText = res;
+        ansEl.style.fontSize = res.length > 7 ? "1.3rem" : "2.2rem";
     }
 </script>
-
 </body>
 </html>
