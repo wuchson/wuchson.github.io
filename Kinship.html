@@ -93,23 +93,61 @@
         </div>
     </div>
 
-    <div class="section-title">🔍 親屬關係百科檢索</div>
-    <input type="text" id="searchInput" class="search-box" placeholder="搜尋關係或稱呼（如：舅、堂、曾孫...）">
-    
+<h1>親屬關係層疊百科</h1>
+        <p>涵蓋九族、旁系、外親與遠房稱呼</p>
+    </header>
+
+    <input type="text" id="searchInput" class="search-box" placeholder="輸入稱呼或關係搜尋（如：堂、舅、曾...）">
+
     <div id="treeContent">
-        <div class="category-title">【宗親 / 直系】九代祖孫</div>
+        <div class="category-title">【宗親 / 父系】九族五代</div>
         <div class="nested-list">
-            <div class="item"><span class="relation"><span class="level-tag tag-up">高祖輩</span><span class="relation-text">高祖父 / 高祖母</span></span><span class="desc">爺爺的爺爺</span></div>
+            <div class="item"><span class="relation"><span class="level-tag tag-up">高祖輩</span><span class="relation-text">高祖父 / 高祖母</span></span><span class="desc">爺爺的爺爺/奶奶</span></div>
             <div class="nested-list">
-                <div class="item"><span class="relation"><span class="level-tag tag-up">曾祖輩</span><span class="relation-text">曾祖父 / 曾祖母</span></span><span class="desc">爺爺的爸爸</span></div>
+                <div class="item"><span class="relation"><span class="level-tag tag-up">曾祖輩</span><span class="relation-text">曾祖父 / 曾祖母</span></span><span class="desc">爺爺的爸爸/媽媽 (太公/太婆)</span></div>
                 <div class="nested-list">
-                    <div class="item"><span class="relation"><span class="level-tag tag-up">祖輩</span><span class="relation-text">祖父 / 祖母</span></span><span class="desc">爸爸的父母</span></div>
+                    <div class="item"><span class="relation"><span class="level-tag tag-up">祖輩</span><span class="relation-text">祖父 / 祖母</span></span><span class="desc">爸爸的爸爸/媽媽 (爺爺/奶奶)</span></div>
                     <div class="nested-list">
                         <div class="item"><span class="relation"><span class="level-tag tag-up">父輩</span><span class="relation-text">父親 / 母親</span></span><span class="desc">生身父母</span></div>
-                        <div class="item" style="border: 2px solid var(--red);"><span class="relation"><span class="level-tag tag-self">己身</span><span class="relation-text">我自己</span></span><span class="desc">基準點</span></div>
+                        <div class="nested-list">
+                            <div class="item" style="border: 2px solid #e74c3c;"><span class="relation"><span class="level-tag tag-self">己身</span><span class="relation-text">我自己</span></span><span class="desc">基準點</span></div>
+                            <div class="nested-list">
+                                <div class="item"><span class="relation"><span class="level-tag tag-down">子輩</span><span class="relation-text">兒子 / 女兒</span></span><span class="desc">第一代晚輩</span></div>
+                                <div class="nested-list">
+                                    <div class="item"><span class="relation"><span class="level-tag tag-down">孫輩</span><span class="relation-text">孫子 / 孫女</span></span><span class="desc">兒子的子女</span></div>
+                                    <div class="nested-list">
+                                        <div class="item"><span class="relation"><span class="level-tag tag-down">曾孫輩</span><span class="relation-text">曾孫 / 曾孫女</span></span><span class="desc">孫子的子女</span></div>
+                                        <div class="nested-list">
+                                            <div class="item"><span class="relation"><span class="level-tag tag-down">玄孫輩</span><span class="relation-text">玄孫 / 玄孫女</span></span><span class="desc">五代孫</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="category-title">【旁系】極遠房分支</div>
+        <div class="nested-list">
+            <div class="item"><span class="relation"><span class="level-tag tag-side">族輩</span><span class="relation-text">族祖父 / 族祖母</span></span><span class="desc">爺爺的堂兄弟姊妹</span></div>
+            <div class="item"><span class="relation"><span class="level-tag tag-side">堂親</span><span class="relation-text">堂伯 / 堂叔 / 堂姑</span></span><span class="desc">父親的堂兄弟姊妹</span></div>
+            <div class="nested-list">
+                <div class="item"><span class="relation"><span class="level-tag tag-side">再從親</span><span class="relation-text">堂兄弟姊妹 (再從兄弟)</span></span><span class="desc">同曾祖父但不同祖父</span></div>
+                <div class="item"><span class="relation"><span class="level-tag tag-side">晚輩</span><span class="relation-text">堂姪 / 堂外甥</span></span><span class="desc">堂兄弟姊妹的子女</span></div>
+            </div>
+        </div>
+
+        <div class="category-title">【外親 / 母系】</div>
+        <div class="nested-list">
+            <div class="item"><span class="relation"><span class="level-tag tag-up">外祖輩</span><span class="relation-text">外曾祖父 / 外曾祖母</span></span><span class="desc">母親的祖父母</span></div>
+            <div class="item"><span class="relation"><span class="level-tag tag-side">表親</span><span class="relation-text">表伯 / 表叔 / 表姑</span></span><span class="desc">父親的表兄弟姊妹</span></div>
+            <div class="item"><span class="relation"><span class="level-tag tag-side">表親</span><span class="relation-text">舅公 / 姨婆</span></span><span class="desc">母親的舅舅/姨媽</span></div>
+        </div>
+    </div>
+</div>
+
         </div>
     </div>
 
