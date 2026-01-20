@@ -3,28 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>親戚關係助手 - 八親等旗艦版</title>
+    <title>親戚關係助手 - 八親等精確版</title>
     <style>
         :root { --male: #6c5ce7; --female: #e84393; --bg: #f8f9fd; }
         body { font-family: -apple-system, "PingFang TC", sans-serif; background: var(--bg); transition: 0.5s; padding-bottom: 50px; }
         body.female-mode { background: #fff5f8; }
-        
         .screen { 
             background: white; margin: 20px; border-radius: 30px; padding: 40px 20px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center;
-            min-height: 220px; display: flex; flex-direction: column; justify-content: center;
+            min-height: 240px; display: flex; flex-direction: column; justify-content: center;
         }
-        .path { font-size: 0.9rem; color: #b2bec3; margin-bottom: 10px; }
-        .ans { font-size: 2.2rem; font-weight: 900; color: var(--male); transition: 0.3s; }
+        .path { font-size: 0.9rem; color: #b2bec3; margin-bottom: 10px; height: 1.2rem; }
+        .ans { font-size: 2.5rem; font-weight: 900; color: var(--male); transition: 0.3s; line-height: 1.2; }
         .female-mode .ans { color: var(--female); }
-        .degree-tag { display: inline-block; margin-top: 15px; padding: 5px 15px; border-radius: 15px; background: #eeeafb; color: var(--male); font-weight: bold; font-size: 0.8rem; }
-        .female-mode .degree-tag { background: #fff0f6; color: var(--female); }
-
+        .tags { margin-top: 15px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .tag { padding: 5px 12px; border-radius: 12px; background: #eeeafb; color: var(--male); font-weight: bold; font-size: 0.75rem; }
+        .female-mode .tag { background: #fff0f6; color: var(--female); }
         .gender-box { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
         .g-btn { border: none; background: #eeeafb; padding: 10px 30px; border-radius: 20px; font-weight: bold; color: #a29bfe; cursor: pointer; transition: 0.3s; }
         .g-btn.active { background: var(--male); color: white; }
         .female-mode .g-btn.active { background: var(--female); }
-
         .keypad-container { padding: 0 20px; max-width: 500px; margin: 0 auto; }
         .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .key { aspect-ratio: 1.1; border: none; background: white; border-radius: 18px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; }
@@ -35,15 +33,15 @@
 </head>
 <body>
 
-<header style="text-align:center; padding: 30px 0;">
+<header style="text-align:center; padding: 20px 0;">
     <h1 style="font-size:1.5rem;">親戚關係助手 Pro</h1>
-    <p style="font-size:0.8rem; color:#a29bfe;">八親等法規級別運算</p>
+    <p style="font-size:0.8rem; color:#a29bfe;">八親等 · 法律精確版</p>
 </header>
 
 <div class="screen">
     <div id="path" class="path">請開始輸入組合...</div>
     <div id="ans" class="ans">自己</div>
-    <div><span id="deg-tag" class="degree-tag" style="display:none;"></span></div>
+    <div class="tags" id="tags"></div>
 </div>
 
 <div class="gender-box">
@@ -72,11 +70,18 @@
     let gender = 'male';
     let stack = [];
 
-    // 八親等智慧稱呼映射
-    const baseNames = {
-        "父": ["父", "爺", "曾祖", "高祖", "天祖", "烈祖", "太祖", "遠祖"],
-        "子": ["子", "孫", "曾孫", "玄孫", "來孫", "晜孫", "仍孫", "雲孫"]
+    // 精確字典
+    const exactDict = {
+        "父": "父親", "母": "母親", "子": "兒子", "女": "女兒",
+        "父,父": "爺爺", "父,母": "奶奶", "母,父": "外公", "母,母": "外婆",
+        "父,兄": "伯父", "父,弟": "叔父", "父,姐": "姑姑", "父,妹": "姑姑",
+        "母,兄": "舅舅", "母,弟": "舅舅", "母,姐": "姨媽", "母,妹": "姨媽",
+        "兄,子": "姪子", "姐,子": "外甥", "弟,子": "姪子", "妹,子": "外甥",
+        "male_妻": "妻子", "female_夫": "丈夫"
     };
+
+    const upNames = ["父親", "爺爺", "曾祖父", "高祖父", "天祖父", "烈祖父", "太祖父", "遠祖父"];
+    const downNames = ["兒子", "孫子", "曾孫", "玄孫", "來孫", "晜孫", "仍孫", "雲孫"];
 
     function setGender(g) {
         gender = g;
@@ -87,7 +92,7 @@
     }
 
     function add(r) {
-        if (stack.length >= 10) return; // 限制最多 10 層
+        if (stack.length >= 12) return;
         stack.push(r);
         update();
     }
@@ -98,50 +103,39 @@
     function update() {
         const pathEl = document.getElementById('path');
         const ansEl = document.getElementById('ans');
-        const degTag = document.getElementById('deg-tag');
+        const tagsEl = document.getElementById('tags');
         
         if (stack.length === 0) {
             pathEl.innerText = "請開始輸入...";
             ansEl.innerText = gender === 'male' ? "自己 (男)" : "自己 (女)";
-            degTag.style.display = "none";
+            tagsEl.innerHTML = "";
             return;
         }
 
         pathEl.innerText = "我的 " + stack.join(' 的 ');
+        const key = stack.join(',');
         
-        // 核心邏輯：計算親等與自動生成稱呼
-        let degree = 0;
-        let up = 0; 
-        let down = 0;
-        let isSide = false;
-
-        stack.forEach(item => {
-            if (['父', '母'].includes(item)) up++;
-            else if (['子', '女'].includes(item)) down++;
-            else if (['兄', '弟', '姐', '妹'].includes(item)) { up++; down++; isSide = true; }
-            else if (['夫', '妻'].includes(item)) { /* 姻親親等不變 */ }
+        let name = exactDict[gender + "_" + key] || exactDict[key];
+        let up = 0, down = 0, isSide = false;
+        
+        stack.forEach(r => {
+            if (['父', '母'].includes(r)) up++;
+            else if (['子', '女'].includes(r)) down++;
+            else if (['兄', '弟', '姐', '妹'].includes(r)) { up++; down++; isSide = true; }
         });
 
-        degree = up + down;
-        
-        // 生成稱呼 (範例邏輯)
-        let name = "血親關係";
-        if (up > 0 && down === 0) { // 純長輩
-            let prefix = stack[0] === '母' ? "外" : "";
-            name = prefix + (baseNames["父"][up-1] || "遠祖") + (stack[stack.length-1] === '母' ? "母" : "父");
-        } else if (down > 0 && up === 0) { // 純晚輩
-            name = (baseNames["子"][down-1] || "遠孫");
-            if (stack[stack.length-1] === '女') name = name.replace('子', '女').replace('孫', '孫女');
-        } else if (isSide) {
-            if (degree === 2) name = "親兄弟姊妹";
-            else if (degree === 3) name = up > down ? "伯叔姑舅姨" : "姪甥";
-            else if (degree === 4) name = "堂/表兄弟姊妹";
-            else name = (degree) + " 親等旁系";
+        if (!name) {
+            if (up > 0 && down === 0) name = upNames[up-1] || "遠祖";
+            else if (down > 0 && up === 0) name = downNames[down-1] || "遠孫";
+            else name = isSide ? (up + down) + "親等旁系" : "親戚關係";
         }
 
         ansEl.innerText = name;
-        degTag.innerText = degree + " 親等";
-        degTag.style.display = "inline-block";
+        ansEl.style.fontSize = name.length > 6 ? "1.8rem" : "2.5rem";
+        
+        tagsEl.innerHTML = `<span class="tag">${up + down} 親等</span>`;
+        if (isSide) tagsEl.innerHTML += `<span class="tag">旁系血親</span>`;
+        else if (up + down > 0) tagsEl.innerHTML += `<span class="tag">直系血親</span>`;
     }
 </script>
 </body>
