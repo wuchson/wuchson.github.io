@@ -2,146 +2,143 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>遠親關係百科</title>
+    <title>九族全景百科：計算機與層疊圖</title>
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #e67e22;
-            --line: #d1d8e0;
-            --bg: #f8f9fa;
-        }
+        :root { --gold: #b8860b; --wood: #3e2723; --paper: #fdfaf0; --male: #3498db; --female: #e91e63; --tree-line: #bdc3c7; }
+        body { font-family: "Noto Sans TC", sans-serif; background: #f4f4f4; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; }
 
-        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); }
-        .wrapper { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        
-        header { text-align: center; margin-bottom: 30px; }
-        .search-box { width: 100%; padding: 12px; border: 2px solid var(--line); border-radius: 10px; font-size: 16px; margin-bottom: 20px; outline: none; transition: 0.3s; }
-        .search-box:focus { border-color: var(--accent); }
+        /* 計算機樣式 */
+        .calc-box { background: var(--paper); border-radius: 12px; border: 3px double var(--gold); box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 40px; }
+        .gender-selector { display: flex; background: #ddd; }
+        .gender-btn { flex: 1; border: none; padding: 12px; cursor: pointer; font-weight: bold; }
+        .gender-btn.active.male { background: var(--male); color: white; }
+        .gender-btn.active.female { background: var(--female); color: white; }
+        .screen { background: var(--wood); color: #fff; padding: 20px; text-align: right; }
+        .path { font-size: 0.85em; opacity: 0.7; min-height: 1.2em; }
+        .ans { font-size: 1.8em; font-weight: bold; color: #f1c40f; margin-top: 5px; }
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--gold); }
+        button.key { border: none; padding: 15px; font-size: 1.1em; background: #fff; cursor: pointer; }
+        button.key:hover { background: #fffde7; }
+        .ac-btn { background: #c0392b !important; color: white; }
 
-        /* 樹狀結構 */
-        .tree ul { padding-top: 20px; position: relative; transition: all 0.5s; padding-left: 0; }
-        .tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; width: 100%; }
-
-        /* 使用縮排表現層疊感 */
-        .nested-list { padding-left: 20px; border-left: 2px solid var(--line); margin: 10px 0; }
-        .item { 
-            background: white; 
-            border: 1px solid #ddd; 
-            padding: 10px 15px; 
-            border-radius: 8px; 
-            margin-bottom: 8px; 
-            display: flex; 
-            justify-content: space-between;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .item:hover { background: #fffbf0; border-color: var(--accent); transform: scale(1.01); }
-        
-        .level-tag { font-size: 0.7em; padding: 2px 6px; border-radius: 4px; color: white; margin-right: 10px; }
-        .tag-up { background: #3498db; }    /* 長輩 */
-        .tag-side { background: #9b59b6; }  /* 旁系 */
-        .tag-down { background: #27ae60; }  /* 晚輩 */
-        .tag-self { background: #e74c3c; }  /* 自己 */
-
-        .relation-text { font-weight: bold; }
-        .desc { font-size: 0.85em; color: #7f8c8d; }
-
-        .hidden { display: none; }
-        .category-title { background: #f1f2f6; padding: 10px; border-radius: 5px; margin-top: 20px; font-weight: bold; color: #57606f; }
+        /* 層疊圖樣式 */
+        .tree-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .tree-box h3 { border-left: 5px solid var(--gold); padding-left: 10px; color: var(--wood); }
+        ul { list-style: none; padding-left: 25px; border-left: 1px solid var(--tree-line); }
+        li { margin: 10px 0; position: relative; }
+        li::before { content: ""; position: absolute; left: -25px; top: 12px; width: 20px; border-top: 1px solid var(--tree-line); }
+        .node-tag { background: #f9f9f9; padding: 4px 10px; border-radius: 4px; border: 1px solid #eee; font-size: 0.95em; }
+        .highlight { color: var(--gold); font-weight: bold; }
+        .self-node { background: #e74c3c; color: white; border: none; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <header>
-        <h1>親屬關係層疊百科</h1>
-        <p>涵蓋九族、旁系、外親與遠房稱呼</p>
-    </header>
-
-    <input type="text" id="searchInput" class="search-box" placeholder="輸入稱呼或關係搜尋（如：堂、舅、曾...）">
-
-    <div id="treeContent">
-        <div class="category-title">【宗親 / 父系】九族五代</div>
-        <div class="nested-list">
-            <div class="item"><span class="relation"><span class="level-tag tag-up">高祖輩</span><span class="relation-text">高祖父 / 高祖母</span></span><span class="desc">爺爺的爺爺/奶奶</span></div>
-            <div class="nested-list">
-                <div class="item"><span class="relation"><span class="level-tag tag-up">曾祖輩</span><span class="relation-text">曾祖父 / 曾祖母</span></span><span class="desc">爺爺的爸爸/媽媽 (太公/太婆)</span></div>
-                <div class="nested-list">
-                    <div class="item"><span class="relation"><span class="level-tag tag-up">祖輩</span><span class="relation-text">祖父 / 祖母</span></span><span class="desc">爸爸的爸爸/媽媽 (爺爺/奶奶)</span></div>
-                    <div class="nested-list">
-                        <div class="item"><span class="relation"><span class="level-tag tag-up">父輩</span><span class="relation-text">父親 / 母親</span></span><span class="desc">生身父母</span></div>
-                        <div class="nested-list">
-                            <div class="item" style="border: 2px solid #e74c3c;"><span class="relation"><span class="level-tag tag-self">己身</span><span class="relation-text">我自己</span></span><span class="desc">基準點</span></div>
-                            <div class="nested-list">
-                                <div class="item"><span class="relation"><span class="level-tag tag-down">子輩</span><span class="relation-text">兒子 / 女兒</span></span><span class="desc">第一代晚輩</span></div>
-                                <div class="nested-list">
-                                    <div class="item"><span class="relation"><span class="level-tag tag-down">孫輩</span><span class="relation-text">孫子 / 孫女</span></span><span class="desc">兒子的子女</span></div>
-                                    <div class="nested-list">
-                                        <div class="item"><span class="relation"><span class="level-tag tag-down">曾孫輩</span><span class="relation-text">曾孫 / 曾孫女</span></span><span class="desc">孫子的子女</span></div>
-                                        <div class="nested-list">
-                                            <div class="item"><span class="relation"><span class="level-tag tag-down">玄孫輩</span><span class="relation-text">玄孫 / 玄孫女</span></span><span class="desc">五代孫</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="container">
+    <div class="calc-box">
+        <div class="gender-selector">
+            <button id="mBtn" class="gender-btn male active" onclick="setGender('male')">我是男性</button>
+            <button id="fBtn" class="gender-btn female" onclick="setGender('female')">我是女性</button>
         </div>
-
-        <div class="category-title">【旁系】極遠房分支</div>
-        <div class="nested-list">
-            <div class="item"><span class="relation"><span class="level-tag tag-side">族輩</span><span class="relation-text">族祖父 / 族祖母</span></span><span class="desc">爺爺的堂兄弟姊妹</span></div>
-            <div class="item"><span class="relation"><span class="level-tag tag-side">堂親</span><span class="relation-text">堂伯 / 堂叔 / 堂姑</span></span><span class="desc">父親的堂兄弟姊妹</span></div>
-            <div class="nested-list">
-                <div class="item"><span class="relation"><span class="level-tag tag-side">再從親</span><span class="relation-text">堂兄弟姊妹 (再從兄弟)</span></span><span class="desc">同曾祖父但不同祖父</span></div>
-                <div class="item"><span class="relation"><span class="level-tag tag-side">晚輩</span><span class="relation-text">堂姪 / 堂外甥</span></span><span class="desc">堂兄弟姊妹的子女</span></div>
-            </div>
+        <div class="screen">
+            <div id="pathText" class="path">我的...</div>
+            <div id="ansText" class="ans">自己</div>
         </div>
-
-        <div class="category-title">【外親 / 母系】</div>
-        <div class="nested-list">
-            <div class="item"><span class="relation"><span class="level-tag tag-up">外祖輩</span><span class="relation-text">外曾祖父 / 外曾祖母</span></span><span class="desc">母親的祖父母</span></div>
-            <div class="item"><span class="relation"><span class="level-tag tag-side">表親</span><span class="relation-text">表伯 / 表叔 / 表姑</span></span><span class="desc">父親的表兄弟姊妹</span></div>
-            <div class="item"><span class="relation"><span class="level-tag tag-side">表親</span><span class="relation-text">舅公 / 姨婆</span></span><span class="desc">母親的舅舅/姨媽</span></div>
+        <div class="btn-group">
+            <button class="key" onclick="add('父')">父</button>
+            <button class="key" onclick="add('母')">母</button>
+            <button class="key" onclick="back()">退格</button>
+            <button class="key ac-btn" onclick="reset()">AC</button>
+            <button class="key" onclick="add('兄')">兄</button>
+            <button class="key" onclick="add('弟')">弟</button>
+            <button class="key" onclick="add('姐')">姐</button>
+            <button class="key" onclick="add('妹')">妹</button>
+            <button class="key" onclick="add('夫')">夫</button>
+            <button class="key" onclick="add('妻')">妻</button>
+            <button class="key" onclick="add('子')">子</button>
+            <button class="key" onclick="add('女')">女</button>
         </div>
+    </div>
+
+    <div class="tree-box">
+        <h3>🌳 九族五代層疊對照表</h3>
+        
+        <ul>
+            <li><span class="node-tag"><b>天祖輩</b>：天祖父母</span>
+                <ul>
+                    <li><span class="node-tag"><b>高祖輩</b>：高祖父母</span>
+                        <ul>
+                            <li><span class="node-tag"><b>曾祖輩</b>：曾祖父母 (太公/太婆)</span>
+                                <ul>
+                                    <li><span class="node-tag"><b>祖輩</b>：祖父母 / 外祖父母</span>
+                                        <ul>
+                                            <li><span class="node-tag"><b>父輩</b>：父親 / 母親</span>
+                                                <ul>
+                                                    <li><span class="node-tag self-node"><b>己身</b>：我</span>
+                                                        <ul>
+                                                            <li><span class="node-tag"><b>子輩</b>：兒子 / 女兒</span>
+                                                                <ul>
+                                                                    <li><span class="node-tag"><b>孫輩</b>：孫子 / 孫女</span>
+                                                                        <ul>
+                                                                            <li><span class="node-tag"><b>曾孫輩</b>：曾孫 / 曾孫女</span>
+                                                                                <ul>
+                                                                                    <li><span class="node-tag"><b>玄孫輩</b>：玄孫 / 玄孫女</span>
+                                                                                        <ul>
+                                                                                            <li><span class="node-tag"><b>來孫輩</b>：來孫 / 來孫女</span></li>
+                                                                                        </ul>
+                                                                                    </li>
+                                                                                </ul>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </li>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </div>
 </div>
 
 <script>
-    // 搜尋功能邏輯
-    const searchInput = document.getElementById('searchInput');
-    const items = document.querySelectorAll('.item');
+    let myGender = 'male';
+    let stack = [];
+    const dict = {
+        "父": "父親", "母": "母親", "父,父": "爺爺", "母,母": "外婆",
+        "父,父,父": "曾祖父", "父,父,父,父": "高祖父", "父,父,父,父,父": "天祖父",
+        "子,子": "孫子", "子,子,子": "曾孫", "子,子,子,子": "玄孫", "子,子,子,子,子": "來孫",
+        "male_妻,父": "岳父", "female_夫,父": "公公",
+        "父,兄": "伯父", "父,弟": "叔父", "母,兄": "舅父", "母,姐": "姨母"
+    };
 
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase();
-        items.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            if (text.includes(query)) {
-                item.style.display = 'flex';
-                // 搜尋時展開所有父級
-                let parent = item.parentElement;
-                while (parent) {
-                    if (parent.classList.contains('nested-list')) parent.style.display = 'block';
-                    parent = parent.parentElement;
-                }
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-
-    // 點擊縮放邏輯
-    items.forEach(item => {
-        item.addEventListener('click', function() {
-            const nextList = this.nextElementSibling;
-            if (nextList && nextList.classList.contains('nested-list')) {
-                nextList.classList.toggle('hidden');
-            }
-        });
-    });
+    function setGender(g) {
+        myGender = g;
+        document.getElementById('mBtn').classList.toggle('active', g === 'male');
+        document.getElementById('fBtn').classList.toggle('active', g === 'female');
+        render();
+    }
+    function add(r) { if(stack.length < 8) stack.push(r); render(); }
+    function reset() { stack = []; render(); }
+    function back() { stack.pop(); render(); }
+    function render() {
+        const p = document.getElementById('pathText');
+        const a = document.getElementById('ansText');
+        if (stack.length === 0) { p.innerText = "我的..."; a.innerText = "自己"; return; }
+        const key = stack.join(',');
+        const gKey = myGender + "_" + key;
+        p.innerText = "路徑: " + stack.join(' 的 ');
+        a.innerText = dict[gKey] || dict[key] || "遠親長輩";
+    }
 </script>
 
 </body>
