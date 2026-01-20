@@ -6,22 +6,12 @@
   <title>Ch AI TOOL 小工具</title>
 
   <meta name="description" content="Ch AI TOOL 提供多種免費線上工具：AI 會議助理、文章閱讀器、HTML網頁語法測試、英文大小寫轉換、色票選擇器、文字處理器、PO文神器、全能秤重助手、年齡換算器、私人加密保險箱、線上抽獎系統。">
-  <meta name="keywords" content="AI 會議助理, 文章閱讀器, HTML測試, 色票選擇, 文字處理, PO文神器, 秤重助手, 年齡換算, 加密保險箱, 抽獎系統, 罩杯計算, 關鍵字篩選器, 跑馬燈, 國曆/農民曆">
- 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Ch AI TOOL",
-    "description": "提供多項免費 AI 工具集。",
-    "featureList": ["AI 會議助理-聽寫", "文章閱讀器-文字轉語音", "HTML網頁語法測試", "英文大小寫轉換", "色票選擇器", "文字處理器", "PO文神器", "全能秤重助手", "年齡換算器", "私人加密保險箱", "線上抽獎系統", "罩杯尺寸計算器", "關鍵字篩選器", "跑馬燈", "國曆/農民曆"]
-  }
-  </script>
-
+  
   <link rel="icon" href="icon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
   <style>
     :root {
       --bg-main: #0b0f1a;
@@ -31,13 +21,11 @@
       --text-muted: #9ca3af;
       --accent: #6366f1;
       --accent-light: #8b5cf6;
-      --nav-bg: rgba(11, 15, 26, 0.9);
+      --nav-bg: rgba(11, 15, 26, 0.95);
       --live-green: #10b981;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -45,18 +33,18 @@
       background: radial-gradient(circle at top, #111827, var(--bg-main));
       color: var(--text-main);
       line-height: 1.75;
-      /* 關鍵：給予足夠的 Padding 避免兩排選單擋住標題 */
-      padding-top: 140px; 
+      /* 核心修正：增加頂部推距，避免標題被兩排選單遮擋 */
+      padding-top: 150px; 
     }
 
-    /* --- 導覽列優化 --- */
+    /* --- 導覽列與選單修正 --- */
     .navbar {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       min-height: 70px;
-      height: auto; /* 讓它隨兩排內容自動增高 */
+      height: auto; /* 讓它隨內容自動撐高 */
       background: var(--nav-bg);
       backdrop-filter: blur(15px);
       border-bottom: 1px solid var(--border-glow);
@@ -74,15 +62,14 @@
       text-decoration: none;
       text-shadow: 0 0 10px var(--accent);
       white-space: nowrap;
-      margin-right: 20px;
     }
 
-    /* 電腦版選單：使用 Grid 達成 10 個一排 */
     .nav-menu {
       display: grid;
+      /* 電腦版 10 個一排 */
       grid-template-columns: repeat(10, auto); 
-      gap: 10px 18px;
       list-style: none;
+      gap: 10px 15px;
       margin: 0;
       padding: 0;
       justify-content: end;
@@ -91,10 +78,9 @@
     .nav-menu a {
       color: var(--text-main);
       text-decoration: none;
-      font-size: 0.85rem; /* 字體稍微縮小確保 10 個塞得進去 */
+      font-size: 0.85rem;
       transition: 0.3s;
       white-space: nowrap;
-      display: block;
     }
 
     .nav-menu a:hover {
@@ -107,7 +93,7 @@
       flex-direction: column;
       cursor: pointer;
       gap: 6px;
-      z-index: 3000;
+      z-index: 3001; /* 確保 X 按鈕在最上層 */
     }
 
     .menu-toggle span {
@@ -118,47 +104,57 @@
       transition: 0.4s;
     }
 
-    /* --- 響應式調整 --- */
-    @media (max-width: 1200px) {
-      /* 螢幕不夠寬時，改為 8 個一排 */
-      .nav-menu { grid-template-columns: repeat(8, auto); }
-      body { padding-top: 150px; }
-    }
-
+    /* --- 手機版 (768px 以下) 修正 --- */
     @media (max-width: 768px) {
       body { padding-top: 80px; }
-      .navbar { height: 70px; min-height: 70px; }
+      
       .menu-toggle { display: flex; }
+
       .nav-menu {
-        display: flex; /* 手機版還原垂直排列 */
+        display: flex; 
         position: fixed;
         top: 0;
-        right: -100%;
-        width: 75%;
+        right: -100%; 
+        width: 80%;
         height: 100vh;
         background: rgba(11, 15, 26, 0.98);
         flex-direction: column;
-        padding: 80px 1.5rem 2rem 0;
-        transition: 0.4s;
-        gap: 0;
+        justify-content: flex-start;
+        /* 核心修正：文字靠左對齊，並從 X 按鈕下方開始 */
+        align-items: flex-start; 
+        padding: 90px 2rem 2rem 2.5rem; 
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        grid-template-columns: none;
       }
+
       .nav-menu.active { right: 0; }
-      .nav-menu a { font-size: 1rem; padding: 12px 0; }
-      
+
+      .nav-menu li { 
+        width: 100%; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+      }
+
+      .nav-menu a { 
+        font-size: 1.1rem; 
+        padding: 16px 0; 
+        display: block;
+        text-align: left;
+      }
+
       .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
       .menu-toggle.open span:nth-child(2) { opacity: 0; }
       .menu-toggle.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
     }
 
-    /* --- 其他內容樣式 --- */
+    /* --- 其他內容與計數器 --- */
     header {
       text-align: center;
-      padding: 2rem 1.5rem 1rem;
+      padding: 3rem 1.5rem 1rem;
       background: linear-gradient(180deg, rgba(99,102,241,0.15), transparent);
     }
-    header h1 { font-size: 2.6rem; margin: 0; letter-spacing: 0.15em; color: #fff; text-shadow: 0 0 18px rgba(99,102,241,0.8); }
-    header h3 { font-weight: 500; color: var(--text-main); margin-top: 10px; }
-    header p { color: var(--text-muted); font-size: 1.1rem; }
+    header h1 { font-size: 2.6rem; margin: 0; color: #fff; text-shadow: 0 0 18px var(--accent); }
+    header h3 { font-weight: 500; margin-top: 10px; }
+    header p { color: var(--text-muted); }
 
     .counter-wrapper { display: flex; justify-content: center; margin-bottom: 2rem; }
     .counter-pill {
@@ -169,22 +165,19 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      backdrop-filter: blur(10px);
     }
-    .status-dot { width: 9px; height: 9px; background-color: var(--live-green); border-radius: 50%; animation: blink 1.6s infinite ease-in-out; }
-    @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } }
+    .status-dot { width: 9px; height: 9px; background-color: var(--live-green); border-radius: 50%; animation: blink 1.6s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     main { max-width: 1100px; margin: auto; padding: 0 1.5rem 3rem; }
-    section { margin-bottom: 2.5rem; padding: 2.2rem; border-radius: 16px; background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-glow); }
-    section h2 { margin-top: 0; border-left: 4px solid var(--accent-light); padding-left: 0.8rem; color: #fff; }
+    section { margin-bottom: 2.5rem; padding: 2.2rem; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-glow); }
+    section h2 { border-left: 4px solid var(--accent-light); padding-left: 0.8rem; }
 
-    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
-    .feature-card { padding: 1.6rem; border-radius: 14px; background: linear-gradient(145deg, rgba(99,102,241,0.15), rgba(139,92,246,0.08)); border: 1px solid rgba(99,102,241,0.4); cursor: pointer; transition: 0.25s; }
-    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 0 25px rgba(139,92,246,0.6); }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+    .feature-card { padding: 1.6rem; border-radius: 14px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99,102,241,0.3); cursor: pointer; transition: 0.3s; }
+    .feature-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px var(--accent-light); }
 
-    #install-prompt { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; padding: 16px 24px; border-radius: 16px; z-index: 9999; text-align: center; width: 90%; max-width: 400px; }
-    #install-prompt button { background: white; color: var(--accent); border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    footer { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.9rem; }
+    footer { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; }
   </style>
 </head>
 
@@ -234,38 +227,25 @@
   <main>
     <section>
       <h2>網站簡介</h2>
-      <p>
-        <strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台，結合現代化介面設計與 AI 輔助功能。
-        使用者可直接在瀏覽器中完成語音、文字與網頁相關處理，無需安裝任何額外軟體。
-      </p>
+      <p><strong>AI TOOL</strong> 是一個專注於效率提升的前端工具平台。使用者可直接在瀏覽器中完成各項處理，無需安裝軟體。</p>
     </section>
 
     <section>
       <h2>核心功能</h2>
       <div class="features">
         <div class="feature-card" onclick="location.href='Dictation.html'"><h3>🎙 AI 會議助理</h3><p>即時語音轉文字，快速生成會議紀錄。</p></div>
-        <div class="feature-card" onclick="location.href='Reader.html'"><h3>🔊 文章閱讀器</h3><p>將文字轉換為自然語音，適合學習與多工。</p></div>
-        <div class="feature-card" onclick="location.href='Grammartest.html'"><h3>💻 HTML 語法測試</h3><p>即時預覽 HTML 結果，快速驗證結構。</p></div>
-        <div class="feature-card" onclick="location.href='Englishconversion.html'"><h3>🔠 英文大小寫轉換</h3><p>一鍵轉換文字格式，提升編輯效率。</p></div>
-        <div class="feature-card" onclick="location.href='ColorTicket.html'"><h3>🧪 色票選擇器</h3><p>全色系選色助手：支援手機，秒速複製。</p></div>
-        <div class="feature-card" onclick="location.href='portfolio.html'"><h3>📝 文字處理器</h3><p>輸入或貼上文字，立即進行轉換與優化。</p></div>
-        <div class="feature-card" onclick="location.href='CommunityPO.html'"><h3>✍️ PO文神器</h3><p>讓每一篇 PO 文都成為眾人矚目的焦點吧！</p></div>
-        <div class="feature-card" onclick="location.href='Weightconversion.html'"><h3>🥦 全能秤重助手</h3><p>菜市場、超市買菜必備！能幫您快速計算。</p></div>
-        <div class="feature-card" onclick="location.href='AgeConversion.html'"><h3>👫 年齡換算器</h3><p>強化台灣特有年份轉換邏輯，快速計算年齡。</p></div>
-        <div class="feature-card" onclick="location.href='Password.html'"><h3>🔐 私人加密保險箱</h3><p>檔案亂碼化儲存，兼顧便利與極高安全性。</p></div>
-        <div class="feature-card" onclick="location.href='Lottery.html'"><h3>🎁 抽獎系統</h3><p>免註冊直接可用，支援 Excel CSV 檔案讀入。</p></div>
-        <div class="feature-card" onclick="location.href='Bracup.html'"><h3>👙 罩杯計算器</h3><p>專為 A-K 罩杯設計，精準計算支撐與包覆。</p></div>
-        <div class="feature-card" onclick="location.href='KeywordFilter.html'"><h3>📑 關鍵字篩選器</h3><p>專為快速校對與資訊檢索設計的工具。</p></div>
-        <div class="feature-card" onclick="location.href='Scrollinglight.html'"><h3>🪧 跑馬燈</h3><p>流暢 3D 動畫技術，手機秒變廣告看板。</p></div>
-        <div class="feature-card" onclick="location.href='Calendar.html'"><h3>📆 日曆</h3><p>查找節氣、參考宜忌，追求質感的歲時夥伴。</p></div>
+        <div class="feature-card" onclick="location.href='Reader.html'"><h3>🔊 文章閱讀器</h3><p>將文字轉換為自然語音。</p></div>
+        <div class="feature-card" onclick="location.href='Grammartest.html'"><h3>💻 HTML 語法測試</h3><p>即時預覽 HTML 結果。</p></div>
+        <div class="feature-card" onclick="location.href='Englishconversion.html'"><h3>🔠 英文大小寫轉換</h3><p>一鍵轉換文字格式。</p></div>
+        <div class="feature-card" onclick="location.href='ColorTicket.html'"><h3>🧪 色票選擇器</h3><p>全色系選色助手，秒速複製。</p></div>
+        <div class="feature-card" onclick="location.href='portfolio.html'"><h3>📝 文字處理器</h3><p>快速轉換與優化文字。</p></div>
+        <div class="feature-card" onclick="location.href='CommunityPO.html'"><h3>✍️ PO文神器</h3><p>讓每一篇 PO 文都成為焦點！</p></div>
+        <div class="feature-card" onclick="location.href='Weightconversion.html'"><h3>🥦 全能秤重助手</h3><p>菜市場、超市買菜必備！</p></div>
+        <div class="feature-card" onclick="location.href='AgeConversion.html'"><h3>👫 年齡換算器</h3><p>強化台灣特有年份轉換邏輯。</p></div>
+        <div class="feature-card" onclick="location.href='Password.html'"><h3>🔐 私人加密保險箱</h3><p>檔案亂碼化儲存，極高安全性。</p></div>
       </div>
     </section>
   </main>
-
-  <div id="install-prompt">
-    <p id="prompt-text"></p>
-    <button onclick="closePrompt()">我知道了</button>
-  </div>
 
   <footer>
     © 2026 AI TOOL · Designed & Built by Chson
@@ -280,20 +260,12 @@
       menuToggle.classList.toggle('open');
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
-      if (!localStorage.getItem('hasSeenInstallPrompt')) {
-        const promptDiv = document.getElementById('install-prompt');
-        const promptText = document.getElementById('prompt-text');
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        promptText.innerHTML = isMobile ? "💡 建議將本站「加入主畫面」以便快速使用！" : "✨ 按下 <b>Ctrl+D</b> 將本站加入收藏夾！";
-        setTimeout(() => { promptDiv.style.display = 'block'; }, 1500);
-      }
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        menuToggle.classList.remove('open');
+      });
     });
-
-    function closePrompt() {
-      document.getElementById('install-prompt').style.display = 'none';
-      localStorage.setItem('hasSeenInstallPrompt', 'true');
-    }
   </script>
 </body>
 </html>
