@@ -3,23 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>親戚關係助手 Pro</title>
+    <title>五親等關係查詢</title>
     <style>
-        :root {
-            --accent: #6c5ce7;
-            --bg: #fdfbff;
-            --card: #ffffff;
-            --text: #2d3436;
-            --light-purple: #eeeafb;
-        }
+        :root { --accent: #6c5ce7; --bg: #fdfbff; --card: #ffffff; --text: #2d3436; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        body { font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); color: var(--text); padding-bottom: 110px; overflow-x: hidden; }
+        body { font-family: -apple-system, "PingFang TC", sans-serif; background: var(--bg); color: var(--text); padding-bottom: 110px; }
 
         header { padding: 40px 20px 10px; text-align: center; }
-        header h1 { font-size: 1.6rem; font-weight: 800; color: var(--text); }
-        header p { font-size: 0.8rem; color: #a29bfe; margin-top: 6px; letter-spacing: 2px; }
+        header h1 { font-size: 1.6rem; font-weight: 800; }
+        header p { font-size: 0.8rem; color: #a29bfe; margin-top: 5px; letter-spacing: 1px; }
 
-        /* 顯示螢幕 */
         .display-area { padding: 0 20px; margin: 20px 0; }
         .screen { 
             background: var(--card); border-radius: 30px; padding: 30px 20px; 
@@ -27,34 +20,29 @@
             border: 1px solid rgba(108, 92, 231, 0.05); min-height: 170px;
             display: flex; flex-direction: column; justify-content: center;
         }
-        .path { font-size: 0.9rem; color: #b2bec3; margin-bottom: 12px; min-height: 1.4rem; }
-        .ans { font-size: 2.2rem; font-weight: 900; color: var(--accent); transition: 0.2s; }
+        .path { font-size: 0.9rem; color: #b2bec3; margin-bottom: 12px; }
+        .ans { font-size: 2.2rem; font-weight: 900; color: var(--accent); }
 
-        /* 性別切換器 */
         .selector-box { padding: 0 50px; margin-bottom: 25px; }
-        .gender-pill { display: flex; background: var(--light-purple); border-radius: 20px; padding: 5px; }
-        .gender-btn { flex: 1; border: none; padding: 10px; border-radius: 15px; font-weight: 700; cursor: pointer; color: #a29bfe; background: transparent; font-size: 0.9rem; }
+        .gender-pill { display: flex; background: #eeeafb; border-radius: 20px; padding: 5px; }
+        .gender-btn { flex: 1; border: none; padding: 10px; border-radius: 15px; font-weight: 700; cursor: pointer; color: #a29bfe; background: transparent; }
         .gender-btn.active { background: white; color: var(--accent); box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2); }
 
-        /* 按鍵區：確保手機比例完美 */
         .keypad-container { padding: 0 25px; max-width: 450px; margin: 0 auto; }
         .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .key { 
-            aspect-ratio: 1; border: none; background: var(--card); border-radius: 22px; 
+            aspect-ratio: 1; border: none; background: var(--card); border-radius: 20px; 
             font-size: 1.2rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        .key:active { transform: scale(0.9); background: var(--light-purple); }
+        .key:active { transform: scale(0.9); background: #eeeafb; }
         .key.op { color: var(--accent); background: #f8f7ff; }
-        .key.ac { color: #ff7675; background: #fff5f5; }
+        .key.ac { color: #ff7675; }
 
-        /* 分頁切換 */
-        .view-section { display: none; padding: 0 20px; animation: slideUp 0.4s ease; }
+        .view-section { display: none; padding: 20px; animation: slideUp 0.4s ease; }
         .view-section.active { display: block; }
-        .map-card { background: white; border-radius: 30px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .tree-node { border-left: 2px solid #efeff4; padding-left: 15px; margin: 12px 0; font-size: 0.95rem; }
+        .map-card { background: white; border-radius: 30px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); font-size: 0.9rem; line-height: 1.8; }
 
-        /* 底部導覽 */
         .bottom-nav { 
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
             width: 85%; background: #2d3436; border-radius: 30px; padding: 12px 0; 
@@ -62,8 +50,6 @@
         }
         .nav-item { flex: 1; text-align: center; color: #636e72; font-size: 0.8rem; font-weight: 800; cursor: pointer; }
         .nav-item.active { color: white; }
-        .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
-
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
@@ -71,13 +57,13 @@
 
 <header>
     <h1>親戚關係助手</h1>
-    <p>五層精確稱呼系統</p>
+    <p>五親等血親 · 完整查詢版</p>
 </header>
 
 <div id="calc-view" class="view-section active">
     <div class="display-area">
         <div class="screen">
-            <div id="path" class="path">請開始輸入關係...</div>
+            <div id="path" class="path">請點擊按鈕組合關係...</div>
             <div id="ans" class="ans">自己</div>
         </div>
     </div>
@@ -107,36 +93,41 @@
 
 <div id="map-view" class="view-section">
     <div class="map-card">
-        <h2 style="margin-bottom:20px; font-size:1.1rem; color:var(--accent);">直系五代關係圖</h2>
-        <div class="tree-node"><b>高祖輩</b>：高祖父/母
-            <div class="tree-node"><b>曾祖輩</b>：曾祖父/母 (太公/太婆)
-                <div class="tree-node"><b>祖輩</b>：爺爺/奶奶/外公/外婆
-                    <div class="tree-node" style="color:var(--accent); font-weight:bold;">● 我 (己身)</div>
-                    <div class="tree-node"><b>子輩</b>：兒子/女兒
-                        <div class="tree-node"><b>孫輩</b>：孫子/孫女
-                            <div class="tree-node"><b>玄孫輩</b>：玄孫 / 來孫</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h3 style="color:var(--accent); margin-bottom:10px;">📊 五親等計算規則</h3>
+        <p>1. <b>直系</b>：每一代為一親等 (父=1, 祖=2, 曾祖=3...)</p>
+        <p>2. <b>旁系</b>：先往上推至同源長輩，再往下算代數之總和。</p>
+        <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
+        <p>• <b>二親等</b>：親兄弟姊妹</p>
+        <p>• <b>三親等</b>：伯叔姑舅姨、姪甥</p>
+        <p>• <b>四親等</b>：堂表兄弟姊妹、爺爺的兄弟</p>
+        <p>• <b>五親等</b>：堂表兄弟姊妹的孩子 (從姪/從甥)</p>
     </div>
 </div>
 
 <nav class="bottom-nav">
-    <div class="nav-item active" id="calc-tab" onclick="switchTab('calc')"><span class="nav-icon">✨</span>計算稱呼</div>
-    <div class="nav-item" id="map-tab" onclick="switchTab('map')"><span class="nav-icon">🌳</span>家族圖譜</div>
+    <div class="nav-item active" id="calc-tab" onclick="switchTab('calc')">稱呼計算</div>
+    <div class="nav-item" id="map-tab" onclick="switchTab('map')">關係圖譜</div>
 </nav>
 
 <script>
     let gender = 'male'; let stack = [];
     const dict = {
-        "父": "父親", "母": "母親",
+        // 直系血親
+        "父": "父親", "母": "母親", 
         "父,父": "爺爺", "父,母": "奶奶", "母,父": "外公", "母,母": "外婆",
-        "父,父,母": "曾祖母 (太婆)", "母,母,母": "外曾外祖母 (太外婆)",
-        "父,父,父,父": "高祖父", "母,母,母,母,母": "外天外祖母",
-        "父,姐": "姑姑", "父,姐,夫": "姑丈", "母,兄": "舅舅", "母,兄,妻": "舅媽",
-        "子,子": "孫子", "子,子,子": "曾孫", "子,子,子,子,子": "來孫"
+        "父,父,父": "曾祖父", "母,母,母": "外曾祖母",
+        "父,父,父,父": "高祖父", "母,母,母,母": "外高祖母",
+        "父,父,父,父,父": "天祖父", "母,母,母,母,母": "外天祖母",
+        // 旁系血親 (三親等)
+        "父,兄": "伯父", "父,弟": "叔父", "父,姐": "姑母", "父,妹": "姑母",
+        "母,兄": "舅父", "母,姐": "姨母",
+        // 旁系血親 (四親等)
+        "父,兄,子": "堂哥/堂弟", "父,姐,子": "姑表哥/弟",
+        "母,兄,子": "舅表哥/弟", "母,姐,子": "姨表哥/弟",
+        // 旁系血親 (五親等)
+        "父,兄,子,子": "堂姪子", "父,姐,子,子": "表姪子",
+        // 晚輩
+        "子": "兒子", "子,子": "孫子", "子,子,子": "曾孫", "子,子,子,子": "玄孫", "子,子,子,子,子": "來孫"
     };
 
     function switchTab(t) {
@@ -145,23 +136,18 @@
         document.getElementById('calc-tab').classList.toggle('active', t === 'calc');
         document.getElementById('map-tab').classList.toggle('active', t === 'map');
     }
-    function setGender(g) {
-        gender = g;
-        document.getElementById('mBtn').classList.toggle('active', g === 'male');
-        document.getElementById('fBtn').classList.toggle('active', g === 'female');
-        update();
-    }
+    function setGender(g) { gender = g; update(); }
     function add(r) { if(stack.length < 5) stack.push(r); update(); }
     function reset() { stack = []; update(); }
     function back() { stack.pop(); update(); }
     function update() {
         const pathEl = document.getElementById('path'); const ansEl = document.getElementById('ans');
-        if (stack.length === 0) { pathEl.innerText = "請開始點擊..."; ansEl.innerText = "自己"; return; }
+        if (stack.length === 0) { pathEl.innerText = "請開始輸入..."; ansEl.innerText = "自己"; return; }
         pathEl.innerText = "我的 " + stack.join(' 的 ');
         const key = stack.join(',');
-        const result = dict[gender + "_" + key] || dict[key] || "長輩 / 親戚";
+        const result = dict[gender + "_" + key] || dict[key] || "血親關係 (五親等內)";
         ansEl.innerText = result;
-        ansEl.style.fontSize = result.length > 7 ? "1.4rem" : "2.2rem";
+        ansEl.style.fontSize = result.length > 7 ? "1.5rem" : "2.2rem";
     }
 </script>
 </body>
