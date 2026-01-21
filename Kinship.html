@@ -3,42 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>親戚稱呼計算機</title>
+    <title>現代親戚稱呼計算機</title>
     <script src="https://cdn.jsdelivr.net/npm/relationship.js/dist/relationship.min.js"></script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; background: #f4f4f4; }
-        .calc-box { width: 320px; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        #display { width: 100%; height: 60px; background: #eee; margin-bottom: 15px; border-radius: 8px; text-align: right; padding: 10px; box-sizing: border-box; font-size: 1.2rem; overflow-y: auto; }
-        #result { font-weight: bold; color: #d32f2f; margin-bottom: 10px; min-height: 24px; }
-        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        button { padding: 15px 5px; border: none; background: #e0e0e0; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-        button:active { background: #ccc; }
-        button.op { background: #ff9800; color: white; }
-        button.clear { background: #f44336; color: white; }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --accent-color: #764ba2;
+            --text-main: #2d3436;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .calc-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        /* 顯示螢幕 */
+        .screen {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        #display {
+            font-size: 0.9rem;
+            color: #636e72;
+            word-break: break-all;
+            margin-bottom: 8px;
+            height: 20px;
+        }
+
+        #result {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-align: right;
+        }
+
+        /* 按鈕區域 */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            height: 60px;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+            color: var(--text-main);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+        }
+
+        button:active {
+            transform: translateY(0px);
+        }
+
+        /* 特殊功能鍵 */
+        button.op {
+            background: var(--accent-color);
+            color: white;
+            grid-column: span 2;
+            font-weight: bold;
+        }
+
+        button.op:hover {
+            background: #5a3782;
+        }
+
+        button.clear {
+            background: #ff7675;
+            color: white;
+        }
+
+        button.back {
+            background: #fab1a0;
+            color: white;
+        }
+
+        /* 性別切換器 (新加入) */
+        .gender-switch {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .gender-switch label {
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        input[type="radio"] { display: none; }
+        input[type="radio"]:checked + label {
+            background: var(--accent-color);
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-<div class="calc-box">
-    <div id="result">我是...</div>
-    <div id="display"></div>
-    <div class="buttons">
-        <button onclick="add('父')">父</button>
-        <button onclick="add('母')">母</button>
-        <button class="clear" onclick="clearAll()">AC</button>
-        <button class="clear" onclick="backspace()">←</button>
-        
-        <button onclick="add('兄')">兄</button>
-        <button onclick="add('弟')">弟</button>
-        <button onclick="add('姐')">姐</button>
-        <button onclick="add('妹')">妹</button>
-        
-        <button onclick="add('夫')">夫</button>
-        <button onclick="add('妻')">妻</button>
-        <button onclick="add('子')">子</button>
-        <button onclick="add('女')">女</button>
-        
-        <button class="op" style="grid-column: span 4;" onclick="calculate()">計算稱呼</button>
+<div class="container">
+    <div class="calc-box">
+        <header>
+            <h1>親戚稱呼計算</h1>
+        </header>
+
+        <div class="gender-switch">
+            <input type="radio" name="sex" id="male" value="1" checked>
+            <label for="male">男方視角</label>
+            <input type="radio" name="sex" id="female" value="0">
+            <label for="female">女方視角</label>
+        </div>
+
+        <div class="screen">
+            <div id="display">開始點擊按鈕...</div>
+            <div id="result">我是？</div>
+        </div>
+
+        <div class="buttons">
+            <button onclick="add('父')">父</button>
+            <button onclick="add('母')">母</button>
+            <button class="clear" onclick="clearAll()">AC</button>
+            <button class="back" onclick="backspace()">←</button>
+            
+            <button onclick="add('兄')">兄</button>
+            <button onclick="add('弟')">弟</button>
+            <button onclick="add('姐')">姐</button>
+            <button onclick="add('妹')">妹</button>
+            
+            <button onclick="add('夫')">夫</button>
+            <button onclick="add('妻')">妻</button>
+            <button onclick="add('子')">子</button>
+            <button onclick="add('女')">女</button>
+            
+            <button class="op" style="grid-column: span 4;" onclick="calculate()">計算關係</button>
+        </div>
     </div>
 </div>
 
@@ -48,35 +201,41 @@
     function add(text) {
         chain.push(text);
         updateDisplay();
+        // 自動即時計算
+        calculate();
     }
 
     function clearAll() {
         chain = [];
-        document.getElementById('result').innerText = "我是...";
+        document.getElementById('result').innerText = "我是？";
         updateDisplay();
     }
 
     function backspace() {
         chain.pop();
         updateDisplay();
+        calculate();
     }
 
     function updateDisplay() {
-        document.getElementById('display').innerText = chain.join('的');
+        const displayText = chain.join('的');
+        document.getElementById('display').innerText = displayText || "開始點擊按鈕...";
     }
 
     function calculate() {
         const query = chain.join('的');
-        if (!query) return;
+        if (!query) {
+            document.getElementById('result').innerText = "我是？";
+            return;
+        };
 
-        // 使用 relationship.js 進行計算
-        // options: { text: 關係字串, sex: 1為男, 0為女 }
-        const res = relationship({ text: query, sex: 1 });
+        const sex = document.querySelector('input[name="sex"]:checked').value;
+        const res = relationship({ text: query, sex: parseInt(sex) });
 
         if (res.length > 0) {
-            document.getElementById('result').innerText = "稱呼：" + res[0];
+            document.getElementById('result').innerText = res[0];
         } else {
-            document.getElementById('result').innerText = "關係太遠了，不知道叫什麼";
+            document.getElementById('result').innerText = "???";
         }
     }
 </script>
