@@ -23,127 +23,108 @@
             display: flex;
             justify-content: center;
             height: 100vh;
-            overflow: hidden;
+            overflow: hidden; /* 防止頁面滑動 */
         }
 
         .wrapper {
             width: 100%;
             max-width: 400px;
+            height: 100%;
             display: flex;
             flex-direction: column;
             padding: 0 24px;
         }
 
-        /* 頂部標題 */
         header {
             padding-top: 40px;
-            text-align: center;
+            flex-shrink: 0;
         }
 
-        header h1 {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-sub);
-            letter-spacing: 2px;
-            margin: 0;
-        }
-
-        /* 視角切換器 */
         .selector {
             display: flex;
-            justify-content: center;
-            margin-top: 20px;
             background: var(--btn-bg);
-            padding: 3px;
+            padding: 2px;
             border-radius: 10px;
+            margin-top: 15px;
         }
 
         .selector label {
             flex: 1;
             font-size: 13px;
             text-align: center;
-            padding: 6px 0;
+            padding: 8px 0;
             cursor: pointer;
             border-radius: 8px;
-            transition: 0.2s;
             color: var(--text-sub);
         }
 
-        input[type="radio"] { display: none; }
         input[type="radio"]:checked + label {
             background: white;
             color: var(--text-main);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             font-weight: 600;
         }
 
-        /* 結果顯示區 - 垂直置中 */
+        /* 重點：結果區域現在佔據固定比例，不讓按鍵被推到底 */
         .display-area {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 200px;
+            padding-bottom: 20px;
         }
 
         #display {
             font-size: 16px;
             color: var(--text-sub);
-            margin-bottom: 10px;
-            font-weight: 300;
+            margin-bottom: 8px;
+            min-height: 24px;
         }
 
         #result {
-            font-size: 48px;
-            font-weight: 600;
+            font-size: 42px;
+            font-weight: 700;
             color: var(--text-main);
         }
 
-        /* 按鍵面板 - 整體上移並懸浮 */
+        /* 調整按鍵區的位置：不再隨意延伸 */
         .keypad-container {
-            margin-bottom: 80px; /* 增加底部間距，避開系統列 */
-            padding: 10px;
+            flex-shrink: 0;
+            padding-bottom: 120px; /* 這裡加大數值，按鈕就會往上提 */
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
 
         button {
             background: var(--btn-bg);
             border: none;
-            height: 60px;
-            border-radius: 12px;
+            height: 62px;
+            border-radius: 15px;
             font-size: 18px;
             color: var(--text-main);
-            cursor: pointer;
-            transition: transform 0.1s, background 0.1s;
+            transition: all 0.1s;
         }
 
         button:active {
             background: #e5e5ea;
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
 
-        /* 功能鍵顏色 */
-        button.tool {
-            font-size: 14px;
-            color: var(--text-sub);
-        }
+        .tool { font-size: 14px; color: var(--text-sub); }
+        .clear { color: #ff3b30; }
 
-        button.clear {
-            color: #ff3b30;
-        }
+        input[type="radio"] { display: none; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
     <header>
-        <h1>RELATIONSHIP</h1>
         <div class="selector">
             <input type="radio" name="sex" id="male" value="1" checked onchange="render()">
             <label for="male">男方視角</label>
@@ -179,40 +160,18 @@
 
 <script>
     let chain = [];
-
-    function add(text) {
-        chain.push(text);
-        render();
-    }
-
-    function clearAll() {
-        chain = [];
-        render();
-    }
-
-    function backspace() {
-        chain.pop();
-        render();
-    }
-
+    function add(t) { chain.push(t); render(); }
+    function clearAll() { chain = []; render(); }
+    function backspace() { chain.pop(); render(); }
     function render() {
-        const query = chain.join('的');
-        const displayEl = document.getElementById('display');
-        const resultEl = document.getElementById('result');
-        
-        displayEl.innerText = query;
-        
-        if (chain.length === 0) {
-            resultEl.innerText = "我是？";
-            resultEl.style.color = "#8e8e93";
-            return;
-        }
-
-        const sex = document.querySelector('input[name="sex"]:checked').value;
-        const res = relationship({ text: query, sex: parseInt(sex) });
-
-        resultEl.style.color = "#000000";
-        resultEl.innerText = (res && res.length > 0) ? res[0] : "查無稱呼";
+        const q = chain.join('的');
+        document.getElementById('display').innerText = q;
+        const resEl = document.getElementById('result');
+        if (!chain.length) { resEl.innerText = "我是？"; resEl.style.color = "#8e8e93"; return; }
+        const s = document.querySelector('input[name="sex"]:checked').value;
+        const res = relationship({ text: q, sex: parseInt(s) });
+        resEl.style.color = "#000";
+        resEl.innerText = (res && res.length) ? res[0] : "查無稱呼";
     }
 </script>
 
