@@ -2,142 +2,138 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>親戚稱呼助手 Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>親戚計算機 - 最終修正版</title>
+    <script src="https://passer-by.com/relationship/relationship.js"></script>
     <style>
-        :root {
-            --primary: #6c5ce7; --bg: #f8f9fd; --text-dark: #2d3436;
-            --text-light: #636e72; --white: #ffffff; --danger: #ff7675;
-            --card-shadow: 0 10px 25px rgba(108, 92, 231, 0.1);
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #d0d0d2; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .calc-box { width: 340px; background: #e0e0e2; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        
+        .screen { background: #f9f9e3; border: 1px solid #bbb; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: right; min-height: 90px; position: relative; }
+        #display { font-size: 0.85rem; color: #666; min-height: 1.2rem; word-break: break-all; margin-bottom: 5px; }
+        #result { font-size: 2.2rem; font-weight: bold; color: #333; }
+        
+        /* 性別切換開關 */
+        .gender-switch { display: flex; justify-content: flex-start; margin-bottom: 10px; gap: 5px; }
+        .gender-btn { padding: 5px 15px; border-radius: 15px; border: 1px solid #ccc; cursor: pointer; background: #fff; font-size: 0.8rem; }
+        .gender-btn.active { background: #444; color: #fff; border-color: #444; }
+
+        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        button { 
+            padding: 18px 0; border: 1px solid #aaa; border-radius: 8px; font-size: 1.3rem; font-weight: bold; cursor: pointer;
+            background: #fff; box-shadow: 0 3px #999; transition: all 0.1s;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; }
-        body { background: var(--bg); color: var(--text-dark); padding-bottom: 50px; min-height: 100vh; display: flex; flex-direction: column; }
-        header { padding: 30px 20px 10px; text-align: center; }
-        header h1 { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .container { padding: 0 20px; max-width: 500px; margin: 0 auto; width: 100%; }
-        .display-screen { background: var(--white); border-radius: 30px; padding: 25px 20px; margin-bottom: 20px; box-shadow: var(--card-shadow); text-align: center; border: 1px solid rgba(255, 255, 255, 0.8); min-height: 160px; display: flex; flex-direction: column; justify-content: center; }
-        .path-text { font-size: 0.9rem; color: var(--text-light); min-height: 1.5em; margin-bottom: 10px; }
-        .result-text { font-size: 2.2rem; font-weight: 900; color: var(--primary); }
-        .gender-selector { display: flex; background: #ededf9; border-radius: 20px; padding: 5px; margin-bottom: 20px; }
-        .gender-btn { flex: 1; border: none; background: transparent; padding: 10px; border-radius: 15px; font-size: 0.9rem; font-weight: 700; color: var(--text-light); transition: 0.3s; }
-        .gender-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .key { aspect-ratio: 1.1; border: none; background: var(--white); border-radius: 18px; font-size: 1.1rem; font-weight: 700; color: var(--text-dark); box-shadow: 0 4px 8px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
-        .key:active { transform: scale(0.92); background: #f0f0f5; }
-        .key.op { color: var(--primary); background: #f5f3ff; }
-        .key.func { color: var(--danger); background: #fff5f5; }
-        .key.back { color: var(--text-light); background: #f1f2f6; font-size: 0.9rem; }
+        button:active { transform: translateY(2px); box-shadow: 0 1px #666; }
+
+        .btn-c { background: #d88a4d; color: white; grid-column: span 2; }
+        .btn-of { background: #6d5b4e; color: white; }
+        .btn-equal { background: #444; color: white; }
+        .btn-age { background: #f8f8f8; color: #888; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>親戚稱呼助手 Pro</h1>
-    <p style="font-size: 0.75rem; color: #a29bfe;">已修正姻親姊妹與上下五代稱謂</p>
-</header>
-
-<div class="container">
-    <div class="display-screen">
-        <div id="path" class="path-text">請組合關係</div>
-        <div id="ans" class="result-text">自己</div>
+<div class="calc-box">
+    <div class="gender-switch">
+        <div id="sex-1" class="gender-btn active" onclick="setSex(1)">我是男</div>
+        <div id="sex-0" class="gender-btn" onclick="setSex(0)">我是女</div>
+    </div>
+    
+    <div class="screen">
+        <div id="display">我</div>
+        <div id="result">我</div>
     </div>
 
-    <div class="gender-selector">
-        <button id="mBtn" class="gender-btn active" onclick="setGender('male')">我是男生</button>
-        <button id="fBtn" class="gender-btn" onclick="setGender('female')">我是女生</button>
-    </div>
-
-    <div class="keypad">
-        <button class="key op" onclick="add('父')">父</button>
-        <button class="key op" onclick="add('母')">母</button>
-        <button class="key back" onclick="back()">退格</button>
-        <button class="key func" onclick="reset()">歸零</button>
-        <button class="key" onclick="add('兄')">兄</button>
-        <button class="key" onclick="add('弟')">弟</button>
-        <button class="key" onclick="add('姐')">姐</button>
-        <button class="key" onclick="add('妹')">妹</button>
-        <button class="key op" onclick="add('夫')">夫</button>
-        <button class="key op" onclick="add('妻')">妻</button>
-        <button class="key op" onclick="add('子')">子</button>
-        <button class="key op" onclick="add('女')">女</button>
+    <div class="buttons">
+        <button onclick="add('父')">父</button>
+        <button onclick="add('母')">母</button>
+        <button class="btn-c" onclick="clearAll()">C</button>
+        
+        <button onclick="add('兄')">兄</button>
+        <button onclick="add('弟')">弟</button>
+        <button onclick="add('姐')">姐</button>
+        <button onclick="add('妹')">妹</button>
+        
+        <button onclick="add('夫')">夫</button>
+        <button onclick="add('妻')">妻</button>
+        <button class="btn-age" onclick="add('長')">長</button>
+        <button class="btn-of" onclick="add('的')">的</button>
+        
+        <button onclick="add('子')">子</button>
+        <button onclick="add('女')">女</button>
+        <button class="btn-age" onclick="add('輕')">輕</button>
+        <button class="btn-equal" onclick="calculate()">＝</button>
     </div>
 </div>
 
 <script>
-    let gender = 'male'; 
-    let stack = [];
+    let chain = []; // 儲存關係陣列
+    let currentSex = 1; // 1代表男, 0代表女
 
-    const dict = {
-        // --- 第一層：夫妻 ---
-        "male_妻": "老婆", "female_夫": "老公",
-
-        // --- 核心修正：妻的姊妹 (男生視角) ---
-        "妻,姐": "大姨子",
-        "妻,妹": "小姨子",
-        "妻,兄": "內兄 (大舅子)",
-        "妻,弟": "內弟 (小舅子)",
-
-        // --- 核心修正：夫的姊妹 (女生視角) ---
-        "夫,姐": "大姑子",
-        "夫,妹": "小姑子",
-        "夫,兄": "大伯子",
-        "夫,弟": "小叔子",
-
-        // --- 父母上五代 ---
-        "父": "父親", "父,父": "爺爺", "父,父,父": "曾祖父", "父,父,父,父": "高祖父", "父,父,父,父,父": "天祖父",
-        "母": "母親", "母,母": "外婆", "母,母,母": "外曾祖母", "母,母,母,母": "外高祖母", "母,母,母,母,母": "外天祖母",
-        "父,母": "奶奶", "父,父,母": "曾祖母", "父,父,父,母": "高祖母", "父,父,父,父,母": "天祖母",
-
-        // --- 父母的兄弟姊妹 ---
-        "父,兄": "伯父", "父,弟": "叔叔", "父,姐": "姑姑", "父,妹": "姑姑",
-        "母,兄": "舅舅", "母,弟": "舅舅", "母,姐": "阿姨", "母,妹": "阿姨",
-
-        // --- 兄弟姊妹及其子女 ---
-        "兄": "哥哥", "弟": "弟弟", "姐": "姊姊", "妹": "妹妹",
-        "兄,子": "姪子", "兄,女": "姪女", "弟,子": "姪子", "弟,女": "姪女",
-        "姐,子": "外甥", "姐,女": "外甥女", "妹,子": "外甥", "妹,女": "外甥女",
-
-        // --- 晚輩下五代 ---
-        "子": "兒子", "子,子": "孫子", "子,子,子": "曾孫", "子,子,子,子": "玄孫", "子,子,子,子,子": "來孫",
-        "女": "女兒", "女,子": "外孫", "女,子,子": "外曾孫", "女,子,子,子": "外玄孫", "女,子,子,子,子": "外來孫"
-    };
-
-    function setGender(g) {
-        gender = g;
-        document.getElementById('mBtn').classList.toggle('active', g === 'male');
-        document.getElementById('fBtn').classList.toggle('active', g === 'female');
-        reset();
+    function setSex(sex) {
+        currentSex = sex;
+        document.getElementById('sex-1').classList.toggle('active', sex === 1);
+        document.getElementById('sex-0').classList.toggle('active', sex === 0);
+        if (chain.length > 0) calculate(); // 即時更新結果
     }
 
-    function add(r) { 
-        if(stack.length === 0) {
-            if(r === '夫' && gender === 'male') { alert("男生請點「妻」"); return; }
-            if(r === '妻' && gender === 'female') { alert("女生請點「夫」"); return; }
-        }
-        if(stack.length < 10) { stack.push(r); update(); }
-    }
-
-    function reset() { stack = []; update(); }
-    function back() { stack.pop(); update(); }
-
-    function update() {
-        const pathEl = document.getElementById('path');
-        const ansEl = document.getElementById('ans');
-        if (stack.length === 0) {
-            pathEl.innerText = "請組合關係";
-            ansEl.innerText = "自己";
+    function add(text) {
+        if (text === '的') {
+            // 「的」按鈕在現代邏輯中僅作為視覺引導，不重複添加
             return;
         }
-        pathEl.innerText = "我的 " + stack.join(' 的 ');
-        const key = stack.join(',');
-        const genderKey = gender + "_" + key;
         
-        // 優先找性別路徑，再找通用路徑
-        let res = dict[genderKey] || dict[key] || "遠親關係";
+        // 如果按的是「長」或「輕」，需附加在最後一個稱謂上
+        if (text === '長' || text === '輕') {
+            if (chain.length > 0) {
+                let last = chain[chain.length - 1];
+                // 避免重複添加長輕
+                if (!last.includes('長') && !last.includes('輕')) {
+                    chain[chain.length - 1] = last + text;
+                }
+            }
+        } else {
+            chain.push(text);
+        }
+        updateDisplay();
+    }
 
-        ansEl.innerText = res;
-        ansEl.style.fontSize = res.length > 7 ? "1.3rem" : "2.2rem";
+    function clearAll() {
+        chain = [];
+        document.getElementById('result').innerText = "我";
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        document.getElementById('display').innerText = "我的" + chain.join('的');
+    }
+
+    function calculate() {
+        if (chain.length === 0) return;
+
+        // 將陣列轉換為庫需要的字串格式
+        const query = chain.join('的');
+        
+        try {
+            // 調用 relationship.js
+            const res = relationship({
+                text: query,
+                sex: currentSex,
+                reverse: false,
+                type: 'chain'
+            });
+
+            if (res && res.length > 0) {
+                // 取第一個最常用的稱呼
+                document.getElementById('result').innerText = res[0];
+            } else {
+                document.getElementById('result').innerText = "關係太遠";
+            }
+        } catch (e) {
+            console.error("計算失敗", e);
+        }
     }
 </script>
+
 </body>
 </html>
