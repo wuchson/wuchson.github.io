@@ -3,141 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>稱呼計算機</title>
+    <title>親戚稱呼</title>
     <script src="https://cdn.jsdelivr.net/npm/relationship.js/dist/relationship.min.js"></script>
     <style>
         :root {
-            --bg: #ffffff;
+            --bg: #fafafa;
             --text-main: #1d1d1f;
             --text-sub: #86868b;
-            --border: #e5e5e7;
-            --accent: #0066cc;
-            --btn-hover: #f5f5f7;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            --border: #eeeeee;
+            --btn-active: #f5f5f7;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, "SF Pro Display", "PingFang TC", sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
             display: flex;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .wrapper {
             width: 100%;
-            max-width: 360px;
-            padding: 40px 24px;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
         }
 
         header {
-            margin-bottom: 48px;
+            margin-top: 60px;
+            text-align: center;
         }
 
         header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
-
-        /* 切換器 - 極簡邊框式 */
-        .mode-switch {
-            display: flex;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 40px;
-            overflow: hidden;
-        }
-
-        .mode-switch label {
-            flex: 1;
-            text-align: center;
-            padding: 10px 0;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
+            font-size: 17px;
+            font-weight: 500;
             color: var(--text-sub);
+            letter-spacing: 2px;
+        }
+
+        /* 視角切換器 */
+        .selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .selector label {
+            font-size: 14px;
+            color: var(--text-sub);
+            cursor: pointer;
+            padding: 4px 12px;
+            transition: 0.2s;
         }
 
         input[type="radio"] { display: none; }
         input[type="radio"]:checked + label {
-            background: var(--text-main);
-            color: white;
+            color: var(--text-main);
+            font-weight: 600;
+            border-bottom: 2px solid var(--text-main);
         }
 
-        /* 顯示區域 */
+        /* 結果顯示區 */
         .display-area {
-            margin-bottom: 48px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
 
         #display {
-            font-size: 14px;
+            font-size: 15px;
             color: var(--text-sub);
-            margin-bottom: 8px;
-            min-height: 20px;
-            font-weight: 400;
+            margin-bottom: 12px;
+            min-height: 22px;
         }
 
         #result {
-            font-size: 32px;
-            font-weight: 600;
-            color: var(--text-main);
+            font-size: 40px;
+            font-weight: 700;
+            word-break: break-all;
         }
 
-        /* 網格按鈕 */
+        /* 底部按鍵區 */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1px; /* 創造細線感 */
-            background-color: var(--border);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
+            gap: 8px;
+            padding-bottom: 40px;
         }
 
         button {
             background: white;
-            border: none;
-            height: 70px;
-            font-size: 17px;
+            border: 1px solid var(--border);
+            height: 64px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 400;
             color: var(--text-main);
             cursor: pointer;
-            transition: background 0.2s;
-            outline: none;
+            transition: all 0.1s;
         }
 
         button:active {
-            background: var(--btn-hover);
+            background: var(--btn-active);
+            transform: scale(0.96);
         }
 
         button.tool {
-            color: var(--text-sub);
+            background: none;
+            border-color: transparent;
             font-size: 14px;
+            color: var(--text-sub);
         }
 
         button.clear {
-            color: #d70015;
-        }
-
-        button.primary {
-            grid-column: span 4;
-            height: 60px;
-            background: white;
-            color: var(--accent);
-            font-weight: 500;
-            border-top: 1px solid var(--border);
-        }
-
-        button.primary:active {
-            background: #f0f7ff;
+            color: #ff3b30;
         }
     </style>
 </head>
@@ -145,13 +132,13 @@
 
 <div class="wrapper">
     <header>
-        <h1>關係計算</h1>
+        <h1>RELATIONSHIP</h1>
     </header>
 
-    <div class="mode-switch">
-        <input type="radio" name="sex" id="male" value="1" checked>
+    <div class="selector">
+        <input type="radio" name="sex" id="male" value="1" checked onchange="render()">
         <label for="male">男方視角</label>
-        <input type="radio" name="sex" id="female" value="0">
+        <input type="radio" name="sex" id="female" value="0" onchange="render()">
         <label for="female">女方視角</label>
     </div>
 
@@ -175,8 +162,6 @@
         <button onclick="add('妻')">妻</button>
         <button onclick="add('子')">子</button>
         <button onclick="add('女')">女</button>
-        
-        <button class="primary" onclick="calculate()">計算稱呼</button>
     </div>
 </div>
 
@@ -200,23 +185,23 @@
 
     function render() {
         const query = chain.join('的');
-        document.getElementById('display').innerText = query;
+        const displayEl = document.getElementById('display');
+        const resultEl = document.getElementById('result');
+        
+        displayEl.innerText = query;
         
         if (chain.length === 0) {
-            document.getElementById('result').innerText = "我是？";
+            resultEl.innerText = "我是？";
+            resultEl.style.color = "#86868b"; // 預設淺色
             return;
         }
 
         const sex = document.querySelector('input[name="sex"]:checked').value;
         const res = relationship({ text: query, sex: parseInt(sex) });
 
-        document.getElementById('result').innerText = (res && res.length > 0) ? res[0] : "無解";
+        resultEl.style.color = "#1d1d1f"; // 有結果時變深色
+        resultEl.innerText = (res && res.length > 0) ? res[0] : "無解";
     }
-
-    // 監聽性別切換
-    document.querySelectorAll('input[name="sex"]').forEach(radio => {
-        radio.addEventListener('change', render);
-    });
 </script>
 
 </body>
