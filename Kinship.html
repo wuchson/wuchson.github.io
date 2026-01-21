@@ -3,195 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>現代親戚稱呼計算機</title>
+    <title>關係計算機 | Relative Calculator</title>
     <script src="https://cdn.jsdelivr.net/npm/relationship.js/dist/relationship.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --accent-color: #764ba2;
-            --text-main: #2d3436;
+            --bg-color: #f0f2f5;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --primary-accent: #6c5ce7;
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --btn-bg: #ffffff;
+            --btn-active: #f1f2f6;
         }
 
         body {
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background: var(--primary-gradient);
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
-            color: var(--text-main);
         }
 
-        .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-        }
-
-        .calc-box {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            padding: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        .calc-wrapper {
+            width: 90%;
+            max-width: 380px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: var(--shadow);
             border: 1px solid rgba(255,255,255,0.3);
         }
 
         header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
 
         header h1 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
             margin: 0;
-            color: var(--accent-color);
             letter-spacing: 1px;
         }
 
-        /* 顯示螢幕 */
-        .screen {
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 25px;
-            min-height: 100px;
+        /* 性別切換器 */
+        .gender-selector {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.05);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .gender-selector label {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 9px;
+            transition: 0.3s;
+            color: var(--text-light);
+        }
+
+        input[type="radio"] { display: none; }
+        input[type="radio"]:checked + label {
+            background: white;
+            color: var(--primary-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
+        /* 螢幕設計 */
+        .screen {
+            margin-bottom: 24px;
+            text-align: right;
+            padding: 10px 5px;
         }
 
         #display {
             font-size: 0.9rem;
-            color: #636e72;
-            word-break: break-all;
-            margin-bottom: 8px;
-            height: 20px;
+            color: var(--text-light);
+            min-height: 1.2rem;
+            margin-bottom: 4px;
+            font-weight: 300;
         }
 
         #result {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            color: var(--accent-color);
-            text-align: right;
+            color: var(--text-dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        /* 按鈕區域 */
-        .buttons {
+        /* 按鈕佈局 */
+        .btn-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
         }
 
         button {
+            aspect-ratio: 1/1;
             border: none;
-            height: 60px;
             border-radius: 18px;
             font-size: 1.1rem;
             font-weight: 500;
+            background: var(--btn-bg);
+            color: var(--text-dark);
             cursor: pointer;
-            transition: all 0.2s ease;
-            background: #fff;
-            color: var(--text-main);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            background: #f8f9fa;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         button:active {
-            transform: translateY(0px);
+            transform: scale(0.92);
+            background: var(--btn-active);
         }
 
-        /* 特殊功能鍵 */
-        button.op {
-            background: var(--accent-color);
-            color: white;
-            grid-column: span 2;
-            font-weight: bold;
-        }
-
-        button.op:hover {
-            background: #5a3782;
+        button.functional {
+            background: rgba(108, 92, 231, 0.1);
+            color: var(--primary-accent);
+            font-weight: 600;
         }
 
         button.clear {
-            background: #ff7675;
+            color: #eb4d4b;
+            background: rgba(235, 77, 75, 0.1);
+        }
+
+        button.action {
+            grid-column: span 2;
+            aspect-ratio: auto;
+            height: 60px;
+            background: var(--primary-accent);
             color: white;
+            font-weight: 600;
+            margin-top: 8px;
         }
 
-        button.back {
-            background: #fab1a0;
-            color: white;
+        button.action:hover {
+            opacity: 0.9;
+            box-shadow: 0 8px 15px rgba(108, 92, 231, 0.3);
         }
 
-        /* 性別切換器 (新加入) */
-        .gender-switch {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .gender-switch label {
-            font-size: 0.85rem;
-            background: rgba(255,255,255,0.5);
-            padding: 5px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        input[type="radio"] { display: none; }
-        input[type="radio"]:checked + label {
-            background: var(--accent-color);
-            color: white;
+        .tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--primary-accent);
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="calc-box">
-        <header>
-            <h1>親戚稱呼計算</h1>
-        </header>
+<div class="calc-wrapper">
+    <header>
+        <h1>稱呼計算機</h1>
+    </header>
 
-        <div class="gender-switch">
-            <input type="radio" name="sex" id="male" value="1" checked>
-            <label for="male">男方視角</label>
-            <input type="radio" name="sex" id="female" value="0">
-            <label for="female">女方視角</label>
-        </div>
+    <div class="gender-selector">
+        <input type="radio" name="sex" id="male" value="1" checked>
+        <label for="male">男方視角</label>
+        <input type="radio" name="sex" id="female" value="0">
+        <label for="female">女方視角</label>
+    </div>
 
-        <div class="screen">
-            <div id="display">開始點擊按鈕...</div>
-            <div id="result">我是？</div>
-        </div>
+    <div class="screen">
+        <span class="tag">Relationship</span>
+        <div id="display">點選關係以開始</div>
+        <div id="result">我是？</div>
+    </div>
 
-        <div class="buttons">
-            <button onclick="add('父')">父</button>
-            <button onclick="add('母')">母</button>
-            <button class="clear" onclick="clearAll()">AC</button>
-            <button class="back" onclick="backspace()">←</button>
-            
-            <button onclick="add('兄')">兄</button>
-            <button onclick="add('弟')">弟</button>
-            <button onclick="add('姐')">姐</button>
-            <button onclick="add('妹')">妹</button>
-            
-            <button onclick="add('夫')">夫</button>
-            <button onclick="add('妻')">妻</button>
-            <button onclick="add('子')">子</button>
-            <button onclick="add('女')">女</button>
-            
-            <button class="op" style="grid-column: span 4;" onclick="calculate()">計算關係</button>
-        </div>
+    <div class="btn-grid">
+        <button onclick="add('父')">父</button>
+        <button onclick="add('母')">母</button>
+        <button class="functional back" onclick="backspace()">⌫</button>
+        <button class="functional clear" onclick="clearAll()">AC</button>
+        
+        <button onclick="add('兄')">兄</button>
+        <button onclick="add('弟')">弟</button>
+        <button onclick="add('姐')">姐</button>
+        <button onclick="add('妹')">妹</button>
+        
+        <button onclick="add('夫')">夫</button>
+        <button onclick="add('妻')">妻</button>
+        <button onclick="add('子')">子</button>
+        <button onclick="add('女')">女</button>
+        
+        <button class="action" style="grid-column: span 4;" onclick="calculate()">稱呼計算</button>
     </div>
 </div>
 
@@ -201,7 +220,6 @@
     function add(text) {
         chain.push(text);
         updateDisplay();
-        // 自動即時計算
         calculate();
     }
 
@@ -219,7 +237,7 @@
 
     function updateDisplay() {
         const displayText = chain.join('的');
-        document.getElementById('display').innerText = displayText || "開始點擊按鈕...";
+        document.getElementById('display').innerText = displayText || "點選關係以開始";
     }
 
     function calculate() {
@@ -227,15 +245,16 @@
         if (!query) {
             document.getElementById('result').innerText = "我是？";
             return;
-        };
+        }
 
         const sex = document.querySelector('input[name="sex"]:checked').value;
         const res = relationship({ text: query, sex: parseInt(sex) });
 
-        if (res.length > 0) {
+        if (res && res.length > 0) {
+            // 取第一個結果，若有多個結果則顯示第一個
             document.getElementById('result').innerText = res[0];
         } else {
-            document.getElementById('result').innerText = "???";
+            document.getElementById('result').innerText = "查無此稱呼";
         }
     }
 </script>
