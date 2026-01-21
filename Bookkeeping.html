@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>私人財務管理</title>
+  <title>Minimal Finance - 私人財務管理</title>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -39,12 +39,12 @@
       background: var(--card-bg); padding: 24px; border-radius: 24px; 
       box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px;
       border: 1px solid var(--border);
+      box-sizing: border-box; /* 確保卡片內部對齊 */
     }
 
     h2, h3 { margin: 0 0 15px 0; font-weight: 700; letter-spacing: -0.5px; }
     h3 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
 
-    /* 統計設計 */
     .hero-stat {
       background: linear-gradient(135deg, #5856D6 0%, #3534a5 100%);
       color: white; padding: 24px; border-radius: 24px; margin-bottom: 20px;
@@ -58,11 +58,16 @@
     .mini-stat small { color: var(--text-sub); font-size: 12px; }
     .mini-stat div { font-size: 18px; font-weight: 700; margin-top: 4px; }
 
-    /* 表單與輸入 */
-    .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    /* 修改重點：確保輸入框不會超出邊界 */
     input, select { 
-      width: 100%; padding: 14px; border: 1px solid var(--border); 
-      border-radius: 14px; background: #fff; font-size: 16px; outline: none;
+      width: 100%; 
+      box-sizing: border-box; /* 修正對齊問題的核心 */
+      padding: 14px; 
+      border: 1px solid var(--border); 
+      border-radius: 14px; 
+      background: #fff; 
+      font-size: 16px; 
+      outline: none;
       transition: all 0.2s;
     }
     input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(88,86,214,0.1); }
@@ -76,8 +81,6 @@
     .btn-primary:hover { background: #4644b1; transform: translateY(-2px); }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-sub); font-size: 14px; }
 
-    /* 明細列表 */
-    .item-list { margin-top: 10px; }
     .item-row { 
       display: flex; justify-content: space-between; align-items: center; 
       padding: 16px 0; border-bottom: 1px solid var(--border);
@@ -86,14 +89,9 @@
     .item-info small { color: var(--text-sub); }
     .item-amt { text-align: right; }
     .item-amt div { font-weight: 700; font-size: 16px; }
-    .btn-del { 
-      color: var(--danger); font-size: 12px; cursor: pointer; 
-      margin-top: 4px; opacity: 0.6; border: none; background: none;
-    }
+    .btn-del { color: var(--danger); font-size: 12px; cursor: pointer; margin-top: 4px; border: none; background: none; opacity: 0.6; }
 
-    /* 圓餅圖 */
     #piechart { width: 100%; height: 250px; }
-
     .hidden { display: none !important; }
   </style>
 </head>
@@ -102,7 +100,7 @@
   <div id="auth-overlay">
     <div class="card" style="width: 320px; text-align: center; border:none;">
       <div style="font-size: 40px; margin-bottom: 10px;">💎</div>
-      <h2 id="auth-title">Welcome Back</h2>
+      <h2>Welcome Back</h2>
       <p style="color:var(--text-sub); font-size:14px; margin-bottom:20px;">請輸入您的專屬密碼以存取財務資料</p>
       <input type="password" id="password-input" placeholder="Enter Password" style="text-align:center;">
       <button class="btn btn-primary" onclick="checkPassword()">解鎖系統</button>
@@ -124,51 +122,36 @@
       <div style="display:flex; gap:10px; margin-bottom:20px;">
         <select id="viewYear" style="margin:0; flex:1"></select>
         <select id="viewMonth" style="margin:0; flex:1"></select>
-        <button onclick="renderAll()" style="width:50px; background:var(--text-main); color:white; border-radius:14px; border:none;">🔍</button>
+        <button onclick="renderAll()" style="width:50px; background:var(--text-main); color:white; border-radius:14px; border:none; cursor:pointer;">🔍</button>
       </div>
       <div class="stats-grid">
-        <div class="mini-stat">
-          <small>本月收入</small>
-          <div id="mInc" style="color:var(--success)">$0</div>
-        </div>
-        <div class="mini-stat">
-          <small>本月支出</small>
-          <div id="mExp" style="color:var(--danger)">$0</div>
-        </div>
-        <div class="mini-stat" style="grid-column: span 2;">
-          <small>本月結餘</small>
-          <div id="mBal">$0</div>
-        </div>
+        <div class="mini-stat"><small>本月收入</small><div id="mInc" style="color:var(--success)">$0</div></div>
+        <div class="mini-stat"><small>本月支出</small><div id="mExp" style="color:var(--danger)">$0</div></div>
+        <div class="mini-stat" style="grid-column: span 2;"><small>本月結餘</small><div id="mBal">$0</div></div>
       </div>
     </div>
 
-    <div class="card">
-      <h3>📊 支出分布</h3>
-      <div id="piechart"></div>
-    </div>
+    <div class="card"><h3>📊 支出分布</h3><div id="piechart"></div></div>
 
     <div class="card">
       <h3>✍️ 新增帳目</h3>
-      <div style="display:flex; gap:10px;">
+      <div style="display:flex; gap:10px; margin-bottom:10px;">
         <select id="type" onchange="updateCategories()" style="flex:1">
           <option value="支出">🔴 支出</option>
           <option value="收入">🟢 收入</option>
         </select>
         <input type="date" id="date" style="flex:1.5">
       </div>
-      <select id="category"></select>
-      <input type="text" id="item" placeholder="項目說明（如：午餐、薪資）">
-      <input type="number" id="amount" placeholder="金額" inputmode="numeric">
-      <button class="btn btn-primary" onclick="addRecord()">儲存這筆紀錄</button>
+      <select id="category" style="margin-bottom:10px;"></select>
+      <input type="text" id="item" placeholder="項目說明" style="margin-bottom:10px;">
+      <input type="number" id="amount" placeholder="金額" inputmode="numeric" style="margin-bottom:10px;">
+      <button class="btn btn-primary" onclick="addRecord()">儲存紀錄</button>
     </div>
 
-    <div class="card">
-      <h3>📋 當月明細</h3>
-      <div id="list" class="item-list"></div>
-    </div>
+    <div class="card"><h3>📋 當月明細</h3><div id="list"></div></div>
 
     <div style="text-align:center; padding-bottom:40px;">
-      <button class="btn-outline" onclick="exportToExcel()" style="margin-right:10px;">📤 匯出備份</button>
+      <button class="btn-outline" onclick="exportToExcel()">📤 匯出備份</button>
       <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 匯入舊檔</button>
       <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importFromExcel(event)">
       <br><br>
@@ -177,7 +160,7 @@
   </div>
 
   <script>
-    // 這裡維持原本的 JavaScript 邏輯，但為了配合質感版，優化了 drawChart 的配色
+    // 邏輯維持不變
     let db = JSON.parse(localStorage.getItem('money_db')) || [];
     const categories = {
         "支出": ["🍔 餐飲", "🚗 交通", "⛽ 油費", "💧 水電費", "🎓 學費", "🛡️ 保險", "🏥 醫療", "🏠 房租", "🧻 日用品", "✏️ 文具", "🛍️ 購物", "✈️ 旅遊", "📈 投資", "❓ 其他"],
@@ -193,7 +176,7 @@
             unlock();
         } else {
             if (btoa(input) === savedPwd) unlock();
-            else document.getElementById('auth-msg').innerText = '密碼錯誤，請再試一次';
+            else document.getElementById('auth-msg').innerText = '密碼錯誤';
         }
     }
 
@@ -204,7 +187,7 @@
     }
 
     function resetPassword() {
-        if(confirm('重設密碼將會登出，現有資料將保留。確定嗎？')) {
+        if(confirm('確定要清除舊密碼嗎？資料會保留。')) {
             localStorage.removeItem('money_pwd');
             location.reload();
         }
@@ -260,35 +243,28 @@
         document.getElementById('tAll').innerText = '$' + tAll.toLocaleString();
 
         drawChart(Object.entries(categoryMap).map(([k, v]) => [k, v]));
-        
         const listDiv = document.getElementById('list');
         listDiv.innerHTML = filteredList.reverse().map(r => `
           <div class="item-row">
-            <div class="item-info">
-              <b>${r.item}</b>
-              <small>${r.category} · ${r.date}</small>
-            </div>
+            <div class="item-info"><b>${r.item}</b><small>${r.category} · ${r.date}</small></div>
             <div class="item-amt">
               <div style="color:${r.type === '收入' ? 'var(--success)' : 'var(--text-main)'}">${r.type === '收入' ? '+' : '-'}$${r.amount.toLocaleString()}</div>
               <button class="btn-del" onclick="deleteRecord(${r.id})">刪除</button>
             </div>
           </div>
-        `).join('') || '<p style="color:var(--text-sub); text-align:center; padding:20px;">本月尚無帳目</p>';
+        `).join('') || '<p style="color:var(--text-sub); text-align:center; padding:20px;">尚無紀錄</p>';
     }
 
     function drawChart(chartDataArr) {
         if (chartDataArr.length === 0) {
-            document.getElementById('piechart').innerHTML = '<div style="text-align:center;color:var(--text-sub);padding-top:100px;font-size:14px;">尚無支出比例資料</div>';
+            document.getElementById('piechart').innerHTML = '<div style="text-align:center;color:var(--text-sub);padding-top:100px;">無支出資料</div>';
             return;
         }
         const data = google.visualization.arrayToDataTable([['Category', 'Amount'], ...chartDataArr]);
         new google.visualization.PieChart(document.getElementById('piechart')).draw(data, {
-            pieHole: 0.5,
-            chartArea: {width: '90%', height: '80%'},
-            legend: {position: 'bottom', textStyle: {color: '#8e8e93', fontSize: 12}},
+            pieHole: 0.5, chartArea: {width: '90%', height: '80%'}, legend: {position: 'bottom'},
             colors: ['#5856D6', '#FF9500', '#FF2D55', '#AF52DE', '#34C759', '#5AC8FA'],
-            backgroundColor: 'transparent',
-            pieSliceBorderStyle: 'none'
+            backgroundColor: 'transparent'
         });
     }
 
@@ -310,7 +286,7 @@
     }
 
     function deleteRecord(id) {
-        if(confirm('確定要刪除這筆紀錄？')) {
+        if(confirm('確定刪除？')) {
             db.splice(id, 1);
             localStorage.setItem('money_db', JSON.stringify(db));
             renderAll();
@@ -333,7 +309,7 @@
             db = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
             localStorage.setItem('money_db', JSON.stringify(db));
             renderAll();
-            alert('匯入完成！');
+            alert('匯入成功');
         };
         reader.readAsArrayBuffer(file);
     }
