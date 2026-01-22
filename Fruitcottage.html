@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v2.9 - 增加爛果統計</title>
+    <title>專業果樹管理系統 v2.9.1 - 排行完整版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -145,6 +145,7 @@
                 
                 <div class="admin-only" id="admin-rank-panel" style="margin-top: 25px; border-top: 2px dashed var(--accent); padding-top: 15px;">
                     <label style="color:#d44b39; margin-bottom: 12px;">🎖️ 今日品質排行設定 (管理員專用)</label>
+                    
                     <div class="rank-card">
                         <div class="rank-header"><span>🥇</span> 第一名</div>
                         <div class="rank-inputs">
@@ -152,11 +153,20 @@
                             <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r1-b" step="0.1"></div>
                         </div>
                     </div>
+
                     <div class="rank-card">
-                        <div class="rank-header"><span>🥈</span> 第二名</div>
+                        <div class="rank-header"><span style="color:#999;">🥈</span> 第二名</div>
                         <div class="rank-inputs">
                             <div class="rank-field"><label>重量 (g)</label><input type="number" id="r2-w"></div>
                             <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r2-b" step="0.1"></div>
+                        </div>
+                    </div>
+
+                    <div class="rank-card">
+                        <div class="rank-header"><span style="color:#cd7f32;">🥉</span> 第三名</div>
+                        <div class="rank-inputs">
+                            <div class="rank-field"><label>重量 (g)</label><input type="number" id="r3-w"></div>
+                            <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r3-b" step="0.1"></div>
                         </div>
                     </div>
                 </div>
@@ -186,7 +196,6 @@
 <script>
     let db = JSON.parse(localStorage.getItem('farm_v29')) || [];
     let rankStore = JSON.parse(localStorage.getItem('rank_v29')) || {};
-    let users = ["管理員", "工作人員"]; // 範例人員
     let currentUser = "";
     let isAdmin = false;
 
@@ -218,7 +227,7 @@
         
         const r = rankStore[today];
         document.getElementById('display-rank-list').innerHTML = r ? 
-            `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. ${r.r2w||'-'}g (${r.r2b||'-'}°)` : "尚未排行";
+            `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. ${r.r2w||'-'}g (${r.r2b||'-'}°) | 3. ${r.r3w||'-'}g (${r.r3b||'-'}°)` : "尚未排行";
         
         const q = document.getElementById('search').value.toLowerCase();
         document.getElementById('tree-list-container').innerHTML = filtered.filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q))
@@ -244,8 +253,8 @@
             code, date,
             harvestQty: document.getElementById('f-harvestQty').value, 
             weightVal: document.getElementById('f-weightVal').value,
-            badQty: document.getElementById('f-badQty').value, // 爛果粒數
-            badWeight: document.getElementById('f-badWeight').value, // 爛果重量
+            badQty: document.getElementById('f-badQty').value, 
+            badWeight: document.getElementById('f-badWeight').value, 
             lastUser: currentUser,
             isBlooming: document.getElementById('f-isBlooming').checked, 
             bloomStatus: document.getElementById('f-bloomStatus').value,
@@ -262,7 +271,8 @@
         if(isAdmin) { 
             rankStore[date] = { 
                 r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, 
-                r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value 
+                r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value,
+                r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value 
             }; 
             localStorage.setItem('rank_v29', JSON.stringify(rankStore)); 
         }
@@ -277,12 +287,22 @@
         document.getElementById('f-code').value = t.code;
         document.getElementById('f-harvestQty').value = t.harvestQty || '';
         document.getElementById('f-weightVal').value = t.weightVal || '';
-        document.getElementById('f-badQty').value = t.badQty || ''; // 載入爛果
-        document.getElementById('f-badWeight').value = t.badWeight || ''; // 載入爛果重量
+        document.getElementById('f-badQty').value = t.badQty || '';
+        document.getElementById('f-badWeight').value = t.badWeight || '';
         document.getElementById('f-isBlooming').checked = t.isBlooming;
         toggleSubField('f-isBlooming', 'f-bloomStatus-box');
         document.getElementById('f-health').value = t.health || '良好';
         document.getElementById('f-user-static').value = t.lastUser;
+
+        if(isAdmin) {
+            const r = rankStore[date] || {};
+            document.getElementById('r1-w').value = r.r1w || '';
+            document.getElementById('r1-b').value = r.r1b || '';
+            document.getElementById('r2-w').value = r.r2w || '';
+            document.getElementById('r2-b').value = r.r2b || '';
+            document.getElementById('r3-w').value = r.r3w || '';
+            document.getElementById('r3-b').value = r.r3b || '';
+        }
         showView('edit');
     }
 
@@ -290,6 +310,16 @@
         document.querySelectorAll('#view-edit input:not([type=date]):not([readonly]), #view-edit select').forEach(e => { if(e.type==='checkbox') e.checked = false; else e.value = ''; });
         document.getElementById('f-date').value = getToday();
         document.getElementById('f-user-static').value = currentUser;
+        
+        if(isAdmin) {
+            const r = rankStore[getToday()] || {};
+            document.getElementById('r1-w').value = r.r1w || '';
+            document.getElementById('r1-b').value = r.r1b || '';
+            document.getElementById('r2-w').value = r.r2w || '';
+            document.getElementById('r2-b').value = r.r2b || '';
+            document.getElementById('r3-w').value = r.r3w || '';
+            document.getElementById('r3-b').value = r.r3b || '';
+        }
         showView('edit');
     }
 
@@ -300,15 +330,8 @@
     }
 
     function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; }
-    
-    function exportExcel() { 
-        const ws = XLSX.utils.json_to_sheet(db); 
-        const wb = XLSX.utils.book_new(); 
-        XLSX.utils.book_append_sheet(wb, ws, "HarvestData"); 
-        XLSX.writeFile(wb, `果園採收紀錄_${getToday()}.xlsx`); 
-    }
-
-    function clearAllData() { if(confirm("確定要刪除所有資料嗎？此動作無法復原。")) { db = []; localStorage.clear(); location.reload(); } }
+    function exportExcel() { const ws = XLSX.utils.json_to_sheet(db); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "HarvestData"); XLSX.writeFile(wb, `果園採收紀錄_${getToday()}.xlsx`); }
+    function clearAllData() { if(confirm("確定要刪除所有資料嗎？")) { db = []; localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
