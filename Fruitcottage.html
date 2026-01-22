@@ -15,6 +15,7 @@
             --white: #ffffff;
             --text-dark: #1b4332;
             --radius: 16px;
+            --warning: #ffcc00;
         }
 
         * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
@@ -30,6 +31,17 @@
 
         header { background: var(--primary); padding: 25px 20px 40px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; }
         header * { color: var(--white) !important; }
+
+        /* 備份提醒橫幅樣式 */
+        #backup-alert {
+            background: var(--warning);
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            display: none; /* 預設隱藏 */
+            border-bottom: 2px solid #e6b800;
+        }
 
         .content-area { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .content-view { display: none; }
@@ -85,6 +97,10 @@
             <input type="text" id="login-pass" placeholder="輸入姓名或管理密碼" style="text-align: center;">
             <button class="btn btn-primary" onclick="checkAuth()">進入系統</button>
         </div>
+    </div>
+
+    <div id="backup-alert" onclick="showView('tools')">
+        ⚠️ 距離上次備份已超過 7 天，請立即導出 Excel 存檔！
     </div>
 
     <header>
@@ -160,7 +176,8 @@
             </div>
             <div class="card">
                 <h3>📂 數據管理</h3>
-                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel</button>
+                <p id="last-backup-text" style="font-size: 12px; color: #666; margin-bottom: 10px;">上次備份時間：尚未備份</p>
+                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel (並更新備份時間)</button>
                 <button class="btn btn-outline" onclick="document.getElementById('import-input').click()" style="margin-top:10px;">📥 匯入資料</button>
                 <input type="file" id="import-input" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
                 <button class="btn btn-outline" onclick="location.reload()" style="margin-top:40px; color:red !important; border-color: red;">登出系統</button>
@@ -182,13 +199,35 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('farm_v17')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v17')) || {};
-    let users = JSON.parse(localStorage.getItem('user_v17')) || ["系統管理員"];
+    let db = JSON.parse(localStorage.getItem('farm_v18')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v18')) || {};
+    let users = JSON.parse(localStorage.getItem('user_v18')) || ["系統管理員"];
+    let lastBackup = localStorage.getItem('backup_time_v18') || null;
     let currentUser = "";
     let isAdmin = false;
 
     const getToday = () => new Date().toISOString().split('T')[0];
+
+    // 檢查備份提醒邏輯
+    function checkBackupAlert() {
+        if (!lastBackup) {
+            document.getElementById('backup-alert').style.display = 'block';
+            document.getElementById('last-backup-text').innerText = "上次備份時間：尚未備份";
+            return;
+        }
+        
+        const lastDate = new Date(lastBackup);
+        const today = new Date();
+        const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+        
+        document.getElementById('last-backup-text').innerText = "上次備份時間：" + lastBackup;
+        
+        if (diffDays >= 7) {
+            document.getElementById('backup-alert').style.display = 'block';
+        } else {
+            document.getElementById('backup-alert').style.display = 'none';
+        }
+    }
 
     function toggleSubField(checkId, boxId) {
         document.getElementById(boxId).style.display = document.getElementById(checkId).checked ? 'block' : 'none';
@@ -209,6 +248,7 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
+        checkBackupAlert();
         renderUserList();
         renderHome();
     }
@@ -224,7 +264,7 @@
         const name = input.value.trim();
         if(name) {
             users.push(name);
-            localStorage.setItem('user_v17', JSON.stringify(users));
+            localStorage.setItem('user_v18', JSON.stringify(users));
             input.value = "";
             renderUserList();
             alert("已新增使用者: " + name);
@@ -278,11 +318,11 @@
 
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_v17', JSON.stringify(db));
+        localStorage.setItem('farm_v18', JSON.stringify(db));
 
         if(isAdmin) {
             rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value };
-            localStorage.setItem('rank_v17', JSON.stringify(rankStore));
+            localStorage.setItem('rank_v18', JSON.stringify(rankStore));
         }
         alert("儲存成功"); showView('home');
     }
@@ -336,7 +376,14 @@
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "FarmData");
-        XLSX.writeFile(wb, "果園紀錄表.xlsx");
+        XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`);
+        
+        // 更新備份時間
+        const now = new Date().toLocaleString();
+        localStorage.setItem('backup_time_v18', now);
+        lastBackup = now;
+        checkBackupAlert();
+        alert("匯出成功！已同步更新最後備份時間。");
     }
 
     function importExcel(input) {
@@ -345,7 +392,7 @@
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             db = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            localStorage.setItem('farm_v17', JSON.stringify(db));
+            localStorage.setItem('farm_v18', JSON.stringify(db));
             alert("匯入成功"); renderHome();
         };
         reader.readAsArrayBuffer(input.files[0]);
