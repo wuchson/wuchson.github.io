@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>果樹管理系統</title>
+    <title>果樹管理系統 Pro - 最終穩定版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -16,6 +16,7 @@
             --text-dark: #1b4332;
             --radius: 16px;
             --warning: #ffcc00;
+            --danger: #e63946;
         }
 
         * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
@@ -54,6 +55,7 @@
 
         .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
         .btn-primary { background: var(--primary); color: white !important; }
+        .btn-danger { background: var(--danger); color: white !important; }
         .btn-outline { background: #e0e0e0; color: #333 !important; }
 
         nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; justify-content: center; align-items: stretch; }
@@ -141,6 +143,7 @@
                 </div>
 
                 <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 25px;">💾 儲存資料</button>
+                <button id="btn-delete" class="btn btn-danger" style="display:none;" onclick="handleDelete()">🗑️ 刪除此筆紀錄</button>
                 <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
@@ -153,7 +156,6 @@
                     <input type="text" id="new-user-input" placeholder="新員工姓名" style="margin-bottom: 0;">
                     <button class="btn btn-primary" onclick="addUser()" style="margin-top: 0; width: 80px;">新增</button>
                 </div>
-                <p style="font-size: 11px; color: #999; margin-top: 10px;">註：只有名單內的人員可透過姓名登入。</p>
             </div>
             <div class="card">
                 <h3>📂 數據備份</h3>
@@ -161,7 +163,7 @@
                 <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel</button>
                 <button class="btn btn-outline" onclick="document.getElementById('import-input').click()" style="margin-top:10px;">📥 匯入歷史資料</button>
                 <input type="file" id="import-input" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
-                <button class="btn btn-outline" onclick="location.reload()" style="margin-top:40px; color:red !important; border-color: red;">登出系統</button>
+                <button class="btn btn-outline" onclick="location.reload()" style="margin-top:40px; color:red !important;">登出系統</button>
             </div>
         </div>
     </div>
@@ -180,46 +182,34 @@
 </div>
 
 <script>
-    // 資料版本 V19
-    let db = JSON.parse(localStorage.getItem('farm_v19')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v19')) || {};
-    let users = JSON.parse(localStorage.getItem('user_v19')) || [];
-    let lastBackup = localStorage.getItem('backup_time_v19') || null;
+    let db = JSON.parse(localStorage.getItem('farm_v20')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v20')) || {};
+    let users = JSON.parse(localStorage.getItem('user_v20')) || [];
+    let lastBackup = localStorage.getItem('backup_time_v20') || null;
     let currentUser = "";
     let isAdmin = false;
 
-    // 設定你的管理密碼
     const ADMIN_PASSWORD = "admin123";
-
     const getToday = () => new Date().toISOString().split('T')[0];
 
-    // 登入驗證邏輯
     function checkAuth() {
         const input = document.getElementById('login-pass').value.trim();
         if(!input) return alert("請輸入姓名或密碼");
 
-        // 1. 檢查是否為管理員
         if (input === ADMIN_PASSWORD) {
             isAdmin = true;
             currentUser = "系統管理員";
-        } 
-        // 2. 檢查是否在員工白名單
-        else if (users.includes(input)) {
+        } else if (users.includes(input)) {
             isAdmin = false;
             currentUser = input;
-        } 
-        // 3. 例外處理：如果是系統第一次使用，名單還是空的
-        else if (users.length === 0 && input === "初始化") {
+        } else if (users.length === 0 && input === "初始化") {
             isAdmin = true;
             currentUser = "系統管理員";
-            alert("首次使用成功，請先至設定頁新增員工名單！");
-        }
-        else {
-            alert("無效的人員姓名或密碼！\n請聯繫管理員新增您的姓名。");
-            return;
+            alert("首次登入成功");
+        } else {
+            alert("查無此人員或密碼錯誤"); return;
         }
 
-        // 登入成功後處理介面
         if(isAdmin) {
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.style.display = el.classList.contains('nav-item') ? 'flex' : 'block';
@@ -234,51 +224,26 @@
         renderHome();
     }
 
+    function showView(viewId) {
+        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
+        document.getElementById('view-' + viewId).classList.add('active-view');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(viewId === 'home') document.getElementById('n-home').classList.add('active');
+        if(viewId === 'tools') document.getElementById('n-tools').classList.add('active');
+    }
+
     function checkBackupAlert() {
         if (!lastBackup) {
             document.getElementById('backup-alert').style.display = 'block';
-            document.getElementById('last-backup-text').innerText = "上次備份：尚未備份";
             return;
         }
-        const lastDate = new Date(lastBackup);
-        const diffDays = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
-        document.getElementById('last-backup-text').innerText = "上次備份：" + lastBackup;
+        const diffDays = Math.floor((new Date() - new Date(lastBackup)) / (1000 * 60 * 60 * 24));
         document.getElementById('backup-alert').style.display = (diffDays >= 7) ? 'block' : 'none';
+        document.getElementById('last-backup-text').innerText = "上次備份：" + lastBackup;
     }
 
     function toggleSubField(checkId, boxId) {
         document.getElementById(boxId).style.display = document.getElementById(checkId).checked ? 'block' : 'none';
-    }
-
-    function renderUserList() {
-        const container = document.getElementById('user-list-display');
-        if(!container) return;
-        container.innerHTML = users.length ? users.map((u, i) => `
-            <div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid #eee;">
-                <span>👤 ${u}</span>
-                <span onclick="deleteUser(${i})" style="color:red; font-size:12px;">刪除</span>
-            </div>`).join('') : "<p style='color:#999; text-align:center;'>尚未建立員工名單</p>";
-    }
-
-    function addUser() {
-        const input = document.getElementById('new-user-input');
-        const name = input.value.trim();
-        if(name && !users.includes(name)) {
-            users.push(name);
-            localStorage.setItem('user_v19', JSON.stringify(users));
-            input.value = "";
-            renderUserList();
-        } else {
-            alert("姓名重複或格式錯誤");
-        }
-    }
-
-    function deleteUser(index) {
-        if(confirm("確定刪除此使用者？")) {
-            users.splice(index, 1);
-            localStorage.setItem('user_v19', JSON.stringify(users));
-            renderUserList();
-        }
     }
 
     function renderHome() {
@@ -294,7 +259,7 @@
         const q = document.getElementById('search').value.toLowerCase();
         const filtered = db.filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q));
         
-        document.getElementById('tree-list-container').innerHTML = filtered.reverse().map(t => `
+        document.getElementById('tree-list-container').innerHTML = filtered.reverse().slice(0, 50).map(t => `
             <div class="card" onclick="editTree('${t.code}', '${t.date}')">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div><b>${t.name}</b> <small>#${t.code}</small><br><span style="font-size:12px; color:#888;">${t.date} · ${t.lastUser}</span></div>
@@ -321,13 +286,13 @@
 
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_v19', JSON.stringify(db));
+        localStorage.setItem('farm_v20', JSON.stringify(db));
 
         if(isAdmin) {
             rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value };
-            localStorage.setItem('rank_v19', JSON.stringify(rankStore));
+            localStorage.setItem('rank_v20', JSON.stringify(rankStore));
         }
-        alert("儲存成功"); showView('home');
+        alert("儲存成功"); renderHome(); showView('home');
     }
 
     function editTree(code, date) {
@@ -352,7 +317,24 @@
         document.getElementById('f-healthDesc').value = t.healthDesc || '';
         document.getElementById('f-medDose').value = t.medDose || '';
         document.getElementById('f-user-static').value = t.lastUser;
+
+        document.getElementById('btn-delete').style.display = 'block';
         showView('edit');
+    }
+
+    function handleDelete() {
+        const code = document.getElementById('f-code').value;
+        const date = document.getElementById('f-date').value;
+        if(confirm(`確定要刪除這筆紀錄嗎？\n編號：${code}\n日期：${date}`)) {
+            const idx = db.findIndex(x => x.code === code && x.date === date);
+            if(idx > -1) {
+                db.splice(idx, 1);
+                localStorage.setItem('farm_v20', JSON.stringify(db));
+                alert("已刪除");
+                renderHome();
+                showView('home');
+            }
+        }
     }
 
     function prepareAdd() {
@@ -361,42 +343,57 @@
         });
         document.getElementById('f-date').value = getToday();
         document.getElementById('f-user-static').value = currentUser;
-        document.getElementById('f-health').value = "良好";
-        document.getElementById('f-bloomStatus-box').style.display = 'none';
-        document.getElementById('f-bagQty-box').style.display = 'none';
+        document.getElementById('btn-delete').style.display = 'none';
         showView('edit');
     }
 
-    function showView(vId) {
-        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
-        document.getElementById('view-'+vId).classList.add('active-view');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(document.getElementById('n-'+vId)) document.getElementById('n-'+vId).classList.add('active');
-        if(vId === 'home') renderHome();
+    function renderUserList() {
+        const container = document.getElementById('user-list-display');
+        container.innerHTML = users.map((u, i) => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>👤 ${u}</span><span onclick="deleteUser(${i})" style="color:red;">刪除</span></div>`).join('');
+    }
+
+    function addUser() {
+        const name = document.getElementById('new-user-input').value.trim();
+        if(name && !users.includes(name)) {
+            users.push(name);
+            localStorage.setItem('user_v20', JSON.stringify(users));
+            document.getElementById('new-user-input').value = "";
+            renderUserList();
+        }
+    }
+
+    function deleteUser(i) {
+        if(confirm("確定刪除此員工？")) {
+            users.splice(i, 1);
+            localStorage.setItem('user_v20', JSON.stringify(users));
+            renderUserList();
+        }
     }
 
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "FarmData");
+        XLSX.utils.book_append_sheet(wb, ws, "果樹紀錄");
         XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`);
-        const now = new Date().toLocaleString();
-        localStorage.setItem('backup_time_v19', now);
-        lastBackup = now;
+        lastBackup = getToday();
+        localStorage.setItem('backup_time_v20', lastBackup);
         checkBackupAlert();
-        alert("匯出完成！");
     }
 
-    function importExcel(input) {
+    function importExcel(el) {
         const reader = new FileReader();
         reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
-            db = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            localStorage.setItem('farm_v19', JSON.stringify(db));
-            alert("匯入成功"); renderHome();
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet);
+            if(confirm(`讀取到 ${json.length} 筆資料，要匯入嗎？`)) {
+                db = json;
+                localStorage.setItem('farm_v20', JSON.stringify(db));
+                renderHome();
+            }
         };
-        reader.readAsArrayBuffer(input.files[0]);
+        reader.readAsArrayBuffer(el.files[0]);
     }
 </script>
 </body>
