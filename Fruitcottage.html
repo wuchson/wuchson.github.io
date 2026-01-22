@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v2.7</title>
+    <title>專業果樹管理系統 v2.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -41,7 +41,7 @@
         input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
         textarea { resize: none; font-family: inherit; }
 
-        /* 排版修復 */
+        /* 排版 */
         .check-container { 
             display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; 
             background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 8px; min-height: 58px;
@@ -60,14 +60,14 @@
         .btn-outline { background: #e0e0e0; color: #333 !important; }
         .btn-danger { background: var(--danger); color: white !important; }
 
-        /* 統計 */
+        /* 圖表 */
         .chart-bar { width: 18px; background: var(--primary); border-radius: 4px 4px 0 0; }
         .chart-bar.today { background: var(--accent); }
         .chart-label { font-size: 9px; color: #888; margin-top: 4px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
         .stats-box { background: #f9fbf9; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
 
-        /* 管理員排行設定 */
+        /* 管理員排行 */
         .rank-row { display: grid; grid-template-columns: 60px 1fr 45px 1fr; gap: 5px; align-items: center; margin-bottom: 8px; padding: 8px; background: #fff9f0; border-radius: 10px; }
         .rank-row input { margin-bottom: 0; padding: 6px; font-size: 14px; height: 36px; }
 
@@ -119,15 +119,11 @@
             </div>
 
             <div class="card">
-                <h4 style="margin:0 0 12px 0;">📈 採收趨勢與統計</h4>
+                <h4 style="margin:0 0 12px 0;">📈 採收趨勢統計</h4>
                 <div id="harvest-chart" style="display: flex; align-items: flex-end; justify-content: space-around; height: 80px; border-bottom: 1px solid #eee; padding-bottom: 5px;"></div>
                 <div class="stats-grid">
                     <div class="stats-box"><small>平均甜度</small><br><b id="avg-brix" style="color:var(--accent); font-size:18px;">0</b><small>°</small></div>
                     <div class="stats-box"><small>平均單重</small><br><b id="avg-weight" style="font-size:18px;">0</b><small> KG</small></div>
-                </div>
-                <div style="margin-top:15px; padding-top:10px; border-top:1px dashed #ddd; text-align:center;">
-                    <span style="font-size:12px; color:#666;">📅 <span id="stat-year"></span> 年度累計：</span>
-                    <b id="year-total-qty">0</b> 粒 / <b id="year-total-weight">0</b> KG
                 </div>
             </div>
 
@@ -138,7 +134,7 @@
 
         <div id="view-edit" class="content-view">
             <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄編輯</h3>
+                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
                 <div class="grid-2">
                     <div><label>📅 日期</label><input type="date" id="f-date"></div>
                     <div><label>👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
@@ -146,38 +142,38 @@
                 
                 <label>📍 基本資訊</label>
                 <select id="f-area"><option value="A區">A區</option><option value="B區">B區</option><option value="C區">C區</option><option value="其它">其它</option></select>
-                <div class="grid-2"><input type="text" id="f-name" placeholder="果樹名稱"><input type="text" id="f-code" placeholder="植株編號"></div>
+                <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
 
                 <div class="check-container" style="border-left: 5px solid #ff6b6b;"><label>🌸 處於花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
                 <div id="f-bloomStatus-box" class="sub-field"><select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select></div>
 
-                <div class="check-container" style="border-left: 5px solid #4dadff;"><label>🛍️ 完成套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
+                <div class="check-container" style="border-left: 5px solid #4dadff;"><label>🛍️ 已套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
                 <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
 
-                <label>🛠️ 養護與修剪</label>
-                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥名稱與劑量">
+                <label>🛠️ 養護</label>
+                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥劑量">
                 <div class="grid-2">
                     <div class="check-container"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
                     <div class="check-container"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
                 </div>
 
-                <label>🏥 健康狀況與醫治</label>
+                <label>🏥 健康狀況</label>
                 <select id="f-health"><option value="良好">健康良好</option><option value="需關注">需關注</option><option value="患病中">患病中</option></select>
-                <textarea id="f-healthDesc" rows="2" placeholder="如有病徵請說明..."></textarea>
-                <input type="text" id="f-medDose" placeholder="使用藥劑名稱與劑量">
+                <textarea id="f-healthDesc" rows="2" placeholder="詳細病徵..."></textarea>
+                <input type="text" id="f-medDose" placeholder="使用藥劑與劑量">
 
-                <label>📊 採收數據</label>
+                <label>📊 採收</label>
                 <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
                 
                 <div class="admin-only" id="admin-rank-panel" style="margin-top: 25px; border-top: 2px dashed var(--accent); padding-top: 15px;">
-                    <label style="color:#d44b39;">🎖️ 管理員：今日排行設定</label>
+                    <label style="color:#d44b39;">🎖️ 今日排行設定 (管理員)</label>
                     <div class="rank-row"><div>1.編號</div><input type="text" id="r1-w"><div>甜度</div><input type="number" id="r1-b"></div>
                     <div class="rank-row"><div>2.編號</div><input type="text" id="r2-w"><div>甜度</div><input type="number" id="r2-b"></div>
                     <div class="rank-row"><div>3.編號</div><input type="text" id="r3-w"><div>甜度</div><input type="number" id="r3-b"></div>
                 </div>
 
-                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
-                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除紀錄</button>
+                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存</button>
+                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除</button>
                 <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
@@ -187,13 +183,13 @@
                 <h3>👥 人員管理</h3>
                 <div id="user-list-display"></div>
                 <div style="display: flex; gap: 8px; margin-top:10px;">
-                    <input type="text" id="new-user-input" placeholder="人員姓名" style="margin-bottom:0;">
+                    <input type="text" id="new-user-input" placeholder="姓名" style="margin-bottom:0;">
                     <button class="btn btn-primary" onclick="addUser()" style="margin-top:0; width:80px;">新增</button>
                 </div>
             </div>
             <div class="card">
-                <h3>📂 數據管理</h3>
-                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel</button>
+                <h3>📂 數據導出入</h3>
+                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出資料 (檔名附日期)</button>
                 <button class="btn btn-outline" onclick="document.getElementById('import-input').click()">📥 匯入資料</button>
                 <input type="file" id="import-input" style="display:none" onchange="importExcel(this)">
                 <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
@@ -210,9 +206,9 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('farm_v27')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v27')) || {};
-    let users = JSON.parse(localStorage.getItem('user_v27')) || [];
+    let db = JSON.parse(localStorage.getItem('farm_v28')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v28')) || {};
+    let users = JSON.parse(localStorage.getItem('user_v28')) || [];
     let currentUser = "";
     let isAdmin = false;
 
@@ -221,9 +217,9 @@
 
     function checkAuth() {
         const input = document.getElementById('login-pass').value.trim();
-        if (input === ADMIN_PASS) { isAdmin = true; currentUser = "系統管理員"; } 
+        if (input === ADMIN_PASS) { isAdmin = true; currentUser = "管理員"; } 
         else if (users.includes(input)) { isAdmin = false; currentUser = input; } 
-        else { alert("查無人員或密碼錯誤"); return; }
+        else { alert("無此人員"); return; }
         
         if(isAdmin) {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = (el.classList.contains('nav-item')?'flex':'block'));
@@ -238,23 +234,18 @@
         renderUserList(); renderHome();
     }
 
-    function logout() { if(confirm("確定登出切換身分嗎？")) location.reload(); }
+    function logout() { location.reload(); }
 
     function renderHome() {
-        const today = getToday(), year = today.split('-')[0], area = document.getElementById('header-area-filter').value;
+        const today = getToday(), area = document.getElementById('header-area-filter').value;
         let filtered = area === "全部" ? db : db.filter(t => t.area === area);
 
         document.getElementById('today-qty').innerText = filtered.filter(t => t.date === today).reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
         document.getElementById('today-weight').innerText = filtered.filter(t => t.date === today).reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
         
-        const yearData = filtered.filter(t => t.date.startsWith(year));
-        document.getElementById('stat-year').innerText = year;
-        document.getElementById('year-total-qty').innerText = yearData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0).toLocaleString();
-        document.getElementById('year-total-weight').innerText = yearData.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
-
         const r = rankStore[today];
         document.getElementById('display-rank-list').innerHTML = r ? 
-            `1. ${r.r1w||'-'} (${r.r1b||'-'}°) | 2. ${r.r2w||'-'} (${r.r2b||'-'}°) | 3. ${r.r3w||'-'} (${r.r3b||'-'}°)` : "尚未建立排行";
+            `1. ${r.r1w||'-'} (${r.r1b||'-'}°) | 2. ${r.r2w||'-'} (${r.r2b||'-'}°) | 3. ${r.r3w||'-'} (${r.r3b||'-'}°)` : "尚未排行";
         
         updateCharts(filtered, today);
         const q = document.getElementById('search').value.toLowerCase();
@@ -272,29 +263,29 @@
             </div>`).join('');
     }
 
-    function updateCharts(filteredDb, today) {
+    function updateCharts(f, today) {
         const last7 = []; for (let i=6; i>=0; i--) { let d=new Date(); d.setDate(d.getDate()-i); last7.push(d.toISOString().split('T')[0]); }
         let max = 0;
-        const daily = last7.map(date => {
-            const qty = filteredDb.filter(t => t.date === date).reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
-            if(qty > max) max = qty; return {date, qty};
+        const daily = last7.map(d => {
+            const qty = f.filter(t => t.date === d).reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
+            if(qty > max) max = qty; return {d, qty};
         });
         document.getElementById('harvest-chart').innerHTML = daily.map(d => {
             const h = max === 0 ? 0 : (d.qty/max)*60;
-            return `<div style="display:flex; flex-direction:column; align-items:center;"><div class="chart-bar ${d.date===today?'today':''}" style="height:${h}px"></div><div class="chart-label">${d.date.split('-')[2]}</div></div>`;
+            return `<div style="display:flex; flex-direction:column; align-items:center;"><div class="chart-bar ${d.d===today?'today':''}" style="height:${h}px"></div><div class="chart-label">${d.d.split('-')[2]}</div></div>`;
         }).join('');
         
-        const todayData = filteredDb.filter(t => t.date === today);
-        const totalW = todayData.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0), totalQ = todayData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
-        document.getElementById('avg-weight').innerText = totalQ > 0 ? (totalW/totalQ).toFixed(2) : 0;
+        const td = f.filter(t => t.date === today);
+        const tw = td.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0), tq = td.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
+        document.getElementById('avg-weight').innerText = tq > 0 ? (tw/tq).toFixed(2) : 0;
         const r = rankStore[today];
-        const brix = r ? [r.r1b, r.r2b, r.r3b].map(parseFloat).filter(v=>!isNaN(v)) : [];
-        document.getElementById('avg-brix').innerText = brix.length ? (brix.reduce((a,b)=>a+b)/brix.length).toFixed(1) : 0;
+        const b = r ? [r.r1b, r.r2b, r.r3b].map(parseFloat).filter(v=>!isNaN(v)) : [];
+        document.getElementById('avg-brix').innerText = b.length ? (b.reduce((a,b)=>a+b)/b.length).toFixed(1) : 0;
     }
 
     function handleSave() {
         const code = document.getElementById('f-code').value, date = document.getElementById('f-date').value;
-        if(!code || !date) return alert("編號與日期必填");
+        if(!code || !date) return alert("必填未填");
         const data = {
             area: document.getElementById('f-area').value, name: document.getElementById('f-name').value, code, date,
             harvestQty: document.getElementById('f-harvestQty').value, weightVal: document.getElementById('f-weightVal').value,
@@ -307,18 +298,17 @@
         };
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_v27', JSON.stringify(db));
+        localStorage.setItem('farm_v28', JSON.stringify(db));
         if(isAdmin) { 
             rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value }; 
-            localStorage.setItem('rank_v27', JSON.stringify(rankStore)); 
+            localStorage.setItem('rank_v28', JSON.stringify(rankStore)); 
         }
-        alert("儲存成功"); showView('home');
+        showView('home');
     }
 
     function editTree(code, date) {
-        if(!isAdmin && date !== getToday()) return alert("權限不足（僅能編輯今日紀錄）");
-        const t = db.find(x => x.code === code && x.date === date);
-        if(!t) return;
+        if(!isAdmin && date !== getToday()) return alert("限編輯今日");
+        const t = db.find(x => x.code === code && x.date === date); if(!t) return;
         document.getElementById('f-area').value = t.area;
         document.getElementById('f-date').value = t.date;
         document.getElementById('f-name').value = t.name;
@@ -327,10 +317,8 @@
         document.getElementById('f-weightVal').value = t.weightVal;
         document.getElementById('f-isBlooming').checked = t.isBlooming;
         toggleSubField('f-isBlooming', 'f-bloomStatus-box');
-        document.getElementById('f-bloomStatus').value = t.bloomStatus || '';
         document.getElementById('f-isBagged').checked = t.isBagged;
         toggleSubField('f-isBagged', 'f-bagQty-box');
-        document.getElementById('f-bagQty').value = t.bagQty || '';
         document.getElementById('f-health').value = t.health || '良好';
         document.getElementById('f-healthDesc').value = t.healthDesc || '';
         document.getElementById('f-medDose').value = t.medDose || '';
@@ -360,19 +348,28 @@
     }
 
     function deleteCurrentRecord() {
-        if(!confirm("確定刪除？")) return;
+        if(!confirm("刪除？")) return;
         const c = document.getElementById('f-code').value, d = document.getElementById('f-date').value;
         db = db.filter(x => !(x.code === c && x.date === d));
-        localStorage.setItem('farm_v27', JSON.stringify(db)); showView('home');
+        localStorage.setItem('farm_v28', JSON.stringify(db)); showView('home');
     }
 
-    function toggleSubField(cid, bid) { document.getElementById(bid).style.display = document.getElementById(cid).checked ? 'block' : 'none'; }
+    function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; }
     function renderUserList() { const c = document.getElementById('user-list-display'); c.innerHTML = users.map((u, i) => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>👤 ${u}</span><span onclick="deleteUser(${i})" style="color:red; cursor:pointer;">刪除</span></div>`).join(''); }
-    function addUser() { const n = document.getElementById('new-user-input').value.trim(); if(n && !users.includes(n)) { users.push(n); localStorage.setItem('user_v27', JSON.stringify(users)); renderUserList(); document.getElementById('new-user-input').value=''; } }
-    function deleteUser(i) { if(confirm("確定刪除？")) { users.splice(i,1); localStorage.setItem('user_v27', JSON.stringify(users)); renderUserList(); } }
-    function exportExcel() { const ws = XLSX.utils.json_to_sheet(db), wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Data"); XLSX.writeFile(wb, `果園紀錄_v27.xlsx`); }
-    function importExcel(input) { const reader = new FileReader(); reader.onload = (e) => { db = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).Sheets[XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).SheetNames[0]]); localStorage.setItem('farm_v27', JSON.stringify(db)); alert("匯入成功"); renderHome(); }; reader.readAsArrayBuffer(input.files[0]); }
-    function clearAllData() { if(isAdmin && prompt("輸入 DELETE 確認清空") === 'DELETE') { db = []; localStorage.setItem('farm_v27', '[]'); renderHome(); } }
+    function addUser() { const n = document.getElementById('new-user-input').value.trim(); if(n && !users.includes(n)) { users.push(n); localStorage.setItem('user_v28', JSON.stringify(users)); renderUserList(); document.getElementById('new-user-input').value=''; } }
+    function deleteUser(i) { users.splice(i,1); localStorage.setItem('user_v28', JSON.stringify(users)); renderUserList(); }
+    
+    // ✨ 檔名增加日期功能 ✨
+    function exportExcel() { 
+        const ws = XLSX.utils.json_to_sheet(db); 
+        const wb = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(wb, ws, "Data"); 
+        const todayStr = new Date().toISOString().split('T')[0]; // 取得 YYYY-MM-DD
+        XLSX.writeFile(wb, `果園紀錄_${todayStr}.xlsx`); 
+    }
+    
+    function importExcel(input) { const reader = new FileReader(); reader.onload = (e) => { db = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).Sheets[XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).SheetNames[0]]); localStorage.setItem('farm_v28', JSON.stringify(db)); alert("匯入成功"); renderHome(); }; reader.readAsArrayBuffer(input.files[0]); }
+    function clearAllData() { if(isAdmin && prompt("輸入 DELETE") === 'DELETE') { db = []; localStorage.setItem('farm_v28', '[]'); renderHome(); } }
 </script>
 </body>
 </html>
