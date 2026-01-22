@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v2.8 - 優化版</title>
+    <title>專業果樹管理系統 v2.8 - 重量優化版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -207,7 +207,7 @@
                     <div class="rank-card">
                         <div class="rank-header"><span>🥇</span> 第一名</div>
                         <div class="rank-inputs">
-                            <div class="rank-field"><label>編號/備註</label><input type="text" id="r1-w" placeholder="如: A-05"></div>
+                            <div class="rank-field"><label>重量 (g)</label><input type="number" id="r1-w" placeholder="例如: 520"></div>
                             <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r1-b" step="0.1" placeholder="0.0"></div>
                         </div>
                     </div>
@@ -215,7 +215,7 @@
                     <div class="rank-card">
                         <div class="rank-header"><span style="color:#999;">🥈</span> 第二名</div>
                         <div class="rank-inputs">
-                            <div class="rank-field"><label>編號/備註</label><input type="text" id="r2-w" placeholder="如: B-12"></div>
+                            <div class="rank-field"><label>重量 (g)</label><input type="number" id="r2-w" placeholder="例如: 505"></div>
                             <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r2-b" step="0.1" placeholder="0.0"></div>
                         </div>
                     </div>
@@ -223,7 +223,7 @@
                     <div class="rank-card">
                         <div class="rank-header"><span style="color:#cd7f32;">🥉</span> 第三名</div>
                         <div class="rank-inputs">
-                            <div class="rank-field"><label>編號/備註</label><input type="text" id="r3-w" placeholder="如: C-01"></div>
+                            <div class="rank-field"><label>重量 (g)</label><input type="number" id="r3-w" placeholder="例如: 490"></div>
                             <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r3-b" step="0.1" placeholder="0.0"></div>
                         </div>
                     </div>
@@ -301,8 +301,9 @@
         document.getElementById('today-weight').innerText = filtered.filter(t => t.date === today).reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
         
         const r = rankStore[today];
+        // 顯示列表格式： 重量g (甜度°)
         document.getElementById('display-rank-list').innerHTML = r ? 
-            `1. ${r.r1w||'-'} (${r.r1b||'-'}°) | 2. ${r.r2w||'-'} (${r.r2b||'-'}°) | 3. ${r.r3w||'-'} (${r.r3b||'-'}°)` : "尚未排行";
+            `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. ${r.r2w||'-'}g (${r.r2b||'-'}°) | 3. ${r.r3w||'-'}g (${r.r3b||'-'}°)` : "尚未排行";
         
         updateCharts(filtered, today);
         const q = document.getElementById('search').value.toLowerCase();
@@ -390,7 +391,6 @@
         document.getElementById('f-pruneBig').checked = t.pruneBig;
         document.getElementById('f-pruneSmall').checked = t.pruneSmall;
 
-        // 如果是管理員，編輯時也載入當時的排行
         if(isAdmin) {
             const r = rankStore[date] || {};
             document.getElementById('r1-w').value = r.r1w || '';
@@ -400,7 +400,6 @@
             document.getElementById('r3-w').value = r.r3w || '';
             document.getElementById('r3-b').value = r.r3b || '';
         }
-
         showView('edit');
     }
 
@@ -411,7 +410,6 @@
         document.getElementById('f-area').value = 'A區';
         document.getElementById('f-health').value = '良好';
         
-        // 新增時載入今日已設定好的排行
         if(isAdmin) {
             const r = rankStore[getToday()] || {};
             document.getElementById('r1-w').value = r.r1w || '';
