@@ -34,6 +34,10 @@
         .check-group.blue { background: #eef6fb; border-color: #caf0f8; margin-top: 15px; }
         .check-group input[type="checkbox"] { width: 22px !important; height: 22px !important; margin: 0 !important; }
 
+        .flower-level-box { display: flex; justify-content: space-around; background: #fff; padding: 10px; border-radius: 10px; border: 1px dashed #ff85a1; margin: 10px 0; }
+        .flower-level-box label { display: flex; align-items: center; gap: 5px; font-size: 14px; color: #d81b60; }
+        .flower-level-box input[type="radio"] { width: auto; margin: 0; }
+
         .weight-group { display: flex; gap: 5px; }
         .weight-group input { flex: 2; }
         .weight-group select { flex: 1; background: #eee; }
@@ -81,7 +85,6 @@
     </div>
 
     <input type="text" id="search" placeholder="🔍 搜尋果樹編號或名稱..." oninput="renderHome()" style="margin: 10px 0; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-    
     <div id="tree-list-container"></div>
 </div>
 
@@ -93,7 +96,7 @@
         <label>果樹編號</label><input type="text" id="f-code">
 
         <div style="background: #fff9db; padding: 15px; border-radius: 12px; border: 1px solid #ffe066; margin-bottom: 15px;">
-            <label style="color: #e67e22; font-size: 15px;">📊 本次採收數據 (填寫後自動計入今日)</label>
+            <label style="color: #e67e22; font-size: 15px;">📊 本次採收數據</label>
             <div style="display: flex; gap: 8px; margin-top:10px;">
                 <div style="flex:1;">
                     <label>採收量(粒)</label>
@@ -105,9 +108,9 @@
                 </div>
             </div>
             
-            <label>單果或總重 (數值)</label>
+            <label>重量數值</label>
             <div class="weight-group">
-                <input type="number" id="f-weightVal" step="0.01" placeholder="輸入重量">
+                <input type="number" id="f-weightVal" step="0.01" placeholder="輸入數值">
                 <select id="f-weightUnit">
                     <option value="公克">公克 (g)</option>
                     <option value="公斤">公斤 (kg)</option>
@@ -117,13 +120,24 @@
         </div>
 
         <div class="check-group">
-            <input type="checkbox" id="f-isBlooming">
+            <input type="checkbox" id="f-isBlooming" onchange="toggleFlowerLevel()">
             <label for="f-isBlooming">🌸 目前正值花期</label>
+        </div>
+        <div id="flower-level-section" style="display:none;">
+            <div class="flower-level-box">
+                <label><input type="radio" name="flowerLevel" value="少量"> 少量</label>
+                <label><input type="radio" name="flowerLevel" value="中量"> 中量</label>
+                <label><input type="radio" name="flowerLevel" value="大量"> 大量</label>
+            </div>
         </div>
 
         <div class="check-group blue">
-            <input type="checkbox" id="f-isBagged">
+            <input type="checkbox" id="f-isBagged" onchange="toggleBagQty()">
             <label for="f-isBagged">🛍️ 已經完成套袋</label>
+        </div>
+        <div id="bag-qty-section" style="display:none; padding: 0 10px;">
+            <label>套袋總數量 (個)</label>
+            <input type="number" id="f-bagQty" placeholder="輸入本次套袋數量">
         </div>
 
         <label style="margin-top:10px;">🧪 管理紀錄</label>
@@ -133,10 +147,9 @@
             <option value="注意">健康狀況：注意</option>
             <option value="病蟲害">健康狀況：病蟲害</option>
         </select>
-        <textarea id="f-pest" rows="2" placeholder="其他備註內容..."></textarea>
+        <textarea id="f-pest" rows="2" placeholder="備註說明..."></textarea>
 
         <div style="text-align:center; margin: 15px 0;"><canvas id="qr-gen"></canvas></div>
-        
         <button class="btn btn-primary" onclick="handleSave()">💾 儲存數據</button>
         <button class="btn btn-outline" onclick="showView('home')">返回列表</button>
     </div>
@@ -147,7 +160,7 @@
         <h3>⚙️ 系統管理</h3>
         <button class="btn btn-primary" onclick="exportExcel()">📤 匯出完整 Excel 報表</button>
         <div style="margin-top:20px;">
-            <label>匯入歷史資料 (Excel)</label>
+            <label>匯入資料 (Excel)</label>
             <input type="file" id="import-file" accept=".xlsx" onchange="handleImport(event)">
         </div>
         <button class="btn btn-outline" onclick="location.reload()" style="margin-top:30px; color:red;">登出系統</button>
@@ -163,7 +176,7 @@
     <div class="nav-item active" id="nav-home" onclick="showView('home')">🏡 首頁清單</div>
     <div class="nav-item" id="nav-scan" onclick="startScan()">📷 掃描條碼</div>
     <div class="nav-item" id="nav-add" onclick="prepareAdd()">➕ 新增紀錄</div>
-    <div class="nav-item" id="nav-tools" onclick="showView('tools')">⚙️ 系統設定</div>
+    <div class="nav-item" id="nav-tools" onclick="showView('tools')">⚙️ 設定</div>
 </nav>
 
 <script>
@@ -177,12 +190,8 @@
         } else { alert("密碼錯誤"); }
     }
 
-    // 取得今天的日期字串 (YYYY-MM-DD)
-    function getTodayStr() {
-        return new Date().toISOString().split('T')[0];
-    }
+    function getTodayStr() { return new Date().toISOString().split('T')[0]; }
 
-    // 單位轉換為公斤以方便計算總重
     function toKG(val, unit) {
         const v = parseFloat(val) || 0;
         if(unit === '公克') return v / 1000;
@@ -190,18 +199,26 @@
         return v;
     }
 
+    function toggleFlowerLevel() {
+        document.getElementById('flower-level-section').style.display = 
+            document.getElementById('f-isBlooming').checked ? 'block' : 'none';
+    }
+
+    // 切換套袋數量顯示
+    function toggleBagQty() {
+        document.getElementById('bag-qty-section').style.display = 
+            document.getElementById('f-isBagged').checked ? 'block' : 'none';
+    }
+
     function renderHome() {
         const today = getTodayStr();
         const todayData = db.filter(t => t.lastUpdate === today);
 
-        // 1. 計算今日統計
         const totalQty = todayData.reduce((sum, t) => sum + (parseInt(t.harvestQty) || 0), 0);
         const totalWeight = todayData.reduce((sum, t) => sum + toKG(t.weightVal, t.weightUnit), 0);
-        
         document.getElementById('today-qty').innerText = totalQty.toLocaleString();
         document.getElementById('today-weight').innerText = totalWeight.toFixed(2);
 
-        // 2. 今日甜度排行榜
         const top3 = [...todayData]
             .filter(t => (parseFloat(t.brix) || 0) > 0)
             .sort((a, b) => (parseFloat(b.brix) || 0) - (parseFloat(a.brix) || 0))
@@ -219,7 +236,6 @@
             rankContainer.innerHTML = `<div style="text-align:center; opacity:0.6; font-size:13px; padding:10px;">今日尚無採收數據</div>`;
         }
 
-        // 3. 渲染列表
         const query = document.getElementById('search').value.toLowerCase();
         const filtered = db.filter(t => (t.code||'').toLowerCase().includes(query) || (t.name||'').toLowerCase().includes(query));
         
@@ -229,7 +245,9 @@
                     <div>
                         <strong>${t.name || '未命名'}</strong> <small style="color:#888;">#${t.code}</small><br>
                         <span style="font-size:12px; color:${t.lastUpdate === today ? 'var(--accent)' : '#999'}">
-                            ${t.lastUpdate === today ? '● 今日已更新' : '上次更新: ' + (t.lastUpdate || '無')}
+                            ${t.isBlooming ? '🌸'+(t.flowerLevel||'') : ''} 
+                            ${t.isBagged ? '🛍️'+(t.bagQty||0) : ''}
+                            ${t.lastUpdate === today ? '● 今日更新' : ''}
                         </span>
                     </div>
                     <div style="text-align:right;">
@@ -251,19 +269,30 @@
 
     function prepareAdd() {
         document.querySelectorAll('#view-edit input, #view-edit textarea').forEach(el => {
-            if(el.type === 'checkbox') el.checked = false; else el.value = '';
+            if(el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
         });
         document.getElementById('f-weightUnit').value = '公克';
+        document.getElementById('flower-level-section').style.display = 'none';
+        document.getElementById('bag-qty-section').style.display = 'none';
         showView('edit');
     }
 
     function editTree(code) {
         const t = db.find(x => x.code === code);
         if(!t) return;
-        const fields = ['name','code','fertilizer','brix','harvestQty','weightVal','weightUnit','health','pest'];
+        const fields = ['name','code','fertilizer','brix','harvestQty','weightVal','weightUnit','health','pest','bagQty'];
         fields.forEach(f => { if(document.getElementById('f-'+f)) document.getElementById('f-'+f).value = t[f] || (f==='weightUnit'?'公克':''); });
+        
         document.getElementById('f-isBlooming').checked = t.isBlooming || false;
         document.getElementById('f-isBagged').checked = t.isBagged || false;
+        
+        if(t.flowerLevel) {
+            const r = document.querySelector(`input[name="flowerLevel"][value="${t.flowerLevel}"]`);
+            if(r) r.checked = true;
+        }
+        toggleFlowerLevel();
+        toggleBagQty();
+        
         new QRious({ element: document.getElementById('qr-gen'), value: t.code, size: 100 });
         showView('edit');
     }
@@ -272,13 +301,17 @@
         const code = document.getElementById('f-code').value;
         if(!code) return alert("請輸入編號");
         
+        const flowerR = document.querySelector('input[name="flowerLevel"]:checked');
         const data = {
-            lastUpdate: getTodayStr() // 標記更新日期
+            lastUpdate: getTodayStr(),
+            isBlooming: document.getElementById('f-isBlooming').checked,
+            flowerLevel: (document.getElementById('f-isBlooming').checked && flowerR) ? flowerR.value : '',
+            isBagged: document.getElementById('f-isBagged').checked,
+            bagQty: document.getElementById('f-bagQty').value || 0
         };
+        
         const fields = ['name','code','fertilizer','brix','harvestQty','weightVal','weightUnit','health','pest'];
         fields.forEach(f => { data[f] = document.getElementById('f-'+f).value; });
-        data.isBlooming = document.getElementById('f-isBlooming').checked;
-        data.isBagged = document.getElementById('f-isBagged').checked;
 
         const idx = db.findIndex(x => x.code === code);
         if(idx > -1) db[idx] = data; else db.push(data);
