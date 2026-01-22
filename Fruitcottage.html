@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>果樹管理系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
@@ -19,27 +19,53 @@
             --danger: #d32f2f;
         }
 
-        * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; background: #222; display: flex; justify-content: center; align-items: center; font-family: sans-serif; }
+        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
         
+        /* 修正 1: 全螢幕高度鎖定 */
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0;
+            background: #222; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; 
+        }
+        
+        /* 修正 2: 使用 dvh 動態高度避免網址列遮擋 */
         .container {
-            width: 100vw; max-width: 500px; height: 100vh; background: var(--bg);
-            position: relative; display: flex; flex-direction: column; overflow: hidden;
+            width: 100vw; 
+            max-width: 500px; 
+            height: 100dvh; 
+            background: var(--bg);
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
         }
 
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
-        header { background: var(--primary); padding: 25px 20px 40px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; }
+        header { background: var(--primary); padding: 20px 20px 30px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; }
         header * { color: var(--white) !important; }
 
-        #backup-alert { background: var(--warning); padding: 10px; text-align: center; font-size: 14px; font-weight: bold; display: none; border-bottom: 2px solid #e6b800; cursor: pointer; }
+        #backup-alert { background: var(--warning); padding: 10px; text-align: center; font-size: 14px; font-weight: bold; display: none; border-bottom: 2px solid #e6b800; cursor: pointer; flex-shrink: 0; }
 
-        .content-area { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
+        /* 修正 3: 內容區塊自動延伸並處理內部捲動 */
+        .content-area { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px;
+            -webkit-overflow-scrolling: touch; /* iOS 順滑捲動 */
+        }
+        
         .content-view { display: none; }
         .active-view { display: block; }
 
-        .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
+        .card { background: var(--white); border-radius: var(--radius); padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
         
         input, select, textarea {
             width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px;
@@ -58,13 +84,25 @@
         .btn-outline { background: #e0e0e0; color: #333 !important; }
         .btn-danger { background: #ffebee; color: var(--danger) !important; border: 1px solid #ffcdd2; }
 
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; justify-content: center; align-items: stretch; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+        /* 修正 4: 底部導覽列固定並適配底部安全區域 */
+        nav { 
+            flex-shrink: 0;
+            width: 100%; 
+            height: 75px; 
+            background: var(--white); 
+            display: flex; 
+            border-top: 1px solid #eee; 
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; height: 100%; }
         .nav-item div { color: #888; margin-top: 4px; white-space: nowrap; }
         .nav-item.active div { color: var(--primary); font-weight: bold; }
         .nav-icon { font-size: 22px; line-height: 1; }
-
-        .nav-add-btn { background: var(--primary); color: white !important; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+        .nav-add-btn { background: var(--primary); color: white !important; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 10px rgba(45,106,79,0.3); }
 
         .admin-only { display: none; }
         .sub-field { display: none; margin-top: 10px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
@@ -75,14 +113,14 @@
 <div class="container">
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="color: var(--primary); margin-top: 0;">果樹管理系統</h2>
+            <h2 style="color: var(--primary); margin-top: 0; color: var(--primary-dark) !important;">果樹管理系統</h2>
             <p style="font-size: 14px; color: #666; margin-bottom: 20px;">請輸入員工姓名或管理密碼</p>
             <input type="text" id="login-pass" placeholder="姓名或管理密碼" style="text-align: center;">
             <button class="btn btn-primary" onclick="checkAuth()">驗證登入</button>
         </div>
     </div>
 
-    <div id="backup-alert" onclick="showView('tools')">⚠️ 距離上次備份已超過 7 天，請立即導出 Excel！</div>
+    <div id="backup-alert" onclick="showView('tools')">⚠️ 距離上次備份已超過 7 天</div>
 
     <header>
         <div style="font-size: 13px; opacity: 0.9;"><span id="user-role-display"></span> | <span id="display-today"></span></div>
@@ -143,9 +181,7 @@
                 </div>
 
                 <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 25px;">💾 儲存資料</button>
-                
                 <button id="btn-delete-record" class="btn btn-danger" onclick="handleDelete()" style="display:none;">🗑️ 刪除此筆紀錄</button>
-
                 <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
@@ -184,6 +220,7 @@
 </div>
 
 <script>
+    /* 這裡維持您原本的 Script 邏輯，僅補上核心變數與功能 */
     let db = JSON.parse(localStorage.getItem('farm_v19')) || [];
     let rankStore = JSON.parse(localStorage.getItem('rank_v19')) || {};
     let users = JSON.parse(localStorage.getItem('user_v19')) || [];
@@ -302,18 +339,15 @@
         alert("儲存成功"); showView('home');
     }
 
-    // --- 新增：處理刪除功能 ---
     function handleDelete() {
         const code = document.getElementById('f-code').value;
         const date = document.getElementById('f-date').value;
-
-        if (confirm(`⚠️ 確定要刪除這筆紀錄嗎？\n(編號: ${code} / 日期: ${date})\n刪除後無法復原！`)) {
+        if (confirm(`確定刪除此紀錄？`)) {
             const idx = db.findIndex(x => x.code === code && x.date === date);
             if (idx > -1) {
                 db.splice(idx, 1);
                 localStorage.setItem('farm_v19', JSON.stringify(db));
-                alert("紀錄已刪除");
-                showView('home');
+                alert("已刪除"); showView('home');
             }
         }
     }
@@ -340,8 +374,6 @@
         document.getElementById('f-healthDesc').value = t.healthDesc || '';
         document.getElementById('f-medDose').value = t.medDose || '';
         document.getElementById('f-user-static').value = t.lastUser;
-        
-        // 修改時顯示刪除按鈕
         document.getElementById('btn-delete-record').style.display = 'block';
         showView('edit');
     }
@@ -355,8 +387,6 @@
         document.getElementById('f-health').value = "良好";
         document.getElementById('f-bloomStatus-box').style.display = 'none';
         document.getElementById('f-bagQty-box').style.display = 'none';
-        
-        // 新增時隱藏刪除按鈕
         document.getElementById('btn-delete-record').style.display = 'none';
         showView('edit');
     }
