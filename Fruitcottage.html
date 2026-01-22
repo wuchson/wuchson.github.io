@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v2.0</title>
+    <title>專業果樹管理系統 v2.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -19,19 +19,21 @@
             --danger: #e63946;
         }
 
+        /* 基礎佈局 */
         * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
         html, body { height: 100%; margin: 0; background: #222; display: flex; justify-content: center; align-items: center; font-family: sans-serif; overflow: hidden; }
         
         .container { width: 100vw; max-width: 500px; height: 100vh; height: -webkit-fill-available; background: var(--bg); display: flex; flex-direction: column; position: relative; }
 
+        /* 登入畫面 */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
+        /* 頁首 */
         header { background: var(--primary); padding: 20px 20px 30px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; }
         header * { color: var(--white) !important; }
 
-        #backup-alert { background: var(--warning); padding: 10px; text-align: center; font-size: 14px; font-weight: bold; display: none; border-bottom: 2px solid #e6b800; cursor: pointer; flex-shrink: 0; }
-
+        /* 內容區 */
         .content-area { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
         .content-view { display: none; }
         .active-view { display: block; }
@@ -40,9 +42,36 @@
         
         input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
 
-        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 8px; }
+        /* 關鍵修正：防止文字換行跑掉 */
+        .check-container { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 12px 15px; 
+            background: #fff; 
+            border-radius: 12px; 
+            border: 1.5px solid #dcdcdc; 
+            margin-top: 8px;
+            min-height: 54px;
+        }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .check-container label { 
+            margin: 0 !important; 
+            font-size: 15px; 
+            white-space: nowrap; /* 核心修正：強制不換行 */
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .check-container input[type="checkbox"] { 
+            width: 24px; 
+            height: 24px; 
+            margin: 0 0 0 10px; 
+            flex-shrink: 0; /* 防止縮小 */
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         label { font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block; }
 
         .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
@@ -51,12 +80,13 @@
         .btn-danger { background: var(--danger); color: white !important; }
 
         /* 圖表樣式 */
-        .chart-bar { width: 18px; background: var(--primary); border-radius: 4px 4px 0 0; transition: height 0.3s; position: relative; }
+        .chart-bar { width: 18px; background: var(--primary); border-radius: 4px 4px 0 0; transition: height 0.3s; }
         .chart-bar.today { background: var(--accent); }
         .chart-label { font-size: 9px; color: #888; margin-top: 4px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .stats-box { background: #f9fbf9; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
 
+        /* 導覽列 */
         nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
         .nav-item div { color: #888; margin-top: 4px; }
@@ -77,8 +107,6 @@
             <button class="btn btn-primary" onclick="checkAuth()">驗證登入</button>
         </div>
     </div>
-
-    <div id="backup-alert" onclick="showView('tools')">⚠️ 提醒：請記得導出 Excel 備份數據！</div>
 
     <header>
         <div style="font-size: 13px; opacity: 0.9;"><span id="user-role-display"></span> | <span id="display-today"></span></div>
@@ -126,14 +154,14 @@
                 </select>
                 <div class="grid-2"><input type="text" id="f-name" placeholder="果樹名稱"><input type="text" id="f-code" placeholder="編號"></div>
 
-                <div class="check-container" style="border-left: 5px solid #ff6b6b;"><label>🌸 花期中</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
+                <div class="check-container" style="border-left: 5px solid #ff6b6b;"><label>🌸 目前處於花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
                 <div id="f-bloomStatus-box" class="sub-field"><select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select></div>
 
-                <div class="check-container" style="border-left: 5px solid #4dadff;"><label>🛍️ 已套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
+                <div class="check-container" style="border-left: 5px solid #4dadff;"><label>🛍️ 已完成套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
                 <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
 
-                <label>🛠️ 養護修剪</label>
-                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥名稱/劑量">
+                <label>🛠️ 養護與修剪</label>
+                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥名稱與劑量">
                 <div class="grid-2">
                     <div class="check-container"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
                     <div class="check-container"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
@@ -166,7 +194,7 @@
             </div>
             <div class="card">
                 <h3>📂 數據管理</h3>
-                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel 備份</button>
+                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel</button>
                 <button class="btn btn-outline" onclick="document.getElementById('import-input').click()">📥 匯入歷史資料</button>
                 <input type="file" id="import-input" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
                 <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
@@ -184,16 +212,15 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('farm_v20')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v20')) || {};
-    let users = JSON.parse(localStorage.getItem('user_v20')) || [];
+    let db = JSON.parse(localStorage.getItem('farm_v21')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v21')) || {};
+    let users = JSON.parse(localStorage.getItem('user_v21')) || [];
     let currentUser = "";
     let isAdmin = false;
 
     const ADMIN_PASSWORD = "admin123";
     const getToday = () => new Date().toISOString().split('T')[0];
 
-    // 登入驗證
     function checkAuth() {
         const input = document.getElementById('login-pass').value.trim();
         if (input === ADMIN_PASSWORD) { isAdmin = true; currentUser = "系統管理員"; } 
@@ -209,7 +236,6 @@
         renderHome();
     }
 
-    // 數據統計與圖表
     function updateAnalytics() {
         const today = getToday();
         const last7Days = [];
@@ -235,7 +261,6 @@
             </div>`;
         }).join('');
 
-        // 平均數計算
         const r = rankStore[today];
         const brixValues = r ? [r.r1b, r.r2b, r.r3b].map(parseFloat).filter(v => !isNaN(v)) : [];
         document.getElementById('avg-brix').innerText = brixValues.length ? (brixValues.reduce((a,b)=>a+b)/brixValues.length).toFixed(1) : 0;
@@ -292,11 +317,11 @@
 
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_v20', JSON.stringify(db));
+        localStorage.setItem('farm_v21', JSON.stringify(db));
 
         if(isAdmin) {
             rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value };
-            localStorage.setItem('rank_v20', JSON.stringify(rankStore));
+            localStorage.setItem('rank_v21', JSON.stringify(rankStore));
         }
         alert("儲存成功"); showView('home');
     }
@@ -306,7 +331,7 @@
         const code = document.getElementById('f-code').value;
         const date = document.getElementById('f-date').value;
         db = db.filter(x => !(x.code === code && x.date === date));
-        localStorage.setItem('farm_v20', JSON.stringify(db));
+        localStorage.setItem('farm_v21', JSON.stringify(db));
         showView('home');
     }
 
@@ -314,7 +339,7 @@
         if(!isAdmin) return alert("限管理員操作");
         if(confirm("確定要清空所有紀錄嗎？請務必先備份！")) {
             if(prompt("請輸入 'DELETE' 確認清空") === 'DELETE') {
-                db = []; localStorage.setItem('farm_v20', '[]');
+                db = []; localStorage.setItem('farm_v21', '[]');
                 alert("已全部清空"); renderHome();
             }
         }
@@ -335,6 +360,10 @@
         document.getElementById('f-isBagged').checked = t.isBagged;
         toggleSubField('f-isBagged', 'f-bagQty-box');
         document.getElementById('f-bagQty').value = t.bagQty || '';
+        document.getElementById('f-water').value = t.water || '';
+        document.getElementById('f-fert').value = t.fert || '';
+        document.getElementById('f-pruneBig').checked = t.pruneBig;
+        document.getElementById('f-pruneSmall').checked = t.pruneSmall;
         document.getElementById('f-user-static').value = t.lastUser;
         document.getElementById('delete-btn').style.display = 'block';
         showView('edit');
@@ -365,15 +394,15 @@
 
     function renderUserList() {
         const container = document.getElementById('user-list-display');
-        container.innerHTML = users.map((u, i) => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>👤 ${u}</span><span onclick="deleteUser(${i})" style="color:red;">刪除</span></div>`).join('');
+        container.innerHTML = users.map((u, i) => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>👤 ${u}</span><span onclick="deleteUser(${i})" style="color:red; cursor:pointer;">刪除</span></div>`).join('');
     }
 
     function addUser() {
         const name = document.getElementById('new-user-input').value.trim();
-        if(name && !users.includes(name)) { users.push(name); localStorage.setItem('user_v20', JSON.stringify(users)); renderUserList(); document.getElementById('new-user-input').value=''; }
+        if(name && !users.includes(name)) { users.push(name); localStorage.setItem('user_v21', JSON.stringify(users)); renderUserList(); document.getElementById('new-user-input').value=''; }
     }
 
-    function deleteUser(i) { if(confirm("刪除人員？")) { users.splice(i,1); localStorage.setItem('user_v20', JSON.stringify(users)); renderUserList(); } }
+    function deleteUser(i) { if(confirm("刪除人員？")) { users.splice(i,1); localStorage.setItem('user_v21', JSON.stringify(users)); renderUserList(); } }
 
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
@@ -387,7 +416,7 @@
         reader.onload = (e) => {
             const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
             db = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            localStorage.setItem('farm_v20', JSON.stringify(db));
+            localStorage.setItem('farm_v21', JSON.stringify(db));
             alert("匯入成功"); renderHome();
         };
         reader.readAsArrayBuffer(input.files[0]);
