@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v2.8</title>
+    <title>專業果樹管理系統 v2.8 - 優化版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -60,16 +60,52 @@
         .btn-outline { background: #e0e0e0; color: #333 !important; }
         .btn-danger { background: var(--danger); color: white !important; }
 
+        /* 管理員排行優化樣式 */
+        .rank-card {
+            background: #fffdfa;
+            border: 1px solid #ffe8cc;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .rank-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #d4a373;
+        }
+        .rank-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .rank-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .rank-field label {
+            margin: 0;
+            font-size: 11px;
+            color: #888;
+            font-weight: normal;
+        }
+        .rank-inputs input {
+            margin-bottom: 0;
+            height: 42px;
+            padding: 8px;
+            border-color: #ffd8a8;
+        }
+
         /* 圖表 */
         .chart-bar { width: 18px; background: var(--primary); border-radius: 4px 4px 0 0; }
         .chart-bar.today { background: var(--accent); }
         .chart-label { font-size: 9px; color: #888; margin-top: 4px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
         .stats-box { background: #f9fbf9; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
-
-        /* 管理員排行 */
-        .rank-row { display: grid; grid-template-columns: 60px 1fr 45px 1fr; gap: 5px; align-items: center; margin-bottom: 8px; padding: 8px; background: #fff9f0; border-radius: 10px; }
-        .rank-row input { margin-bottom: 0; padding: 6px; font-size: 14px; height: 36px; }
 
         /* 底部導覽 */
         nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
@@ -162,18 +198,39 @@
                 <textarea id="f-healthDesc" rows="2" placeholder="詳細病徵..."></textarea>
                 <input type="text" id="f-medDose" placeholder="使用藥劑與劑量">
 
-                <label>📊 採收</label>
+                <label>📊 採收數據</label>
                 <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
                 
                 <div class="admin-only" id="admin-rank-panel" style="margin-top: 25px; border-top: 2px dashed var(--accent); padding-top: 15px;">
-                    <label style="color:#d44b39;">🎖️ 今日排行設定 (管理員)</label>
-                    <div class="rank-row"><div>1.編號</div><input type="text" id="r1-w"><div>甜度</div><input type="number" id="r1-b"></div>
-                    <div class="rank-row"><div>2.編號</div><input type="text" id="r2-w"><div>甜度</div><input type="number" id="r2-b"></div>
-                    <div class="rank-row"><div>3.編號</div><input type="text" id="r3-w"><div>甜度</div><input type="number" id="r3-b"></div>
+                    <label style="color:#d44b39; margin-bottom: 12px;">🎖️ 今日品質排行設定 (管理員專用)</label>
+                    
+                    <div class="rank-card">
+                        <div class="rank-header"><span>🥇</span> 第一名</div>
+                        <div class="rank-inputs">
+                            <div class="rank-field"><label>編號/備註</label><input type="text" id="r1-w" placeholder="如: A-05"></div>
+                            <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r1-b" step="0.1" placeholder="0.0"></div>
+                        </div>
+                    </div>
+
+                    <div class="rank-card">
+                        <div class="rank-header"><span style="color:#999;">🥈</span> 第二名</div>
+                        <div class="rank-inputs">
+                            <div class="rank-field"><label>編號/備註</label><input type="text" id="r2-w" placeholder="如: B-12"></div>
+                            <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r2-b" step="0.1" placeholder="0.0"></div>
+                        </div>
+                    </div>
+
+                    <div class="rank-card">
+                        <div class="rank-header"><span style="color:#cd7f32;">🥉</span> 第三名</div>
+                        <div class="rank-inputs">
+                            <div class="rank-field"><label>編號/備註</label><input type="text" id="r3-w" placeholder="如: C-01"></div>
+                            <div class="rank-field"><label>甜度 (°)</label><input type="number" id="r3-b" step="0.1" placeholder="0.0"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存</button>
-                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除</button>
+                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
+                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除紀錄</button>
                 <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
@@ -299,8 +356,13 @@
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
         localStorage.setItem('farm_v28', JSON.stringify(db));
+        
         if(isAdmin) { 
-            rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value }; 
+            rankStore[date] = { 
+                r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, 
+                r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, 
+                r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value 
+            }; 
             localStorage.setItem('rank_v28', JSON.stringify(rankStore)); 
         }
         showView('home');
@@ -327,6 +389,18 @@
         document.getElementById('f-fert').value = t.fert || '';
         document.getElementById('f-pruneBig').checked = t.pruneBig;
         document.getElementById('f-pruneSmall').checked = t.pruneSmall;
+
+        // 如果是管理員，編輯時也載入當時的排行
+        if(isAdmin) {
+            const r = rankStore[date] || {};
+            document.getElementById('r1-w').value = r.r1w || '';
+            document.getElementById('r1-b').value = r.r1b || '';
+            document.getElementById('r2-w').value = r.r2w || '';
+            document.getElementById('r2-b').value = r.r2b || '';
+            document.getElementById('r3-w').value = r.r3w || '';
+            document.getElementById('r3-b').value = r.r3b || '';
+        }
+
         showView('edit');
     }
 
@@ -336,6 +410,17 @@
         document.getElementById('f-user-static').value = currentUser;
         document.getElementById('f-area').value = 'A區';
         document.getElementById('f-health').value = '良好';
+        
+        // 新增時載入今日已設定好的排行
+        if(isAdmin) {
+            const r = rankStore[getToday()] || {};
+            document.getElementById('r1-w').value = r.r1w || '';
+            document.getElementById('r1-b').value = r.r1b || '';
+            document.getElementById('r2-w').value = r.r2w || '';
+            document.getElementById('r2-b').value = r.r2b || '';
+            document.getElementById('r3-w').value = r.r3w || '';
+            document.getElementById('r3-b').value = r.r3b || '';
+        }
         showView('edit');
     }
 
@@ -348,7 +433,7 @@
     }
 
     function deleteCurrentRecord() {
-        if(!confirm("刪除？")) return;
+        if(!confirm("確定刪除這筆紀錄？")) return;
         const c = document.getElementById('f-code').value, d = document.getElementById('f-date').value;
         db = db.filter(x => !(x.code === c && x.date === d));
         localStorage.setItem('farm_v28', JSON.stringify(db)); showView('home');
@@ -359,17 +444,16 @@
     function addUser() { const n = document.getElementById('new-user-input').value.trim(); if(n && !users.includes(n)) { users.push(n); localStorage.setItem('user_v28', JSON.stringify(users)); renderUserList(); document.getElementById('new-user-input').value=''; } }
     function deleteUser(i) { users.splice(i,1); localStorage.setItem('user_v28', JSON.stringify(users)); renderUserList(); }
     
-    // ✨ 檔名增加日期功能 ✨
     function exportExcel() { 
         const ws = XLSX.utils.json_to_sheet(db); 
         const wb = XLSX.utils.book_new(); 
         XLSX.utils.book_append_sheet(wb, ws, "Data"); 
-        const todayStr = new Date().toISOString().split('T')[0]; // 取得 YYYY-MM-DD
+        const todayStr = new Date().toISOString().split('T')[0];
         XLSX.writeFile(wb, `果園紀錄_${todayStr}.xlsx`); 
     }
     
     function importExcel(input) { const reader = new FileReader(); reader.onload = (e) => { db = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).Sheets[XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).SheetNames[0]]); localStorage.setItem('farm_v28', JSON.stringify(db)); alert("匯入成功"); renderHome(); }; reader.readAsArrayBuffer(input.files[0]); }
-    function clearAllData() { if(isAdmin && prompt("輸入 DELETE") === 'DELETE') { db = []; localStorage.setItem('farm_v28', '[]'); renderHome(); } }
+    function clearAllData() { if(isAdmin && prompt("請輸入 DELETE 以清空所有數據") === 'DELETE') { db = []; localStorage.setItem('farm_v28', '[]'); renderHome(); } }
 </script>
 </body>
 </html>
