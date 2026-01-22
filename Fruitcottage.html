@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>果樹管理系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
@@ -24,12 +24,19 @@
         .container { 
             width: 100vw; max-width: 500px; height: 100vh; background: var(--bg); 
             position: relative; display: flex; flex-direction: column; overflow: hidden; 
+            /* 修正：自動避開頂部瀏海/動態島 */
+            padding-top: env(safe-area-inset-top); 
         }
 
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
-        header { background: var(--primary); padding: 25px 20px 40px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; }
+        header { 
+            background: var(--primary); 
+            /* 修正：增加上方間距，避免文字太靠近系統時間 */
+            padding: 30px 20px 40px 20px; 
+            text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; 
+        }
         header * { color: var(--white) !important; }
 
         #backup-alert { background: var(--warning); padding: 10px; text-align: center; font-size: 14px; font-weight: bold; display: none; border-bottom: 2px solid #e6b800; cursor: pointer; }
@@ -56,7 +63,13 @@
         .btn-primary { background: var(--primary); color: white !important; }
         .btn-outline { background: #e0e0e0; color: #333 !important; }
 
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; justify-content: center; align-items: stretch; }
+        nav { 
+            position: absolute; bottom: 0; width: 100%; 
+            /* 修正：增加底部安全距離，避免按鈕被手機手勢橫條遮住 */
+            height: calc(80px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; justify-content: center; align-items: center; 
+        }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
         .nav-item div { color: #888; margin-top: 4px; white-space: nowrap; }
         .nav-item.active div { color: var(--primary); font-weight: bold; }
@@ -180,7 +193,6 @@
 </div>
 
 <script>
-    // 資料版本 V19
     let db = JSON.parse(localStorage.getItem('farm_v19')) || [];
     let rankStore = JSON.parse(localStorage.getItem('rank_v19')) || {};
     let users = JSON.parse(localStorage.getItem('user_v19')) || [];
@@ -188,38 +200,29 @@
     let currentUser = "";
     let isAdmin = false;
 
-    // 設定你的管理密碼
     const ADMIN_PASSWORD = "admin123";
 
     const getToday = () => new Date().toISOString().split('T')[0];
 
-    // 登入驗證邏輯
     function checkAuth() {
         const input = document.getElementById('login-pass').value.trim();
         if(!input) return alert("請輸入姓名或密碼");
 
-        // 1. 檢查是否為管理員
         if (input === ADMIN_PASSWORD) {
             isAdmin = true;
             currentUser = "系統管理員";
-        } 
-        // 2. 檢查是否在員工白名單
-        else if (users.includes(input)) {
+        } else if (users.includes(input)) {
             isAdmin = false;
             currentUser = input;
-        } 
-        // 3. 例外處理：如果是系統第一次使用，名單還是空的
-        else if (users.length === 0 && input === "初始化") {
+        } else if (users.length === 0 && input === "初始化") {
             isAdmin = true;
             currentUser = "系統管理員";
             alert("首次使用成功，請先至設定頁新增員工名單！");
-        }
-        else {
-            alert("無效的人員姓名或密碼！\n請聯繫管理員新增您的姓名。");
+        } else {
+            alert("無效的人員姓名或密碼！");
             return;
         }
 
-        // 登入成功後處理介面
         if(isAdmin) {
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.style.display = el.classList.contains('nav-item') ? 'flex' : 'block';
