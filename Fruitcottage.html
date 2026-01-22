@@ -3,473 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartFarm Elite - 2026 高端農業管理</title>
+    <title>果樹管理系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     
     <style>
-        :root { 
-            --primary: #1b4332; 
-            --primary-light: #2d6a4f;
-            --accent: #D4AF37; /* 香檳金 */
-            --bg: #f8f9fa; 
-            --white: #ffffff; 
-            --glass: rgba(255, 255, 255, 0.8);
-            --shadow: 0 8px 32px rgba(0,0,0,0.1);
+        :root {
+            --primary: #2d6a4f;
+            --primary-dark: #1b4332;
+            --accent: #d4a373;
+            --bg: #f4f6f5;
+            --white: #ffffff;
+            --text-dark: #1b4332;
+            --radius: 16px;
         }
 
-        body { 
-            margin: 0; 
-            background: var(--bg); 
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
-            color: #333;
-            line-height: 1.6;
+        * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; background: #222; display: flex; justify-content: center; align-items: center; font-family: sans-serif; }
+        
+        .container { 
+            width: 100vw; max-width: 500px; height: 100vh; background: var(--bg); 
+            position: relative; display: flex; flex-direction: column; overflow: hidden; 
         }
 
-        /* 桌面端優化佈局 */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding-bottom: 100px;
-        }
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; }
 
-        /* 登入畫面優化 */
-        #login-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
-            z-index: 5000; display: flex; align-items: center; justify-content: center; 
-        }
-        .login-box { 
-            background: var(--white); padding: 40px; border-radius: 24px; 
-            width: 85%; max-width: 350px; text-align: center; box-shadow: var(--shadow);
-        }
+        header { background: var(--primary); padding: 25px 20px 40px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; }
+        header * { color: var(--white) !important; }
 
-        /* 時尚頂部 */
-        header { 
-            background: var(--primary); color: white; padding: 30px 20px; 
-            border-radius: 0 0 30px 30px; box-shadow: var(--shadow);
-            text-align: center;
-        }
-        .summary-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; 
-        }
-        .summary-item { 
-            background: rgba(255,255,255,0.1); backdrop-filter: blur(5px);
-            padding: 15px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.2);
-        }
+        .content-area { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
+        .content-view { display: none; }
+        .active-view { display: block; }
 
-        /* 卡片設計 */
-        .content-view { display: none; padding: 20px; }
-        .active-view { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card { 
-            background: var(--white); border-radius: 20px; padding: 20px; 
-            margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.03);
-        }
-
-        /* 輸入框美化 */
-        label { font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block; }
+        .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
+        
         input, select, textarea { 
-            width: 100%; padding: 14px; border: 1.5px solid #eee; border-radius: 12px; 
-            margin-bottom: 20px; font-size: 16px; transition: 0.3s; background: #fafafa;
-        }
-        input:focus { border-color: var(--accent); outline: none; background: white; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
-
-        /* 按鈕美化 */
-        .btn { 
-            border: none; padding: 15px; border-radius: 12px; cursor: pointer; 
-            font-weight: 700; width: 100%; font-size: 16px; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(27, 67, 50, 0.3); }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-outline { background: transparent; border: 1.5px solid #ddd; color: #666; margin-top: 10px; }
-
-        /* 排行榜與特殊區塊 */
-        .rank-badge {
-            background: var(--accent); color: var(--primary); padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;
-        }
-        .status-tag {
-            padding: 4px 12px; border-radius: 8px; font-size: 12px; background: #f0f0f0;
+            width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; 
+            font-size: 16px; color: #000 !important; background: #fff !important; margin-bottom: 5px;
         }
 
-        /* 導航列優化 (手機底部固定，桌面寬屏) */
+        .check-container { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 12px 15px; background: #fff; border-radius: 12px; 
+            border: 1.5px solid #dcdcdc; margin-top: 8px; width: 100%;
+        }
+        .check-container label { 
+            margin: 0; font-size: 15px; color: var(--text-dark); 
+            white-space: nowrap; flex: 1; display: flex; align-items: center;
+        }
+        .check-container input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        label { font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block; }
+
+        .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
+        .btn-primary { background: var(--primary); color: white !important; }
+        .btn-outline { background: #e0e0e0; color: #333 !important; }
+
         nav { 
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 1000px; background: var(--glass); backdrop-filter: blur(15px);
-            display: flex; height: 75px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 100;
-            border-radius: 20px 20px 0 0;
+            position: absolute; bottom: 0; width: 100%; height: 80px; 
+            background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; 
+            justify-content: center; align-items: stretch;
         }
-        .nav-item { 
-            flex: 1; text-align: center; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; color: #aaa; font-size: 11px; cursor: pointer; transition: 0.3s;
-        }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+        .nav-item div { color: #888; margin-top: 4px; white-space: nowrap; }
+        .nav-item.active div { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 22px; line-height: 1; }
 
-        /* 桌面適配：隱藏捲軸與調整間隔 */
-        @media (min-width: 768px) {
-            body { background: #e9ecef; }
-            .container { margin-top: 20px; }
-            header { border-radius: 30px; }
-        }
+        .nav-add-btn { background: var(--primary); color: white !important; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+
+        .admin-only { display: none; }
+        .sub-field { display: none; margin-top: 10px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <div style="font-size: 40px; margin-bottom: 10px;">🍃</div>
-        <h2 style="color: var(--primary); margin:0; letter-spacing: 2px;">SMART FARM</h2>
-        <p style="color: #888; font-size: 14px; margin-bottom: 30px;">Elite Management System</p>
-        <input type="password" id="login-pass" placeholder="請輸入訪問密碼" style="text-align: center; border-radius: 30px;">
-        <button class="btn btn-primary" onclick="checkAuth()" style="border-radius: 30px;">ENTER SYSTEM</button>
-    </div>
-</div>
-
 <div class="container">
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color: var(--primary); margin-top: 0;">果樹管理系統</h2>
+            <input type="text" id="login-pass" placeholder="輸入姓名或管理密碼" style="text-align: center;">
+            <button class="btn btn-primary" onclick="checkAuth()">進入系統</button>
+        </div>
+    </div>
+
     <header>
-        <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8;">Today's Harvest</div>
-        <div class="summary-grid">
-            <div class="summary-item">
-                <div style="font-size: 11px; opacity: 0.7;">總數量</div>
-                <div style="font-size: 24px; font-weight: 800; color: var(--accent);"><span id="today-qty">0</span> <small style="font-size:12px;">pcs</small></div>
-            </div>
-            <div class="summary-item">
-                <div style="font-size: 11px; opacity: 0.7;">總重量</div>
-                <div style="font-size: 24px; font-weight: 800; color: #fff;"><span id="today-weight">0</span> <small style="font-size:12px;">kg</small></div>
-            </div>
+        <div style="font-size: 13px; opacity: 0.9;"><span id="user-role-display"></span> | <span id="display-today"></span></div>
+        <div style="display: flex; justify-content: space-around; margin-top: 15px;">
+            <div>今日粒數<br><b id="today-qty" style="font-size:24px;">0</b></div>
+            <div>今日重量<br><b id="today-weight" style="font-size:24px;">0.0</b> <small>KG</small></div>
         </div>
     </header>
 
-    <div id="view-home" class="content-view active-view">
-        <div class="card" style="background: linear-gradient(135deg, #1b4332, #081c15); color: white; border:none; position: relative; overflow: hidden;">
-            <div style="position: absolute; right: -20px; top: -20px; font-size: 100px; opacity: 0.1;">🏆</div>
-            <h3 style="margin: 0 0 15px 0; font-size: 16px; color: var(--accent); display: flex; align-items: center; gap: 8px;">
-                Top Quality Ranking
-            </h3>
-            <div id="display-rank-list">
-                <div style="text-align:center; opacity:0.5; font-size:13px; padding: 20px 0;">尚無排行紀錄</div>
+    <div class="content-area">
+        <div id="view-home" class="content-view active-view">
+            <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white;">
+                <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行</h4>
+                <div id="display-rank-list" style="font-size:14px; line-height: 1.6; color: white !important;"></div>
+            </div>
+            <label>🔍 快速搜尋</label>
+            <input type="text" id="search" placeholder="搜尋果樹名稱..." oninput="renderHome()">
+            <div id="tree-list-container" style="margin-top:10px;"></div>
+        </div>
+
+        <div id="view-edit" class="content-view">
+            <div class="card">
+                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 填寫紀錄</h3>
+                <div class="grid-2">
+                    <div><label>📅 日期</label><input type="date" id="f-date"></div>
+                    <div><label>👤 人員</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
+                </div>
+                <label>🌳 基本資訊</label>
+                <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
+
+                <div class="check-container" style="border-left: 5px solid #ff6b6b;"><label>🌸 目前處於花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
+                <div id="f-bloomStatus-box" class="sub-field"><select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select></div>
+
+                <div class="check-container" style="border-left: 5px solid #4dadff;"><label>🛍️ 已完成套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
+                <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
+
+                <label>💧 養護與✂️ 修剪</label>
+                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥名稱與劑量">
+                <div class="grid-2">
+                    <div class="check-container"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
+                    <div class="check-container"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
+                </div>
+
+                <label>🏥 健康狀況與醫治</label>
+                <select id="f-health"><option value="良好">良好</option><option value="需關注">需關注</option><option value="患病中">患病中</option></select>
+                <textarea id="f-healthDesc" rows="2" placeholder="詳細病徵說明..."></textarea>
+                <input type="text" id="f-medDose" placeholder="藥物名稱與劑量">
+
+                <label>📊 採收數據</label>
+                <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
+                
+                <div class="admin-only" id="admin-rank-panel" style="margin-top: 20px; border-top: 2px dashed var(--accent); padding-top: 15px;">
+                    <label style="color:#d44b39;">🎖️ 管理員：今日排行設定</label>
+                    <div style="display:flex; gap:5px; margin-bottom:5px;"><input type="text" id="r1-w" placeholder="1. 編號/重量"><input type="number" id="r1-b" placeholder="甜度"></div>
+                    <div style="display:flex; gap:5px; margin-bottom:5px;"><input type="text" id="r2-w" placeholder="2. 編號/重量"><input type="number" id="r2-b" placeholder="甜度"></div>
+                    <div style="display:flex; gap:5px;"><input type="text" id="r3-w" placeholder="3. 編號/重量"><input type="number" id="r3-b" placeholder="甜度"></div>
+                </div>
+
+                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 25px;">💾 儲存資料</button>
+                <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
 
-        <div style="position: sticky; top: 10px; z-index: 10;">
-            <input type="text" id="search" placeholder="🔍 搜尋果樹編號或名稱..." oninput="renderHome()" style="box-shadow: var(--shadow); border: none;">
-        </div>
-        <div id="tree-list-container"></div>
-    </div>
-
-    <div id="view-edit" class="content-view">
-        <div class="card">
-            <h3 style="margin-top:0; border-bottom: 2px solid var(--bg); padding-bottom: 15px;">數據登錄</h3>
-            
-            <label>果樹基本資訊</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="text" id="f-name" placeholder="名稱">
-                <input type="text" id="f-code" placeholder="編號 (例如: A-01)">
-            </div>
-
-            <label>生長階段標記</label>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <div style="flex:1; background: #fff5f5; padding: 12px; border-radius: 12px; border: 1px solid #ffe3e3; text-align: center;">
-                    <input type="checkbox" id="f-isBlooming" onchange="toggleFlowerLevel()" style="width: 20px; height: 20px; margin: 0 auto 5px;">
-                    <div style="font-size: 12px; color: #e03131;">花期中</div>
-                </div>
-                <div style="flex:1; background: #f3f0ff; padding: 12px; border-radius: 12px; border: 1px solid #e5dbff; text-align: center;">
-                    <input type="checkbox" id="f-isBagged" onchange="toggleBagQty()" style="width: 20px; height: 20px; margin: 0 auto 5px;">
-                    <div style="font-size: 12px; color: #5f3dc4;">已套袋</div>
+        <div id="view-tools" class="content-view">
+            <div class="card">
+                <h3>👥 人員管理</h3>
+                <div id="user-list-display" style="margin-bottom: 15px;"></div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="new-user-input" placeholder="新員工姓名" style="margin-bottom: 0;">
+                    <button class="btn btn-primary" onclick="addUser()" style="margin-top: 0; width: 80px;">新增</button>
                 </div>
             </div>
-
-            <div id="flower-level-section" style="display:none; margin-bottom: 20px;">
-                <label>花量評估</label>
-                <div style="display: flex; gap: 10px;">
-                    <label style="flex:1; background: #eee; padding: 10px; border-radius: 10px; text-align: center;"><input type="radio" name="flowerLevel" value="少量" style="margin:0;"> 少量</label>
-                    <label style="flex:1; background: #eee; padding: 10px; border-radius: 10px; text-align: center;"><input type="radio" name="flowerLevel" value="中量" style="margin:0;"> 中量</label>
-                    <label style="flex:1; background: #eee; padding: 10px; border-radius: 10px; text-align: center;"><input type="radio" name="flowerLevel" value="大量" style="margin:0;"> 大量</label>
-                </div>
+            <div class="card">
+                <h3>📂 數據管理</h3>
+                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel</button>
+                <button class="btn btn-outline" onclick="document.getElementById('import-input').click()" style="margin-top:10px;">📥 匯入資料</button>
+                <input type="file" id="import-input" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
+                <button class="btn btn-outline" onclick="location.reload()" style="margin-top:40px; color:red !important; border-color: red;">登出系統</button>
             </div>
-
-            <div id="bag-qty-section" style="display:none;">
-                <label>本次套袋數量</label>
-                <input type="number" id="f-bagQty" placeholder="0">
-            </div>
-
-            <label>採收數據</label>
-            <div style="background: var(--bg); padding: 15px; border-radius: 15px; margin-bottom: 20px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <span style="font-size: 12px; color: #888;">粒數</span>
-                        <input type="number" id="f-harvestQty" placeholder="0" style="margin-bottom: 0;">
-                    </div>
-                    <div>
-                        <span style="font-size: 12px; color: #888;">總重</span>
-                        <div style="display: flex; gap: 5px;">
-                            <input type="number" id="f-weightVal" placeholder="0" style="margin-bottom: 0;">
-                            <select id="f-weightUnit" style="width: 80px; margin-bottom: 0; padding: 10px 5px;">
-                                <option value="公斤">kg</option>
-                                <option value="台斤">台斤</option>
-                                <option value="公克">g</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <label>🏆 設定今日品質排行</label>
-            <div style="background: #fff9db; padding: 15px; border-radius: 15px; border: 1px solid #ffe066;">
-                <div style="display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; margin-bottom: 5px; opacity: 0.5; font-size: 12px;">
-                    <span>名次</span><span>單顆重量</span><span>甜度Brix</span>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; align-items: center;">
-                        <span class="rank-badge">1st</span><input type="text" id="rank1-w" placeholder="重" style="margin:0;"><input type="number" id="rank1-b" placeholder="度" style="margin:0;">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; align-items: center;">
-                        <span class="rank-badge" style="background:#dee2e6;">2nd</span><input type="text" id="rank2-w" placeholder="重" style="margin:0;"><input type="number" id="rank2-b" placeholder="度" style="margin:0;">
-                    </div>
-                </div>
-            </div>
-
-            <label style="margin-top: 20px;">管理紀錄</label>
-            <input type="text" id="f-fertilizer" placeholder="施肥項目">
-            <select id="f-health">
-                <option value="良好">健康狀況：良好</option>
-                <option value="注意">健康狀況：注意</option>
-                <option value="病蟲害">健康狀況：病蟲害</option>
-            </select>
-            <textarea id="f-pest" rows="2" placeholder="其他備註..."></textarea>
-
-            <div style="text-align:center; margin: 20px 0;"><canvas id="qr-gen"></canvas></div>
-            <button class="btn btn-primary" onclick="handleSave()">💾 儲存並同步數據</button>
-            <button class="btn btn-outline" onclick="showView('home')">取消返回</button>
         </div>
     </div>
 
-    <div id="view-tools" class="content-view">
-        <div class="card">
-            <h3>數據中心</h3>
-            <button class="btn btn-primary" onclick="exportExcel()">📤 匯出年度報表 (Excel)</button>
-            <div style="margin-top:30px;">
-                <label>批次匯入果園數據</label>
-                <input type="file" id="import-file" accept=".xlsx" onchange="handleImport(event)">
-            </div>
-            <button class="btn btn-outline" onclick="location.reload()" style="margin-top:50px; color:#e03131; border-color: #ffc9c9;">登出系統</button>
+    <nav>
+        <div class="nav-item active" id="n-home" onclick="showView('home')">
+            <span class="nav-icon">📋</span><div>清單</div>
         </div>
-    </div>
+        <div class="nav-item" onclick="prepareAdd()">
+            <div class="nav-add-btn">＋</div>
+        </div>
+        <div class="nav-item admin-only" id="n-tools" onclick="showView('tools')">
+            <span class="nav-icon">⚙️</span><div>設定</div>
+        </div>
+    </nav>
 </div>
-
-<div id="scanner-ui">
-    <video id="video" playsinline></video>
-    <button onclick="stopScan()" style="position:absolute; bottom:40px; left:50%; transform:translateX(-50%); padding:15px 40px; background:rgba(255,0,0,0.8); color:white; border:none; border-radius:30px; backdrop-filter:blur(10px);">關閉掃描器器</button>
-</div>
-
-<nav>
-    <div class="nav-item active" id="nav-home" onclick="showView('home')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-        首頁列表
-    </div>
-    <div class="nav-item" id="nav-scan" onclick="startScan()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-        條碼掃描
-    </div>
-    <div class="nav-item" id="nav-add" onclick="prepareAdd()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-8m0 0V4m0 4h8m-8 0H4"></path></svg>
-        新增數據
-    </div>
-    <div class="nav-item" id="nav-tools" onclick="showView('tools')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        系統設定
-    </div>
-</nav>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('farm_pro_v12')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('farm_rank_v12')) || {};
+    let db = JSON.parse(localStorage.getItem('farm_v17')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v17')) || {};
+    let users = JSON.parse(localStorage.getItem('user_v17')) || ["系統管理員"];
+    let currentUser = "";
+    let isAdmin = false;
+
+    const getToday = () => new Date().toISOString().split('T')[0];
+
+    function toggleSubField(checkId, boxId) {
+        document.getElementById(boxId).style.display = document.getElementById(checkId).checked ? 'block' : 'none';
+    }
 
     function checkAuth() {
-        const input = document.getElementById('login-pass').value;
-        if (input === "admin" || input === "123") {
-            document.getElementById('login-screen').style.opacity = '0';
-            setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; }, 300);
-            renderHome();
-        } else { alert("密碼錯誤"); }
+        const pass = document.getElementById('login-pass').value.trim();
+        if(!pass) return;
+        isAdmin = (pass.toLowerCase() === "admin");
+        currentUser = isAdmin ? "系統管理員" : pass;
+        
+        if(isAdmin) {
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = el.classList.contains('nav-item') ? 'flex' : 'block';
+            });
+        }
+        
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('user-role-display').innerText = currentUser;
+        document.getElementById('display-today').innerText = getToday();
+        renderUserList();
+        renderHome();
     }
 
-    function getTodayStr() { return new Date().toISOString().split('T')[0]; }
-    function toKG(val, unit) {
-        const v = parseFloat(val) || 0;
-        if(unit === '公克') return v / 1000;
-        if(unit === '台斤') return v * 0.6;
-        return v;
+    function renderUserList() {
+        const container = document.getElementById('user-list-display');
+        if(!container) return;
+        container.innerHTML = users.map(u => `<div style="padding: 10px; border-bottom: 1px solid #eee;">👤 ${u}</div>`).join('');
     }
 
-    function toggleFlowerLevel() {
-        document.getElementById('flower-level-section').style.display = document.getElementById('f-isBlooming').checked ? 'block' : 'none';
-    }
-    function toggleBagQty() {
-        document.getElementById('bag-qty-section').style.display = document.getElementById('f-isBagged').checked ? 'block' : 'none';
+    function addUser() {
+        const input = document.getElementById('new-user-input');
+        const name = input.value.trim();
+        if(name) {
+            users.push(name);
+            localStorage.setItem('user_v17', JSON.stringify(users));
+            input.value = "";
+            renderUserList();
+            alert("已新增使用者: " + name);
+        }
     }
 
     function renderHome() {
-        const today = getTodayStr();
-        const todayData = db.filter(t => t.lastUpdate === today);
-
-        document.getElementById('today-qty').innerText = todayData.reduce((sum, t) => sum + (parseInt(t.harvestQty) || 0), 0).toLocaleString();
-        document.getElementById('today-weight').innerText = todayData.reduce((sum, t) => sum + toKG(t.weightVal, t.weightUnit), 0).toFixed(2);
-
-        const tr = rankStore[today];
-        const rDiv = document.getElementById('display-rank-list');
-        if(tr && (tr.r1b || tr.r2b)) {
-            let h = '';
-            for(let i=1; i<=2; i++) if(tr[`r${i}b`]) h += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.1);"><span>${i===1?'🥇':'🥈'} ${tr[`r${i}w`]}</span><span style="color:var(--accent);">${tr[`r${i}b`]} Brix</span></div>`;
-            rDiv.innerHTML = h;
-        } else { rDiv.innerHTML = '<div style="text-align:center; opacity:0.5; font-size:13px; padding:10px 0;">尚未錄入品質排行數據</div>'; }
-
-        const query = document.getElementById('search').value.toLowerCase();
-        const filtered = db.filter(t => (t.code||'').toLowerCase().includes(query) || (t.name||'').toLowerCase().includes(query));
+        const today = getToday();
+        const todayData = db.filter(t => t.date === today);
+        document.getElementById('today-qty').innerText = todayData.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
+        document.getElementById('today-weight').innerText = todayData.reduce((s, t) => s + (parseFloat(t.weightVal) || 0), 0).toFixed(1);
         
-        document.getElementById('tree-list-container').innerHTML = filtered.map(t => `
-            <div class="card" onclick="editTree('${t.code}')">
+        const r = rankStore[today];
+        document.getElementById('display-rank-list').innerHTML = r ? 
+            `1. ${r.r1w||'-'} (${r.r1b||'-'}°) | 2. ${r.r2w||'-'} (${r.r2b||'-'}°) | 3. ${r.r3w||'-'} (${r.r3b||'-'}°)` : "今日尚無排名紀錄";
+
+        const q = document.getElementById('search').value.toLowerCase();
+        const filtered = db.filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q));
+        
+        document.getElementById('tree-list-container').innerHTML = filtered.reverse().map(t => `
+            <div class="card" onclick="editTree('${t.code}', '${t.date}')">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div style="font-weight:800; font-size:16px;">${t.name || '未命名'}</div>
-                        <div style="font-size:12px; color:#aaa; margin-bottom:5px;">#${t.code}</div>
-                        <div style="display:flex; gap:5px;">
-                            ${t.isBlooming ? '<span class="status-tag" style="background:#fff5f5; color:#e03131;">🌸 花期</span>' : ''}
-                            ${t.isBagged ? '<span class="status-tag" style="background:#f3f0ff; color:#5f3dc4;">🛍️ 套袋</span>' : ''}
-                        </div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:18px; font-weight:800; color:var(--primary);">${t.harvestQty || 0} <small style="font-size:10px;">pcs</small></div>
-                        <div style="font-size:12px; color:#888;">${t.weightVal || 0} ${t.weightUnit}</div>
-                    </div>
+                    <div><b>${t.name}</b> <small>#${t.code}</small><br><span style="font-size:12px; color:#888;">${t.date} · ${t.lastUser}</span></div>
+                    <div style="text-align:right;"><b>${t.harvestQty||0} 粒</b><br><small>${t.weightVal||0} KG</small></div>
                 </div>
-                ${t.lastUpdate === today ? '<div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px; font-size:11px; color:var(--accent);">● 今日已同步數據</div>' : ''}
-            </div>
-        `).join('');
-    }
-
-    function showView(vId) {
-        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('view-'+vId).classList.add('active-view');
-        document.getElementById('nav-'+vId).classList.add('active');
-        if(vId === 'home') renderHome();
-    }
-
-    function prepareAdd() {
-        document.querySelectorAll('#view-edit input, #view-edit textarea').forEach(el => {
-            if(el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
-        });
-        const today = getTodayStr();
-        if(rankStore[today]) for(let i=1; i<=2; i++) { 
-            document.getElementById(`rank${i}-w`).value = rankStore[today][`r${i}w`] || '';
-            document.getElementById(`rank${i}-b`).value = rankStore[today][`r${i}b`] || '';
-        }
-        toggleFlowerLevel(); toggleBagQty();
-        showView('edit');
-    }
-
-    function editTree(code) {
-        const t = db.find(x => x.code === code);
-        if(!t) return;
-        document.getElementById('f-name').value = t.name || '';
-        document.getElementById('f-code').value = t.code || '';
-        document.getElementById('f-fertilizer').value = t.fertilizer || '';
-        document.getElementById('f-harvestQty').value = t.harvestQty || '';
-        document.getElementById('f-weightVal').value = t.weightVal || '';
-        document.getElementById('f-weightUnit').value = t.weightUnit || '公斤';
-        document.getElementById('f-health').value = t.health || '良好';
-        document.getElementById('f-pest').value = t.pest || '';
-        document.getElementById('f-bagQty').value = t.bagQty || '';
-        document.getElementById('f-isBlooming').checked = t.isBlooming;
-        document.getElementById('f-isBagged').checked = t.isBagged;
-        if(t.flowerLevel) { const r = document.querySelector(`input[name="flowerLevel"][value="${t.flowerLevel}"]`); if(r) r.checked = true; }
-        const today = getTodayStr();
-        if(rankStore[today]) for(let i=1; i<=2; i++) { 
-            document.getElementById(`rank${i}-w`).value = rankStore[today][`r${i}w`] || '';
-            document.getElementById(`rank${i}-b`).value = rankStore[today][`r${i}b`] || '';
-        }
-        toggleFlowerLevel(); toggleBagQty();
-        new QRious({ element: document.getElementById('qr-gen'), value: t.code, size: 100 });
-        showView('edit');
+            </div>`).join('');
     }
 
     function handleSave() {
         const code = document.getElementById('f-code').value;
-        if(!code) return alert("請輸入編號");
-        const today = getTodayStr();
-        const flowerR = document.querySelector('input[name="flowerLevel"]:checked');
+        const date = document.getElementById('f-date').value;
+        if(!code || !date) return alert("編號與日期必填");
+
         const data = {
-            lastUpdate: today,
-            isBlooming: document.getElementById('f-isBlooming').checked,
-            flowerLevel: (document.getElementById('f-isBlooming').checked && flowerR) ? flowerR.value : '',
-            isBagged: document.getElementById('f-isBagged').checked,
-            bagQty: document.getElementById('f-bagQty').value || 0,
-            name: document.getElementById('f-name').value,
-            code: code,
-            fertilizer: document.getElementById('f-fertilizer').value,
+            name: document.getElementById('f-name').value, code, date,
             harvestQty: document.getElementById('f-harvestQty').value,
             weightVal: document.getElementById('f-weightVal').value,
-            weightUnit: document.getElementById('f-weightUnit').value,
+            lastUser: currentUser,
+            isBlooming: document.getElementById('f-isBlooming').checked,
+            bloomStatus: document.getElementById('f-bloomStatus').value,
+            isBagged: document.getElementById('f-isBagged').checked,
+            bagQty: document.getElementById('f-bagQty').value,
+            water: document.getElementById('f-water').value,
+            fert: document.getElementById('f-fert').value,
+            pruneBig: document.getElementById('f-pruneBig').checked,
+            pruneSmall: document.getElementById('f-pruneSmall').checked,
             health: document.getElementById('f-health').value,
-            pest: document.getElementById('f-pest').value
+            healthDesc: document.getElementById('f-healthDesc').value,
+            medDose: document.getElementById('f-medDose').value
         };
-        const idx = db.findIndex(x => x.code === code);
-        if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_pro_v12', JSON.stringify(db));
 
-        rankStore[today] = {
-            r1w: document.getElementById('rank1-w').value, r1b: document.getElementById('rank1-b').value,
-            r2w: document.getElementById('rank2-w').value, r2b: document.getElementById('rank2-b').value
-        };
-        localStorage.setItem('farm_rank_v12', JSON.stringify(rankStore));
-        alert("🎉 數據已成功雲端化儲存 (本地快取)");
-        showView('home');
+        const idx = db.findIndex(x => x.code === code && x.date === date);
+        if(idx > -1) db[idx] = data; else db.push(data);
+        localStorage.setItem('farm_v17', JSON.stringify(db));
+
+        if(isAdmin) {
+            rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value };
+            localStorage.setItem('rank_v17', JSON.stringify(rankStore));
+        }
+        alert("儲存成功"); showView('home');
     }
 
-    function exportExcel() { 
+    function editTree(code, date) {
+        const t = db.find(x => x.code === code && x.date === date);
+        if(!t) return;
+        document.getElementById('f-date').value = t.date;
+        document.getElementById('f-name').value = t.name;
+        document.getElementById('f-code').value = t.code;
+        document.getElementById('f-harvestQty').value = t.harvestQty;
+        document.getElementById('f-weightVal').value = t.weightVal;
+        document.getElementById('f-isBlooming').checked = t.isBlooming;
+        toggleSubField('f-isBlooming', 'f-bloomStatus-box');
+        document.getElementById('f-bloomStatus').value = t.bloomStatus || '';
+        document.getElementById('f-isBagged').checked = t.isBagged;
+        toggleSubField('f-isBagged', 'f-bagQty-box');
+        document.getElementById('f-bagQty').value = t.bagQty || '';
+        document.getElementById('f-water').value = t.water || '';
+        document.getElementById('f-fert').value = t.fert || '';
+        document.getElementById('f-pruneBig').checked = t.pruneBig;
+        document.getElementById('f-pruneSmall').checked = t.pruneSmall;
+        document.getElementById('f-health').value = t.health || '良好';
+        document.getElementById('f-healthDesc').value = t.healthDesc || '';
+        document.getElementById('f-medDose').value = t.medDose || '';
+        document.getElementById('f-user-static').value = t.lastUser;
+        showView('edit');
+    }
+
+    function prepareAdd() {
+        document.querySelectorAll('#view-edit input:not([type=date]):not([readonly]), #view-edit select, #view-edit textarea').forEach(e => {
+            if(e.type==='checkbox') e.checked = false; else e.value = '';
+        });
+        document.getElementById('f-date').value = getToday();
+        document.getElementById('f-user-static').value = currentUser;
+        document.getElementById('f-health').value = "良好";
+        document.getElementById('f-bloomStatus-box').style.display = 'none';
+        document.getElementById('f-bagQty-box').style.display = 'none';
+        showView('edit');
+    }
+
+    function showView(vId) {
+        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
+        document.getElementById('view-'+vId).classList.add('active-view');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(document.getElementById('n-'+vId)) document.getElementById('n-'+vId).classList.add('active');
+        if(vId === 'home') renderHome();
+    }
+
+    function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "果園年度數據");
-        XLSX.writeFile(wb, `Farm_Elite_Report_${getTodayStr()}.xlsx`); 
+        XLSX.utils.book_append_sheet(wb, ws, "FarmData");
+        XLSX.writeFile(wb, "果園紀錄表.xlsx");
     }
 
-    function handleImport(e) {
+    function importExcel(input) {
         const reader = new FileReader();
-        reader.onload = (evt) => {
-            const data = new Uint8Array(evt.target.result);
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
-            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            json.forEach(item => { const idx = db.findIndex(x => x.code == item.code); if(idx > -1) db[idx] = item; else db.push(item); });
-            localStorage.setItem('farm_pro_v12', JSON.stringify(db));
-            renderHome(); alert("批次數據匯入成功！");
+            db = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            localStorage.setItem('farm_v17', JSON.stringify(db));
+            alert("匯入成功"); renderHome();
         };
-        reader.readAsArrayBuffer(e.target.files[0]);
+        reader.readAsArrayBuffer(input.files[0]);
     }
-    
-    let streamPtr;
-    function startScan() {
-        document.getElementById('scanner-ui').style.display = 'block';
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
-            streamPtr = s; const v = document.getElementById('video'); v.srcObject = s; v.play();
-            requestAnimationFrame(scanTick);
-        }).catch(err => { alert("鏡頭開啟失敗"); stopScan(); });
-    }
-    function scanTick() {
-        const v = document.getElementById('video');
-        if(v.readyState === v.HAVE_ENOUGH_DATA) {
-            const c = document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight;
-            const ctx=c.getContext("2d"); ctx.drawImage(v,0,0,c.width,c.height);
-            const code = jsQR(ctx.getImageData(0,0,c.width,c.height).data, c.width, c.height);
-            if(code) { stopScan(); editTree(code.data); return; }
-        }
-        if(document.getElementById('scanner-ui').style.display === 'block') requestAnimationFrame(scanTick);
-    }
-    function stopScan() { if(streamPtr) streamPtr.getTracks().forEach(t => t.stop()); document.getElementById('scanner-ui').style.display = 'none'; }
 </script>
 </body>
 </html>
