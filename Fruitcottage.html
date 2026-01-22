@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SmartFarm Pro - 榮譽果寶版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    
+    <style>
+        :root { --primary: #1b4332; --accent: #40916c; --bg: #f0f2f1; --white: #ffffff; --danger: #d00; --gold: #FFD700; }
+        body { margin: 0; background: var(--bg); font-family: -apple-system, sans-serif; padding-bottom: 80px; }
+        
+        /* 登入介面 */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 5000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
+
+        header { background: var(--primary); color: white; padding: 20px; border-radius: 0 0 20px 20px; text-align: center; }
+        .content-view { display: none; padding: 10px; }
+        .active-view { display: block; }
+        .card { background: var(--white); border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        .btn { border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; font-size: 16px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--primary); color: var(--primary); }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin: 5px 0 15px 0; box-sizing: border-box; }
+        label { font-size: 13px; font-weight: bold; color: #555; }
+
+        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; height: 75px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #888; font-size: 12px; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 22px; display: block; }
+
+        /* 排行榜樣式 */
+        .rank-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .rank-num { font-size: 20px; font-weight: bold; width: 35px; color: var(--accent); }
+        .rank-1 { color: #FFD700; font-size: 24px; }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
+
+        #scanner-ui { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        .admin-only { display: none; border: 2px solid var(--gold); padding: 10px; border-radius: 10px; background: #fffdf0; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <h2 style="color: var(--primary);">智慧果園登入</h2>
+        <input type="password" id="login-pass" placeholder="請輸入密碼" style="text-align: center; font-size: 18px; letter-spacing: 5px;">
+        <button class="btn btn-primary" onclick="checkAuth()">進入系統</button>
+        <p id="err-msg" style="color: var(--danger); font-size: 12px; margin-top: 10px;"></p>
+    </div>
+</div>
+
+<header>
+    <div style="font-size: 22px; font-weight: bold;">SmartFarm Pro</div>
+    <div id="user-tag" style="font-size: 11px; opacity: 0.8;"></div>
+</header>
+
+<div id="view-home" class="content-view active-view">
+    <div class="card" style="background: var(--primary); color: white;">
+        <h3 style="margin: 0 0 10px 0;">🏆 優良果寶排行榜 (前3名)</h3>
+        <div id="top-rank-list"></div>
+    </div>
+    <input type="text" id="search" placeholder="🔍 搜尋編號、品種或問題..." oninput="renderHome()" style="background: white; border: none; border-radius: 12px; margin: 10px 0;">
+    <div id="tree-list-container"></div>
+</div>
+
+<div id="view-edit" class="content-view">
+    <div class="card">
+        <h3 id="edit-title">果樹採收與詳細紀錄</h3>
+        <div style="display: flex; gap: 10px;">
+            <div style="flex:2;"><label>名稱</label><input type="text" id="f-name"></div>
+            <div style="flex:1;"><label>編號</label><input type="text" id="f-code"></div>
+        </div>
+        
+        <label style="color: var(--accent);">📊 採收與品質數據</label>
+        <div style="display: flex; gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 10px;">
+            <div style="flex:1;"><label>總重量(kg)</label><input type="number" id="f-dailyCount" step="0.1"></div>
+            <div style="flex:1;"><label>甜度(Brix)</label><input type="number" id="f-brix" step="0.1"></div>
+        </div>
+
+        <label>📅 關鍵日期</label>
+        <div style="display: flex; gap: 10px;">
+            <div style="flex:1;"><label>栽種日</label><input type="date" id="f-plantDate"></div>
+            <div style="flex:1;"><label>套袋日</label><input type="date" id="f-bag"></div>
+        </div>
+
+        <label>💧 澆水與 🧪 施肥</label>
+        <input type="text" id="f-water" placeholder="澆水說明">
+        <input type="text" id="f-fertilizer" placeholder="肥料名稱與日期">
+
+        <label>✂ 修剪紀錄 (大/小)</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="f-pruneBig" placeholder="大修剪">
+            <input type="text" id="f-pruneSmall" placeholder="小修剪">
+        </div>
+
+        <label>🏥 健康狀況與醫治</label>
+        <select id="f-health"><option>良好</option><option>注意</option><option>病蟲害</option></select>
+        <textarea id="f-pest" rows="2" placeholder="病蟲害問題說明..."></textarea>
+        <div style="display: flex; gap: 10px;">
+            <input type="date" id="f-treatDate">
+            <input type="text" id="f-medicine" placeholder="藥物與劑量">
+        </div>
+
+        <div style="text-align:center; margin-top:15px;"><canvas id="qr-gen"></canvas></div>
+        <button class="btn btn-primary" onclick="handleSave()">💾 儲存更新</button>
+        <button class="btn btn-outline" onclick="showView('home')">取消</button>
+    </div>
+</div>
+
+<div id="view-tools" class="content-view">
+    <div class="card">
+        <h3>📊 數據與權限管理</h3>
+        <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel 全紀錄</button>
+        <input type="file" id="import-file" accept=".xlsx" onchange="handleImport(event)" style="margin-top:15px;">
+        
+        <div id="admin-panel" class="admin-only">
+            <h4 style="margin:0; color:var(--primary);">🔑 管理員工具：修改密碼</h4>
+            <input type="text" id="new-user-pwd" placeholder="新使用者密碼">
+            <button class="btn btn-primary" onclick="updateUserPwd()">儲存新密碼</button>
+        </div>
+
+        <button class="btn" style="background:#ffeded; color:var(--danger); margin-top: 30px;" onclick="clearAll()">⚠️ 重置所有資料</button>
+        <button class="btn btn-outline" onclick="location.reload()">🔒 安全登出</button>
+    </div>
+</div>
+
+<div id="scanner-ui">
+    <video id="video" playsinline></video>
+    <button onclick="stopScan()" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:12px 25px; border-radius:20px;">關閉相機</button>
+</div>
+
+<nav>
+    <div class="nav-item active" id="nav-home" onclick="showView('home')"><span class="nav-icon">🌳</span>清單</div>
+    <div class="nav-item" id="nav-scan" onclick="startScan()"><span class="nav-icon">📷</span>掃描</div>
+    <div class="nav-item" id="nav-add" onclick="prepareAdd()"><span class="nav-icon">➕</span>新增</div>
+    <div class="nav-item" id="nav-tools" onclick="showView('tools')"><span class="nav-icon">⚙️</span>數據</div>
+</nav>
+
+<script>
+    const ADMIN_PWD = "admin";
+    let currentUserRole = ""; 
+    let db = JSON.parse(localStorage.getItem('farm_pro_v6')) || [];
+
+    function checkAuth() {
+        const input = document.getElementById('login-pass').value;
+        const storedUserPwd = localStorage.getItem('app_user_pwd') || "123";
+        if (input === ADMIN_PWD) {
+            currentUserRole = "admin";
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('user-tag').innerText = "權限：管理員";
+        } else if (input === storedUserPwd) {
+            currentUserRole = "user";
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('user-tag').innerText = "權限：一般使用者";
+        } else {
+            document.getElementById('err-msg').innerText = "密碼錯誤！";
+        }
+        renderHome();
+    }
+
+    function showView(viewId) {
+        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('view-' + viewId).classList.add('active-view');
+        document.getElementById('nav-' + viewId).classList.add('active');
+        if(viewId === 'home') renderHome();
+    }
+
+    function renderHome() {
+        // 更新排行榜 (依甜度排序)
+        const sortedDb = [...db].sort((a, b) => (parseFloat(b.brix) || 0) - (parseFloat(a.brix) || 0)).slice(0, 3);
+        const rankList = document.getElementById('top-rank-list');
+        rankList.innerHTML = sortedDb.length ? sortedDb.map((t, i) => `
+            <div class="rank-item">
+                <span class="rank-num rank-${i+1}">${i+1}</span>
+                <div style="flex:1"><strong>${t.name}</strong> (${t.code})</div>
+                <div style="text-align:right"><span style="color:var(--gold)">Brix: ${t.brix || 0}</span><br><small>${t.dailyCount || 0}kg</small></div>
+            </div>
+        `).join('') : '<div style="font-size:12px; opacity:0.7">尚無採收數據</div>';
+
+        // 更新清單
+        const query = document.getElementById('search').value.toLowerCase();
+        const container = document.getElementById('tree-list-container');
+        const filtered = db.filter(t => (t.code||'').toLowerCase().includes(query) || (t.name||'').toLowerCase().includes(query));
+        container.innerHTML = filtered.map(t => `
+            <div class="card" onclick="editTree('${t.code}')" style="display:flex; justify-content:space-between; align-items:center;">
+                <div><strong>${t.code} - ${t.name}</strong><br><span style="font-size:12px; color:#666;">甜度: ${t.brix||0} | 重量: ${t.dailyCount||0}kg</span></div>
+                <span style="color:var(--accent)">❯</span>
+            </div>
+        `).join('');
+    }
+
+    function prepareAdd() {
+        document.querySelectorAll('#view-edit input, #view-edit textarea').forEach(el => el.value = '');
+        document.getElementById('qr-gen').style.display = 'none';
+        showView('edit');
+    }
+
+    function editTree(code) {
+        const t = db.find(x => x.code === code);
+        if(!t) return;
+        const fields = ['name','code','plantDate','water','pruneBig','pruneSmall','fertilizer','bloom','bag','harvestEnd','dailyCount','brix','health','pest','treatDate','medicine'];
+        fields.forEach(f => { if(document.getElementById('f-'+f)) document.getElementById('f-'+f).value = t[f] || ''; });
+        new QRious({ element: document.getElementById('qr-gen'), value: t.code, size: 120 });
+        document.getElementById('qr-gen').style.display = 'inline-block';
+        showView('edit');
+    }
+
+    function handleSave() {
+        const code = document.getElementById('f-code').value;
+        if(!code) return alert("編號必填");
+        const data = {};
+        const fields = ['name','code','plantDate','water','pruneBig','pruneSmall','fertilizer','bloom','bag','harvestEnd','dailyCount','brix','health','pest','treatDate','medicine'];
+        fields.forEach(f => { data[f] = document.getElementById('f-'+f).value; });
+        const idx = db.findIndex(x => x.code === code);
+        if(idx > -1) db[idx] = data; else db.push(data);
+        localStorage.setItem('farm_pro_v6', JSON.stringify(db));
+        showView('home');
+    }
+
+    function exportExcel() {
+        const ws = XLSX.utils.json_to_sheet(db);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "果園紀錄");
+        XLSX.writeFile(wb, "SmartFarm_Report.xlsx");
+    }
+
+    function handleImport(e) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const jsonData = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(evt.target.result), {type: 'array'}).Sheets[0]);
+            jsonData.forEach(item => {
+                const idx = db.findIndex(x => x.code == item.code);
+                if(idx > -1) db[idx] = item; else db.push(item);
+            });
+            localStorage.setItem('farm_pro_v6', JSON.stringify(db));
+            renderHome(); showView('home'); alert("匯入完成");
+        };
+        reader.readAsArrayBuffer(e.target.files[0]);
+    }
+
+    function updateUserPwd() {
+        const newPwd = document.getElementById('new-user-pwd').value;
+        if(newPwd) { localStorage.setItem('app_user_pwd', newPwd); alert("密碼已更新"); }
+    }
+
+    let streamPtr;
+    function startScan() {
+        document.getElementById('scanner-ui').style.display = 'block';
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
+            streamPtr = s; const v = document.getElementById('video'); v.srcObject = s; v.play();
+            requestAnimationFrame(scanTick);
+        });
+    }
+    function scanTick() {
+        const v = document.getElementById('video');
+        if(v.readyState === v.HAVE_ENOUGH_DATA) {
+            const canvas = document.createElement("canvas"); canvas.width = v.videoWidth; canvas.height = v.videoHeight;
+            const ctx = canvas.getContext("2d"); ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(img.data, img.width, img.height);
+            if(code) { stopScan(); editTree(code.data); return; }
+        }
+        if(document.getElementById('scanner-ui').style.display === 'block') requestAnimationFrame(scanTick);
+    }
+    function stopScan() { if(streamPtr) streamPtr.getTracks().forEach(t => t.stop()); document.getElementById('scanner-ui').style.display = 'none'; }
+    function clearAll() { if(confirm("確定永久刪除所有資料？")) { db = []; localStorage.clear(); location.reload(); } }
+
+</script>
+</body>
+</html>
