@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartFarm Pro - 產量統計版</title>
+    <title>SmartFarm Pro - 產量終極版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -12,7 +12,7 @@
         :root { --primary: #1b4332; --accent: #40916c; --bg: #f0f2f1; --white: #ffffff; --danger: #d00; --gold: #FFD700; }
         body { margin: 0; background: var(--bg); font-family: -apple-system, sans-serif; padding-bottom: 80px; }
         
-        /* 登入介面 */
+        /* 登入遮罩 */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 5000; display: flex; align-items: center; justify-content: center; }
         .login-box { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
 
@@ -28,14 +28,14 @@
         label { font-size: 13px; font-weight: bold; color: #555; display: block; }
 
         /* 勾選框特殊樣式 */
-        .check-group { display: flex; align-items: center; gap: 10px; background: #eef7f2; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
-        .check-group input[type="checkbox"] { width: 25px; height: 25px; margin: 0; }
+        .check-group { display: flex; align-items: center; gap: 12px; background: #f0f9f4; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #d1e7dd; }
+        .check-group input[type="checkbox"] { width: 22px; height: 22px; margin: 0; cursor: pointer; }
 
         nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; height: 75px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #888; font-size: 12px; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
 
-        .rank-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .rank-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .rank-num { font-size: 18px; font-weight: bold; width: 30px; }
         
         #scanner-ui { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; }
@@ -47,92 +47,103 @@
 
 <div id="login-screen">
     <div class="login-box">
-        <h2 style="color: var(--primary);">果園管理系統</h2>
+        <h2 style="color: var(--primary); margin-top:0;">果園管理系統</h2>
         <input type="password" id="login-pass" placeholder="請輸入密碼" style="text-align: center; font-size: 18px;">
-        <button class="btn btn-primary" onclick="checkAuth()">進入系統</button>
+        <button class="btn btn-primary" onclick="checkAuth()">驗證登入</button>
         <p id="err-msg" style="color: var(--danger); font-size: 12px;"></p>
     </div>
 </div>
 
 <header>
-    <div style="font-size: 20px; font-weight: bold;">SmartFarm 數據看板</div>
-    <div style="font-size: 13px; margin-top: 8px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px;">
-        🍏 年度採收總計：<span id="total-harvest-count" style="font-size: 18px; color: var(--gold); font-weight: bold;">0</span> 粒
+    <div style="font-size: 18px; font-weight: bold;">SmartFarm 生產看板</div>
+    <div style="font-size: 13px; margin-top: 8px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 12px;">
+        🍏 年度採收總計：<span id="total-harvest-count" style="font-size: 20px; color: var(--gold); font-weight: bold;">0</span> 粒
     </div>
 </header>
 
 <div id="view-home" class="content-view active-view">
     <div class="card" style="background: var(--primary); color: white;">
-        <h3 style="margin: 0 0 10px 0; font-size: 16px;">🏆 優質排行榜前3粒 (依甜度)</h3>
+        <h3 style="margin: 0 0 8px 0; font-size: 15px;">🏆 優質排行榜 (甜度前3名)</h3>
         <div id="top-rank-list"></div>
     </div>
-    <input type="text" id="search" placeholder="🔍 搜尋編號、品種..." oninput="renderHome()" style="background: white; border: none; border-radius: 12px; margin: 10px 0;">
+    <input type="text" id="search" placeholder="🔍 搜尋編號、品種名稱..." oninput="renderHome()" style="background: white; border: none; border-radius: 12px; margin: 10px 0;">
     <div id="tree-list-container"></div>
 </div>
 
 <div id="view-edit" class="content-view">
     <div class="card">
-        <h3 id="edit-title">果樹檔案編輯</h3>
+        <h3 id="edit-title" style="margin-top:0;">果樹檔案編輯</h3>
         
         <label>名稱</label>
-        <input type="text" id="f-name">
+        <input type="text" id="f-name" placeholder="例如：愛文芒果">
+        
         <label>📅 栽種日期</label>
         <input type="date" id="f-plantDate">
+        
         <label>編號</label>
-        <input type="text" id="f-code">
+        <input type="text" id="f-code" placeholder="例如：A-001">
 
         <hr style="border: 0.5px solid #eee; margin: 20px 0;">
 
         <div class="check-group">
             <input type="checkbox" id="f-isBlooming">
-            <label style="margin:0; font-size: 16px;">🌸 目前是否開花？</label>
+            <label style="margin:0; font-size: 16px; color: #1b4332;">🌸 目前是否開花？</label>
         </div>
         <label>開花期詳細說明</label>
-        <textarea id="f-bloomDesc" rows="2" placeholder="說明開花狀況..."></textarea>
+        <textarea id="f-bloomDesc" rows="2" placeholder="開花數量、花期狀況..."></textarea>
 
-        <label style="color: var(--accent); font-weight: bold;">📊 採收與品質數據</label>
-        <div style="display: flex; gap: 10px; background: #f9f9f9; padding: 10px; border-radius: 10px;">
-            <div style="flex:1;"><label>數量 (粒)</label><input type="number" id="f-harvestQty"></div>
-            <div style="flex:1;"><label>總重 (kg)</label><input type="number" id="f-dailyCount" step="0.1"></div>
-            <div style="flex:1;"><label>甜度 (Brix)</label><input type="number" id="f-brix" step="0.1"></div>
+        <label style="color: var(--accent); font-weight: bold;">📊 採收品質與數據 (單位：粒/kg)</label>
+        <div style="display: flex; gap: 8px; background: #f9f9f9; padding: 10px; border-radius: 10px;">
+            <div style="flex:1;"><label>數量(粒)</label><input type="number" id="f-harvestQty"></div>
+            <div style="flex:1;"><label>總重(kg)</label><input type="number" id="f-dailyCount" step="0.1"></div>
+            <div style="flex:1;"><label>甜度(Brix)</label><input type="number" id="f-brix" step="0.1"></div>
         </div>
 
-        <label>💧 澆水說明</label><input type="text" id="f-water">
-        <label>🧪 施肥紀錄</label><input type="text" id="f-fertilizer">
+        <label>💧 澆水/ 🧪 施肥說明</label>
+        <input type="text" id="f-water" placeholder="澆水紀錄">
+        <input type="text" id="f-fertilizer" placeholder="施肥種類與日期">
+
+        <label>✂ 修剪紀錄 (大/小修剪日期)</label>
         <div style="display: flex; gap: 10px;">
-            <div style="flex:1;"><label>大修剪</label><input type="text" id="f-pruneBig"></div>
-            <div style="flex:1;"><label>小修剪</label><input type="text" id="f-pruneSmall"></div>
+            <input type="text" id="f-pruneBig" placeholder="大修剪">
+            <input type="text" id="f-pruneSmall" placeholder="小修剪">
         </div>
         
-        <label>🛍️ 套袋日</label><input type="date" id="f-bag">
-        <label>🏥 健康狀況</label>
-        <select id="f-health"><option>良好</option><option>注意</option><option>病蟲害</option></select>
-        <textarea id="f-pest" rows="2" placeholder="病蟲害/藥劑劑量說明..."></textarea>
+        <label>🛍️ 套袋日 / 🏥 健康狀況</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="date" id="f-bag" style="flex:1;">
+            <select id="f-health" style="flex:1;"><option>良好</option><option>注意</option><option>病蟲害</option></select>
+        </div>
+        <label>病蟲害及藥劑劑量紀錄</label>
+        <textarea id="f-pest" rows="2" placeholder="紀錄病徵與用藥情形..."></textarea>
 
         <div style="text-align:center; margin-top:15px;"><canvas id="qr-gen"></canvas></div>
-        <button class="btn btn-primary" onclick="handleSave()">💾 儲存資料</button>
-        <button class="btn btn-outline" onclick="showView('home')">取消</button>
+        <button class="btn btn-primary" onclick="handleSave()">💾 儲存果樹資料</button>
+        <button class="btn btn-outline" onclick="showView('home')">取消返回</button>
     </div>
 </div>
 
 <div id="view-tools" class="content-view">
     <div class="card">
-        <h3>⚙️ 系統管理</h3>
-        <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel 報表</button>
-        <input type="file" id="import-file" accept=".xlsx" onchange="handleImport(event)" style="margin-top:15px;">
-        <div id="admin-panel" class="admin-only">
-            <h4 style="margin:10px 0; color:var(--primary);">🔒 更改使用者密碼</h4>
-            <input type="text" id="new-user-pwd" placeholder="新密碼">
-            <button class="btn btn-primary" onclick="updateUserPwd()">確認修改</button>
+        <h3>⚙️ 資料管理中心</h3>
+        <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel (年度總表)</button>
+        <div style="margin-top: 15px;">
+            <label>批次匯入 Excel (.xlsx)</label>
+            <input type="file" id="import-file" accept=".xlsx" onchange="handleImport(event)">
         </div>
-        <button class="btn" style="background:#ffeded; color:var(--danger); margin-top: 30px;" onclick="clearAll()">⚠️ 刪除所有資料</button>
-        <button class="btn btn-outline" onclick="location.reload()">🔒 登出</button>
+        <div id="admin-panel" class="admin-only">
+            <h4 style="margin:10px 0; color:var(--primary);">🔒 修改使用者密碼 (Admin 權限)</h4>
+            <input type="text" id="new-user-pwd" placeholder="輸入新密碼">
+            <button class="btn btn-primary" onclick="updateUserPwd()">儲存新密碼</button>
+        </div>
+        <button class="btn" style="background:#ffeded; color:var(--danger); margin-top: 30px;" onclick="clearAll()">⚠️ 清空所有資料庫</button>
+        <button class="btn btn-outline" onclick="location.reload()">🔒 登出系統</button>
     </div>
 </div>
 
 <div id="scanner-ui">
     <video id="video" playsinline></video>
-    <button onclick="stopScan()" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:12px 25px; border-radius:20px;">關閉相機</button>
+    <button onclick="stopScan()" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:12px 25px; border-radius:20px; border:none; background:white;">關閉相機</button>
 </div>
 
 <nav>
@@ -144,7 +155,7 @@
 
 <script>
     const ADMIN_PWD = "admin";
-    let db = JSON.parse(localStorage.getItem('farm_pro_v7')) || [];
+    let db = JSON.parse(localStorage.getItem('farm_pro_v8')) || [];
 
     function checkAuth() {
         const input = document.getElementById('login-pass').value;
@@ -154,29 +165,30 @@
             if(input === ADMIN_PWD) document.getElementById('admin-panel').style.display = 'block';
             renderHome();
         } else {
-            document.getElementById('err-msg').innerText = "密碼錯誤";
+            document.getElementById('err-msg').innerText = "密碼錯誤，請重新輸入";
         }
     }
 
     function renderHome() {
-        // 計算年度總產量 (粒)
+        // 更新年度總數量 (粒)
         const totalQty = db.reduce((sum, t) => sum + (parseInt(t.harvestQty) || 0), 0);
         document.getElementById('total-harvest-count').innerText = totalQty.toLocaleString();
 
-        // 依甜度排名前3粒
+        // 更新甜度排行榜前3名
         const sortedDb = [...db].sort((a, b) => (parseFloat(b.brix) || 0) - (parseFloat(a.brix) || 0)).slice(0, 3);
         const rankList = document.getElementById('top-rank-list');
-        rankList.innerHTML = sortedDb.map((t, i) => `
+        rankList.innerHTML = sortedDb.length ? sortedDb.map((t, i) => `
             <div class="rank-item">
                 <span class="rank-num">${i+1}</span>
                 <div style="flex:1"><strong>${t.name}</strong> <small>(${t.code})</small></div>
                 <div style="text-align:right">
-                    <span style="color:var(--gold)">Brix: ${t.brix || 0}</span><br>
-                    <small>${t.harvestQty || 0}粒 / ${t.dailyCount || 0}kg</small>
+                    <span style="color:var(--gold); font-weight:bold;">${t.brix || 0} Brix</span><br>
+                    <small>${t.harvestQty || 0} 粒 / ${t.dailyCount || 0} kg</small>
                 </div>
             </div>
-        `).join('');
+        `).join('') : '<div style="font-size:12px; opacity:0.7">暫無採收紀錄</div>';
 
+        // 更新搜尋清單
         const query = document.getElementById('search').value.toLowerCase();
         const container = document.getElementById('tree-list-container');
         const filtered = db.filter(t => (t.code||'').toLowerCase().includes(query) || (t.name||'').toLowerCase().includes(query));
@@ -185,10 +197,10 @@
                 <div>
                     <strong>${t.name}</strong> <small>(${t.code})</small><br>
                     <span style="font-size:12px; color:#666;">
-                        ${t.isBlooming ? '🌸 開花中' : '🌿 生長期'} | 產量: ${t.harvestQty||0}粒
+                        ${t.isBlooming ? '🌸 開花中' : '🌿 生長期'} | 產量: ${t.harvestQty||0} 粒
                     </span>
                 </div>
-                <span>❯</span>
+                <span style="color:#ccc;">❯</span>
             </div>
         `).join('');
     }
@@ -222,18 +234,21 @@
 
     function handleSave() {
         const code = document.getElementById('f-code').value;
-        if(!code) return alert("編號必填");
+        if(!code) return alert("請填寫果樹編號");
         const data = { isBlooming: document.getElementById('f-isBlooming').checked };
         const fields = ['name','code','plantDate','water','pruneBig','pruneSmall','fertilizer','bloomDesc','bag','dailyCount','brix','harvestQty','health','pest'];
         fields.forEach(f => { data[f] = document.getElementById('f-'+f).value; });
         const idx = db.findIndex(x => x.code === code);
         if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_pro_v7', JSON.stringify(db));
+        localStorage.setItem('farm_pro_v8', JSON.stringify(db));
         showView('home');
     }
 
     function exportExcel() {
-        XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet(db), "果園"), "Farm_Data.xlsx");
+        const ws = XLSX.utils.json_to_sheet(db);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "果園年度總表");
+        XLSX.writeFile(wb, "SmartFarm_Data_Export.xlsx");
     }
 
     function handleImport(e) {
@@ -241,17 +256,18 @@
         reader.onload = (evt) => {
             const json = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(evt.target.result), {type: 'array'}).Sheets[0]);
             json.forEach(item => { const idx = db.findIndex(x => x.code == item.code); if(idx > -1) db[idx] = item; else db.push(item); });
-            localStorage.setItem('farm_pro_v7', JSON.stringify(db));
-            renderHome(); alert("匯入成功");
+            localStorage.setItem('farm_pro_v8', JSON.stringify(db));
+            renderHome(); alert("Excel 匯入成功！"); showView('home');
         };
         reader.readAsArrayBuffer(e.target.files[0]);
     }
 
     function updateUserPwd() {
         const p = document.getElementById('new-user-pwd').value;
-        if(p) { localStorage.setItem('app_user_pwd', p); alert("密碼已改"); }
+        if(p) { localStorage.setItem('app_user_pwd', p); alert("使用者密碼已修改！"); }
     }
 
+    // 掃描功能 (jsQR)
     let streamPtr;
     function startScan() {
         document.getElementById('scanner-ui').style.display = 'block';
@@ -263,14 +279,16 @@
     function scanTick() {
         const v = document.getElementById('video');
         if(v.readyState === v.HAVE_ENOUGH_DATA) {
-            const code = jsQR(v.getContext ? v.getContext("2d").getImageData(0,0,v.width,v.height).data : 
-            (() => { const c = document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight; const ctx=c.getContext("2d"); ctx.drawImage(v,0,0); return ctx.getImageData(0,0,c.width,c.height); })().data, v.videoWidth, v.videoHeight);
+            const canvas = document.createElement("canvas"); canvas.width = v.videoWidth; canvas.height = v.videoHeight;
+            const ctx = canvas.getContext("2d"); ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(img.data, img.width, img.height);
             if(code) { stopScan(); editTree(code.data); return; }
         }
         if(document.getElementById('scanner-ui').style.display === 'block') requestAnimationFrame(scanTick);
     }
     function stopScan() { if(streamPtr) streamPtr.getTracks().forEach(t => t.stop()); document.getElementById('scanner-ui').style.display = 'none'; }
-    function clearAll() { if(confirm("清除？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("警告：這將刪除所有果樹資料！確定嗎？")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
