@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>果樹管理系統</title>
+    <title>果樹管理系統 Pro - 安全加強版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -27,21 +27,12 @@
         }
 
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; }
+        .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
         header { background: var(--primary); padding: 25px 20px 40px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; }
         header * { color: var(--white) !important; }
 
-        /* 備份提醒橫幅樣式 */
-        #backup-alert {
-            background: var(--warning);
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            display: none; /* 預設隱藏 */
-            border-bottom: 2px solid #e6b800;
-        }
+        #backup-alert { background: var(--warning); padding: 10px; text-align: center; font-size: 14px; font-weight: bold; display: none; border-bottom: 2px solid #e6b800; cursor: pointer; }
 
         .content-area { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .content-view { display: none; }
@@ -54,15 +45,8 @@
             font-size: 16px; color: #000 !important; background: #fff !important; margin-bottom: 5px;
         }
 
-        .check-container { 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 12px 15px; background: #fff; border-radius: 12px; 
-            border: 1.5px solid #dcdcdc; margin-top: 8px; width: 100%;
-        }
-        .check-container label { 
-            margin: 0; font-size: 15px; color: var(--text-dark); 
-            white-space: nowrap; flex: 1; display: flex; align-items: center;
-        }
+        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 8px; width: 100%; }
+        .check-container label { margin: 0; font-size: 15px; color: var(--text-dark); white-space: nowrap; flex: 1; display: flex; align-items: center; }
         .check-container input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -72,11 +56,7 @@
         .btn-primary { background: var(--primary); color: white !important; }
         .btn-outline { background: #e0e0e0; color: #333 !important; }
 
-        nav { 
-            position: absolute; bottom: 0; width: 100%; height: 80px; 
-            background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; 
-            justify-content: center; align-items: stretch;
-        }
+        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; justify-content: center; align-items: stretch; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
         .nav-item div { color: #888; margin-top: 4px; white-space: nowrap; }
         .nav-item.active div { color: var(--primary); font-weight: bold; }
@@ -94,14 +74,13 @@
     <div id="login-screen">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-top: 0;">果樹管理系統</h2>
-            <input type="text" id="login-pass" placeholder="輸入姓名或管理密碼" style="text-align: center;">
-            <button class="btn btn-primary" onclick="checkAuth()">進入系統</button>
+            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">請輸入員工姓名或管理密碼</p>
+            <input type="text" id="login-pass" placeholder="姓名或管理密碼" style="text-align: center;">
+            <button class="btn btn-primary" onclick="checkAuth()">驗證登入</button>
         </div>
     </div>
 
-    <div id="backup-alert" onclick="showView('tools')">
-        ⚠️ 距離上次備份已超過 7 天，請立即導出 Excel 存檔！
-    </div>
+    <div id="backup-alert" onclick="showView('tools')">⚠️ 距離上次備份已超過 7 天，請立即導出 Excel！</div>
 
     <header>
         <div style="font-size: 13px; opacity: 0.9;"><span id="user-role-display"></span> | <span id="display-today"></span></div>
@@ -118,7 +97,7 @@
                 <div id="display-rank-list" style="font-size:14px; line-height: 1.6; color: white !important;"></div>
             </div>
             <label>🔍 快速搜尋</label>
-            <input type="text" id="search" placeholder="搜尋果樹名稱..." oninput="renderHome()">
+            <input type="text" id="search" placeholder="搜尋果樹名稱或編號..." oninput="renderHome()">
             <div id="tree-list-container" style="margin-top:10px;"></div>
         </div>
 
@@ -129,6 +108,7 @@
                     <div><label>📅 日期</label><input type="date" id="f-date"></div>
                     <div><label>👤 人員</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
                 </div>
+                
                 <label>🌳 基本資訊</label>
                 <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
 
@@ -167,18 +147,19 @@
 
         <div id="view-tools" class="content-view">
             <div class="card">
-                <h3>👥 人員管理</h3>
+                <h3>👥 人員名單管理</h3>
                 <div id="user-list-display" style="margin-bottom: 15px;"></div>
                 <div style="display: flex; gap: 8px;">
                     <input type="text" id="new-user-input" placeholder="新員工姓名" style="margin-bottom: 0;">
                     <button class="btn btn-primary" onclick="addUser()" style="margin-top: 0; width: 80px;">新增</button>
                 </div>
+                <p style="font-size: 11px; color: #999; margin-top: 10px;">註：只有名單內的人員可透過姓名登入。</p>
             </div>
             <div class="card">
-                <h3>📂 數據管理</h3>
-                <p id="last-backup-text" style="font-size: 12px; color: #666; margin-bottom: 10px;">上次備份時間：尚未備份</p>
-                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel (並更新備份時間)</button>
-                <button class="btn btn-outline" onclick="document.getElementById('import-input').click()" style="margin-top:10px;">📥 匯入資料</button>
+                <h3>📂 數據備份</h3>
+                <p id="last-backup-text" style="font-size: 12px; color: #666; margin-bottom: 10px;">上次備份：尚未紀錄</p>
+                <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel</button>
+                <button class="btn btn-outline" onclick="document.getElementById('import-input').click()" style="margin-top:10px;">📥 匯入歷史資料</button>
                 <input type="file" id="import-input" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
                 <button class="btn btn-outline" onclick="location.reload()" style="margin-top:40px; color:red !important; border-color: red;">登出系統</button>
             </div>
@@ -199,46 +180,46 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('farm_v18')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v18')) || {};
-    let users = JSON.parse(localStorage.getItem('user_v18')) || ["系統管理員"];
-    let lastBackup = localStorage.getItem('backup_time_v18') || null;
+    // 資料版本 V19
+    let db = JSON.parse(localStorage.getItem('farm_v19')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v19')) || {};
+    let users = JSON.parse(localStorage.getItem('user_v19')) || [];
+    let lastBackup = localStorage.getItem('backup_time_v19') || null;
     let currentUser = "";
     let isAdmin = false;
 
+    // 設定你的管理密碼
+    const ADMIN_PASSWORD = "admin123";
+
     const getToday = () => new Date().toISOString().split('T')[0];
 
-    // 檢查備份提醒邏輯
-    function checkBackupAlert() {
-        if (!lastBackup) {
-            document.getElementById('backup-alert').style.display = 'block';
-            document.getElementById('last-backup-text').innerText = "上次備份時間：尚未備份";
+    // 登入驗證邏輯
+    function checkAuth() {
+        const input = document.getElementById('login-pass').value.trim();
+        if(!input) return alert("請輸入姓名或密碼");
+
+        // 1. 檢查是否為管理員
+        if (input === ADMIN_PASSWORD) {
+            isAdmin = true;
+            currentUser = "系統管理員";
+        } 
+        // 2. 檢查是否在員工白名單
+        else if (users.includes(input)) {
+            isAdmin = false;
+            currentUser = input;
+        } 
+        // 3. 例外處理：如果是系統第一次使用，名單還是空的
+        else if (users.length === 0 && input === "初始化") {
+            isAdmin = true;
+            currentUser = "系統管理員";
+            alert("首次使用成功，請先至設定頁新增員工名單！");
+        }
+        else {
+            alert("無效的人員姓名或密碼！\n請聯繫管理員新增您的姓名。");
             return;
         }
-        
-        const lastDate = new Date(lastBackup);
-        const today = new Date();
-        const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
-        
-        document.getElementById('last-backup-text').innerText = "上次備份時間：" + lastBackup;
-        
-        if (diffDays >= 7) {
-            document.getElementById('backup-alert').style.display = 'block';
-        } else {
-            document.getElementById('backup-alert').style.display = 'none';
-        }
-    }
 
-    function toggleSubField(checkId, boxId) {
-        document.getElementById(boxId).style.display = document.getElementById(checkId).checked ? 'block' : 'none';
-    }
-
-    function checkAuth() {
-        const pass = document.getElementById('login-pass').value.trim();
-        if(!pass) return;
-        isAdmin = (pass.toLowerCase() === "admin");
-        currentUser = isAdmin ? "系統管理員" : pass;
-        
+        // 登入成功後處理介面
         if(isAdmin) {
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.style.display = el.classList.contains('nav-item') ? 'flex' : 'block';
@@ -253,21 +234,50 @@
         renderHome();
     }
 
+    function checkBackupAlert() {
+        if (!lastBackup) {
+            document.getElementById('backup-alert').style.display = 'block';
+            document.getElementById('last-backup-text').innerText = "上次備份：尚未備份";
+            return;
+        }
+        const lastDate = new Date(lastBackup);
+        const diffDays = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
+        document.getElementById('last-backup-text').innerText = "上次備份：" + lastBackup;
+        document.getElementById('backup-alert').style.display = (diffDays >= 7) ? 'block' : 'none';
+    }
+
+    function toggleSubField(checkId, boxId) {
+        document.getElementById(boxId).style.display = document.getElementById(checkId).checked ? 'block' : 'none';
+    }
+
     function renderUserList() {
         const container = document.getElementById('user-list-display');
         if(!container) return;
-        container.innerHTML = users.map(u => `<div style="padding: 10px; border-bottom: 1px solid #eee;">👤 ${u}</div>`).join('');
+        container.innerHTML = users.length ? users.map((u, i) => `
+            <div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid #eee;">
+                <span>👤 ${u}</span>
+                <span onclick="deleteUser(${i})" style="color:red; font-size:12px;">刪除</span>
+            </div>`).join('') : "<p style='color:#999; text-align:center;'>尚未建立員工名單</p>";
     }
 
     function addUser() {
         const input = document.getElementById('new-user-input');
         const name = input.value.trim();
-        if(name) {
+        if(name && !users.includes(name)) {
             users.push(name);
-            localStorage.setItem('user_v18', JSON.stringify(users));
+            localStorage.setItem('user_v19', JSON.stringify(users));
             input.value = "";
             renderUserList();
-            alert("已新增使用者: " + name);
+        } else {
+            alert("姓名重複或格式錯誤");
+        }
+    }
+
+    function deleteUser(index) {
+        if(confirm("確定刪除此使用者？")) {
+            users.splice(index, 1);
+            localStorage.setItem('user_v19', JSON.stringify(users));
+            renderUserList();
         }
     }
 
@@ -300,29 +310,22 @@
 
         const data = {
             name: document.getElementById('f-name').value, code, date,
-            harvestQty: document.getElementById('f-harvestQty').value,
-            weightVal: document.getElementById('f-weightVal').value,
+            harvestQty: document.getElementById('f-harvestQty').value, weightVal: document.getElementById('f-weightVal').value,
             lastUser: currentUser,
-            isBlooming: document.getElementById('f-isBlooming').checked,
-            bloomStatus: document.getElementById('f-bloomStatus').value,
-            isBagged: document.getElementById('f-isBagged').checked,
-            bagQty: document.getElementById('f-bagQty').value,
-            water: document.getElementById('f-water').value,
-            fert: document.getElementById('f-fert').value,
-            pruneBig: document.getElementById('f-pruneBig').checked,
-            pruneSmall: document.getElementById('f-pruneSmall').checked,
-            health: document.getElementById('f-health').value,
-            healthDesc: document.getElementById('f-healthDesc').value,
-            medDose: document.getElementById('f-medDose').value
+            isBlooming: document.getElementById('f-isBlooming').checked, bloomStatus: document.getElementById('f-bloomStatus').value,
+            isBagged: document.getElementById('f-isBagged').checked, bagQty: document.getElementById('f-bagQty').value,
+            water: document.getElementById('f-water').value, fert: document.getElementById('f-fert').value,
+            pruneBig: document.getElementById('f-pruneBig').checked, pruneSmall: document.getElementById('f-pruneSmall').checked,
+            health: document.getElementById('f-health').value, healthDesc: document.getElementById('f-healthDesc').value, medDose: document.getElementById('f-medDose').value
         };
 
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_v18', JSON.stringify(db));
+        localStorage.setItem('farm_v19', JSON.stringify(db));
 
         if(isAdmin) {
             rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value };
-            localStorage.setItem('rank_v18', JSON.stringify(rankStore));
+            localStorage.setItem('rank_v19', JSON.stringify(rankStore));
         }
         alert("儲存成功"); showView('home');
     }
@@ -377,13 +380,11 @@
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "FarmData");
         XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`);
-        
-        // 更新備份時間
         const now = new Date().toLocaleString();
-        localStorage.setItem('backup_time_v18', now);
+        localStorage.setItem('backup_time_v19', now);
         lastBackup = now;
         checkBackupAlert();
-        alert("匯出成功！已同步更新最後備份時間。");
+        alert("匯出完成！");
     }
 
     function importExcel(input) {
@@ -392,7 +393,7 @@
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             db = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            localStorage.setItem('farm_v18', JSON.stringify(db));
+            localStorage.setItem('farm_v19', JSON.stringify(db));
             alert("匯入成功"); renderHome();
         };
         reader.readAsArrayBuffer(input.files[0]);
