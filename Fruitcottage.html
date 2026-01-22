@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>果樹管理系統</title>
+    <title>果樹管理系統 Pro - 安全加強版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-   
+    
     <style>
         :root {
             --primary: #2d6a4f;
@@ -20,10 +20,10 @@
 
         * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
         html, body { height: 100%; margin: 0; background: #222; display: flex; justify-content: center; align-items: center; font-family: sans-serif; }
-       
-        .container {
-            width: 100vw; max-width: 500px; height: 100vh; background: var(--bg);
-            position: relative; display: flex; flex-direction: column; overflow: hidden;
+        
+        .container { 
+            width: 100vw; max-width: 500px; height: 100vh; background: var(--bg); 
+            position: relative; display: flex; flex-direction: column; overflow: hidden; 
         }
 
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -39,9 +39,9 @@
         .active-view { display: block; }
 
         .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
-       
-        input, select, textarea {
-            width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px;
+        
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; 
             font-size: 16px; color: #000 !important; background: #fff !important; margin-bottom: 5px;
         }
 
@@ -108,7 +108,7 @@
                     <div><label>📅 日期</label><input type="date" id="f-date"></div>
                     <div><label>👤 人員</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
                 </div>
-               
+                
                 <label>🌳 基本資訊</label>
                 <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
 
@@ -132,7 +132,7 @@
 
                 <label>📊 採收數據</label>
                 <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
-               
+                
                 <div class="admin-only" id="admin-rank-panel" style="margin-top: 20px; border-top: 2px dashed var(--accent); padding-top: 15px;">
                     <label style="color:#d44b39;">🎖️ 管理員：今日排行設定</label>
                     <div style="display:flex; gap:5px; margin-bottom:5px;"><input type="text" id="r1-w" placeholder="1. 編號/重量"><input type="number" id="r1-b" placeholder="甜度"></div>
@@ -202,12 +202,12 @@
         if (input === ADMIN_PASSWORD) {
             isAdmin = true;
             currentUser = "系統管理員";
-        }
+        } 
         // 2. 檢查是否在員工白名單
         else if (users.includes(input)) {
             isAdmin = false;
             currentUser = input;
-        }
+        } 
         // 3. 例外處理：如果是系統第一次使用，名單還是空的
         else if (users.length === 0 && input === "初始化") {
             isAdmin = true;
@@ -225,7 +225,7 @@
                 el.style.display = el.classList.contains('nav-item') ? 'flex' : 'block';
             });
         }
-       
+        
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
@@ -286,14 +286,14 @@
         const todayData = db.filter(t => t.date === today);
         document.getElementById('today-qty').innerText = todayData.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
         document.getElementById('today-weight').innerText = todayData.reduce((s, t) => s + (parseFloat(t.weightVal) || 0), 0).toFixed(1);
-       
+        
         const r = rankStore[today];
-        document.getElementById('display-rank-list').innerHTML = r ?
+        document.getElementById('display-rank-list').innerHTML = r ? 
             `1. ${r.r1w||'-'} (${r.r1b||'-'}°) | 2. ${r.r2w||'-'} (${r.r2b||'-'}°) | 3. ${r.r3w||'-'} (${r.r3b||'-'}°)` : "今日尚無排名紀錄";
 
         const q = document.getElementById('search').value.toLowerCase();
         const filtered = db.filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q));
-       
+        
         document.getElementById('tree-list-container').innerHTML = filtered.reverse().map(t => `
             <div class="card" onclick="editTree('${t.code}', '${t.date}')">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
