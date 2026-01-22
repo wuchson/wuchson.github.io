@@ -2,10 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>果樹管理系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
+   
     <style>
         :root {
             --primary: #2d6a4f;
@@ -16,85 +16,54 @@
             --text-dark: #1b4332;
             --radius: 16px;
             --warning: #ffcc00;
-            --danger: #e63946;
         }
 
         * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
-        
-        /* 修正高度問題的核心 CSS */
-        html, body { 
-            height: 100%; 
-            margin: 0; 
-            background: #222; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-family: sans-serif;
-            overflow: hidden; 
+        html, body { height: 100%; margin: 0; background: #222; display: flex; justify-content: center; align-items: center; font-family: sans-serif; }
+       
+        .container {
+            width: 100vw; max-width: 500px; height: 100vh; background: var(--bg);
+            position: relative; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .container { 
-            width: 100vw; 
-            max-width: 500px; 
-            /* 使用 dvh 確保在手機網址列縮放時高度正確 */
-            height: 100dvh; 
-            background: var(--bg); 
-            position: relative; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
-
-        header { 
-            background: var(--primary); 
-            padding: calc(15px + env(safe-area-inset-top)) 20px 30px 20px; 
-            text-align: center; 
-            border-radius: 0 0 35px 35px; 
-            flex-shrink: 0; 
-        }
-        header * { color: var(--white) !important; }
-
-        .content-area { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px 15px 120px 15px; /* 增加底部 padding 防止內容被 nav 擋住 */
-        }
-
-        nav { 
-            position: absolute; 
-            bottom: 0; 
-            width: 100%; 
-            /* 計算導覽列高度，包含手機底部的安全區域 */
-            height: calc(75px + env(safe-area-inset-bottom)); 
-            padding-bottom: env(safe-area-inset-bottom);
-            background: var(--white); 
-            display: flex; 
-            border-top: 1px solid #eee; 
-            z-index: 1000; 
-            justify-content: center; 
-            align-items: center; 
-        }
-
-        /* 其餘樣式保持不變 */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+        header { background: var(--primary); padding: 25px 20px 40px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; }
+        header * { color: var(--white) !important; }
+
         #backup-alert { background: var(--warning); padding: 10px; text-align: center; font-size: 14px; font-weight: bold; display: none; border-bottom: 2px solid #e6b800; cursor: pointer; }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .content-view { display: none; }
         .active-view { display: block; }
+
         .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
-        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 8px; }
+       
+        input, select, textarea {
+            width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px;
+            font-size: 16px; color: #000 !important; background: #fff !important; margin-bottom: 5px;
+        }
+
+        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 8px; width: 100%; }
+        .check-container label { margin: 0; font-size: 15px; color: var(--text-dark); white-space: nowrap; flex: 1; display: flex; align-items: center; }
+        .check-container input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         label { font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block; }
+
         .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
         .btn-primary { background: var(--primary); color: white !important; }
-        .btn-danger { background: var(--danger); color: white !important; }
         .btn-outline { background: #e0e0e0; color: #333 !important; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; height: 100%; }
-        .nav-item div { color: #888; margin-top: 4px; }
+
+        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; z-index: 1000; justify-content: center; align-items: stretch; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+        .nav-item div { color: #888; margin-top: 4px; white-space: nowrap; }
         .nav-item.active div { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 22px; }
+        .nav-icon { font-size: 22px; line-height: 1; }
+
         .nav-add-btn { background: var(--primary); color: white !important; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+
         .admin-only { display: none; }
         .sub-field { display: none; margin-top: 10px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
     </style>
@@ -105,12 +74,13 @@
     <div id="login-screen">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-top: 0;">果樹管理系統</h2>
+            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">請輸入員工姓名或管理密碼</p>
             <input type="text" id="login-pass" placeholder="姓名或管理密碼" style="text-align: center;">
             <button class="btn btn-primary" onclick="checkAuth()">驗證登入</button>
         </div>
     </div>
 
-    <div id="backup-alert" onclick="showView('tools')">⚠️ 請執行導出備份！</div>
+    <div id="backup-alert" onclick="showView('tools')">⚠️ 距離上次備份已超過 7 天，請立即導出 Excel！</div>
 
     <header>
         <div style="font-size: 13px; opacity: 0.9;"><span id="user-role-display"></span> | <span id="display-today"></span></div>
@@ -124,52 +94,74 @@
         <div id="view-home" class="content-view active-view">
             <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white;">
                 <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行</h4>
-                <div id="display-rank-list" style="font-size:14px; line-height: 1.6;"></div>
+                <div id="display-rank-list" style="font-size:14px; line-height: 1.6; color: white !important;"></div>
             </div>
             <label>🔍 快速搜尋</label>
-            <input type="text" id="search" placeholder="搜尋名稱或編號..." oninput="renderHome()">
+            <input type="text" id="search" placeholder="搜尋果樹名稱或編號..." oninput="renderHome()">
             <div id="tree-list-container" style="margin-top:10px;"></div>
         </div>
 
         <div id="view-edit" class="content-view">
             <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄詳情</h3>
+                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 填寫紀錄</h3>
                 <div class="grid-2">
                     <div><label>📅 日期</label><input type="date" id="f-date"></div>
                     <div><label>👤 人員</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
                 </div>
+               
+                <label>🌳 基本資訊</label>
                 <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
-                
-                <div class="check-container"><label>🌸 花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
-                <div id="f-bloomStatus-box" class="sub-field"><select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option></select></div>
 
-                <div class="check-container"><label>🛍️ 套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
+                <div class="check-container" style="border-left: 5px solid #ff6b6b;"><label>🌸 目前處於花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
+                <div id="f-bloomStatus-box" class="sub-field"><select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select></div>
+
+                <div class="check-container" style="border-left: 5px solid #4dadff;"><label>🛍️ 已完成套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
                 <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
 
-                <label>💧 養護與數據</label>
-                <input type="text" id="f-water" placeholder="澆水說明">
-                <input type="text" id="f-fert" placeholder="施肥紀錄">
+                <label>💧 養護與✂️ 修剪</label>
+                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥名稱與劑量">
+                <div class="grid-2">
+                    <div class="check-container"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
+                    <div class="check-container"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
+                </div>
+
+                <label>🏥 健康狀況與醫治</label>
+                <select id="f-health"><option value="良好">良好</option><option value="需關注">需關注</option><option value="患病中">患病中</option></select>
+                <textarea id="f-healthDesc" rows="2" placeholder="詳細病徵說明..."></textarea>
+                <input type="text" id="f-medDose" placeholder="藥物名稱與劑量">
+
+                <label>📊 採收數據</label>
                 <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
+               
+                <div class="admin-only" id="admin-rank-panel" style="margin-top: 20px; border-top: 2px dashed var(--accent); padding-top: 15px;">
+                    <label style="color:#d44b39;">🎖️ 管理員：今日排行設定</label>
+                    <div style="display:flex; gap:5px; margin-bottom:5px;"><input type="text" id="r1-w" placeholder="1. 編號/重量"><input type="number" id="r1-b" placeholder="甜度"></div>
+                    <div style="display:flex; gap:5px; margin-bottom:5px;"><input type="text" id="r2-w" placeholder="2. 編號/重量"><input type="number" id="r2-b" placeholder="甜度"></div>
+                    <div style="display:flex; gap:5px;"><input type="text" id="r3-w" placeholder="3. 編號/重量"><input type="number" id="r3-b" placeholder="甜度"></div>
+                </div>
 
                 <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 25px;">💾 儲存資料</button>
-                <button id="btn-delete" class="btn btn-danger" style="display:none;" onclick="handleDelete()">🗑️ 刪除紀錄</button>
                 <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
 
         <div id="view-tools" class="content-view">
             <div class="card">
-                <h3>👥 員工管理</h3>
-                <div id="user-list-display"></div>
-                <div style="display: flex; gap: 8px; margin-top:10px;">
-                    <input type="text" id="new-user-input" placeholder="姓名">
-                    <button class="btn btn-primary" onclick="addUser()" style="margin-top:0; width:80px;">新增</button>
+                <h3>👥 人員名單管理</h3>
+                <div id="user-list-display" style="margin-bottom: 15px;"></div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="new-user-input" placeholder="新員工姓名" style="margin-bottom: 0;">
+                    <button class="btn btn-primary" onclick="addUser()" style="margin-top: 0; width: 80px;">新增</button>
                 </div>
+                <p style="font-size: 11px; color: #999; margin-top: 10px;">註：只有名單內的人員可透過姓名登入。</p>
             </div>
             <div class="card">
-                <h3>📂 數據工具</h3>
+                <h3>📂 數據備份</h3>
+                <p id="last-backup-text" style="font-size: 12px; color: #666; margin-bottom: 10px;">上次備份：尚未紀錄</p>
                 <button class="btn btn-primary" onclick="exportExcel()">📤 匯出 Excel</button>
-                <button class="btn btn-outline" onclick="location.reload()" style="margin-top:20px; color:red !important;">登出</button>
+                <button class="btn btn-outline" onclick="document.getElementById('import-input').click()" style="margin-top:10px;">📥 匯入歷史資料</button>
+                <input type="file" id="import-input" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
+                <button class="btn btn-outline" onclick="location.reload()" style="margin-top:40px; color:red !important; border-color: red;">登出系統</button>
             </div>
         </div>
     </div>
@@ -188,41 +180,105 @@
 </div>
 
 <script>
-    /* JavaScript 部分維持原本的邏輯，僅更新數據存儲鍵名以防版本衝突 */
-    let db = JSON.parse(localStorage.getItem('farm_v21')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v21')) || {};
-    let users = JSON.parse(localStorage.getItem('user_v21')) || [];
+    // 資料版本 V19
+    let db = JSON.parse(localStorage.getItem('farm_v19')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v19')) || {};
+    let users = JSON.parse(localStorage.getItem('user_v19')) || [];
+    let lastBackup = localStorage.getItem('backup_time_v19') || null;
     let currentUser = "";
     let isAdmin = false;
 
+    // 設定你的管理密碼
     const ADMIN_PASSWORD = "admin123";
+
     const getToday = () => new Date().toISOString().split('T')[0];
 
+    // 登入驗證邏輯
     function checkAuth() {
         const input = document.getElementById('login-pass').value.trim();
-        if (input === ADMIN_PASSWORD) { isAdmin = true; currentUser = "管理員"; }
-        else if (users.includes(input)) { isAdmin = false; currentUser = input; }
-        else if (input === "初始化") { isAdmin = true; currentUser = "管理員"; }
-        else { alert("驗證失敗"); return; }
+        if(!input) return alert("請輸入姓名或密碼");
 
-        if(isAdmin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+        // 1. 檢查是否為管理員
+        if (input === ADMIN_PASSWORD) {
+            isAdmin = true;
+            currentUser = "系統管理員";
+        }
+        // 2. 檢查是否在員工白名單
+        else if (users.includes(input)) {
+            isAdmin = false;
+            currentUser = input;
+        }
+        // 3. 例外處理：如果是系統第一次使用，名單還是空的
+        else if (users.length === 0 && input === "初始化") {
+            isAdmin = true;
+            currentUser = "系統管理員";
+            alert("首次使用成功，請先至設定頁新增員工名單！");
+        }
+        else {
+            alert("無效的人員姓名或密碼！\n請聯繫管理員新增您的姓名。");
+            return;
+        }
+
+        // 登入成功後處理介面
+        if(isAdmin) {
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = el.classList.contains('nav-item') ? 'flex' : 'block';
+            });
+        }
+       
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
+        checkBackupAlert();
         renderUserList();
         renderHome();
     }
 
-    function showView(viewId) {
-        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
-        document.getElementById('view-' + viewId).classList.add('active-view');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(viewId==='home') document.getElementById('n-home').classList.add('active');
-        if(viewId==='tools') document.getElementById('n-tools').classList.add('active');
+    function checkBackupAlert() {
+        if (!lastBackup) {
+            document.getElementById('backup-alert').style.display = 'block';
+            document.getElementById('last-backup-text').innerText = "上次備份：尚未備份";
+            return;
+        }
+        const lastDate = new Date(lastBackup);
+        const diffDays = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
+        document.getElementById('last-backup-text').innerText = "上次備份：" + lastBackup;
+        document.getElementById('backup-alert').style.display = (diffDays >= 7) ? 'block' : 'none';
     }
 
-    function toggleSubField(cid, bid) {
-        document.getElementById(bid).style.display = document.getElementById(cid).checked ? 'block' : 'none';
+    function toggleSubField(checkId, boxId) {
+        document.getElementById(boxId).style.display = document.getElementById(checkId).checked ? 'block' : 'none';
+    }
+
+    function renderUserList() {
+        const container = document.getElementById('user-list-display');
+        if(!container) return;
+        container.innerHTML = users.length ? users.map((u, i) => `
+            <div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid #eee;">
+                <span>👤 ${u}</span>
+                <span onclick="deleteUser(${i})" style="color:red; font-size:12px;">刪除</span>
+            </div>`).join('') : "<p style='color:#999; text-align:center;'>尚未建立員工名單</p>";
+    }
+
+    function addUser() {
+        const input = document.getElementById('new-user-input');
+        const name = input.value.trim();
+        if(name && !users.includes(name)) {
+            users.push(name);
+            localStorage.setItem('user_v19', JSON.stringify(users));
+            input.value = "";
+            renderUserList();
+        } else {
+            alert("姓名重複或格式錯誤");
+        }
+    }
+
+    function deleteUser(index) {
+        if(confirm("確定刪除此使用者？")) {
+            users.splice(index, 1);
+            localStorage.setItem('user_v19', JSON.stringify(users));
+            renderUserList();
+        }
     }
 
     function renderHome() {
@@ -230,15 +286,19 @@
         const todayData = db.filter(t => t.date === today);
         document.getElementById('today-qty').innerText = todayData.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
         document.getElementById('today-weight').innerText = todayData.reduce((s, t) => s + (parseFloat(t.weightVal) || 0), 0).toFixed(1);
-        
+       
+        const r = rankStore[today];
+        document.getElementById('display-rank-list').innerHTML = r ?
+            `1. ${r.r1w||'-'} (${r.r1b||'-'}°) | 2. ${r.r2w||'-'} (${r.r2b||'-'}°) | 3. ${r.r3w||'-'} (${r.r3b||'-'}°)` : "今日尚無排名紀錄";
+
         const q = document.getElementById('search').value.toLowerCase();
         const filtered = db.filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q));
-        
+       
         document.getElementById('tree-list-container').innerHTML = filtered.reverse().map(t => `
             <div class="card" onclick="editTree('${t.code}', '${t.date}')">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div><b>${t.name}</b> <small>#${t.code}</small><br><span style="font-size:12px; color:#888;">${t.date}</span></div>
-                    <div style="text-align:right;"><b>${t.harvestQty||0} 粒</b></div>
+                    <div><b>${t.name}</b> <small>#${t.code}</small><br><span style="font-size:12px; color:#888;">${t.date} · ${t.lastUser}</span></div>
+                    <div style="text-align:right;"><b>${t.harvestQty||0} 粒</b><br><small>${t.weightVal||0} KG</small></div>
                 </div>
             </div>`).join('');
     }
@@ -246,7 +306,7 @@
     function handleSave() {
         const code = document.getElementById('f-code').value;
         const date = document.getElementById('f-date').value;
-        if(!code || !date) return alert("必填未填");
+        if(!code || !date) return alert("編號與日期必填");
 
         const data = {
             name: document.getElementById('f-name').value, code, date,
@@ -254,13 +314,20 @@
             lastUser: currentUser,
             isBlooming: document.getElementById('f-isBlooming').checked, bloomStatus: document.getElementById('f-bloomStatus').value,
             isBagged: document.getElementById('f-isBagged').checked, bagQty: document.getElementById('f-bagQty').value,
-            water: document.getElementById('f-water').value, fert: document.getElementById('f-fert').value
+            water: document.getElementById('f-water').value, fert: document.getElementById('f-fert').value,
+            pruneBig: document.getElementById('f-pruneBig').checked, pruneSmall: document.getElementById('f-pruneSmall').checked,
+            health: document.getElementById('f-health').value, healthDesc: document.getElementById('f-healthDesc').value, medDose: document.getElementById('f-medDose').value
         };
 
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_v21', JSON.stringify(db));
-        alert("儲存成功"); renderHome(); showView('home');
+        localStorage.setItem('farm_v19', JSON.stringify(db));
+
+        if(isAdmin) {
+            rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value };
+            localStorage.setItem('rank_v19', JSON.stringify(rankStore));
+        }
+        alert("儲存成功"); showView('home');
     }
 
     function editTree(code, date) {
@@ -273,51 +340,63 @@
         document.getElementById('f-weightVal').value = t.weightVal;
         document.getElementById('f-isBlooming').checked = t.isBlooming;
         toggleSubField('f-isBlooming', 'f-bloomStatus-box');
+        document.getElementById('f-bloomStatus').value = t.bloomStatus || '';
         document.getElementById('f-isBagged').checked = t.isBagged;
         toggleSubField('f-isBagged', 'f-bagQty-box');
-        document.getElementById('btn-delete').style.display = 'block';
+        document.getElementById('f-bagQty').value = t.bagQty || '';
+        document.getElementById('f-water').value = t.water || '';
+        document.getElementById('f-fert').value = t.fert || '';
+        document.getElementById('f-pruneBig').checked = t.pruneBig;
+        document.getElementById('f-pruneSmall').checked = t.pruneSmall;
+        document.getElementById('f-health').value = t.health || '良好';
+        document.getElementById('f-healthDesc').value = t.healthDesc || '';
+        document.getElementById('f-medDose').value = t.medDose || '';
+        document.getElementById('f-user-static').value = t.lastUser;
         showView('edit');
     }
 
-    function handleDelete() {
-        if(confirm("確定刪除？")) {
-            const code = document.getElementById('f-code').value;
-            const date = document.getElementById('f-date').value;
-            db = db.filter(x => !(x.code === code && x.date === date));
-            localStorage.setItem('farm_v21', JSON.stringify(db));
-            renderHome(); showView('home');
-        }
-    }
-
     function prepareAdd() {
-        document.querySelectorAll('#view-edit input:not([type=date]), select').forEach(e => {
+        document.querySelectorAll('#view-edit input:not([type=date]):not([readonly]), #view-edit select, #view-edit textarea').forEach(e => {
             if(e.type==='checkbox') e.checked = false; else e.value = '';
         });
         document.getElementById('f-date').value = getToday();
         document.getElementById('f-user-static').value = currentUser;
-        document.getElementById('btn-delete').style.display = 'none';
+        document.getElementById('f-health').value = "良好";
+        document.getElementById('f-bloomStatus-box').style.display = 'none';
+        document.getElementById('f-bagQty-box').style.display = 'none';
         showView('edit');
     }
 
-    function renderUserList() {
-        document.getElementById('user-list-display').innerHTML = users.map((u, i) => `
-            <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #eee;">
-                <span>👤 ${u}</span><span onclick="deleteUser(${i})" style="color:red;">刪除</span>
-            </div>`).join('');
+    function showView(vId) {
+        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
+        document.getElementById('view-'+vId).classList.add('active-view');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(document.getElementById('n-'+vId)) document.getElementById('n-'+vId).classList.add('active');
+        if(vId === 'home') renderHome();
     }
-
-    function addUser() {
-        const n = document.getElementById('new-user-input').value.trim();
-        if(n) { users.push(n); localStorage.setItem('user_v21', JSON.stringify(users)); renderUserList(); }
-    }
-
-    function deleteUser(i) { users.splice(i, 1); localStorage.setItem('user_v21', JSON.stringify(users)); renderUserList(); }
 
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Data");
-        XLSX.writeFile(wb, `Farm_${getToday()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "FarmData");
+        XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`);
+        const now = new Date().toLocaleString();
+        localStorage.setItem('backup_time_v19', now);
+        lastBackup = now;
+        checkBackupAlert();
+        alert("匯出完成！");
+    }
+
+    function importExcel(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            db = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            localStorage.setItem('farm_v19', JSON.stringify(db));
+            alert("匯入成功"); renderHome();
+        };
+        reader.readAsArrayBuffer(input.files[0]);
     }
 </script>
 </body>
