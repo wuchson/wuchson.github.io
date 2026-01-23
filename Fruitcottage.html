@@ -16,7 +16,7 @@
             --text-dark: #1b4332;
             --radius: 16px;
             --danger: #e63946;
-            --warning: #ffb703; /* 調整為更顯眼的黃色 */
+            --warning: #ffb703;
         }
 
         * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
@@ -24,25 +24,12 @@
         
         .container { width: 100vw; max-width: 500px; height: 100vh; height: -webkit-fill-available; background: var(--bg); display: flex; flex-direction: column; position: relative; }
 
-        /* 頂部備份警告條樣式 */
-        #backup-banner {
-            background: var(--warning);
-            padding: 10px 15px;
-            display: none; /* 預設隱藏 */
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 10001;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        #backup-banner { background: var(--warning); padding: 10px 15px; display: none; align-items: center; justify-content: space-between; font-size: 14px; font-weight: bold; z-index: 10001; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .banner-content { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 
-        /* 登入畫面 */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
-        /* 頁首 */
         header { background: var(--primary); padding: 15px 20px 25px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; position: relative; }
         header * { color: var(--white) !important; }
         .logout-text-btn { position: absolute; right: 15px; top: 12px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; }
@@ -67,7 +54,6 @@
 
         .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
         
-        /* 趨勢圖表樣式 */
         .trend-container { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px; }
         .trend-bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; min-height: 2px; transition: height 0.5s ease; }
         .trend-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; white-space: nowrap; color: white !important; }
@@ -178,11 +164,31 @@
                 
                 <div class="admin-only" id="admin-rank-panel">
                     <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員)</div>
+                    
                     <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
-                        <div style="color:#d4a373; font-weight:bold; margin-bottom:8px;">🥇 第一名</div>
-                        <div class="grid-2"><div><label>重量(g)</label><input type="number" id="r1-w"></div><div><label>甜度(°)</label><input type="number" id="r1-b" step="0.1"></div></div>
+                        <div style="color:#C31342; font-weight:bold; margin-bottom:8px;">🥇 第一名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r1-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r1-b" step="0.1"></div>
+                        </div>
                     </div>
+
+                    <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#FF9500; font-weight:bold; margin-bottom:8px;">🥈 第二名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r2-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r2-b" step="0.1"></div>
+                        </div>
                     </div>
+
+                    <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#FF52B1; font-weight:bold; margin-bottom:8px;">🥉 第三名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r3-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r3-b" step="0.1"></div>
+                        </div>
+                    </div>
+                </div>
 
                 <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
                 <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除</button>
@@ -206,6 +212,9 @@
                     <small>上次備份時間：</small><br><b id="last-backup-display">尚未有備份紀錄</b>
                 </div>
                 <button class="btn btn-warning" onclick="exportExcel()">📤 匯出備份 (Excel)</button>
+                <button class="btn btn-outline" onclick="document.getElementById('import-file').click()" style="background:#e8f5e9; color:var(--primary) !important; border: 1px solid var(--primary);">📥 匯入資料 (Excel)</button>
+                <input type="file" id="import-file" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
+                
                 <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
                 <button class="btn btn-danger" onclick="clearAllData()">🧨 清空所有資料</button>
             </div>
@@ -247,19 +256,17 @@
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
         
-        checkBackupInterval(); // 登入後檢查備份
+        checkBackupInterval();
         renderHome();
         renderUserList();
     }
 
-    // 檢查備份間隔
     function checkBackupInterval() {
         if (!lastBackup) {
-            // 如果從未備份過，且資料庫有東西，也顯示提醒
             if(db.length > 0) document.getElementById('backup-banner').style.display = 'flex';
             return;
         }
-        const lastDate = new Date(lastBackup.split(' ')[0]); // 取得日期部分
+        const lastDate = new Date(lastBackup.split(' ')[0]);
         const now = new Date();
         const diffDays = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
         if (diffDays >= 7) {
@@ -268,21 +275,14 @@
         document.getElementById('last-backup-display').innerText = lastBackup;
     }
 
-    function closeBackupBanner() {
-        document.getElementById('backup-banner').style.display = 'none';
-    }
-
-    function handleBackupNow() {
-        exportExcel();
-        closeBackupBanner();
-    }
+    function closeBackupBanner() { document.getElementById('backup-banner').style.display = 'none'; }
+    function handleBackupNow() { exportExcel(); closeBackupBanner(); }
 
     function exportExcel() { 
         const ws = XLSX.utils.json_to_sheet(db); 
         const wb = XLSX.utils.book_new(); 
         XLSX.utils.book_append_sheet(wb, ws, "Data"); 
         XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`); 
-        
         const timeNow = new Date().toLocaleString('zh-TW', { hour12: false });
         localStorage.setItem('last_backup_time', timeNow);
         lastBackup = timeNow;
@@ -290,14 +290,34 @@
         alert("備份完成！Excel 已匯出。");
     }
 
-    // --- 其餘功能函數保持不變 ---
+    function importExcel(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            if (confirm(`讀取到 ${jsonData.length} 筆資料，是否覆蓋現有數據？`)) {
+                db = jsonData;
+                localStorage.setItem('farm_v31', JSON.stringify(db));
+                alert("匯入成功！");
+                location.reload();
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
     function renderHome() {
         const today = getToday(), area = document.getElementById('header-area-filter').value;
         let filtered = area === "全部" ? db : db.filter(t => t.area === area);
         document.getElementById('today-qty').innerText = filtered.filter(t => t.date === today).reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
         document.getElementById('today-weight').innerText = filtered.filter(t => t.date === today).reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
+        
         const r = rankStore[today];
-        document.getElementById('display-rank-list').innerHTML = r ? `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. ${r.r2w||'-'}g (${r.r2b||'-'}°) | 3. ${r.r3w||'-'}g (${r.r3b||'-'}°)` : "尚未排行";
+        document.getElementById('display-rank-list').innerHTML = r ? 
+            `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. ${r.r2w||'-'}g (${r.r2b||'-'}°) | 3. ${r.r3w||'-'}g (${r.r3b||'-'}°)` : "尚未排行";
 
         const chartContainer = document.getElementById('weekly-trend-chart');
         let daysData = [];
@@ -332,8 +352,13 @@
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
         localStorage.setItem('farm_v31', JSON.stringify(db));
+        
         if(isAdmin) { 
-            rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value }; 
+            rankStore[date] = { 
+                r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, 
+                r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, 
+                r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value 
+            }; 
             localStorage.setItem('rank_v31', JSON.stringify(rankStore)); 
         }
         showView('home');
@@ -352,8 +377,24 @@
         document.getElementById('f-medDose').value = t.medDose || ''; document.getElementById('f-water').value = t.water || '';
         document.getElementById('f-fert').value = t.fert || ''; document.getElementById('f-pruneBig').checked = t.pruneBig || false;
         document.getElementById('f-pruneSmall').checked = t.pruneSmall || false; document.getElementById('f-user-static').value = t.lastUser;
-        if(isAdmin) { const r = rankStore[date] || {}; document.getElementById('r1-w').value = r.r1w || ''; document.getElementById('r1-b').value = r.r1b || ''; document.getElementById('r2-w').value = r.r2w || ''; document.getElementById('r2-b').value = r.r2b || ''; document.getElementById('r3-w').value = r.r3w || ''; document.getElementById('r3-b').value = r.r3b || ''; }
+        
+        if(isAdmin) { 
+            const r = rankStore[date] || {}; 
+            document.getElementById('r1-w').value = r.r1w || ''; document.getElementById('r1-b').value = r.r1b || ''; 
+            document.getElementById('r2-w').value = r.r2w || ''; document.getElementById('r2-b').value = r.r2b || ''; 
+            document.getElementById('r3-w').value = r.r3w || ''; document.getElementById('r3-b').value = r.r3b || ''; 
+        }
         showView('edit');
+    }
+
+    function deleteCurrentRecord() {
+        const code = document.getElementById('f-code').value;
+        const date = document.getElementById('f-date').value;
+        if(confirm("確定刪除此筆紀錄？")) {
+            db = db.filter(x => !(x.code === code && x.date === date));
+            localStorage.setItem('farm_v31', JSON.stringify(db));
+            showView('home');
+        }
     }
 
     function prepareAdd() {
