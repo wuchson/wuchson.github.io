@@ -3,41 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>雲端私人財務管理</title>
+  <title>雲端私人財務管理 V2</title>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg-color: #f8f9fb;
-      --card-bg: #ffffff;
-      --primary: #5856D6;
-      --success: #34C759;
-      --danger: #FF3B30;
-      --text-main: #1c1c1e;
-      --text-sub: #8e8e93;
-      --border: #efeff4;
+      --bg-color: #f8f9fb; --card-bg: #ffffff; --primary: #5856D6;
+      --success: #34C759; --danger: #FF3B30; --text-main: #1c1c1e;
+      --text-sub: #8e8e93; --border: #efeff4;
     }
     body { font-family: -apple-system, sans-serif; background: var(--bg-color); margin: 0; padding: 16px; display: flex; justify-content: center; }
     .container { width: 100%; max-width: 480px; }
     .card { background: var(--card-bg); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid var(--border); }
-    .hero-stat { background: linear-gradient(135deg, #5856D6 0%, #3534a5 100%); color: white; padding: 24px; border-radius: 24px; margin-bottom: 16px; box-shadow: 0 15px 30px rgba(88, 86, 214, 0.3); }
+    .hero-stat { background: linear-gradient(135deg, #5856D6 0%, #3534a5 100%); color: white; padding: 24px; border-radius: 24px; margin-bottom: 16px; }
     .hero-stat div { font-size: 32px; font-weight: 800; margin-top: 5px; }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .mini-stat { padding: 14px; border-radius: 18px; background: var(--bg-color); border: 1px solid var(--border); }
     input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; font-size: 16px; box-sizing: border-box;}
-    .btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; }
     .btn-primary { background: var(--primary); color: white; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-sub); font-size: 13px; padding: 10px 16px; width: auto; }
     .item-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
-    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <div id="loading-overlay">⌛ 正在同步雲端資料...</div>
+  <div id="loading-overlay">
+    <div style="font-size: 40px; margin-bottom: 10px;">☁️</div>
+    <div id="loading-text">正在同步雲端資料...</div>
+  </div>
 
   <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); display:flex; align-items:center; justify-content:center; z-index:1000;">
     <div class="card" style="max-width:320px; text-align:center;">
-      <h2>☁️ 雲端財務管理</h2>
+      <div style="font-size: 40px; margin-bottom: 12px;">💰</div>
+      <h2>雲端財務管理</h2>
       <input type="password" id="password-input" placeholder="輸入解鎖密碼" style="text-align:center;">
       <button class="btn btn-primary" onclick="checkPassword()">解鎖並同步</button>
     </div>
@@ -45,7 +46,7 @@
 
   <div id="main-app" class="container hidden">
     <div class="hero-stat">
-      <small>💎 雲端總資產</small>
+      <small>💎 雲端總資產 (Google Sheets)</small>
       <div id="tAll">$0</div>
     </div>
 
@@ -53,7 +54,7 @@
       <div style="display:flex; gap:8px; margin-bottom:16px;">
         <select id="viewYear" style="margin:0"></select>
         <select id="viewMonth" style="margin:0"></select>
-        <button onclick="renderAll()" style="padding:0 15px; background:var(--text-main); color:white; border-radius:14px; border:none;">🔍</button>
+        <button onclick="refreshData()" style="padding:0 15px; background:var(--text-main); color:white; border-radius:14px; border:none; cursor:pointer;">🔄</button>
       </div>
       <div class="stats-grid">
         <div class="mini-stat"><small>月收入</small><div id="mInc" style="color:var(--success)">$0</div></div>
@@ -71,42 +72,46 @@
       <select id="category"></select>
       <input type="text" id="item" placeholder="項目說明">
       <input type="number" id="amount" placeholder="金額" inputmode="numeric">
-      <button class="btn btn-primary" onclick="addRecord()">存入 Google 試算表</button>
+      <button class="btn btn-primary" onclick="addRecord()">存入雲端</button>
     </div>
 
     <div class="card">
       <h3>📋 當月明細</h3>
       <div id="list"></div>
     </div>
+
+    <div style="text-align:center; padding: 20px 0 40px 0;">
+      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
+        <button class="btn-outline" onclick="window.open('你的試算表網址', '_blank')">📑 打開試算表</button>
+        <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 匯入舊檔</button>
+      </div>
+      <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importFromExcel(event)">
+      <p style="font-size:12px; color:var(--text-sub);">提示：匯入功能會將 Excel 資料批次上傳至 Google 試算表</p>
+    </div>
   </div>
 
   <script>
     // --------------------------------------------------
-    // ⚠️ 請在這裡貼上你的 Google Apps Script URL
     const API_URL = "https://script.google.com/macros/s/AKfycbyMU9hxCbZW6Citb7TpVZspsM6pak5NFE9LOv-W7N3Qk0CXx-LGeEWgBUV0UVK2gaDf/exec";
     // --------------------------------------------------
 
     let db = [];
     const categories = {
-      "支出": ["🍔 餐飲", "🚗 交通", "💧 水電費", "🛡️ 保險", "🏠 房租", "🛍️ 購物", "📈 投資", "❓ 其他"],
-      "收入": ["💰 薪資", "🧧 獎金", "💹 投資獲利", "✨ 其他"]
+      "支出": ["🍔 餐飲", "🚗 交通", "⛽ 油費", "🔧 維修費", "💧 水電費", "🏠 房租", "🛍️ 購物", "📈 投資", "❓ 其他"],
+      "收入": ["💰 薪資", "🧧 獎金", "💹 投資獲利", "🛠️ 兼職", "✨ 其他"]
     };
 
     function checkPassword() {
-      const input = document.getElementById('password-input').value;
-      if (input === "admin123") { // 預設密碼
+      if (document.getElementById('password-input').value === "admin123") {
         document.getElementById('auth-overlay').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
         initApp();
-      } else {
-        alert('密碼錯誤');
-      }
+      } else { alert('密碼錯誤'); }
     }
 
     async function initApp() {
       google.charts.load('current', {'packages':['corechart']});
       const now = new Date();
-      // 初始化下拉選單... (省略重複的 UI 代碼以保持簡潔)
       setupSelectors(now);
       document.getElementById('date').valueAsDate = now;
       updateCategories();
@@ -130,21 +135,19 @@
     }
 
     async function refreshData() {
-      document.getElementById('loading-overlay').style.display = 'flex';
+      toggleLoading(true, "正在讀取雲端資料...");
       try {
         const response = await fetch(API_URL);
         db = await response.json();
         renderAll();
-      } catch (e) {
-        alert('同步失敗，請檢查 API URL 或網路');
-      }
-      document.getElementById('loading-overlay').style.display = 'none';
+      } catch (e) { alert('同步失敗，請檢查網路或 API URL'); }
+      toggleLoading(false);
     }
 
     async function addRecord() {
       const amt = document.getElementById('amount').value;
       const item = document.getElementById('item').value;
-      if(!amt || !item) return alert('請填寫完整');
+      if(!amt || !item) return alert('請完整填寫');
 
       const data = {
         action: 'add',
@@ -155,7 +158,7 @@
         type: document.getElementById('type').value
       };
 
-      document.getElementById('loading-overlay').style.display = 'flex';
+      toggleLoading(true, "正在存入雲端...");
       await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
       document.getElementById('item').value = '';
       document.getElementById('amount').value = '';
@@ -165,11 +168,43 @@
     async function deleteRecord(id) {
       if(!confirm('確定從雲端刪除？')) return;
       const target = db[id];
-      const data = { action: 'delete', date: target.date, item: target.item, amount: target.amount };
-      
-      document.getElementById('loading-overlay').style.display = 'flex';
-      await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+      toggleLoading(true, "正在從雲端刪除...");
+      await fetch(API_URL, { 
+        method: 'POST', 
+        body: JSON.stringify({ action: 'delete', date: target.date, item: target.item, amount: target.amount }) 
+      });
       await refreshData();
+    }
+
+    async function importFromExcel(e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = async function(event) {
+        try {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, {type: 'array'});
+          const imported = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+          
+          if(confirm(`偵測到 ${imported.length} 筆資料，要匯入至雲端嗎？`)) {
+            for(let [index, item] of imported.entries()) {
+              toggleLoading(true, `正在匯入第 ${index+1}/${imported.length} 筆...`);
+              await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'add', ...item, amount: parseFloat(item.amount) })
+              });
+            }
+            alert('匯入完成！');
+            await refreshData();
+          }
+        } catch(e) { alert('檔案格式不相符'); }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function toggleLoading(show, text="") {
+      const loader = document.getElementById('loading-overlay');
+      document.getElementById('loading-text').innerText = text;
+      loader.style.display = show ? 'flex' : 'none';
     }
 
     function renderAll() {
@@ -182,7 +217,6 @@
         const d = new Date(r.date);
         const amt = parseFloat(r.amount);
         if(r.type === '收入') tAll += amt; else tAll -= amt;
-        
         if(d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
           if(r.type === '收入') mInc += amt; else mExp += amt;
           filteredList.push({...r, id: index});
@@ -192,7 +226,6 @@
       document.getElementById('tAll').innerText = '$' + tAll.toLocaleString();
       document.getElementById('mInc').innerText = '$' + mInc.toLocaleString();
       document.getElementById('mExp').innerText = '$' + mExp.toLocaleString();
-
       document.getElementById('list').innerHTML = filteredList.reverse().map(r => `
         <div class="item-row">
           <div><b>${r.item}</b><br><small>${r.category} · ${r.date}</small></div>
@@ -200,10 +233,10 @@
             <div style="color:${r.type === '收入' ? 'var(--success)' : 'var(--text-main)'}; font-weight:700">
               ${r.type === '收入' ? '+' : '-'}$${r.amount.toLocaleString()}
             </div>
-            <button onclick="deleteRecord(${r.id})" style="border:none; background:none; color:var(--danger); font-size:12px; cursor:pointer">刪除</button>
+            <button onclick="deleteRecord(${r.id})" style="border:none; background:none; color:var(--danger); font-size:11px; cursor:pointer">刪除</button>
           </div>
         </div>
-      `).join('') || '<p style="text-align:center; color:var(--text-sub)">本月尚無紀錄</p>';
+      `).join('') || '<p style="text-align:center; color:var(--text-sub); font-size:14px;">本月尚無紀錄</p>';
     }
   </script>
 </body>
