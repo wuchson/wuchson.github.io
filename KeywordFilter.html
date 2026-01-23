@@ -43,10 +43,9 @@
             outline: none;
         }
 
-        /* 清空按鈕樣式 */
-        .clear-btn {
+        /* 按鈕基礎樣式 */
+        .btn {
             padding: 0 20px;
-            background-color: #ff4d4f;
             color: white;
             border: none;
             border-radius: 6px;
@@ -54,10 +53,18 @@
             font-weight: bold;
             font-size: 14px;
             white-space: nowrap;
+            transition: background 0.2s;
         }
-        .clear-btn:active { background-color: #d9363e; }
 
-        /* 文章顯示區：改為 60vh 讓空間更長 */
+        /* 清空按鈕樣式 */
+        .clear-btn { background-color: #ff4d4f; }
+        .clear-btn:hover { background-color: #d9363e; }
+
+        /* 下載按鈕樣式 */
+        .download-btn { background-color: #28a745; }
+        .download-btn:hover { background-color: #218838; }
+
+        /* 文章顯示區 */
         #displayArea { 
             width: 100%; 
             height: 60vh; 
@@ -68,7 +75,7 @@
             background: #fafafa; 
             white-space: pre-wrap; 
             word-wrap: break-word;
-            color: #888888; 
+            color: #444; /* 微調顏色使其更易閱讀 */
             font-size: 16px; 
             outline: none;
             box-sizing: border-box;
@@ -84,11 +91,10 @@
         
         .footer-hint { color: #999; font-size: 11px; margin-top: 10px; text-align: center; }
 
-        /* 手機版細微調整 */
         @media (max-width: 480px) {
             h2 { font-size: 1.2em; }
-            .control-group { flex-direction: column; } /* 手機上搜尋框與按鈕上下排列 */
-            .clear-btn { padding: 12px; }
+            .control-group { flex-direction: column; }
+            .btn { padding: 12px; }
         }
     </style>
 </head>
@@ -99,18 +105,19 @@
 
     <div class="intro">
         <strong>💡 功能簡介：</strong><br>
-        貼上文章後文字呈灰色。在上方搜尋，相同字詞將即時<strong>變色高亮</strong>。
+        貼上文章後在上方搜尋，相同字詞將即時<strong>變色高亮</strong>。您可以點擊「下載檔案」將目前內容存為 TXT。
     </div>
     
     <div class="control-group">
         <input type="text" id="keywordInput" placeholder="輸入關鍵字...">
-        <button class="clear-btn" onclick="clearContent()">一鍵清空</button>
+        <button class="btn download-btn" onclick="downloadTXT()">下載檔案</button>
+        <button class="btn clear-btn" onclick="clearContent()">一鍵清空</button>
     </div>
 
     <div id="displayArea" contenteditable="true" placeholder="請在此貼上文章內容..."></div>
     
     <p class="footer-hint">
-        ※ 空間已加大。若內容過長可上下滑動檢視。
+        ※ 若內容過長可上下滑動檢視。下載時將儲存目前的原始文字。
     </p>
 </div>
 
@@ -121,6 +128,7 @@
 
     // 監聽內容輸入
     displayArea.addEventListener('input', function() {
+        // 只有在沒有搜尋關鍵字的情況下，才更新原始內容快照
         if (keywordInput.value === "") {
             rawContent = displayArea.innerText;
         }
@@ -129,9 +137,11 @@
     // 監聽關鍵字輸入
     keywordInput.addEventListener('input', function() {
         const keyword = this.value;
+        // 如果 rawContent 為空但區塊內有字，先同步一次
         if (!rawContent && displayArea.innerText !== "") {
             rawContent = displayArea.innerText;
         }
+        
         if (!keyword) {
             displayArea.innerText = rawContent;
             return;
@@ -145,6 +155,37 @@
         const regex = new RegExp(`(${safeKey})`, 'gi');
         const highlightedText = rawContent.replace(regex, '<mark>$1</mark>');
         displayArea.innerHTML = highlightedText;
+    }
+
+    // --- 新增功能：下載另存 TXT ---
+    function downloadTXT() {
+        // 取得目前的文字內容（使用 innerText 會排除 <mark> 標籤）
+        const textToSave = displayArea.innerText;
+        
+        if (!textToSave.trim()) {
+            alert("目前沒有內容可以下載！");
+            return;
+        }
+
+        // 建立 Blob 物件
+        const blob = new Blob([textToSave], { type: "text/plain;charset=utf-8" });
+        const url = window.URL.createObjectURL(blob);
+        
+        // 建立隱藏的下載連結
+        const link = document.createElement("a");
+        link.href = url;
+        
+        // 設定檔名（預設以時間命名）
+        const timestamp = new Date().toISOString().slice(0, 10);
+        link.download = `文章備份_${timestamp}.txt`;
+        
+        // 執行下載
+        document.body.appendChild(link);
+        link.click();
+        
+        // 清理
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
     }
 
     // 一鍵清空功能
