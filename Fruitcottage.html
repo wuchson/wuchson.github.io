@@ -43,6 +43,12 @@
         input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
         textarea { resize: none; font-family: inherit; }
 
+        /* 修正點：強制讓頂部選單的選項顯示為深色，解決電腦版白底白字問題 */
+        #header-area-filter option {
+            color: #1b4332 !important;
+            background-color: #ffffff !important;
+        }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         label { font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block; }
 
@@ -98,9 +104,11 @@
         <div class="logout-text-btn" onclick="logout()">登出</div>
         <div style="font-size: 13px; opacity: 0.9;"><span id="user-icon">👤</span> <span id="user-role-display"></span> | <span id="display-today"></span></div>
         <div style="margin: 10px 0;">
-            <select id="header-area-filter" onchange="renderHome()" style="width: auto; padding: 5px 15px; border-radius: 20px; font-size: 14px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white;">
+            <select id="header-area-filter" onchange="renderHome()" style="width: auto; padding: 5px 15px; border-radius: 20px; font-size: 14px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white; cursor: pointer;">
                 <option value="全部">全場數據加總</option>
-                <option value="A區">A區</option><option value="B區">B區</option><option value="C區">C區</option>
+                <option value="A區">A區</option>
+                <option value="B區">B區</option>
+                <option value="C區">C區</option>
             </select>
         </div>
         <div style="display: flex; justify-content: space-around;">
