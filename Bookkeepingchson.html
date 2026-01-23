@@ -3,27 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>雲端私人財務管理 V2</title>
+  <title>私人財務管理 - 雲端加強版</title>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg-color: #f8f9fb; --card-bg: #ffffff; --primary: #5856D6;
-      --success: #34C759; --danger: #FF3B30; --text-main: #1c1c1e;
-      --text-sub: #8e8e93; --border: #efeff4;
+      --success: #34C759; --danger: #FF3B30; --warning: #FF9500;
+      --text-main: #1c1c1e; --text-sub: #8e8e93; --border: #efeff4;
     }
+    * { box-sizing: border-box; }
     body { font-family: -apple-system, sans-serif; background: var(--bg-color); margin: 0; padding: 16px; display: flex; justify-content: center; }
     .container { width: 100%; max-width: 480px; }
     .card { background: var(--card-bg); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid var(--border); }
-    .hero-stat { background: linear-gradient(135deg, #5856D6 0%, #3534a5 100%); color: white; padding: 24px; border-radius: 24px; margin-bottom: 16px; }
-    .hero-stat div { font-size: 32px; font-weight: 800; margin-top: 5px; }
+    .hero-stat { background: linear-gradient(135deg, #5856D6 0%, #3534a5 100%); color: white; padding: 24px; border-radius: 24px; margin-bottom: 16px; box-shadow: 0 15px 30px rgba(88, 86, 214, 0.3); }
+    .hero-stat div.total { font-size: 32px; font-weight: 800; margin-top: 5px; }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .mini-stat { padding: 14px; border-radius: 18px; background: var(--bg-color); border: 1px solid var(--border); }
-    input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; font-size: 16px; box-sizing: border-box;}
-    .btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+    .mini-stat small { color: var(--text-sub); font-size: 11px; }
+    input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; font-size: 16px; }
+    .btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
     .btn-primary { background: var(--primary); color: white; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-sub); font-size: 13px; padding: 10px 16px; width: auto; }
-    .item-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-sub); font-size: 12px; padding: 8px 12px; width: auto; border-radius: 10px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    #piechart { width: 100%; height: 220px; }
     #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
     .hidden { display: none !important; }
   </style>
@@ -31,62 +34,69 @@
 <body>
 
   <div id="loading-overlay">
-    <div style="font-size: 40px; margin-bottom: 10px;">☁️</div>
-    <div id="loading-text">正在同步雲端資料...</div>
+    <div style="font-size: 40px;">⏳</div>
+    <div id="loading-text" style="margin-top:10px; font-weight:600;">雲端同步中...</div>
   </div>
 
-  <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); display:flex; align-items:center; justify-content:center; z-index:1000;">
-    <div class="card" style="max-width:320px; text-align:center;">
+  <div id="auth-overlay">
+    <div class="card" style="max-width: 320px; text-align: center; margin-top: 100px;">
       <div style="font-size: 40px; margin-bottom: 12px;">💰</div>
-      <h2>雲端財務管理</h2>
-      <input type="password" id="password-input" placeholder="輸入解鎖密碼" style="text-align:center;">
-      <button class="btn btn-primary" onclick="checkPassword()">解鎖並同步</button>
+      <h2>私人財務管理</h2>
+      <p id="auth-hint" style="color:var(--text-sub); font-size:13px; margin-bottom:20px;">請輸入解鎖密碼</p>
+      <input type="password" id="password-input" placeholder="輸入密碼" style="text-align:center;">
+      <button class="btn btn-primary" onclick="checkPassword()">解鎖系統</button>
     </div>
   </div>
 
   <div id="main-app" class="container hidden">
     <div class="hero-stat">
-      <small>💎 雲端總資產 (Google Sheets)</small>
-      <div id="tAll">$0</div>
+      <small>💎 歷年總資產累計</small>
+      <div id="tAll" class="total">$0</div>
+      <div style="display:flex; justify-content:space-between; margin-top:16px; opacity:0.9;">
+        <small>年度收支結餘</small>
+        <span id="yBal" style="font-weight:600; font-size: 15px;">$0</span>
+      </div>
     </div>
 
     <div class="card">
       <div style="display:flex; gap:8px; margin-bottom:16px;">
-        <select id="viewYear" style="margin:0"></select>
-        <select id="viewMonth" style="margin:0"></select>
-        <button onclick="refreshData()" style="padding:0 15px; background:var(--text-main); color:white; border-radius:14px; border:none; cursor:pointer;">🔄</button>
+        <select id="viewYear" style="margin:0; flex:2;"></select>
+        <select id="viewMonth" style="margin:0; flex:2;"></select>
+        <button onclick="refreshData()" style="flex:1; background:var(--text-main); color:white; border-radius:14px; border:none; cursor:pointer;">🔄</button>
       </div>
       <div class="stats-grid">
-        <div class="mini-stat"><small>月收入</small><div id="mInc" style="color:var(--success)">$0</div></div>
-        <div class="mini-stat"><small>月支出</small><div id="mExp" style="color:var(--danger)">$0</div></div>
+        <div class="mini-stat"><small>本月收入</small><div id="mInc" style="color:var(--success)">$0</div></div>
+        <div class="mini-stat"><small>本月支出</small><div id="mExp" style="color:var(--danger)">$0</div></div>
+        <div class="mini-stat" style="grid-column: span 2;"><small>本月結餘</small><div id="mBal">$0</div></div>
       </div>
     </div>
+
+    <div class="card"><h3>📊 支出分布</h3><div id="piechart"></div></div>
 
     <div class="card">
       <h3>✍️ 新增帳目</h3>
-      <select id="type" onchange="updateCategories()">
-        <option value="支出">🔴 支出</option>
-        <option value="收入">🟢 收入</option>
-      </select>
-      <input type="date" id="date">
+      <div style="display:flex; gap:8px;">
+        <select id="type" onchange="updateCategories()" style="flex:1">
+          <option value="支出">🔴 支出</option>
+          <option value="收入">🟢 收入</option>
+        </select>
+        <input type="date" id="date" style="flex:1.5">
+      </div>
       <select id="category"></select>
       <input type="text" id="item" placeholder="項目說明">
       <input type="number" id="amount" placeholder="金額" inputmode="numeric">
-      <button class="btn btn-primary" onclick="addRecord()">存入雲端</button>
+      <button class="btn btn-primary" onclick="addRecord()">存入 Google 雲端</button>
     </div>
 
-    <div class="card">
-      <h3>📋 當月明細</h3>
-      <div id="list"></div>
-    </div>
+    <div class="card"><h3>📋 當月明細</h3><div id="list"></div></div>
 
-    <div style="text-align:center; padding: 20px 0 40px 0;">
+    <div style="text-align:center; padding-bottom: 40px;">
       <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
-        <button class="btn-outline" onclick="window.open('你的試算表網址', '_blank')">📑 打開試算表</button>
+        <button class="btn-outline" onclick="window.open('你的試算表網址', '_blank')">📤 開啟試算表</button>
         <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 匯入舊檔</button>
       </div>
       <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importFromExcel(event)">
-      <p style="font-size:12px; color:var(--text-sub);">提示：匯入功能會將 Excel 資料批次上傳至 Google 試算表</p>
+      <span style="font-size:12px; color:var(--text-sub); cursor:pointer; text-decoration: underline;" onclick="resetPassword()">🔒 重設解鎖密碼</span>
     </div>
   </div>
 
@@ -97,36 +107,48 @@
 
     let db = [];
     const categories = {
-      "支出": ["🍔 餐飲", "🚗 交通", "⛽ 油費", "🔧 維修費", "💧 水電費", "🏠 房租", "🛍️ 購物", "📈 投資", "❓ 其他"],
-      "收入": ["💰 薪資", "🧧 獎金", "💹 投資獲利", "🛠️ 兼職", "✨ 其他"]
+      "支出": ["🍔 餐飲", "🚗 交通", "⛽ 油費", "🔧 維修費", "💧 水電費", "🎓 學費", "🛡️ 保險", "🏥 醫療", "🏠 房租", "🧻 日用品", "✏️ 文具", "🛍️ 購物", "✈️ 旅遊", "📈 投資", "❓ 其他"],
+      "收入": ["💰 薪資", "🧧 獎金", "💹 投資獲利", "🛠️ 兼職", "🪙 零用錢", "✨ 其他"]
     };
 
+    // 密碼邏輯
     function checkPassword() {
-      if (document.getElementById('password-input').value === "0000") {
+      const input = document.getElementById('password-input').value;
+      const savedPwd = localStorage.getItem('money_pwd');
+      const defaultPwd = "0000";
+
+      if (input === defaultPwd || (savedPwd && btoa(input) === savedPwd)) {
+        if (!savedPwd && input !== defaultPwd) localStorage.setItem('money_pwd', btoa(input));
         document.getElementById('auth-overlay').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
         initApp();
-      } else { alert('密碼錯誤'); }
+      } else {
+        alert('密碼錯誤');
+      }
+    }
+
+    function resetPassword() {
+      if(confirm('重設密碼將登出，確定嗎？')) {
+        localStorage.removeItem('money_pwd');
+        location.reload();
+      }
     }
 
     async function initApp() {
       google.charts.load('current', {'packages':['corechart']});
       const now = new Date();
-      setupSelectors(now);
-      document.getElementById('date').valueAsDate = now;
-      updateCategories();
-      await refreshData();
-    }
-
-    function setupSelectors(now) {
+      // 年份改為前後 10 年
       const ys = document.getElementById('viewYear');
-      for(let i=now.getFullYear()-2; i<=now.getFullYear()+2; i++){
+      for(let i=now.getFullYear()-10; i<=now.getFullYear()+10; i++){
         let o=document.createElement('option'); o.value=i; o.text=i+'年'; if(i===now.getFullYear())o.selected=true; ys.add(o);
       }
       const ms = document.getElementById('viewMonth');
       for(let i=0; i<12; i++){
         let o=document.createElement('option'); o.value=i; o.text=(i+1)+'月'; if(i===now.getMonth())o.selected=true; ms.add(o);
       }
+      document.getElementById('date').valueAsDate = now;
+      updateCategories();
+      await refreshData();
     }
 
     function updateCategories() {
@@ -135,97 +157,45 @@
     }
 
     async function refreshData() {
-      toggleLoading(true, "正在讀取雲端資料...");
+      toggleLoading(true, "讀取雲端資料...");
       try {
         const response = await fetch(API_URL);
         db = await response.json();
         renderAll();
-      } catch (e) { alert('同步失敗，請檢查網路或 API URL'); }
+      } catch (e) { alert('同步失敗，請確認 API URL'); }
       toggleLoading(false);
-    }
-
-    async function addRecord() {
-      const amt = document.getElementById('amount').value;
-      const item = document.getElementById('item').value;
-      if(!amt || !item) return alert('請完整填寫');
-
-      const data = {
-        action: 'add',
-        date: document.getElementById('date').value,
-        category: document.getElementById('category').value,
-        item: item,
-        amount: parseFloat(amt),
-        type: document.getElementById('type').value
-      };
-
-      toggleLoading(true, "正在存入雲端...");
-      await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
-      document.getElementById('item').value = '';
-      document.getElementById('amount').value = '';
-      await refreshData();
-    }
-
-    async function deleteRecord(id) {
-      if(!confirm('確定從雲端刪除？')) return;
-      const target = db[id];
-      toggleLoading(true, "正在從雲端刪除...");
-      await fetch(API_URL, { 
-        method: 'POST', 
-        body: JSON.stringify({ action: 'delete', date: target.date, item: target.item, amount: target.amount }) 
-      });
-      await refreshData();
-    }
-
-    async function importFromExcel(e) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = async function(event) {
-        try {
-          const data = new Uint8Array(event.target.result);
-          const workbook = XLSX.read(data, {type: 'array'});
-          const imported = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-          
-          if(confirm(`偵測到 ${imported.length} 筆資料，要匯入至雲端嗎？`)) {
-            for(let [index, item] of imported.entries()) {
-              toggleLoading(true, `正在匯入第 ${index+1}/${imported.length} 筆...`);
-              await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'add', ...item, amount: parseFloat(item.amount) })
-              });
-            }
-            alert('匯入完成！');
-            await refreshData();
-          }
-        } catch(e) { alert('檔案格式不相符'); }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function toggleLoading(show, text="") {
-      const loader = document.getElementById('loading-overlay');
-      document.getElementById('loading-text').innerText = text;
-      loader.style.display = show ? 'flex' : 'none';
     }
 
     function renderAll() {
       const targetYear = parseInt(document.getElementById('viewYear').value);
       const targetMonth = parseInt(document.getElementById('viewMonth').value);
-      let mInc = 0, mExp = 0, tAll = 0;
+      let mInc = 0, mExp = 0, yBal = 0, tAll = 0;
+      let categoryMap = {};
       let filteredList = [];
 
       db.forEach((r, index) => {
         const d = new Date(r.date);
         const amt = parseFloat(r.amount);
         if(r.type === '收入') tAll += amt; else tAll -= amt;
-        if(d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
-          if(r.type === '收入') mInc += amt; else mExp += amt;
-          filteredList.push({...r, id: index});
+        
+        if(d.getFullYear() === targetYear) {
+          if(r.type === '收入') yBal += amt; else yBal -= amt;
+          if(d.getMonth() === targetMonth) {
+            if(r.type === '收入') mInc += amt; 
+            else { mExp += amt; categoryMap[r.category] = (categoryMap[r.category] || 0) + amt; }
+            filteredList.push({...r, id: index});
+          }
         }
       });
 
       document.getElementById('tAll').innerText = '$' + tAll.toLocaleString();
+      document.getElementById('yBal').innerText = '$' + yBal.toLocaleString();
       document.getElementById('mInc').innerText = '$' + mInc.toLocaleString();
       document.getElementById('mExp').innerText = '$' + mExp.toLocaleString();
+      document.getElementById('mBal').innerText = '$' + (mInc - mExp).toLocaleString();
+
+      drawChart(Object.entries(categoryMap).map(([k, v]) => [k, v]));
+      
       document.getElementById('list').innerHTML = filteredList.reverse().map(r => `
         <div class="item-row">
           <div><b>${r.item}</b><br><small>${r.category} · ${r.date}</small></div>
@@ -236,7 +206,64 @@
             <button onclick="deleteRecord(${r.id})" style="border:none; background:none; color:var(--danger); font-size:11px; cursor:pointer">刪除</button>
           </div>
         </div>
-      `).join('') || '<p style="text-align:center; color:var(--text-sub); font-size:14px;">本月尚無紀錄</p>';
+      `).join('') || '<p style="text-align:center; color:var(--text-sub); font-size:14px;">尚無紀錄</p>';
+    }
+
+    function drawChart(chartDataArr) {
+      if (chartDataArr.length === 0) {
+        document.getElementById('piechart').innerHTML = '<div style="text-align:center;color:var(--text-sub);padding-top:100px;font-size:14px;">暫無支出資料</div>';
+        return;
+      }
+      const data = google.visualization.arrayToDataTable([['Category', 'Amount'], ...chartDataArr]);
+      new google.visualization.PieChart(document.getElementById('piechart')).draw(data, {
+        pieHole: 0.5, chartArea: {width: '95%', height: '80%'}, legend: {position: 'bottom'},
+        colors: ['#5856D6', '#FF9500', '#FF2D55', '#AF52DE', '#34C759', '#5AC8FA']
+      });
+    }
+
+    async function addRecord() {
+      const amt = document.getElementById('amount').value;
+      const item = document.getElementById('item').value;
+      if(!amt || !item) return alert('請填寫完整');
+      const data = { action: 'add', date: document.getElementById('date').value, category: document.getElementById('category').value, item, amount: parseFloat(amt), type: document.getElementById('type').value };
+      toggleLoading(true, "存入雲端...");
+      await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+      document.getElementById('item').value = '';
+      document.getElementById('amount').value = '';
+      await refreshData();
+    }
+
+    async function deleteRecord(id) {
+      if(!confirm('確定刪除？')) return;
+      const target = db[id];
+      toggleLoading(true, "刪除中...");
+      await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', date: target.date, item: target.item, amount: target.amount }) });
+      await refreshData();
+    }
+
+    async function importFromExcel(e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = async function(event) {
+        try {
+          const workbook = XLSX.read(new Uint8Array(event.target.result), {type: 'array'});
+          const imported = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+          if(confirm(`匯入 ${imported.length} 筆資料？`)) {
+            for(let [i, item] of imported.entries()) {
+              toggleLoading(true, `匯入進度 ${i+1}/${imported.length}`);
+              await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'add', ...item }) });
+            }
+            alert('匯入完成'); await refreshData();
+          }
+        } catch(e) { alert('格式錯誤'); }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function toggleLoading(show, text="") {
+      const loader = document.getElementById('loading-overlay');
+      document.getElementById('loading-text').innerText = text;
+      loader.style.display = show ? 'flex' : 'none';
     }
   </script>
 </body>
