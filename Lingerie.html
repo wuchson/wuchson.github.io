@@ -3,158 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lingerie Pro - 全功能穩定版</title>
+    <title>Lingerie Pro</title>
     <style>
-        :root {
-            --primary: #8da399; 
-            --primary-dark: #6b7e75;
-            --accent: #d4a373; 
-            --bg: #f9f7f2;    
-            --card-bg: #ffffff;
-            --border: #e0dcd0;
-            --h: 46px;
-        }
-
-        body { font-family: "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
+        :root { --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; }
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
         .container { max-width: 900px; margin: auto; }
-
         .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        h3 { color: var(--primary-dark); border-left: 4px solid var(--accent); padding-left: 12px; margin: 0 0 20px 0; font-size: 1.1rem; }
-
-        /* 佈局：自動切換單雙欄 */
-        .flex-grid { display: flex; flex-wrap: wrap; gap: 20px; }
-        .flex-item { flex: 1; min-width: 300px; }
-
-        .input-group { margin-bottom: 15px; }
-        label { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #888; display: block; }
-
-        .input-row { display: flex; gap: 8px; width: 100%; }
+        h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 12px; margin: 0 0 15px 0; font-size: 1.1rem; }
+        
+        .flex-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 15px; }
+        .field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 0.85rem; font-weight: bold; color: #888; }
+        
         input, select { 
-            height: var(--h); border: 1px solid var(--border); border-radius: 8px; 
-            padding: 0 12px; font-size: 16px; box-sizing: border-box; background: #fff; flex: 1; min-width: 0;
+            width: 100%; padding: 10px; font-size: 16px; border: 1px solid var(--border); 
+            border-radius: 8px; box-sizing: border-box; background: #fff; min-height: 46px;
         }
 
         button { 
-            height: var(--h); padding: 0 18px; border: none; border-radius: 8px; 
-            background: var(--primary); color: white; font-weight: bold; cursor: pointer; 
-            white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+            padding: 0 20px; min-height: 46px; border: none; border-radius: 8px; 
+            background: var(--primary); color: white; font-weight: bold; cursor: pointer;
         }
         .btn-accent { background: var(--accent); }
-        .btn-outline { background: white; color: #888; border: 1px solid var(--border); }
-
         .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .tag { background: #f0f2f1; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #e0e5e3; }
-        .tag-del { margin-left: 8px; color: #bbb; cursor: pointer; }
-
-        .table-wrapper { overflow-x: auto; margin-top: 10px; border-radius: 8px; border: 1px solid #eee; }
+        
+        .table-wrapper { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 600px; }
-        th { background: #fdfdfd; padding: 12px; text-align: left; font-size: 0.85rem; color: #999; border-bottom: 2px solid #eee; }
-        td { padding: 12px; border-bottom: 1px solid #f9f9f9; font-size: 0.95rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f9f9f9; }
 
-        @media print { .no-print { display: none !important; } #printArea { display: block !important; } }
+        @media print { 
+            .no-print { display: none !important; } 
+            #printArea { display: block !important; } 
+        }
     </style>
 </head>
 <body>
 
 <div class="container no-print">
-    <header style="text-align: center; padding: 20px 0;">
-        <h1 style="color: var(--primary-dark); margin: 0; letter-spacing: 3px;">LINGERIE PRO</h1>
-    </header>
-
     <div class="card">
         <h3>基本資料管理</h3>
-        <div class="flex-grid">
-            <div class="flex-item">
-                <label>新增廠商</label>
-                <div class="input-row">
-                    <input type="text" id="vCode" placeholder="代碼" style="flex:0 0 70px;">
-                    <input type="text" id="vName" placeholder="名稱">
-                    <button onclick="addVendor()">+</button>
-                </div>
-                <div id="vendorTags" class="tag-group"></div>
-            </div>
-            <div class="flex-item">
-                <label>新增顏色</label>
-                <div class="input-row">
-                    <input type="text" id="cName" placeholder="顏色">
-                    <button onclick="addColor()">+</button>
-                </div>
-                <div id="colorTags" class="tag-group"></div>
-            </div>
+        <div class="flex-row">
+            <div class="field" style="flex:0 0 80px;"><label>代碼</label><input type="text" id="vCode" placeholder="A01"></div>
+            <div class="field"><label>廠商</label><input type="text" id="vName" placeholder="名稱"></div>
+            <button onclick="addVendor()">+</button>
         </div>
-        <div class="input-group" style="margin-top:20px;">
-            <label>款式對照設定</label>
-            <div class="input-row">
-                <select id="setVendorRel" style="flex:0 0 90px;"></select>
-                <input type="text" id="setBraId" placeholder="內衣型號">
-                <input type="text" id="setPantyId" placeholder="內褲型號">
-                <button class="btn-accent" onclick="addModel()">儲存</button>
-            </div>
-            <div id="modelTags" class="tag-group"></div>
+        <div id="vendorTags" class="tag-group"></div>
+
+        <div class="flex-row" style="margin-top:20px;">
+            <div class="field"><label>新增顏色</label><input type="text" id="cName" placeholder="例如：櫻花粉"></div>
+            <button onclick="addColor()">+</button>
         </div>
+        <div id="colorTags" class="tag-group"></div>
+
+        <div class="flex-row" style="margin-top:20px;">
+            <div class="field" style="flex:0 0 100px;"><label>廠商</label><select id="setVendorRel"></select></div>
+            <div class="field"><label>內衣型號</label><input type="text" id="setBraId" placeholder="2501"></div>
+            <div class="field"><label>內褲型號</label><input type="text" id="setPantyId" placeholder="2502"></div>
+            <button class="btn-accent" onclick="addModel()">儲存款式對照</button>
+        </div>
+        <div id="modelTags" class="tag-group"></div>
     </div>
 
     <div class="card">
-        <h3>每日庫存作業</h3>
-        <div class="flex-grid">
-            <div class="flex-item">
-                <label>廠商與款式</label>
-                <div class="input-row" style="margin-bottom:10px;">
-                    <select id="selectVendor" onchange="updateModelSelect()"></select>
-                </div>
-                <select id="selectModel"></select>
-            </div>
-            <div class="flex-item">
-                <label>顏色與規格</label>
-                <div class="input-row" style="margin-bottom:10px;">
-                    <select id="selectColor"></select>
-                </div>
-                <div class="input-row">
+        <h3>庫存與出貨作業</h3>
+        <div class="flex-row">
+            <div class="field"><label>廠商</label><select id="selectVendor" onchange="updateModelSelect()"></select></div>
+            <div class="field"><label>款式</label><select id="selectModel"></select></div>
+            <div class="field"><label>顏色</label><select id="selectColor"></select></div>
+        </div>
+        <div class="flex-row">
+            <div class="field">
+                <label>規格尺寸 (罩杯 / 圍數 / 內褲)</label>
+                <div style="display:flex; gap:5px;">
                     <select id="braCup"><script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
-                    <select id="braBand"><script>for(let i=32; i<=42; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
-                    <select id="pantySize"><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2L">2L</option></select>
+                    <select id="braBand"><script>for(let i=30; i<=50; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
+                    <select id="pantySize">
+                        <option value="SS">SS</option><option value="S">S</option><option value="M">M</option>
+                        <option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option>
+                        <option value="3XL">3XL</option><option value="4XL">4XL</option><option value="無">無</option>
+                    </select>
                 </div>
             </div>
+            <div class="field" style="flex:0 0 80px;"><label>數量</label><input type="number" id="pQty" value="1"></div>
         </div>
-        <div class="input-group" style="margin-top:15px;">
-            <label>數量</label>
-            <input type="number" id="pQty" value="1" min="1">
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button style="flex: 1;" onclick="handleStock('IN')">📥 補貨入庫</button>
-            <button class="btn-accent" style="flex: 1;" onclick="addToInvoice()">➕ 加入出貨單</button>
+        <div class="flex-row">
+            <button style="flex: 1;" onclick="handleStock()">📥 補貨入庫</button>
+            <button class="btn-accent" style="flex: 1;" onclick="addToInvoice()">➕ 加入出貨清單</button>
         </div>
     </div>
 
-    <div class="card" id="invoiceCard" style="display:none; border: 1px solid var(--accent);">
-        <h3>待列印出貨單</h3>
-        <div class="table-wrapper"><table id="invoiceTable"><thead><tr><th>型號</th><th>規格</th><th>數量</th><th>操作</th></tr></thead><tbody></tbody></table></div>
-        <button class="btn-accent" style="width:100%; margin-top:15px;" onclick="printInvoice()">🖨️ 確認並列印出貨單</button>
+    <div class="card" id="invoiceCard" style="display:none; border: 2px solid var(--accent);">
+        <h3>待列印出貨單 (確認後將自動扣除庫存)</h3>
+        <div class="table-wrapper"><table><thead><tr><th>型號</th><th>顏色</th><th>規格</th><th>數量</th><th>操作</th></tr></thead><tbody id="invoiceTableBody"></tbody></table></div>
+        <button class="btn-accent" style="width:100%; margin-top:15px;" onclick="printInvoice()">🖨️ 確認列印並自動扣庫存</button>
     </div>
 
     <div class="card">
-        <h3>全店庫存清單</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>廠商</th><th>型號</th><th>顏色</th><th>規格</th><th>庫存</th><th>操作</th></tr></thead>
-                <tbody id="stockTableBody"></tbody>
-            </table>
-        </div>
-        <div style="margin-top: 20px; display: flex; gap: 10px;">
-            <button class="btn-outline" style="flex:1" onclick="exportData()">💾 備份匯出</button>
-            <button class="btn-outline" style="flex:1" onclick="document.getElementById('importFile').click()">📥 還原匯入</button>
+        <h3>目前庫存清單</h3>
+        <div class="table-wrapper"><table id="stockTable"><thead><tr><th>廠商</th><th>型號(衣/褲)</th><th>顏色</th><th>規格</th><th>數量</th><th>操作</th></tr></thead><tbody id="stockTableBody"></tbody></table></div>
+        <div style="margin-top:20px; display:flex; gap:10px;">
+            <button style="flex:1; background:#888;" onclick="exportData()">💾 備份資料</button>
+            <button style="flex:1; background:#888;" onclick="document.getElementById('importFile').click()">📥 還原資料</button>
             <input type="file" id="importFile" style="display:none" onchange="importData(event)">
         </div>
     </div>
 </div>
 
-<div id="printArea" style="display:none; padding: 30px;">
-    <h2 style="text-align:center;">出貨單</h2>
+<div id="printArea" style="display:none; padding:40px; font-family: serif;">
+    <h2 style="text-align:center;">出貨單 (Invoice)</h2>
     <p id="printDate" style="text-align:right;"></p>
-    <table style="width:100%; border-collapse: collapse; border: 1px solid #000;">
-        <thead><tr style="background:#eee;"><th style="border:1px solid #000;padding:8px;">商品</th><th style="border:1px solid #000;padding:8px;">顏色</th><th style="border:1px solid #000;padding:8px;">規格</th><th style="border:1px solid #000;padding:8px;">數量</th></tr></thead>
+    <table style="width:100%; border-collapse:collapse; border:1px solid #000;">
+        <thead><tr style="background:#eee;"><th style="border:1px solid #000;padding:8px;">商品編號</th><th style="border:1px solid #000;padding:8px;">顏色</th><th style="border:1px solid #000;padding:8px;">尺寸規格</th><th style="border:1px solid #000;padding:8px;">數量</th></tr></thead>
         <tbody id="printTableBody"></tbody>
     </table>
+    <div style="margin-top:30px; text-align:right;">簽名：____________________</div>
 </div>
 
 <script>
@@ -172,59 +135,87 @@
         render();
     }
 
-    function addVendor() { const c = document.getElementById('vCode').value.toUpperCase().trim(), n = document.getElementById('vName').value.trim(); if(c && n) { vendors.push({code:c, name:n}); save(); } }
-    function addColor() { const n = document.getElementById('cName').value.trim(); if(n) { colors.push(n); save(); } }
-    function addModel() { const v = document.getElementById('setVendorRel').value, b = document.getElementById('setBraId').value.trim(), p = document.getElementById('setPantyId').value.trim(); if(v && (b||p)) { models.push({vCode:v, braId:b, pantyId:p}); save(); } }
+    function addVendor() { const c = document.getElementById('vCode').value.toUpperCase().trim(), n = document.getElementById('vName').value.trim(); if(c && n) { vendors.push({code:c, name:n}); save(); document.getElementById('vCode').value=''; document.getElementById('vName').value=''; } }
+    function addColor() { const n = document.getElementById('cName').value.trim(); if(n) { colors.push(n); save(); document.getElementById('cName').value=''; } }
+    function addModel() { 
+        const v = document.getElementById('setVendorRel').value, b = document.getElementById('setBraId').value.trim(), p = document.getElementById('setPantyId').value.trim(); 
+        if(v && (b||p)) { models.push({vCode:v, braId:b, pantyId:p}); save(); document.getElementById('setBraId').value=''; document.getElementById('setPantyId').value=''; } 
+    }
 
     function render() {
-        document.getElementById('vendorTags').innerHTML = vendors.map((v,i)=>`<div class="tag">${v.code}-${v.name}<span class="tag-del" onclick="vendors.splice(${i},1);save()">×</span></div>`).join('');
-        document.getElementById('colorTags').innerHTML = colors.map((c,i)=>`<div class="tag">${c}<span class="tag-del" onclick="colors.splice(${i},1);save()">×</span></div>`).join('');
-        document.getElementById('modelTags').innerHTML = models.map((m,i)=>`<div class="tag">${m.vCode}:${m.braId}<span class="tag-del" onclick="models.splice(${i},1);save()">×</span></div>`).join('');
+        document.getElementById('vendorTags').innerHTML = vendors.map((v,i)=>`<div class="tag">${v.code}-${v.name} <span style="cursor:pointer" onclick="vendors.splice(${i},1);save()">×</span></div>`).join('');
+        document.getElementById('colorTags').innerHTML = colors.map((c,i)=>`<div class="tag">${c} <span style="cursor:pointer" onclick="colors.splice(${i},1);save()">×</span></div>`).join('');
+        document.getElementById('modelTags').innerHTML = models.map((m,i)=>`<div class="tag">${m.vCode}: 衣${m.braId}/褲${m.pantyId} <span style="cursor:pointer" onclick="models.splice(${i},1);save()">×</span></div>`).join('');
         document.getElementById('setVendorRel').innerHTML = vendors.map(v=>`<option value="${v.code}">${v.code}</option>`).join('');
         document.getElementById('selectVendor').innerHTML = vendors.map(v=>`<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('selectColor').innerHTML = colors.map(c=>`<option value="${c}">${c}</option>`).join('');
         updateModelSelect();
-        document.getElementById('stockTableBody').innerHTML = inventory.map((i,idx)=>`<tr><td>${i.v}</td><td>${i.bi}</td><td>${i.c}</td><td>${i.bc}${i.bb}/${i.ps}</td><td>${i.q}</td><td><button class="btn-outline" style="height:28px;padding:0 8px;font-size:12px;" onclick="inventory.splice(${idx},1);save()">刪</button></td></tr>`).join('');
+        document.getElementById('stockTableBody').innerHTML = inventory.map((i,idx)=>`<tr><td>${i.v}</td><td>${i.bi}/${i.pi}</td><td>${i.c}</td><td>${i.bc}${i.bb}/${i.ps}</td><td style="font-weight:bold; color:${i.q<=0?'red':'black'}">${i.q}</td><td><button style="background:red;padding:4px 8px;min-height:30px;" onclick="inventory.splice(${idx},1);save()">刪</button></td></tr>`).join('');
     }
 
     function updateModelSelect() {
         const v = document.getElementById('selectVendor').value;
         const fil = models.filter(m => m.vCode === v);
-        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join('');
+        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>衣:${m.braId} / 褲:${m.pantyId}</option>`).join('');
     }
 
-    function handleStock(type) {
+    function handleStock() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr), qty = parseInt(document.getElementById('pQty').value), col = document.getElementById('selectColor').value;
         const bc = document.getElementById('braCup').value, bb = document.getElementById('braBand').value, ps = document.getElementById('pantySize').value;
-        const key = `${m.vCode}-${m.braId}-${col}-${bc}${bb}-${ps}`;
-        let item = inventory.find(i => `${i.v}-${i.bi}-${i.c}-${i.bc}${i.bb}-${i.ps}` === key);
-        if(item) item.q += qty; else inventory.push({v:m.vCode, bi:m.braId, c:col, bc:bc, bb:bb, ps:ps, q:qty});
-        save();
+        let item = inventory.find(i => i.v===m.vCode && i.bi===m.braId && i.c===col && i.bc===bc && i.bb===bb && i.ps===ps);
+        if(item) item.q += qty; else inventory.push({v:m.vCode, bi:m.braId, pi:m.pantyId, c:col, bc:bc, bb:bb, ps:ps, q:qty});
+        save(); alert("入庫成功");
     }
 
     function addToInvoice() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr), qty = parseInt(document.getElementById('pQty').value), col = document.getElementById('selectColor').value;
         const bc = document.getElementById('braCup').value, bb = document.getElementById('braBand').value, ps = document.getElementById('pantySize').value;
-        invoiceList.push({v:m.vCode, bi:m.braId, c:col, bc:bc, bb:bb, ps:ps, q:qty});
+        invoiceList.push({v:m.vCode, bi:m.braId, pi:m.pantyId, c:col, bc:bc, bb:bb, ps:ps, q:qty});
         renderInvoice();
     }
 
     function renderInvoice() {
         document.getElementById('invoiceCard').style.display = invoiceList.length ? 'block' : 'none';
-        document.querySelector('#invoiceTable tbody').innerHTML = invoiceList.map((i,idx)=>`<tr><td>${i.bi}</td><td>${i.bc}${i.bb}/${i.ps}</td><td>${i.q}</td><td><span onclick="invoiceList.splice(${idx},1);renderInvoice()" style="cursor:pointer;color:red">×</span></td></tr>`).join('');
+        document.getElementById('invoiceTableBody').innerHTML = invoiceList.map((i,idx)=>`<tr><td>${i.bi}</td><td>${i.c}</td><td>${i.bc}${i.bb}/${i.ps}</td><td>${i.q}</td><td><span onclick="invoiceList.splice(${idx},1);renderInvoice()" style="cursor:pointer;color:red; font-size:20px;">×</span></td></tr>`).join('');
     }
 
     function printInvoice() {
-        document.getElementById('printDate').innerText = "日期：" + new Date().toLocaleString();
+        if(invoiceList.length === 0) return;
+
+        // 核心修改：列印前先扣庫存
+        invoiceList.forEach(orderItem => {
+            let stock = inventory.find(i => 
+                i.v === orderItem.v && i.bi === orderItem.bi && i.c === orderItem.c && 
+                i.bc === orderItem.bc && i.bb === orderItem.bb && i.ps === orderItem.ps
+            );
+            if(stock) {
+                stock.q -= orderItem.q;
+            } else {
+                // 若庫存原本不存在，建立一個負數庫存作為提醒
+                inventory.push({...orderItem, q: (0 - orderItem.q)});
+            }
+        });
+
+        // 儲存扣完後的結果
+        save();
+
+        // 填寫列印表格
+        document.getElementById('printDate').innerText = "列印日期：" + new Date().toLocaleString();
         document.getElementById('printTableBody').innerHTML = invoiceList.map(i=>`<tr><td style="border:1px solid #000;padding:8px;">${i.v}-${i.bi}</td><td style="border:1px solid #000;padding:8px;">${i.c}</td><td style="border:1px solid #000;padding:8px;">${i.bc}${i.bb}/${i.ps}</td><td style="border:1px solid #000;padding:8px;">${i.q}</td></tr>`).join('');
-        window.print();
-        invoiceList = []; renderInvoice();
+        
+        // 執行列印
+        window.print(); 
+        
+        // 清空清單並提醒
+        invoiceList = []; 
+        renderInvoice();
+        alert("出貨單已列印，庫存已自動更新扣除。");
     }
 
-    function exportData() { const blob = new Blob([JSON.stringify({v:vendors, c:colors, m:models, i:inventory})], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Full_Backup.json`; a.click(); }
-    function importData(e) { const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; colors=d.c; models=d.m; inventory=d.i; save(); }; r.readAsText(e.target.files[0]); }
+    function exportData() { const blob = new Blob([JSON.stringify({v:vendors, c:colors, m:models, i:inventory})], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup_${new Date().toLocaleDateString()}.json`; a.click(); }
+    function importData(e) { const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v||[]; colors=d.c||[]; models=d.m||[]; inventory=d.i||[]; save(); alert("資料還原成功！"); } catch(e) { alert("檔案格式錯誤"); } }; r.readAsText(e.target.files[0]); }
 
     render();
 </script>
