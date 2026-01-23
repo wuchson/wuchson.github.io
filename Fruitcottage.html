@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v3.1 - 備份安全版</title>
+    <title>專業果樹管理系統 v3.1 - 穩定版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -72,7 +72,31 @@
 
         .admin-only { display: none; }
         .sub-field { display: none; margin-top: 5px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
-        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 5px; }
+
+        /* 修正後的 Checkbox 容器 */
+        .check-container { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 12px 15px; 
+            background: #fff; 
+            border-radius: 12px; 
+            border: 1.5px solid #dcdcdc; 
+            margin-top: 5px; 
+            min-height: 50px;
+        }
+        .check-container label { 
+            margin: 0; 
+            white-space: nowrap; 
+            flex: 1; 
+        }
+        .check-container input[type="checkbox"] { 
+            width: 20px; 
+            height: 20px; 
+            margin: 0 0 0 10px; 
+            cursor: pointer; 
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -209,7 +233,6 @@
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
         
-        // 登入後檢查備份提醒 (距離上次大於7天)
         checkBackupInterval();
         renderHome();
     }
@@ -278,6 +301,9 @@
         document.getElementById('f-harvestQty').value = t.harvestQty; document.getElementById('f-weightVal').value = t.weightVal;
         document.getElementById('f-badQty').value = t.badQty || ''; document.getElementById('f-badWeight').value = t.badWeight || '';
         document.getElementById('f-isBlooming').checked = t.isBlooming; toggleSubField('f-isBlooming', 'f-bloomStatus-box');
+        document.getElementById('f-isBagged').checked = t.isBagged; toggleSubField('f-isBagged', 'f-bagQty-box');
+        document.getElementById('f-bagQty').value = t.bagQty || '';
+        document.getElementById('f-bloomStatus').value = t.bloomStatus || '';
         document.getElementById('f-health').value = t.health || '良好'; document.getElementById('f-healthDesc').value = t.healthDesc || '';
         document.getElementById('f-medDose').value = t.medDose || ''; document.getElementById('f-water').value = t.water || '';
         document.getElementById('f-fert').value = t.fert || ''; document.getElementById('f-pruneBig').checked = t.pruneBig || false;
@@ -289,6 +315,8 @@
     function prepareAdd() {
         document.querySelectorAll('#view-edit input:not([type=date]):not([readonly]), #view-edit select, #view-edit textarea').forEach(e => { if(e.type==='checkbox') e.checked = false; else e.value = ''; });
         document.getElementById('f-date').value = getToday(); document.getElementById('f-user-static').value = currentUser;
+        document.getElementById('f-bloomStatus-box').style.display = 'none';
+        document.getElementById('f-bagQty-box').style.display = 'none';
         if(isAdmin) { const r = rankStore[getToday()] || {}; document.getElementById('r1-w').value = r.r1w || ''; document.getElementById('r1-b').value = r.r1b || ''; document.getElementById('r2-w').value = r.r2w || ''; document.getElementById('r2-b').value = r.r2b || ''; document.getElementById('r3-w').value = r.r3w || ''; document.getElementById('r3-b').value = r.r3b || ''; }
         showView('edit');
     }
@@ -307,7 +335,6 @@
         XLSX.utils.book_append_sheet(wb, ws, "Data"); 
         XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`); 
         
-        // 更新並存儲最後備份時間
         const timeNow = new Date().toLocaleString();
         localStorage.setItem('last_backup_time', timeNow);
         lastBackup = timeNow;
