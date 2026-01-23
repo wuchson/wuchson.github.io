@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雲端私人財務管理</title>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    :root {
+      --bg-color: #f8f9fb;
+      --card-bg: #ffffff;
+      --primary: #5856D6;
+      --success: #34C759;
+      --danger: #FF3B30;
+      --text-main: #1c1c1e;
+      --text-sub: #8e8e93;
+      --border: #efeff4;
+    }
+    body { font-family: -apple-system, sans-serif; background: var(--bg-color); margin: 0; padding: 16px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 480px; }
+    .card { background: var(--card-bg); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid var(--border); }
+    .hero-stat { background: linear-gradient(135deg, #5856D6 0%, #3534a5 100%); color: white; padding: 24px; border-radius: 24px; margin-bottom: 16px; box-shadow: 0 15px 30px rgba(88, 86, 214, 0.3); }
+    .hero-stat div { font-size: 32px; font-weight: 800; margin-top: 5px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mini-stat { padding: 14px; border-radius: 18px; background: var(--bg-color); border: 1px solid var(--border); }
+    input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; font-size: 16px; box-sizing: border-box;}
+    .btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: var(--primary); color: white; }
+    .item-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div id="loading-overlay">⌛ 正在同步雲端資料...</div>
+
+  <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); display:flex; align-items:center; justify-content:center; z-index:1000;">
+    <div class="card" style="max-width:320px; text-align:center;">
+      <h2>☁️ 雲端財務管理</h2>
+      <input type="password" id="password-input" placeholder="輸入解鎖密碼" style="text-align:center;">
+      <button class="btn btn-primary" onclick="checkPassword()">解鎖並同步</button>
+    </div>
+  </div>
+
+  <div id="main-app" class="container hidden">
+    <div class="hero-stat">
+      <small>💎 雲端總資產</small>
+      <div id="tAll">$0</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <select id="viewYear" style="margin:0"></select>
+        <select id="viewMonth" style="margin:0"></select>
+        <button onclick="renderAll()" style="padding:0 15px; background:var(--text-main); color:white; border-radius:14px; border:none;">🔍</button>
+      </div>
+      <div class="stats-grid">
+        <div class="mini-stat"><small>月收入</small><div id="mInc" style="color:var(--success)">$0</div></div>
+        <div class="mini-stat"><small>月支出</small><div id="mExp" style="color:var(--danger)">$0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>✍️ 新增帳目</h3>
+      <select id="type" onchange="updateCategories()">
+        <option value="支出">🔴 支出</option>
+        <option value="收入">🟢 收入</option>
+      </select>
+      <input type="date" id="date">
+      <select id="category"></select>
+      <input type="text" id="item" placeholder="項目說明">
+      <input type="number" id="amount" placeholder="金額" inputmode="numeric">
+      <button class="btn btn-primary" onclick="addRecord()">存入 Google 試算表</button>
+    </div>
+
+    <div class="card">
+      <h3>📋 當月明細</h3>
+      <div id="list"></div>
+    </div>
+  </div>
+
+  <script>
+    // --------------------------------------------------
+    // ⚠️ 請在這裡貼上你的 Google Apps Script URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbxYawdgAXQeXGSs70uaIcY11mO-vR55d4roft4qmYy8IIcabJmU3a6v-ra5rqHwZhll/exec";
+    // --------------------------------------------------
+
+    let db = [];
+    const categories = {
+      "支出": ["🍔 餐飲", "🚗 交通", "💧 水電費", "🛡️ 保險", "🏠 房租", "🛍️ 購物", "📈 投資", "❓ 其他"],
+      "收入": ["💰 薪資", "🧧 獎金", "💹 投資獲利", "✨ 其他"]
+    };
+
+    function checkPassword() {
+      const input = document.getElementById('password-input').value;
+      if (input === "admin123") { // 預設密碼
+        document.getElementById('auth-overlay').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        initApp();
+      } else {
+        alert('密碼錯誤');
+      }
+    }
+
+    async function initApp() {
+      google.charts.load('current', {'packages':['corechart']});
+      const now = new Date();
+      // 初始化下拉選單... (省略重複的 UI 代碼以保持簡潔)
+      setupSelectors(now);
+      document.getElementById('date').valueAsDate = now;
+      updateCategories();
+      await refreshData();
+    }
+
+    function setupSelectors(now) {
+      const ys = document.getElementById('viewYear');
+      for(let i=now.getFullYear()-2; i<=now.getFullYear()+2; i++){
+        let o=document.createElement('option'); o.value=i; o.text=i+'年'; if(i===now.getFullYear())o.selected=true; ys.add(o);
+      }
+      const ms = document.getElementById('viewMonth');
+      for(let i=0; i<12; i++){
+        let o=document.createElement('option'); o.value=i; o.text=(i+1)+'月'; if(i===now.getMonth())o.selected=true; ms.add(o);
+      }
+    }
+
+    function updateCategories() {
+      const type = document.getElementById('type').value;
+      document.getElementById('category').innerHTML = categories[type].map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    async function refreshData() {
+      document.getElementById('loading-overlay').style.display = 'flex';
+      try {
+        const response = await fetch(API_URL);
+        db = await response.json();
+        renderAll();
+      } catch (e) {
+        alert('同步失敗，請檢查 API URL 或網路');
+      }
+      document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    async function addRecord() {
+      const amt = document.getElementById('amount').value;
+      const item = document.getElementById('item').value;
+      if(!amt || !item) return alert('請填寫完整');
+
+      const data = {
+        action: 'add',
+        date: document.getElementById('date').value,
+        category: document.getElementById('category').value,
+        item: item,
+        amount: parseFloat(amt),
+        type: document.getElementById('type').value
+      };
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+      await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+      document.getElementById('item').value = '';
+      document.getElementById('amount').value = '';
+      await refreshData();
+    }
+
+    async function deleteRecord(id) {
+      if(!confirm('確定從雲端刪除？')) return;
+      const target = db[id];
+      const data = { action: 'delete', date: target.date, item: target.item, amount: target.amount };
+      
+      document.getElementById('loading-overlay').style.display = 'flex';
+      await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+      await refreshData();
+    }
+
+    function renderAll() {
+      const targetYear = parseInt(document.getElementById('viewYear').value);
+      const targetMonth = parseInt(document.getElementById('viewMonth').value);
+      let mInc = 0, mExp = 0, tAll = 0;
+      let filteredList = [];
+
+      db.forEach((r, index) => {
+        const d = new Date(r.date);
+        const amt = parseFloat(r.amount);
+        if(r.type === '收入') tAll += amt; else tAll -= amt;
+        
+        if(d.getFullYear() === targetYear && d.getMonth() === targetMonth) {
+          if(r.type === '收入') mInc += amt; else mExp += amt;
+          filteredList.push({...r, id: index});
+        }
+      });
+
+      document.getElementById('tAll').innerText = '$' + tAll.toLocaleString();
+      document.getElementById('mInc').innerText = '$' + mInc.toLocaleString();
+      document.getElementById('mExp').innerText = '$' + mExp.toLocaleString();
+
+      document.getElementById('list').innerHTML = filteredList.reverse().map(r => `
+        <div class="item-row">
+          <div><b>${r.item}</b><br><small>${r.category} · ${r.date}</small></div>
+          <div style="text-align:right">
+            <div style="color:${r.type === '收入' ? 'var(--success)' : 'var(--text-main)'}; font-weight:700">
+              ${r.type === '收入' ? '+' : '-'}$${r.amount.toLocaleString()}
+            </div>
+            <button onclick="deleteRecord(${r.id})" style="border:none; background:none; color:var(--danger); font-size:12px; cursor:pointer">刪除</button>
+          </div>
+        </div>
+      `).join('') || '<p style="text-align:center; color:var(--text-sub)">本月尚無紀錄</p>';
+    }
+  </script>
+</body>
+</html>
