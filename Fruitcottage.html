@@ -184,13 +184,31 @@
                 
                 <div class="admin-only" id="admin-rank-panel">
                     <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員)</div>
+                    
                     <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
-                        <div style="color:#C31342; font-weight:bold; margin-bottom:8px;">🥇 第一名</div>
+                        <div style="color:#BA4568; font-weight:bold; margin-bottom:8px;">🥇 第一名</div>
                         <div class="grid-2">
                             <div><label>重量(g)</label><input type="number" id="r1-w"></div>
                             <div><label>甜度(°)</label><input type="number" id="r1-b" step="0.1"></div>
                         </div>
                     </div>
+
+                    <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#BA9545; font-weight:bold; margin-bottom:8px;">🥈 第二名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r2-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r2-b" step="0.1"></div>
+                        </div>
+                    </div>
+
+                    <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#BAA345; font-weight:bold; margin-bottom:8px;">🥉 第三名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r3-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r3-b" step="0.1"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-warning" onclick="saveRanking()" style="margin-bottom:20px;">更新今日排行</button>
                 </div>
 
                 <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
@@ -261,15 +279,13 @@
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
         renderHome();
-        renderUserList(); // 初始化使用者列表
+        renderUserList();
     }
 
-    // --- 使用者管理功能 ---
     function addUser() {
         const name = document.getElementById('new-user-name').value.trim();
         if (!name) return alert("請輸入人員姓名");
         if (userList.includes(name)) return alert("該人員已在名單中");
-        
         userList.push(name);
         saveUserList();
         document.getElementById('new-user-name').value = '';
@@ -301,12 +317,23 @@
     function saveUserList() { 
         localStorage.setItem('user_list_v31', JSON.stringify(userList)); 
     }
-    // ----------------------
 
     function calcIncome() {
         const w = parseFloat(document.getElementById('f-sellWeight').value) || 0;
         const p = parseFloat(document.getElementById('f-price').value) || 0;
         document.getElementById('f-income').value = Math.round(w * p);
+    }
+
+    function saveRanking() {
+        const today = getToday();
+        rankStore[today] = {
+            r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value,
+            r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value,
+            r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value
+        };
+        localStorage.setItem('rank_v31', JSON.stringify(rankStore));
+        alert("今日品質排行已更新！");
+        renderHome();
     }
 
     function renderHome() {
@@ -354,8 +381,7 @@
             price: document.getElementById('f-price').value, income: document.getElementById('f-income').value,
             badQty: document.getElementById('f-badQty').value, badWeight: document.getElementById('f-badWeight').value,
             lastUser: currentUser, isBlooming: document.getElementById('f-isBlooming').checked,
-            isBagged: document.getElementById('f-isBagged').checked, health: document.getElementById('f-health').value,
-            income: document.getElementById('f-income').value
+            isBagged: document.getElementById('f-isBagged').checked, health: document.getElementById('f-health').value
         };
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = Object.assign(db[idx], data); else db.push(data);
@@ -381,6 +407,15 @@
         document.getElementById('f-date').value = getToday(); 
         document.getElementById('f-user-static').value = currentUser;
         document.getElementById('f-unit').value = '公斤';
+        
+        // 清空排行欄位
+        ['r1-w','r1-b','r2-w','r2-b','r3-w','r3-b'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                const r = rankStore[getToday()] || {};
+                el.value = r[id.replace('-','')] || '';
+            }
+        });
         showView('edit');
     }
 
