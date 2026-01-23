@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v3.1 - 穩定版</title>
+    <title>專業果樹管理系統 v3.2 - 具備恢復功能</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -24,11 +24,9 @@
         
         .container { width: 100vw; max-width: 500px; height: 100vh; height: -webkit-fill-available; background: var(--bg); display: flex; flex-direction: column; position: relative; }
 
-        /* 登入畫面 */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 
-        /* 備份提醒彈窗 */
         #backup-alert { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.7); z-index: 10000; display: none; 
@@ -36,7 +34,6 @@
         }
         .alert-box { background: white; border-radius: 20px; padding: 25px; text-align: center; width: 100%; max-width: 320px; border-top: 8px solid var(--warning); }
 
-        /* 頁首 */
         header { background: var(--primary); padding: 15px 20px 25px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; position: relative; }
         header * { color: var(--white) !important; }
         .logout-text-btn { position: absolute; right: 15px; top: 12px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; }
@@ -60,9 +57,16 @@
         .btn-danger { background: var(--danger); color: white !important; }
 
         .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
-        .rank-card { background: #fffdfa; border: 1px solid #ffe8cc; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
-        .rank-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; font-weight: bold; color: #d4a373; }
-        .rank-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .check-container { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 12px 15px; background: #fff; border-radius: 12px; 
+            border: 1.5px solid #dcdcdc; margin-top: 5px; min-height: 50px;
+        }
+        .check-container label { margin: 0; white-space: nowrap; flex: 1; }
+        .check-container input[type="checkbox"] { width: 20px; height: 20px; margin: 0 0 0 10px; flex-shrink: 0; }
+
+        .sub-field { display: none; margin-top: 5px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
 
         nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
@@ -71,45 +75,9 @@
         .nav-add-btn { background: var(--primary); color: white !important; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
 
         .admin-only { display: none; }
-        .sub-field { display: none; margin-top: 5px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
-
-        /* 修正後的 Checkbox 容器 */
-        .check-container { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 12px 15px; 
-            background: #fff; 
-            border-radius: 12px; 
-            border: 1.5px solid #dcdcdc; 
-            margin-top: 5px; 
-            min-height: 50px;
-        }
-        .check-container label { 
-            margin: 0; 
-            white-space: nowrap; 
-            flex: 1; 
-        }
-        .check-container input[type="checkbox"] { 
-            width: 20px; 
-            height: 20px; 
-            margin: 0 0 0 10px; 
-            cursor: pointer; 
-            flex-shrink: 0;
-        }
     </style>
 </head>
 <body>
-
-<div id="backup-alert">
-    <div class="alert-box">
-        <div style="font-size: 40px; margin-bottom: 10px;">💾</div>
-        <h3 style="margin: 0 0 10px 0;">提醒備份資料</h3>
-        <p style="font-size: 14px; color: #666; line-height: 1.5;">您已超過一週未備份資料，建議立即匯出 Excel 以保存在手機本機。</p>
-        <button class="btn btn-warning" onclick="handleBackupNow()">立即備份</button>
-        <div style="margin-top: 10px; font-size: 13px; color: #999; text-decoration: underline;" onclick="closeBackupAlert()">晚點再說</div>
-    </div>
-</div>
 
 <div class="container">
     <div id="login-screen">
@@ -122,7 +90,7 @@
 
     <header>
         <div class="logout-text-btn" onclick="logout()">登出</div>
-        <div style="font-size: 13px; opacity: 0.9;"><span id="user-icon"></span> <span id="user-role-display"></span> | <span id="display-today"></span></div>
+        <div style="font-size: 13px; opacity: 0.9;"><span id="user-role-display"></span> | <span id="display-today"></span></div>
         <div style="margin: 10px 0;">
             <select id="header-area-filter" onchange="renderHome()" style="width: auto; padding: 5px 15px; border-radius: 20px; font-size: 14px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white;">
                 <option value="全部">全場數據加總</option>
@@ -137,10 +105,6 @@
 
     <div class="content-area">
         <div id="view-home" class="content-view active-view">
-            <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white;">
-                <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4>
-                <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div>
-            </div>
             <input type="text" id="search" placeholder="🔍 搜尋編號或名稱..." oninput="renderHome()">
             <div id="tree-list-container"></div>
         </div>
@@ -148,12 +112,10 @@
         <div id="view-edit" class="content-view">
             <div class="card">
                 <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
-                
                 <div class="grid-2">
                     <div><label>📅 日期</label><input type="date" id="f-date"></div>
                     <div><label>👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
                 </div>
-                
                 <div class="section-title">📍 基本資訊</div>
                 <select id="f-area"><option value="A區">A區</option><option value="B區">B區</option><option value="C區">C區</option></select>
                 <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
@@ -165,43 +127,26 @@
                 <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
 
                 <div class="section-title">🛠️ 養護與健康</div>
-                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥劑量">
                 <div class="grid-2">
                     <div class="check-container" style="font-size:13px;"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
                     <div class="check-container" style="font-size:13px;"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
                 </div>
-                <select id="f-health"><option value="良好">健康良好</option><option value="需關注">需關注</option><option value="患病中">患病中</option></select>
-                <textarea id="f-healthDesc" rows="2" placeholder="病情或異常描述..."></textarea>
-                <input type="text" id="f-medDose" placeholder="使用藥劑與劑量">
-
-                <div class="section-title">📊 採收數據</div>
-                <label>正常果</label>
-                <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
-                <label style="color: var(--danger);">爛果 (⚠️)</label>
-                <div class="grid-2"><input type="number" id="f-badQty" placeholder="粒數"><input type="number" id="f-badWeight" step="0.1" placeholder="重量(KG)"></div>
-                
-                <div class="admin-only" id="admin-rank-panel">
-                    <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員)</div>
-                    <div class="rank-card"><div class="rank-header">🥇 第一名</div><div class="grid-2"><div><label>重量(g)</label><input type="number" id="r1-w"></div><div><label>甜度(°)</label><input type="number" id="r1-b" step="0.1"></div></div></div>
-                    <div class="rank-card"><div class="rank-header">🥈 第二名</div><div class="grid-2"><div><label>重量(g)</label><input type="number" id="r2-w"></div><div><label>甜度(°)</label><input type="number" id="r2-b" step="0.1"></div></div></div>
-                    <div class="rank-card"><div class="rank-header">🥉 第三名</div><div class="grid-2"><div><label>重量(g)</label><input type="number" id="r3-w"></div><div><label>甜度(°)</label><input type="number" id="r3-b" step="0.1"></div></div></div>
-                </div>
 
                 <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
-                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除</button>
                 <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
 
         <div id="view-tools" class="content-view admin-only">
             <div class="card">
-                <h3>📂 資料安全管理</h3>
-                <div style="background: #fff9f0; padding: 12px; border-radius: 10px; border: 1px solid #ffe8cc; margin-bottom: 15px;">
-                    <small style="color: #666;">上次備份時間：</small><br>
-                    <b id="last-backup-display">尚未有備份紀錄</b>
-                </div>
+                <h3>📂 資料備份與恢復</h3>
                 <button class="btn btn-warning" onclick="exportExcel()">📤 匯出備份 (Excel)</button>
-                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                <div style="margin-top: 20px; padding: 15px; border: 2px dashed var(--primary); border-radius: 12px; text-align: center;">
+                    <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">📥 匯入資料恢復</p>
+                    <input type="file" id="import-file" accept=".xlsx, .xls" style="font-size: 12px;">
+                    <button class="btn btn-primary" onclick="importExcel()" style="margin-top: 10px;">開始恢復資料</button>
+                </div>
+                <hr style="margin:30px 0; border:0; border-top:1px solid #eee;">
                 <button class="btn btn-danger" onclick="clearAllData()">🧨 清空所有資料</button>
             </div>
         </div>
@@ -216,8 +161,6 @@
 
 <script>
     let db = JSON.parse(localStorage.getItem('farm_v31')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v31')) || {};
-    let lastBackup = localStorage.getItem('last_backup_time') || "";
     let currentUser = "";
     let isAdmin = false;
 
@@ -232,42 +175,15 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
-        
-        checkBackupInterval();
         renderHome();
     }
 
-    function checkBackupInterval() {
-        if (!lastBackup) return; 
-        const lastDate = new Date(lastBackup);
-        const now = new Date();
-        const diffDays = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
-        if (diffDays >= 7) {
-            document.getElementById('backup-alert').style.display = 'flex';
-        }
-        document.getElementById('last-backup-display').innerText = lastBackup;
-    }
-
-    function handleBackupNow() {
-        exportExcel();
-        closeBackupAlert();
-    }
-
-    function closeBackupAlert() {
-        document.getElementById('backup-alert').style.display = 'none';
-    }
-
     function renderHome() {
-        const today = getToday(), area = document.getElementById('header-area-filter').value;
+        const area = document.getElementById('header-area-filter').value;
         let filtered = area === "全部" ? db : db.filter(t => t.area === area);
-        document.getElementById('today-qty').innerText = filtered.filter(t => t.date === today).reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
-        document.getElementById('today-weight').innerText = filtered.filter(t => t.date === today).reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
-        const r = rankStore[today];
-        document.getElementById('display-rank-list').innerHTML = r ? 
-            `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. ${r.r2w||'-'}g (${r.r2b||'-'}°) | 3. ${r.r3w||'-'}g (${r.r3b||'-'}°)` : "尚未排行";
         const q = document.getElementById('search').value.toLowerCase();
         document.getElementById('tree-list-container').innerHTML = filtered.filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q))
-            .reverse().map(t => `<div class="card" onclick="editTree('${t.code}', '${t.date}')"><div style="display:flex; justify-content:space-between; align-items:center;"><div><b>${t.name}</b> <small>#${t.code}</small><br><span style="font-size:11px; color:#888;">正常:${t.harvestQty||0} / 爛果:${t.badQty||0}</span></div><div style="text-align:right;"><b>${t.weightVal||0} KG</b><br><small>${t.health}</small></div></div></div>`).join('');
+            .reverse().map(t => `<div class="card" onclick="editTree('${t.code}', '${t.date}')"><div style="display:flex; justify-content:space-between; align-items:center;"><div><b>${t.name}</b> <small>#${t.code}</small><br><span style="font-size:11px; color:#888;">日期:${t.date}</span></div><div style="text-align:right;"><b>${t.area}</b></div></div></div>`).join('');
     }
 
     function handleSave() {
@@ -275,49 +191,69 @@
         if(!code || !date) return alert("編號與日期必填");
         const data = {
             area: document.getElementById('f-area').value, name: document.getElementById('f-name').value, code, date,
-            harvestQty: document.getElementById('f-harvestQty').value, weightVal: document.getElementById('f-weightVal').value,
-            badQty: document.getElementById('f-badQty').value, badWeight: document.getElementById('f-badWeight').value,
             lastUser: currentUser, isBlooming: document.getElementById('f-isBlooming').checked, bloomStatus: document.getElementById('f-bloomStatus').value,
             isBagged: document.getElementById('f-isBagged').checked, bagQty: document.getElementById('f-bagQty').value,
-            health: document.getElementById('f-health').value, healthDesc: document.getElementById('f-healthDesc').value,
-            medDose: document.getElementById('f-medDose').value, water: document.getElementById('f-water').value,
-            fert: document.getElementById('f-fert').value, pruneBig: document.getElementById('f-pruneBig').checked,
-            pruneSmall: document.getElementById('f-pruneSmall').checked
+            pruneBig: document.getElementById('f-pruneBig').checked, pruneSmall: document.getElementById('f-pruneSmall').checked
         };
         const idx = db.findIndex(x => x.code === code && x.date === date);
         if(idx > -1) db[idx] = data; else db.push(data);
         localStorage.setItem('farm_v31', JSON.stringify(db));
-        if(isAdmin) { 
-            rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value, r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value, r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value }; 
-            localStorage.setItem('rank_v31', JSON.stringify(rankStore)); 
-        }
         showView('home');
+    }
+
+    function importExcel() {
+        const fileInput = document.getElementById('import-file');
+        if (!fileInput.files[0]) return alert("請先選擇 Excel 檔案");
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const importedData = XLSX.utils.sheet_to_json(worksheet);
+            
+            if (confirm(`偵測到 ${importedData.length} 筆紀錄，是否匯入？(這會與現有資料合併)`)) {
+                db = [...db, ...importedData];
+                // 簡易去重 (根據編號與日期)
+                const uniqueDb = Array.from(new Set(db.map(a => JSON.stringify({code:a.code, date:a.date}))))
+                    .map(string => db.find(a => JSON.stringify({code:a.code, date:a.date}) === string));
+                
+                db = uniqueDb;
+                localStorage.setItem('farm_v31', JSON.stringify(db));
+                alert("資料恢復成功！");
+                renderHome();
+                showView('home');
+            }
+        };
+        reader.readAsArrayBuffer(fileInput.files[0]);
+    }
+
+    function exportExcel() { 
+        if (db.length === 0) return alert("目前沒有資料可以匯出");
+        const ws = XLSX.utils.json_to_sheet(db); 
+        const wb = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(wb, ws, "Data"); 
+        XLSX.writeFile(wb, `果園備份_${getToday()}.xlsx`); 
     }
 
     function editTree(code, date) {
         const t = db.find(x => x.code === code && x.date === date); if(!t) return;
-        document.getElementById('f-area').value = t.area; document.getElementById('f-date').value = t.date;
-        document.getElementById('f-name').value = t.name; document.getElementById('f-code').value = t.code;
-        document.getElementById('f-harvestQty').value = t.harvestQty; document.getElementById('f-weightVal').value = t.weightVal;
-        document.getElementById('f-badQty').value = t.badQty || ''; document.getElementById('f-badWeight').value = t.badWeight || '';
+        document.getElementById('f-area').value = t.area; 
+        document.getElementById('f-date').value = t.date;
+        document.getElementById('f-name').value = t.name; 
+        document.getElementById('f-code').value = t.code;
         document.getElementById('f-isBlooming').checked = t.isBlooming; toggleSubField('f-isBlooming', 'f-bloomStatus-box');
         document.getElementById('f-isBagged').checked = t.isBagged; toggleSubField('f-isBagged', 'f-bagQty-box');
-        document.getElementById('f-bagQty').value = t.bagQty || '';
-        document.getElementById('f-bloomStatus').value = t.bloomStatus || '';
-        document.getElementById('f-health').value = t.health || '良好'; document.getElementById('f-healthDesc').value = t.healthDesc || '';
-        document.getElementById('f-medDose').value = t.medDose || ''; document.getElementById('f-water').value = t.water || '';
-        document.getElementById('f-fert').value = t.fert || ''; document.getElementById('f-pruneBig').checked = t.pruneBig || false;
-        document.getElementById('f-pruneSmall').checked = t.pruneSmall || false; document.getElementById('f-user-static').value = t.lastUser;
-        if(isAdmin) { const r = rankStore[date] || {}; document.getElementById('r1-w').value = r.r1w || ''; document.getElementById('r1-b').value = r.r1b || ''; document.getElementById('r2-w').value = r.r2w || ''; document.getElementById('r2-b').value = r.r2b || ''; document.getElementById('r3-w').value = r.r3w || ''; document.getElementById('r3-b').value = r.r3b || ''; }
+        document.getElementById('f-pruneBig').checked = t.pruneBig || false;
+        document.getElementById('f-pruneSmall').checked = t.pruneSmall || false;
         showView('edit');
     }
 
     function prepareAdd() {
-        document.querySelectorAll('#view-edit input:not([type=date]):not([readonly]), #view-edit select, #view-edit textarea').forEach(e => { if(e.type==='checkbox') e.checked = false; else e.value = ''; });
-        document.getElementById('f-date').value = getToday(); document.getElementById('f-user-static').value = currentUser;
-        document.getElementById('f-bloomStatus-box').style.display = 'none';
-        document.getElementById('f-bagQty-box').style.display = 'none';
-        if(isAdmin) { const r = rankStore[getToday()] || {}; document.getElementById('r1-w').value = r.r1w || ''; document.getElementById('r1-b').value = r.r1b || ''; document.getElementById('r2-w').value = r.r2w || ''; document.getElementById('r2-b').value = r.r2b || ''; document.getElementById('r3-w').value = r.r3w || ''; document.getElementById('r3-b').value = r.r3b || ''; }
+        document.querySelectorAll('#view-edit input:not([type=date]):not([readonly]), #view-edit select').forEach(e => { if(e.type==='checkbox') e.checked = false; else e.value = ''; });
+        document.getElementById('f-date').value = getToday();
+        document.getElementById('f-user-static').value = currentUser;
         showView('edit');
     }
 
@@ -328,20 +264,6 @@
     }
 
     function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; }
-    
-    function exportExcel() { 
-        const ws = XLSX.utils.json_to_sheet(db); 
-        const wb = XLSX.utils.book_new(); 
-        XLSX.utils.book_append_sheet(wb, ws, "Data"); 
-        XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`); 
-        
-        const timeNow = new Date().toLocaleString();
-        localStorage.setItem('last_backup_time', timeNow);
-        lastBackup = timeNow;
-        if(document.getElementById('last-backup-display')) document.getElementById('last-backup-display').innerText = timeNow;
-        alert("備份完成！Excel 已匯出。");
-    }
-
     function clearAllData() { if(confirm("確定要刪除所有資料嗎？")) { db = []; localStorage.clear(); location.reload(); } }
     function logout() { location.reload(); }
 </script>
