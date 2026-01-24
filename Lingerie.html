@@ -23,37 +23,31 @@
         .btn-danger { background: var(--danger); }
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
-       
-        /* 預覽區域樣式 */
+        
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         .tag span { margin-left: 8px; color: var(--danger); font-weight: bold; cursor: pointer; }
+        .tag-model { background: #e2e8f0; border-color: #cbd5e0; } /* 型號標籤專用顏色 */
         .scan-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .mode-btn { font-size: 0.85rem; padding: 10px 5px; border: 2px solid transparent; opacity: 0.8; }
         .mode-active { border-color: #333; opacity: 1; outline: 3px solid #000; transform: scale(0.98); }
 
-        /* --- 核心列印定義 (不顯示在螢幕上) --- */
         #print-label-page, #print-invoice-page { display: none; }
 
         @media print {
             .no-print { display: none !important; }
             body { background: white; margin: 0; padding: 0; }
             @page { margin: 0; size: A4 portrait; }
-
-            /* 標籤模式：鶴屋64號 (38x38mm) */
             #print-label-page {
                 display: grid !important;
                 grid-template-columns: repeat(5, 38mm);
                 grid-template-rows: repeat(7, 38mm);
-                column-gap: 2.5mm;
-                row-gap: 0mm;
-                padding-left: 6.5mm;
-                padding-top: 15.5mm;
-                box-sizing: border-box;
-                page-break-after: always;
+                column-gap: 2.5mm; row-gap: 0mm;
+                padding-left: 6.5mm; padding-top: 15.5mm;
+                box-sizing: border-box; page-break-after: always;
             }
             .label-item {
                 width: 38mm; height: 38mm;
@@ -63,8 +57,6 @@
             }
             .label-item canvas { width: 22mm !important; height: 22mm !important; }
             .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
-
-            /* 出貨單模式 */
             #print-invoice-page { display: block !important; padding: 20mm; }
             .inv-table { width: 100%; border-collapse: collapse; }
             .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; }
@@ -90,15 +82,18 @@
         </div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
+        
         <div class="row-inputs">
             <input type="text" id="colorInp" placeholder="新增顏色名稱">
             <button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增顏色</button>
         </div>
         <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+        
         <div class="field">
+            <label>新增款式型號</label>
             <select id="setVendorRel"></select>
             <div class="row-inputs" style="margin-top:5px;">
-                <input type="text" id="setBraId" placeholder="型號">
+                <input type="text" id="setBraId" placeholder="輸入型號 (如: A001)">
                 <select id="itemType">
                     <optgroup label="女性內著"><option value="內衣內褲套組">內衣內褲套組</option><option value="單內衣">單內衣</option><option value="單內褲">單內褲</option></optgroup>
                     <optgroup label="塑身系列"><option value="連身塑身衣">連身塑身衣</option><option value="半身塑身衣">半身塑身衣</option><option value="塑身褲">塑身褲</option></optgroup>
@@ -108,6 +103,7 @@
                 </select>
             </div>
             <button class="btn-accent" onclick="addModel()">儲存款式</button>
+            <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
         </div>
     </div>
 
@@ -171,7 +167,6 @@
 </div>
 
 <div id="print-label-page"></div>
-
 <div id="print-invoice-page">
     <h2 id="inv-header" style="text-align:center;"></h2>
     <h3 style="text-align:center;">出貨明細單</h3>
@@ -226,8 +221,15 @@
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
         document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
-        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="vendors.splice(${idx},1);save()">×</span></div>`).join('');
-        document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c} <span onclick="colors.splice(${idx},1);save()">×</span></div>`).join('');
+        
+        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="deleteVendor(${idx})">×</span></div>`).join('');
+        document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c} <span onclick="deleteColor(${idx})">×</span></div>`).join('');
+        
+        // 渲染型號標籤 (含刪除功能)
+        document.getElementById('modelTags').innerHTML = models.map((m,idx) => 
+            `<div class="tag tag-model">${m.vCode}-${m.braId} <span onclick="deleteModel(${idx})">×</span></div>`
+        ).join('');
+
         updateModelSelect();
         document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx)=>{
             return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb||''}${i.bc||''} ${i.bz||''}</td>
@@ -237,16 +239,38 @@
 
     function updateCompName() { compName = document.getElementById('compNameInp').value; save(); }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
+    function deleteColor(idx) { if(confirm("刪除顏色？")) { colors.splice(idx,1); save(); } }
+    function deleteVendor(idx) { if(confirm("刪除廠商？相關型號不會消失但建議先清理。")) { vendors.splice(idx,1); save(); } }
+
+    function addModel() { 
+        const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value; 
+        if(v&&b){
+            models.push({vCode:v, braId:b, type:t}); 
+            document.getElementById('setBraId').value = ''; // 清空輸入框
+            save();
+        } 
+    }
+    
+    // 新增：刪除型號函式
+    function deleteModel(idx) {
+        if(confirm(`確定要刪除型號「${models[idx].braId}」嗎？\n這不會刪除已有的庫存紀錄。`)) {
+            models.splice(idx,1);
+            save();
+        }
+    }
+
     function updateModelSelect() {
         const v = document.getElementById('selectVendor').value;
         const fil = models.filter(m => m.vCode === v);
         document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId} (${m.type})</option>`).join('');
     }
+    
     function updateStock(vCode, braId, c, bb, bc, bz, qty) {
         let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
         if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty});
         save(); playBeep();
     }
+
     function handleManual(t) {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
@@ -268,24 +292,19 @@
             }
         });
     }
-    function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
-    function deleteItem(idx) { if(confirm("刪除？")) { inventory.splice(idx,1); save(); } }
-    function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save();} }
-    function addModel() { const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value; if(v&&b){models.push({vCode:v, braId:b, type:t}); save();} }
 
-    // --- 列印控制邏輯 ---
+    function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
+    function deleteItem(idx) { if(confirm("刪除庫存紀錄？")) { inventory.splice(idx,1); save(); } }
+    function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
 
     function prepareTags() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
         const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
-       
         const page = document.getElementById('print-label-page');
         const inv = document.getElementById('print-invoice-page');
         page.innerHTML = '';
-        inv.style.display = 'none'; // 確保列印標籤時不顯示出貨單
-       
-        // 產生 35 張標籤
+        inv.style.display = 'none'; 
         for(let i=0; i<35; i++) {
             const div = document.createElement('div');
             div.className = 'label-item';
@@ -293,12 +312,9 @@
             const txt = document.createElement('div');
             txt.className = 'txt';
             txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`;
-            div.appendChild(can);
-            div.appendChild(txt);
-            page.appendChild(div);
+            div.appendChild(can); div.appendChild(txt); page.appendChild(div);
             new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: 150 });
         }
-       
         document.getElementById('print-preview-zone').style.display = 'block';
         document.getElementById('preview-msg').innerText = `已產生 ${m.braId} (${c}) 整頁標籤，請準備鶴屋64號標籤紙。`;
         window.scrollTo(0, document.body.scrollHeight);
@@ -310,15 +326,11 @@
         const color = document.getElementById('selectColor').value;
         const qty = document.getElementById('braQty').value;
         const spec = `${m.braId} ${color} (${document.getElementById('braBand').value}${document.getElementById('braCup').value} ${document.getElementById('braSize').value})`;
-       
         invoiceItems.push({ name: spec, qty: qty });
-       
-        // 渲染單據
         document.getElementById('inv-header').innerText = compName;
         document.getElementById('print-date').innerText = new Date().toLocaleString();
         document.getElementById('inv-body').innerHTML = invoiceItems.map(i => `<tr><td>${i.name}</td><td style="text-align:center;">${i.qty}</td></tr>`).join('');
-       
-        document.getElementById('print-label-page').style.display = 'none'; // 確保列印單據時不顯示標籤
+        document.getElementById('print-label-page').style.display = 'none';
         document.getElementById('print-invoice-page').style.display = 'block';
         document.getElementById('print-preview-zone').style.display = 'block';
         document.getElementById('preview-msg').innerText = `已加入出貨單。目前共 ${invoiceItems.length} 項品項。`;
@@ -329,7 +341,7 @@
     function clearInvoice() { invoiceItems = []; document.getElementById('print-invoice-page').style.display = 'none'; closePreview(); }
     function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; save(); alert("OK"); }; r.readAsText(f); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; save(); alert("匯入成功！"); }; r.readAsText(f); }
     render();
 </script>
 </body>
