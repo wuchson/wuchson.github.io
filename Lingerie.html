@@ -23,8 +23,6 @@
         .btn-danger { background: var(--danger); }
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
-        
-        /* 預覽區域樣式 */
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
@@ -39,11 +37,11 @@
         #print-label-page, #print-invoice-page { display: none; }
 
         @media print {
-            .no-print { display: none !important; }
-            body { background: white; margin: 0; padding: 0; }
+            .no-print, #print-preview-zone { display: none !important; }
+            body { background: white; margin: 0; padding: 0; overflow: hidden; }
             @page { margin: 0; size: A4 portrait; }
 
-            /* 標籤模式：鶴屋64號 (38x38mm) */
+            /* 標籤模式：限制高度防止第二頁 */
             #print-label-page { 
                 display: grid !important; 
                 grid-template-columns: repeat(5, 38mm); 
@@ -53,19 +51,23 @@
                 padding-left: 6.5mm; 
                 padding-top: 15.5mm; 
                 box-sizing: border-box;
-                page-break-after: always;
+                height: 297mm; /* A4 總高度 */
+                max-height: 297mm;
+                overflow: hidden;
+                page-break-after: avoid !important;
             }
             .label-item {
                 width: 38mm; height: 38mm;
                 display: flex; flex-direction: column;
                 align-items: center; justify-content: center;
                 overflow: hidden; text-align: center; color: black; line-height: 1.2;
+                box-sizing: border-box;
             }
             .label-item canvas { width: 22mm !important; height: 22mm !important; }
             .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
 
             /* 出貨單模式 */
-            #print-invoice-page { display: block !important; padding: 20mm; }
+            #print-invoice-page { display: block !important; padding: 15mm; page-break-after: avoid; }
             .inv-table { width: 100%; border-collapse: collapse; }
             .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; }
         }
@@ -249,6 +251,8 @@
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
         updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)*(t==='OUT'?-1:1));
+        // 操作後重置數量為 1，方便下次操作
+        document.getElementById('braQty').value = 1;
     }
 
     async function startScan(mode) {
@@ -280,10 +284,12 @@
         
         const page = document.getElementById('print-label-page');
         const inv = document.getElementById('print-invoice-page');
-        page.innerHTML = '';
-        inv.style.display = 'none'; // 確保列印標籤時不顯示出貨單
         
-        // 產生 35 張標籤
+        // 重置狀態：隱藏其他列印區塊
+        inv.style.display = 'none';
+        page.style.display = 'grid'; 
+        page.innerHTML = '';
+        
         for(let i=0; i<35; i++) {
             const div = document.createElement('div');
             div.className = 'label-item';
@@ -298,7 +304,7 @@
         }
         
         document.getElementById('print-preview-zone').style.display = 'block';
-        document.getElementById('preview-msg').innerText = `已產生 ${m.braId} (${c}) 整頁標籤，請準備鶴屋64號標籤紙。`;
+        document.getElementById('preview-msg').innerText = `已產生 ${m.braId} 整頁標籤。`;
         window.scrollTo(0, document.body.scrollHeight);
     }
 
@@ -311,13 +317,14 @@
         
         invoiceItems.push({ name: spec, qty: qty });
         
-        // 渲染單據
+        // 重置狀態：隱藏標籤頁
+        document.getElementById('print-label-page').style.display = 'none';
+        document.getElementById('print-invoice-page').style.display = 'block';
+        
         document.getElementById('inv-header').innerText = compName;
         document.getElementById('print-date').innerText = new Date().toLocaleString();
         document.getElementById('inv-body').innerHTML = invoiceItems.map(i => `<tr><td>${i.name}</td><td style="text-align:center;">${i.qty}</td></tr>`).join('');
         
-        document.getElementById('print-label-page').style.display = 'none'; // 確保列印單據時不顯示標籤
-        document.getElementById('print-invoice-page').style.display = 'block';
         document.getElementById('print-preview-zone').style.display = 'block';
         document.getElementById('preview-msg').innerText = `已加入出貨單。目前共 ${invoiceItems.length} 項品項。`;
         window.scrollTo(0, document.body.scrollHeight);
@@ -327,7 +334,7 @@
     function clearInvoice() { invoiceItems = []; document.getElementById('print-invoice-page').style.display = 'none'; closePreview(); }
     function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; save(); alert("OK"); }; r.readAsText(f); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; save(); alert("匯入成功"); }; r.readAsText(f); }
     render();
 </script>
 </body>
