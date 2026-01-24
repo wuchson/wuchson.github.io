@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 完整功能版</title>
+    <title>Lingerie Pro - 旗艦完整版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <style>
         :root { --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78; }
         body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
@@ -23,7 +22,6 @@
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         .tag span { margin-left: 8px; color: var(--danger); font-weight: bold; cursor: pointer; }
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; }
-        .scan-btns { display: flex; gap: 10px; padding: 10px; background: #333; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
@@ -33,27 +31,36 @@
 
 <div class="container">
     <div class="card">
-        <h3>1. 廠商與款式設定</h3>
+        <h3>1. 廠商與品項設定</h3>
         <div class="row-inputs">
-            <input type="text" id="vCodeInp" placeholder="廠商代碼">
+            <input type="text" id="vCodeInp" placeholder="代碼(A01)">
             <input type="text" id="vNameInp" placeholder="廠商名稱">
         </div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" class="tag-group"></div>
         <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-        <div class="field"><label>選擇廠商</label><select id="setVendorRel"></select></div>
+        
         <div class="field">
+            <label>選擇廠商</label>
+            <select id="setVendorRel"></select>
+        </div>
+        <div class="field">
+            <label>品項類別</label>
             <select id="itemType" onchange="updateUI()">
                 <option value="內衣/內褲組">內衣/內褲組(套裝)</option>
-                <option value="內衣">內衣(單件)</option><option value="內褲">內褲(單件)</option>
-                <option value="束身衣">束身衣</option><option value="束身褲">束身褲</option>
-                <option value="保暖衣">保暖衣</option><option value="男內衣">男內衣</option>
-                <option value="男內褲">男內褲</option><option value="男保暖衣">男保暖衣</option>
+                <option value="內衣">內衣(單件)</option>
+                <option value="內褲">內褲(單件)</option>
+                <option value="束身衣">束身衣</option>
+                <option value="束身褲">束身褲</option>
+                <option value="保暖衣">保暖衣</option>
+                <option value="男內衣">男內衣</option>
+                <option value="男內褲">男內褲</option>
+                <option value="男保暖衣">男保暖衣</option>
             </select>
         </div>
         <div class="row-inputs">
-            <input type="text" id="setBraId" placeholder="主要型號">
-            <input type="text" id="setPantyId" placeholder="次要型號">
+            <input type="text" id="setBraId" placeholder="內衣型號">
+            <input type="text" id="setPantyId" placeholder="內褲型號">
         </div>
         <button class="btn-accent" onclick="addModel()">儲存新款式</button>
         <div id="modelTags" class="tag-group"></div>
@@ -64,28 +71,28 @@
         <button onclick="startScan()" style="background:#5a67d8; margin-bottom:10px;">📷 啟動掃描</button>
         <div id="scanner-container">
             <div id="reader"></div>
-            <div class="scan-btns"><button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button></div>
+            <div style="padding:10px; background:#333;"><button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button></div>
         </div>
         <div class="field"><label>廠商</label><select id="selectVendor" onchange="updateModelSelect()"></select></div>
         <div class="field"><label>款式</label><select id="selectModel"></select></div>
         <div class="field">
             <div class="row-inputs">
                 <select id="selectColor" style="flex:1.5;"></select>
-                <input type="text" id="newColorInp" placeholder="新顏色" style="flex:1;">
-                <button onclick="addColor()" style="flex:0.5; padding:0;">+</button>
+                <input type="text" id="newColorInp" placeholder="新色" style="flex:1;">
+                <button onclick="addColor()" style="flex:0.5;">+</button>
             </div>
         </div>
         <div class="row-inputs">
             <select id="braCup"><option value="-">-</option><script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
             <select id="braBand"><option value="-">-</option><script>for(let i=30; i<=52; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
             <select id="pantySize">
-                <option value="SS">SS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option>
-                <option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="4XL">4XL</option><option value="無">無</option>
+                <option value="無">無</option><option value="SS">SS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option>
+                <option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="4XL">4XL</option>
             </select>
         </div>
         <div class="row-inputs">
-            <div class="field"><label>上裝數量</label><input type="number" id="braQty" value="1"></div>
-            <div class="field"><label>下裝數量</label><input type="number" id="pantyQty" value="1"></div>
+            <input type="number" id="braQty" placeholder="上裝數量" value="1">
+            <input type="number" id="pantyQty" placeholder="下裝數量" value="1">
         </div>
         <div class="row-inputs">
             <button onclick="handleStock('IN')">📥 入庫</button>
@@ -124,53 +131,29 @@
         render();
     }
 
-    // 匯入資料功能
-    function importData(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            try {
-                const data = JSON.parse(ev.target.result);
-                if (data.v && data.m && data.i) {
-                    vendors = data.v; colors = data.c || ["黑色", "膚色", "粉色"];
-                    models = data.m; inventory = data.i;
-                    save();
-                    alert("資料還原成功！");
-                } else { alert("檔案格式不正確"); }
-            } catch (err) { alert("讀取失敗：" + err); }
-        };
-        reader.readAsText(file);
-    }
-
-    function exportData() {
-        const b = new Blob([JSON.stringify({v:vendors, c:colors, m:models, i:inventory})], {type:"application/json"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = "Lingerie_Backup.json"; a.click();
-    }
-
     function updateUI() {
         const type = document.getElementById('itemType').value;
-        const pInp = document.getElementById('setPantyId');
-        pInp.style.display = (type === "內衣" || type === "內褲") ? "none" : "block";
-    }
-
-    function addColor() {
-        const inp = document.getElementById('newColorInp');
-        const val = inp.value.trim();
-        if (val && !colors.includes(val)) { colors.push(val); inp.value = ''; save(); }
+        document.getElementById('setBraId').style.display = (type === "內褲") ? "none" : "block";
+        document.getElementById('setPantyId').style.display = (type === "內衣") ? "none" : "block";
     }
 
     function render() {
-        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code}-${v.name} <span onclick="vendors.splice(${idx},1);save()">×</span></div>`).join('');
+        // 渲染標籤
+        document.getElementById('vendorTags').innerHTML = vendors.map((v,i) => `<div class="tag">${v.code}-${v.name} <span onclick="vendors.splice(${i},1);save()">×</span></div>`).join('');
+        document.getElementById('modelTags').innerHTML = models.map((m,i) => `<div class="tag">${m.type}:${m.braId||m.pantyId} <span onclick="models.splice(${i},1);save()">×</span></div>`).join('');
+        
+        // 渲染選單
         const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
         document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
-        document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.type}:${m.braId||m.pantyId} <span onclick="models.splice(${idx},1);save()">×</span></div>`).join('');
+        
         updateModelSelect();
-        document.getElementById('stockTableBody').innerHTML = inventory.map((i,idx)=>`
+        
+        // 渲染表格
+        document.getElementById('stockTableBody').innerHTML = inventory.map((i, idx) => `
             <tr><td><b>${i.vFull}</b><br>${i.type}</td><td>${i.c}<br>${i.bc}${i.bb}/${i.ps}</td>
-            <td>${i.bq != 0 ? '上:'+i.bq : ''} ${i.pq != 0 ? '下:'+i.pq : ''}</td>
+            <td>上:${i.bq} 下:${i.pq}</td>
             <td><button onclick="inventory.splice(${idx},1);save()" class="btn-danger" style="padding:5px;">刪</button></td></tr>`).join('');
     }
 
@@ -178,6 +161,11 @@
         const c = document.getElementById('vCodeInp').value.toUpperCase().trim();
         const n = document.getElementById('vNameInp').value.trim();
         if(c && n) { vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value=''; }
+    }
+
+    function addColor() {
+        const val = document.getElementById('newColorInp').value.trim();
+        if (val && !colors.includes(val)) { colors.push(val); document.getElementById('newColorInp').value = ''; save(); }
     }
 
     function addModel() {
@@ -195,29 +183,6 @@
         document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>[${m.type}] ${m.braId||''} ${m.pantyId||''}</option>`).join('');
     }
 
-    async function startScan() {
-        document.getElementById('scanner-container').style.display = 'block';
-        if (html5QrCode) await stopScan();
-        html5QrCode = new Html5Qrcode("reader");
-        try {
-            await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
-                const p = txt.split(',');
-                if(p.length >= 6) { 
-                    document.getElementById('selectVendor').value = p[0]; updateModelSelect();
-                    document.getElementById('selectColor').value = p[3];
-                    document.getElementById('braCup').value = p[4]; document.getElementById('braBand').value = p[5];
-                    if(p[6]) document.getElementById('pantySize').value = p[6];
-                }
-                stopScan();
-            });
-        } catch (e) { stopScan(); }
-    }
-
-    async function stopScan() {
-        if (html5QrCode) { try { await html5QrCode.stop(); } catch(e){} html5QrCode = null; }
-        document.getElementById('scanner-container').style.display = 'none';
-    }
-
     function handleStock(t) {
         const mStr = document.getElementById('selectModel').value;
         if(!mStr) return;
@@ -228,7 +193,44 @@
         if(t==='OUT') { bq=-bq; pq=-pq; }
         let it = inventory.find(x => x.vCode===m.vCode && x.bi===m.braId && x.pi===m.pantyId && x.c===c && x.bc===bc && x.bb===bb && x.ps===ps);
         if(it) { it.bq+=bq; it.pq+=pq; } else { inventory.push({vCode:m.vCode, vFull:`${m.vCode}-${m.vName}`, type:m.type, bi:m.braId, pi:m.pantyId, c, bc, bb, ps, bq, pq}); }
-        save(); alert(t === 'IN' ? "已入庫" : "已出貨");
+        save(); alert(t === 'IN' ? "入庫成功" : "出貨成功");
+    }
+
+    async function startScan() {
+        document.getElementById('scanner-container').style.display = 'block';
+        if (html5QrCode) await stopScan();
+        html5QrCode = new Html5Qrcode("reader");
+        await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+            const p = txt.split(',');
+            if(p.length >= 6) { 
+                document.getElementById('selectVendor').value = p[0]; updateModelSelect();
+                document.getElementById('selectColor').value = p[3]; document.getElementById('braCup').value = p[4]; 
+                document.getElementById('braBand').value = p[5]; if(p[6]) document.getElementById('pantySize').value = p[6];
+            }
+            stopScan();
+        }).catch(e => stopScan());
+    }
+
+    async function stopScan() {
+        if (html5QrCode) { try { await html5QrCode.stop(); } catch(e){} html5QrCode = null; }
+        document.getElementById('scanner-container').style.display = 'none';
+    }
+
+    function exportData() {
+        const b = new Blob([JSON.stringify({v:vendors, c:colors, m:models, i:inventory})], {type:"application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = "Lingerie_Backup.json"; a.click();
+    }
+
+    function importData(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                vendors = data.v || []; colors = data.c || colors; models = data.m || []; inventory = data.i || [];
+                save(); alert("還原成功");
+            } catch (err) { alert("讀取失敗"); }
+        };
+        reader.readAsText(e.target.files[0]);
     }
 
     render();
