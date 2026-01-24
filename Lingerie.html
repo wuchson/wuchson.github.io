@@ -113,7 +113,7 @@
 
         <div class="row-inputs">
             <button onclick="handleStock('IN')">📥 入庫</button>
-            <button class="btn-success" onclick="handleStock('OUT')">📤 出貨</button>
+            <button class="btn-success" onclick="checkStockThenOut()">📤 出貨</button>
         </div>
 
         <div class="row-inputs" style="margin-top:10px;">
@@ -184,6 +184,26 @@
         return c + (sizePart ? " " + sizePart : "");
     }
 
+    // 出貨前的庫存檢查
+    function checkStockThenOut() {
+        const mStr = document.getElementById('selectModel').value;
+        if(!mStr) return;
+        const m = JSON.parse(mStr);
+        const qty = parseInt(document.getElementById('braQty').value);
+        const color = document.getElementById('selectColor').value;
+        const band = document.getElementById('braBand').value;
+        const cup = document.getElementById('braCup').value;
+        const bz = document.getElementById('braSize').value;
+
+        let item = inventory.find(i => i.vCode === m.vCode && i.braId === m.braId && i.c === color && i.bb === band && i.bc === cup && i.bz === bz);
+        let currentStock = item ? item.bq : 0;
+
+        if(currentStock < qty) {
+            if(!confirm(`⚠️ 庫存不足！\n目前庫存：${currentStock} 件\n預計出貨：${qty} 件\n確定要繼續扣除嗎？`)) return;
+        }
+        handleStock('OUT');
+    }
+
     function handleStock(t) {
         const mStr = document.getElementById('selectModel').value;
         if(!mStr) { alert("請先選擇款式"); return; }
@@ -192,7 +212,8 @@
         const band = document.getElementById('braBand').value;
         const cup = document.getElementById('braCup').value;
         const bz = document.getElementById('braSize').value;
-        const qty = parseInt(document.getElementById('braQty').value) * (t==='OUT' ? -1 : 1);
+        const qtyInp = parseInt(document.getElementById('braQty').value);
+        const qty = qtyInp * (t==='OUT' ? -1 : 1);
         
         let item = inventory.find(i => i.vCode === m.vCode && i.braId === m.braId && i.c === color && i.bb === band && i.bc === cup && i.bz === bz);
         if (item) item.bq += qty;
@@ -217,15 +238,33 @@
                     }
                 }
                 if(!found) { alert("找不到該型號，請先新增款式"); stopScan(); return; }
+                
                 document.getElementById('selectColor').value = p[3];
                 document.getElementById('braBand').value = p[4] || '-';
                 document.getElementById('braCup').value = p[5] || '-';
                 document.getElementById('braSize').value = p[6] || '-';
+                
                 stopScan();
+
+                // 彈窗邏輯
                 setTimeout(() => {
-                    const act = prompt("【掃描成功】\n規格：" + getSpecStr(p[3], p[4], p[5], p[6]) + "\n1:入庫(1件) 2:出貨(1件) 0:僅填入資料", "1");
-                    if(act === "1") handleStock('IN');
-                    else if(act === "2") handleStock('OUT');
+                    const specName = getSpecStr(p[3], p[4], p[5], p[6]);
+                    let userQty = prompt(`【掃描成功】\n品項：${p[1]}\n規格：${specName}\n\n請輸入數量：`, "1");
+                    
+                    if (userQty === null) return; 
+                    let qty = parseInt(userQty);
+                    if (isNaN(qty) || qty <= 0) { alert("請輸入有效的數量！"); return; }
+
+                    document.getElementById('braQty').value = qty;
+                    const act = prompt(`數量：${qty}\n請選擇動作：\n1: 📥 入庫\n2: 📤 出貨\n0: 僅填入`, "1");
+
+                    if (act === "1") {
+                        handleStock('IN');
+                        alert("✅ 已入庫");
+                    } else if (act === "2") {
+                        checkStockThenOut();
+                        alert("📤 已出貨");
+                    }
                 }, 400);
             }
         });
