@@ -2,117 +2,138 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lingerie Pro - 廠商名稱修復版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lingerie Pro - 手機直式優化版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <style>
         :root { --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78; }
-        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; line-height: 1.5; }
-        .container { max-width: 1000px; margin: auto; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 12px; margin: 0 0 15px 0; font-size: 1.1rem; }
-        .flex-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 15px; }
-        .field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-        label { font-size: 0.85rem; font-weight: bold; color: #888; }
-        input, select { width: 100%; padding: 10px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; min-height: 46px; }
-        button { padding: 0 15px; min-height: 46px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        
+        /* 基礎樣式重置 */
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
+        .container { max-width: 600px; margin: auto; }
+        
+        /* 卡片與間距 */
+        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
+
+        /* 直式排版核心：Flex 方向 */
+        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
+        .flex-group { display: flex; flex-direction: column; gap: 10px; }
+        .row-inputs { display: flex; gap: 8px; width: 100%; }
+        .row-inputs > * { flex: 1; }
+
+        label { font-size: 0.8rem; font-weight: bold; color: #888; }
+        input, select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; appearance: none; }
+        
+        /* 按鈕風格 */
+        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:active { opacity: 0.7; transform: scale(0.98); }
         .btn-accent { background: var(--accent); }
         .btn-success { background: var(--success); }
-        .btn-danger { background: var(--danger); }
-        .btn-scan { background: #5a67d8; width: 100%; margin-bottom: 10px; }
-        .tag { background: #f0f2f1; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #e0e5e3; display: flex; align-items: center; gap: 5px; }
-        .tag span { cursor: pointer; color: #999; }
-        .table-wrapper { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid #eee; }
-        table { width: 100%; border-collapse: collapse; background: #fff; min-width: 800px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f9f9f9; font-size: 0.92rem; }
-        #labelContent { margin: 20px auto; padding: 10px; background: white; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; box-sizing: border-box; }
-        #qrCanvas { width: 85px !important; height: 85px !important; }
-        @media print { body * { visibility: hidden; } #labelContent, #labelContent * { visibility: visible; } #labelContent { border: none !important; position: absolute; left: 0; top: 0; margin: 0; } }
+        .btn-danger { background: var(--danger); padding: 5px 10px; font-size: 14px; width: auto; }
+        .btn-scan { background: #5a67d8; margin-bottom: 15px; }
+
+        /* 標籤群組 */
+        .tag-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
+        .tag span { margin-left: 5px; color: #999; font-weight: bold; font-size: 1.2rem; }
+
+        /* 庫存表格滾動 */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; min-width: 500px; font-size: 0.85rem; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
+
+        /* 標籤預覽 */
+        #labelContent { margin: 10px auto; padding: 15px; background: white; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        #qrCanvas { width: 80px !important; height: 80px !important; }
+
+        @media print { .no-print { display: none; } body { background: white; padding: 0; } #labelContent { border: none; position: absolute; left: 0; top: 0; } }
     </style>
 </head>
 <body>
 
 <div class="container no-print">
     <div class="card">
-        <h3>1. 基礎資料管理</h3>
-        <div class="flex-row">
-            <div class="field" style="flex:0 0 80px;"><label>代碼</label><input type="text" id="vCode" placeholder="A01"></div>
-            <div class="field"><label>廠商名稱</label><input type="text" id="vName" placeholder="例如: 艾波"></div>
-            <button onclick="addVendor()">新增廠商</button>
+        <h3>1. 廠商與款式設定</h3>
+        <div class="flex-group">
+            <div class="row-inputs">
+                <input type="text" id="vCode" placeholder="代碼(A01)">
+                <input type="text" id="vName" placeholder="廠商名稱">
+            </div>
+            <button onclick="addVendor()">+ 新增廠商</button>
+            <div id="vendorTags" class="tag-group"></div>
+            
+            <hr style="width:100%; border:0; border-top:1px solid #eee; margin:10px 0;">
+            
+            <div class="field"><label>選擇廠商</label><select id="setVendorRel"></select></div>
+            <div class="row-inputs">
+                <input type="text" id="setBraId" placeholder="內衣型號">
+                <input type="text" id="setBraId" placeholder="內衣型號" style="display:none;"> <input type="text" id="setPantyId" placeholder="內褲型號">
+            </div>
+            <button class="btn-accent" onclick="addModel()">儲存新款式</button>
+            <div id="modelTags" class="tag-group"></div>
         </div>
-        <div id="vendorTags" class="flex-row" style="margin-top:5px; gap:5px;"></div>
-
-        <div class="flex-row" style="margin-top:20px;">
-            <div class="field" style="flex:0 0 150px;"><label>選擇廠商</label><select id="setVendorRel"></select></div>
-            <div class="field"><label>內衣型號</label><input type="text" id="setBraId" placeholder="2583"></div>
-            <div class="field"><label>內褲型號</label><input type="text" id="setPantyId" placeholder="2584"></div>
-            <button class="btn-accent" onclick="addModel()">儲存款式</button>
-        </div>
-        <div id="modelTags" class="flex-row" style="margin-top:5px; gap:5px;"></div>
-        
-        <div class="flex-row" style="margin-top:15px;">
-            <div class="field"><label>顏色</label><input type="text" id="cName" placeholder="黑色"></div>
-            <button onclick="addColor()">新增顏色</button>
-        </div>
-        <div id="colorTags" class="flex-row" style="margin-top:5px; gap:5px;"></div>
     </div>
 
     <div class="card">
-        <h3>2. 庫存進出貨作業</h3>
-        <button class="btn-scan" onclick="startScan()">📷 掃描條碼</button>
-        <div id="reader" style="width: 100%; display:none; margin-top: 10px; border-radius: 8px; overflow: hidden;"></div>
+        <h3>2. 進出貨作業</h3>
+        <button class="btn-scan" onclick="startScan()">📷 開啟掃描儀</button>
+        <div id="reader" style="width: 100%; display:none; margin-bottom: 15px;"></div>
         
-        <div class="flex-row" style="margin-top:15px;">
+        <div class="flex-group">
             <div class="field"><label>廠商</label><select id="selectVendor" onchange="updateModelSelect()"></select></div>
-            <div class="field"><label>款式選擇</label><select id="selectModel" onchange="toggleQtyInputs()"></select></div>
+            <div class="field"><label>款式</label><select id="selectModel" onchange="toggleQtyInputs()"></select></div>
             <div class="field"><label>顏色</label><select id="selectColor"></select></div>
-        </div>
-        <div class="flex-row">
-            <div class="field"><label>規格尺寸</label>
-                <div style="display:flex; gap:5px;">
-                    <select id="braCup"><script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
-                    <select id="braBand"><script>for(let i=30; i<=50; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
-                    <select id="pantySize">
-                        <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="無">無</option>
-                    </select>
-                </div>
+            
+            <label>規格尺寸</label>
+            <div class="row-inputs">
+                <select id="braCup"><script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
+                <select id="braBand"><script>for(let i=30; i<=50; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
+                <select id="pantySize">
+                    <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="無">無</option>
+                </select>
             </div>
-            <div class="field" id="braQtyField"><label>內衣數量</label><input type="number" id="braQty" value="1"></div>
-            <div class="field" id="pantyQtyField"><label>內褲數量</label><input type="number" id="pantyQty" value="1"></div>
-        </div>
-        <div class="flex-row">
-            <button style="flex:1" onclick="handleStock('IN')">📥 補貨入庫</button>
-            <button style="flex:1" class="btn-success" onclick="handleStock('OUT')">📤 出貨銷貨</button>
+
+            <div class="row-inputs" style="margin-top:10px;">
+                <div class="field" id="braQtyField"><label>內衣數量</label><input type="number" id="braQty" value="1"></div>
+                <div class="field" id="pantyQtyField"><label>內褲數量</label><input type="number" id="pantyQty" value="1"></div>
+            </div>
+
+            <div class="row-inputs">
+                <button onclick="handleStock('IN')">📥 入庫</button>
+                <button class="btn-success" onclick="handleStock('OUT')">📤 出貨</button>
+            </div>
         </div>
     </div>
 
     <div class="card" id="labelCard" style="display:none; border: 2px solid var(--accent);">
         <h3>🏷️ 標籤預覽</h3>
         <div id="labelContent">
-            <div class="label-text" id="labelText"></div>
+            <div id="labelText"></div>
             <canvas id="qrCanvas"></canvas>
         </div>
-        <div style="text-align:center;"><button class="btn-accent" onclick="window.print()">🖨️ 列印標籤</button></div>
+        <button class="btn-accent" onclick="window.print()">🖨️ 確認列印</button>
     </div>
 
     <div class="card">
-        <h3>3. 庫存清單與管理</h3>
+        <h3>3. 庫存清單</h3>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>廠商</th><th>內衣型號</th><th>內褲型號</th><th>顏色</th><th>規格</th><th>內衣</th><th>內褲</th><th>操作</th></tr></thead>
+                <thead><tr><th>廠商</th><th>型號(衣/褲)</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
-        <div style="margin-top:20px; display:flex; gap:10px;">
-            <button style="flex:1; background:#666;" onclick="exportData()">💾 備份資料</button>
-            <button style="flex:1; background:#666;" onclick="document.getElementById('importFile').click()">📥 還原資料</button>
+        <div class="flex-group" style="margin-top:20px;">
+            <button style="background:#666;" onclick="exportData()">💾 備份資料</button>
+            <button style="background:#666;" onclick="document.getElementById('importFile').click()">📥 還原資料</button>
             <input type="file" id="importFile" style="display:none" onchange="importData(event)">
         </div>
     </div>
 </div>
 
 <script>
+    // [資料邏輯與前幾版本一致，確保穩定性]
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
     let colors = JSON.parse(localStorage.getItem('C_D')) || [];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
@@ -128,26 +149,20 @@
     }
 
     function render() {
-        // 渲染標籤
         document.getElementById('vendorTags').innerHTML = vendors.map((v,i)=>`<div class="tag">${v.code}-${v.name} <span onclick="vendors.splice(${i},1);save()">×</span></div>`).join('');
         document.getElementById('colorTags').innerHTML = colors.map((c,i)=>`<div class="tag">${c} <span onclick="colors.splice(${i},1);save()">×</span></div>`).join('');
         document.getElementById('modelTags').innerHTML = models.map((m,i)=>`<div class="tag">${m.vName}:衣${m.braId}/褲${m.pantyId} <span onclick="models.splice(${i},1);save()">×</span></div>`).join('');
-        
-        // 更新下拉選單 (修正點：使用 code+name)
         const vHtml = vendors.map(v=>`<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vHtml;
         document.getElementById('selectVendor').innerHTML = vHtml;
         document.getElementById('selectColor').innerHTML = colors.map(c=>`<option value="${c}">${c}</option>`).join('');
-        
         updateModelSelect();
-        
-        // 庫存清單渲染 (修正點：顯示完整廠商名)
         document.getElementById('stockTableBody').innerHTML = inventory.map((i,idx)=>`
             <tr>
-                <td>${i.vFull}</td><td>${i.bi||'-'}</td><td>${i.pi||'-'}</td><td>${i.c}</td><td>${i.bc}${i.bb}/${i.ps}</td>
-                <td style="font-weight:bold">${i.bq}</td><td style="font-weight:bold">${i.pq}</td>
-                <td><button onclick="previewLabel(${idx})" style="padding:4px;background:var(--accent)">標籤</button>
-                    <button onclick="inventory.splice(${idx},1);save()" style="padding:4px;background:var(--danger)">刪</button></td>
+                <td>${i.vFull}</td><td>${i.bi||'/'}<br>${i.pi||'/'}</td><td>${i.bc}${i.bb}/${i.ps}</td>
+                <td>衣:${i.bq}<br>褲:${i.pq}</td>
+                <td><button onclick="previewLabel(${idx})" style="padding:5px; margin-bottom:5px;">標籤</button><br>
+                    <button class="btn-danger" onclick="if(confirm('刪除?')) {inventory.splice(${idx},1);save();}">刪</button></td>
             </tr>`).join('');
     }
 
@@ -156,31 +171,26 @@
         const n = document.getElementById('vName').value.trim();
         if(c && n){ vendors.push({code:c, name:n}); save(); document.getElementById('vCode').value=''; document.getElementById('vName').value=''; }
     }
-
     function addColor() { const n = document.getElementById('cName').value.trim(); if(n){colors.push(n); save(); document.getElementById('cName').value='';}}
-
     function addModel() {
         const vCode = document.getElementById('setVendorRel').value;
-        const vendor = vendors.find(v => v.code === vCode);
-        const b = document.getElementById('setBraId').value.trim();
+        const v = vendors.find(x => x.code === vCode);
+        const b = document.querySelectorAll('#setBraId')[0].value.trim();
         const p = document.getElementById('setPantyId').value.trim();
-        if(vendor && (b||p)){ models.push({vCode:vCode, vName:vendor.name, braId:b, pantyId:p}); save(); }
+        if(v && (b||p)){ models.push({vCode:vCode, vName:v.name, braId:b, pantyId:p}); save(); }
     }
-
     function updateModelSelect() {
         const vCode = document.getElementById('selectVendor').value;
         const fil = models.filter(m => m.vCode === vCode);
         document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>衣:${m.braId||'X'} / 褲:${m.pantyId||'X'}</option>`).join('');
         toggleQtyInputs();
     }
-
     function toggleQtyInputs() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
-        document.getElementById('braQtyField').style.visibility = m.braId ? 'visible' : 'hidden';
-        document.getElementById('pantyQtyField').style.visibility = m.pantyId ? 'visible' : 'hidden';
+        document.getElementById('braQtyField').style.display = m.braId ? 'flex' : 'none';
+        document.getElementById('pantyQtyField').style.display = m.pantyId ? 'flex' : 'none';
     }
-
     function handleStock(type) {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
@@ -189,42 +199,25 @@
         let bQty = parseInt(document.getElementById('braQty').value) || 0;
         let pQty = parseInt(document.getElementById('pantyQty').value) || 0;
         if(type === 'OUT') { bQty = -bQty; pQty = -pQty; }
-
         let it = inventory.find(i => i.vCode===m.vCode && i.bi===m.braId && i.pi===m.pantyId && i.c===col && i.bc===bc && i.bb===bb && i.ps===ps);
-        if(it) {
-            it.bq += bQty; it.pq += pQty;
-        } else {
-            inventory.push({ vCode:m.vCode, vFull: `${m.vCode}-${m.vName}`, bi:m.braId, pi:m.pantyId, c:col, bc:bc, bb:bb, ps:ps, bq:bQty, pq:pQty });
-        }
-        save(); alert(type==='IN'?'補貨完成':'出貨完成');
+        if(it) { it.bq += bQty; it.pq += pQty; } 
+        else { inventory.push({ vCode:m.vCode, vFull: `${m.vCode}-${m.vName}`, bi:m.braId, pi:m.pantyId, c:col, bc:bc, bb:bb, ps:ps, bq:bQty, pq:pQty }); }
+        save(); alert(type==='IN'?'已入庫':'已出貨');
     }
-
     function previewLabel(idx) {
         const i = inventory[idx]; document.getElementById('labelCard').style.display = 'block';
-        document.getElementById('labelText').innerHTML = `<div style="font-size:1.1rem; font-weight:bold;">${i.vFull}</div><div style="font-size:0.85rem;">${i.bi?'衣:'+i.bi:''} ${i.pi?'褲:'+i.pi:''}</div><div style="font-size:1.15rem; border:2px solid #000; padding:2px 6px; font-weight:bold; display:inline-block; margin-top:5px;">${i.bc}${i.bb} / ${i.ps}</div>`;
+        document.getElementById('labelText').innerHTML = `<div style="font-weight:bold;">${i.vFull}</div><div style="font-size:0.8rem;">衣:${i.bi||'-'} 褲:${i.pi||'-'}</div><div style="font-size:1.1rem; border:2px solid #000; padding:2px 5px; font-weight:bold; display:inline-block; margin-top:5px;">${i.bc}${i.bb} / ${i.ps}</div>`;
         new QRious({ element: document.getElementById('qrCanvas'), value: `${i.vCode},${i.bi},${i.pi},${i.c},${i.bc},${i.bb},${i.ps}`, size: 200 });
-        document.getElementById('labelCard').scrollIntoView({behavior:"smooth"});
+        document.getElementById('labelCard').scrollIntoView();
     }
-
-    function exportData() {
-        const b = new Blob([JSON.stringify({v:vendors, c:colors, m:models, i:inventory})], {type: "application/json"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `Lingerie_Pro_Data.json`; a.click();
-    }
-    function importData(e) {
-        const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; colors=d.c; models=d.m; inventory=d.i; save(); alert("已還原"); };
-        r.readAsText(e.target.files[0]);
-    }
+    function exportData() { const b = new Blob([JSON.stringify({v:vendors, c:colors, m:models, i:inventory})], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `Lingerie_Mobile.json`; a.click(); }
+    function importData(e) { const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; colors=d.c; models=d.m; inventory=d.i; save(); alert("還原完成"); }; r.readAsText(e.target.files[0]); }
     async function startScan() {
         document.getElementById('reader').style.display = 'block';
         html5QrCode = new Html5Qrcode("reader");
-        await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+        await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} }, (txt) => {
             const p = txt.split(',');
-            if(p.length >= 6) {
-                document.getElementById('selectVendor').value = p[0]; updateModelSelect();
-                document.getElementById('selectColor').value = p[3];
-                document.getElementById('braCup').value = p[4]; document.getElementById('braBand').value = p[5];
-                if(p[6]) document.getElementById('pantySize').value = p[6];
-            }
+            if(p.length >= 6) { document.getElementById('selectVendor').value = p[0]; updateModelSelect(); document.getElementById('selectColor').value = p[3]; document.getElementById('braCup').value = p[4]; document.getElementById('braBand').value = p[5]; if(p[6]) document.getElementById('pantySize').value = p[6]; }
             stopScan();
         });
     }
