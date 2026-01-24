@@ -34,9 +34,9 @@
         .mode-btn { font-size: 0.85rem; padding: 10px 5px; border: 2px solid transparent; opacity: 0.8; }
         .mode-active { border-color: #333; opacity: 1; outline: 3px solid #000; transform: scale(0.98); }
         #print-label-page, #print-invoice-page { display: none; }
-        
-        /* 微調出貨單內的修改按鈕樣式 */
-        .qty-btn { width: auto; padding: 4px 10px; font-size: 14px; margin: 2px; }
+
+        /* 為了修改按鈕特別增加的樣式 */
+        .edit-qty-btn { width: auto; padding: 5px 12px; font-size: 14px; margin: 0 2px; }
 
         @media print {
             .no-print { display: none !important; }
@@ -96,8 +96,9 @@
     <div class="card">
         <h3>2. 進出貨與操作</h3>
         <div class="scan-mode-grid">
-            <button class="mode-btn" id="m-in1" style="background:#4299e1;" onclick="startScan('IN_AUTO')">📥 連續入庫</button>
-            <button class="mode-btn" id="m-out1" style="background:#48bb78;" onclick="startScan('OUT_AUTO')">📤 掃描出貨 (加入清單)</button>
+            <button class="mode-btn" id="m-in1" style="background:#4299e1;" onclick="startScan('IN_AUTO')">📥 連續入 1</button>
+            <button class="mode-btn" id="m-inN" style="background:#3182ce;" onclick="startScan('IN_MANUAL')">📥 入庫(填量)</button>
+            <button class="mode-btn" id="m-out1" style="background:#48bb78;" onclick="startScan('OUT_AUTO')">📤 連續出貨 (掃完再扣庫存)</button>
         </div>
         <div id="scanner-container">
             <div id="scan-feedback">掃描成功！</div>
@@ -129,10 +130,11 @@
     </div>
 
     <div id="print-preview-zone">
-        <h4 style="margin:0 0 10px 0; color:var(--accent);">單據預覽 / 修改區域</h4>
+        <h4 style="margin:0 0 10px 0; color:var(--accent);">預覽區域已準備</h4>
         <div id="preview-msg" style="font-size:14px; margin-bottom:15px; color:#555; background:#fff9f0; padding:10px; border-radius:6px;"></div>
         <div class="row-inputs" id="preview-actions">
-            <button onclick="closePreview()" class="btn-danger">關閉預覽</button>
+            <button onclick="window.print()" style="background:#333;">🖨️ 列印</button>
+            <button onclick="closePreview()" class="btn-danger" style="flex:0.5">關閉預覽</button>
         </div>
     </div>
 
@@ -158,19 +160,17 @@
     <h2 id="inv-header" style="text-align:center;"></h2>
     <h3 style="text-align:center;">出貨明細單 (待確認)</h3>
     <table class="inv-table">
-        <thead><tr><th>品項規格</th><th style="width:120px; text-align:center;">數量</th></tr></thead>
+        <thead><tr><th>品項規格</th><th style="width:150px; text-align:center;">數量 / 操作</th></tr></thead>
         <tbody id="inv-body"></tbody>
     </table>
     <div style="margin-top:30px; display:flex; justify-content: space-between;">
         <span>經手人：__________</span>
         <span>列印日期：<span id="print-date"></span></span>
     </div>
-    <div class="no-print" style="margin-top:30px; display:flex; flex-direction:column; gap:10px;">
-        <button onclick="confirmAndShip()" style="background:var(--success);">✅ 確認出貨 (正式扣庫存)</button>
-        <div style="display:flex; gap:10px;">
-            <button onclick="window.print()" style="background:#333; flex:1;">🖨️ 列印單據</button>
-            <button class="btn-danger" onclick="clearInvoice()" style="flex:1;">🗑️ 清空單據</button>
-        </div>
+    <div class="no-print" style="margin-top:30px; display:flex; gap:10px;">
+        <button onclick="confirmAndShip()" style="background:var(--success); flex:1;">✅ 確認出貨 (正式扣庫存)</button>
+        <button onclick="window.print()" style="background:#333; flex:0.5;">🖨️ 僅列印單據</button>
+        <button class="btn-danger" onclick="clearInvoice()" style="flex:0.5;">🗑️ 清空單據</button>
     </div>
 </div>
 
@@ -225,7 +225,7 @@
     function updateCompName() { compName = document.getElementById('compNameInp').value; save(); }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
     function deleteColor(idx) { if(confirm("刪除顏色？")) { colors.splice(idx,1); save(); } }
-    function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
+    function deleteVendor(idx) { if(confirm("刪除廠商？相關型號不會消失。")) { vendors.splice(idx,1); save(); } }
     function addModel() {
         const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value;
         if(v&&b){ models.push({vCode:v, braId:b, type:t}); document.getElementById('setBraId').value = ''; save(); }
@@ -241,14 +241,13 @@
     function updateStock(vCode, braId, c, bb, bc, bz, qty) {
         let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
         if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty});
-        save();
+        save(); playBeep();
     }
 
     function handleManual(t) {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
         updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value));
-        playBeep();
     }
 
     async function startScan(mode) {
@@ -258,13 +257,13 @@
             if(isProcessing) return;
             const p = txt.split(','); if(p.length < 4) return;
             const [vCode, braId, , c, bb, bc, bz] = p;
+
             isProcessing = true;
             if(mode.includes('OUT')) {
                 addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1);
-                document.getElementById('scan-feedback').innerText = "已加入清單";
+                document.getElementById('scan-feedback').innerText = "已加入出貨單";
             } else {
                 updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1);
-                playBeep();
                 document.getElementById('scan-feedback').innerText = "入庫成功";
             }
             document.getElementById('scan-feedback').style.display = 'block';
@@ -288,39 +287,45 @@
         document.getElementById('inv-header').innerText = compName;
         document.getElementById('print-date').innerText = new Date().toLocaleString();
         
+        // 核心修改：渲染出貨單時增加操作按鈕
         document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => `
             <tr>
                 <td>${i.name}</td>
                 <td style="text-align:center;">
-                    <span style="font-weight:bold; font-size:1.1rem; display:block; margin-bottom:5px;">${i.qty}</span>
-                    <div class="no-print">
-                        <button class="qty-btn" style="background:var(--primary);" onclick="editInvoiceItem(${idx}, 1)">+1</button>
-                        <button class="qty-btn" style="background:var(--accent);" onclick="editInvoiceItem(${idx}, -1)">-1</button>
-                        <button class="qty-btn" style="background:var(--danger);" onclick="deleteInvoiceItem(${idx})">刪</button>
+                    <span style="font-weight:bold; font-size:16px;">${i.qty}</span>
+                    <div class="no-print" style="margin-top:5px;">
+                        <button class="edit-qty-btn" style="background:var(--primary);" onclick="changeInvoiceQty(${idx}, 1)">+1</button>
+                        <button class="edit-qty-btn" style="background:var(--accent);" onclick="changeInvoiceQty(${idx}, -1)">-1</button>
+                        <button class="edit-qty-btn" style="background:var(--danger);" onclick="removeInvoiceItem(${idx})">刪</button>
                     </div>
                 </td>
             </tr>`).join('');
-        
+
         document.getElementById('print-label-page').style.display = 'none';
         document.getElementById('print-invoice-page').style.display = 'block';
         document.getElementById('print-preview-zone').style.display = 'block';
-        document.getElementById('preview-msg').innerText = `出貨單包含 ${invoiceItems.length} 項商品。請確認數量後執行出貨。`;
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        document.getElementById('preview-msg').innerText = `出貨單已更新，目前累計 ${invoiceItems.length} 項商品。`;
     }
 
-    function editInvoiceItem(index, change) {
-        invoiceItems[index].qty = parseInt(invoiceItems[index].qty) + change;
-        if (invoiceItems[index].qty <= 0) {
-            deleteInvoiceItem(index);
+    // 修改單據數量的函式
+    function changeInvoiceQty(idx, delta) {
+        invoiceItems[idx].qty += delta;
+        if (invoiceItems[idx].qty <= 0) {
+            removeInvoiceItem(idx);
         } else {
             refreshInvoiceUI();
         }
     }
 
-    function deleteInvoiceItem(index) {
-        if (confirm("移除此項？")) {
-            invoiceItems.splice(index, 1);
-            if (invoiceItems.length === 0) clearInvoice(); else refreshInvoiceUI();
+    // 移除單據項目的函式
+    function removeInvoiceItem(idx) {
+        if(confirm("確定要移除此筆出貨項目？")) {
+            invoiceItems.splice(idx, 1);
+            if(invoiceItems.length === 0) {
+                closePreview();
+            } else {
+                refreshInvoiceUI();
+            }
         }
     }
 
@@ -331,12 +336,14 @@
     }
 
     function confirmAndShip() {
-        if (invoiceItems.length === 0) return alert("單據空空如也！");
-        if (!confirm("確定出貨並扣除庫存嗎？")) return;
+        if (invoiceItems.length === 0) return alert("單據中無商品！");
+        if (!confirm("確定出貨？執行後將「扣除庫存」且無法取消。")) return;
+
         invoiceItems.forEach(item => {
             updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -Math.abs(item.qty));
         });
-        alert("出貨完成，庫存已自動扣除！");
+
+        alert("出貨成功，庫存已扣除！");
         clearInvoice();
     }
 
@@ -350,7 +357,8 @@
         const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
         const printType = document.getElementById('printType').value;
         const page = document.getElementById('print-label-page');
-        page.innerHTML = ''; page.style.display = 'grid';
+        page.innerHTML = '';
+        page.style.display = 'grid';
         document.getElementById('print-invoice-page').style.display = 'none';
         document.body.classList.remove('print-mode-a4', 'print-mode-single');
         if(printType === 'A4') {
@@ -361,7 +369,7 @@
             page.appendChild(createLabelItem(m, c, bb, bc, bz, 200));
         }
         document.getElementById('print-preview-zone').style.display = 'block';
-        document.getElementById('preview-msg').innerText = "標籤已產生。";
+        document.getElementById('preview-msg').innerText = "標籤預覽已產生。";
     }
 
     function createLabelItem(m, c, bb, bc, bz, qrSize) {
