@@ -34,8 +34,6 @@
         .mode-btn { font-size: 0.85rem; padding: 10px 5px; border: 2px solid transparent; opacity: 0.8; }
         .mode-active { border-color: #333; opacity: 1; outline: 3px solid #000; transform: scale(0.98); }
         #print-label-page, #print-invoice-page { display: none; }
-
-        /* 為了修改按鈕特別增加的樣式 */
         .edit-qty-btn { width: auto; padding: 5px 12px; font-size: 14px; margin: 0 2px; }
 
         @media print {
@@ -259,13 +257,26 @@
             const [vCode, braId, , c, bb, bc, bz] = p;
 
             isProcessing = true;
+            
             if(mode.includes('OUT')) {
                 addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1);
                 document.getElementById('scan-feedback').innerText = "已加入出貨單";
+            } else if (mode === 'IN_MANUAL') {
+                playBeep(); 
+                const inputQty = prompt(`[掃描成功] ${braId} - ${c}\n請輸入入庫數量:`, "1");
+                const qty = parseInt(inputQty);
+                if (!isNaN(qty) && qty > 0) {
+                    updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', qty);
+                    document.getElementById('scan-feedback').innerText = `入庫成功: ${qty} 件`;
+                } else {
+                    isProcessing = false;
+                    return;
+                }
             } else {
                 updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1);
                 document.getElementById('scan-feedback').innerText = "入庫成功";
             }
+            
             document.getElementById('scan-feedback').style.display = 'block';
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800);
         });
@@ -274,11 +285,8 @@
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) {
         const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`;
         let existing = invoiceItems.find(i => i.name === spec);
-        if(existing) {
-            existing.qty = parseInt(existing.qty) + parseInt(qty);
-        } else {
-            invoiceItems.push({ vCode, braId, c, bb, bc, bz, name: spec, qty: parseInt(qty) });
-        }
+        if(existing) { existing.qty = parseInt(existing.qty) + parseInt(qty); } 
+        else { invoiceItems.push({ vCode, braId, c, bb, bc, bz, name: spec, qty: parseInt(qty) }); }
         playBeep();
         refreshInvoiceUI();
     }
@@ -286,8 +294,6 @@
     function refreshInvoiceUI() {
         document.getElementById('inv-header').innerText = compName;
         document.getElementById('print-date').innerText = new Date().toLocaleString();
-        
-        // 核心修改：渲染出貨單時增加操作按鈕
         document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => `
             <tr>
                 <td>${i.name}</td>
@@ -300,32 +306,21 @@
                     </div>
                 </td>
             </tr>`).join('');
-
         document.getElementById('print-label-page').style.display = 'none';
         document.getElementById('print-invoice-page').style.display = 'block';
         document.getElementById('print-preview-zone').style.display = 'block';
         document.getElementById('preview-msg').innerText = `出貨單已更新，目前累計 ${invoiceItems.length} 項商品。`;
     }
 
-    // 修改單據數量的函式
     function changeInvoiceQty(idx, delta) {
         invoiceItems[idx].qty += delta;
-        if (invoiceItems[idx].qty <= 0) {
-            removeInvoiceItem(idx);
-        } else {
-            refreshInvoiceUI();
-        }
+        if (invoiceItems[idx].qty <= 0) removeInvoiceItem(idx); else refreshInvoiceUI();
     }
 
-    // 移除單據項目的函式
     function removeInvoiceItem(idx) {
         if(confirm("確定要移除此筆出貨項目？")) {
             invoiceItems.splice(idx, 1);
-            if(invoiceItems.length === 0) {
-                closePreview();
-            } else {
-                refreshInvoiceUI();
-            }
+            if(invoiceItems.length === 0) closePreview(); else refreshInvoiceUI();
         }
     }
 
@@ -338,11 +333,7 @@
     function confirmAndShip() {
         if (invoiceItems.length === 0) return alert("單據中無商品！");
         if (!confirm("確定出貨？執行後將「扣除庫存」且無法取消。")) return;
-
-        invoiceItems.forEach(item => {
-            updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -Math.abs(item.qty));
-        });
-
+        invoiceItems.forEach(item => { updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -Math.abs(item.qty)); });
         alert("出貨成功，庫存已扣除！");
         clearInvoice();
     }
@@ -357,8 +348,7 @@
         const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
         const printType = document.getElementById('printType').value;
         const page = document.getElementById('print-label-page');
-        page.innerHTML = '';
-        page.style.display = 'grid';
+        page.innerHTML = ''; page.style.display = 'grid';
         document.getElementById('print-invoice-page').style.display = 'none';
         document.body.classList.remove('print-mode-a4', 'print-mode-single');
         if(printType === 'A4') {
