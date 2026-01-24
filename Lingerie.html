@@ -49,9 +49,33 @@
         <div class="field"><label>選擇廠商設定款式</label><select id="setVendorRel"></select></div>
         <div class="row-inputs">
             <input type="text" id="setBraId" placeholder="型號">
-            <select id="itemType" style="flex:0.6;">
-                <option value="內衣">內衣</option><option value="內褲">內褲</option>
-                <option value="套裝">套裝</option><option value="塑身">塑身</option>
+            <select id="itemType" style="flex:1.2;">
+                <optgroup label="女性內著">
+                    <option value="內衣褲套組">內衣褲套組</option>
+                    <option value="單內衣">單內衣</option>
+                    <option value="單內褲">單內褲</option>
+                </optgroup>
+                <optgroup label="塑身系列">
+                    <option value="連身塑身衣">連身塑身衣</option>
+                    <option value="半身塑身衣">半身塑身衣</option>
+                    <option value="塑身褲">塑身褲</option>
+                </optgroup>
+                <optgroup label="居家/保暖">
+                    <option value="保暖衣">保暖衣</option>
+                    <option value="保暖褲">保暖褲</option>
+                    <option value="睡衣">睡衣</option>
+                    <option value="睡褲">睡褲</option>
+                </optgroup>
+                <optgroup label="情趣系列">
+                    <option value="情趣內衣">情趣內衣</option>
+                    <option value="情趣內褲">情趣內褲</option>
+                </optgroup>
+                <optgroup label="男性系列">
+                    <option value="男內衣">男內衣</option>
+                    <option value="男內褲">男內褲</option>
+                    <option value="男保暖衣">男保暖衣</option>
+                    <option value="男保暖褲">男保暖褲</option>
+                </optgroup>
             </select>
         </div>
         <button class="btn-accent" onclick="addModel()">儲存款式</button>
@@ -69,17 +93,17 @@
         </div>
 
         <div class="row-inputs">
-            <select id="selectColor"></select>
-            <select id="braBand">
+            <select id="selectColor" title="顏色"></select>
+            <select id="braBand" title="下圍">
                 <option value="-">下圍-</option>
                 <script>for(let i=30; i<=52; i+=2) document.write(`<option value="${i}">${i}</option>`);</script>
                 <option value="F">Free</option>
             </select>
-            <select id="braCup">
+            <select id="braCup" title="罩杯">
                 <option value="-">罩杯-</option>
                 <script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script>
             </select>
-            <select id="braSize">
+            <select id="braSize" title="尺碼">
                 <option value="-">尺碼-</option>
                 <script>["SS","S","M","L","XL","XXL","3XL","4XL"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script>
             </select>
@@ -119,7 +143,7 @@
         <h3>3. 庫存管理</h3>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>品項</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
+                <thead><tr><th>品項 (分類)</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
@@ -137,7 +161,7 @@
     document.getElementById('custom-inv-title').innerText = storeName + " - 出貨單";
 
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
-    let colors = JSON.parse(localStorage.getItem('C_D')) || ["黑色", "膚色", "粉色", "紫色", "藍色", "紅色", "白色"];
+    let colors = JSON.parse(localStorage.getItem('C_D')) || ["黑色", "膚色", "粉色", "紫色", "藍色", "紅色", "白色", "咖啡", "灰色"];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
     let invoiceItems = []; 
@@ -171,11 +195,8 @@
         const qty = parseInt(document.getElementById('braQty').value) * (t==='OUT' ? -1 : 1);
         
         let item = inventory.find(i => i.vCode === m.vCode && i.braId === m.braId && i.c === color && i.bb === band && i.bc === cup && i.bz === bz);
-        if (item) {
-            item.bq += qty;
-        } else {
-            inventory.push({ vCode: m.vCode, vFull: m.vName, braId: m.braId, c: color, bb: band, bc: cup, bz: bz, bq: qty });
-        }
+        if (item) item.bq += qty;
+        else inventory.push({ vCode: m.vCode, vFull: m.vName, braId: m.braId, type: m.type, c: color, bb: band, bc: cup, bz: bz, bq: qty });
         save();
     }
 
@@ -196,15 +217,13 @@
                     }
                 }
                 if(!found) { alert("找不到該型號，請先新增款式"); stopScan(); return; }
-                
                 document.getElementById('selectColor').value = p[3];
                 document.getElementById('braBand').value = p[4] || '-';
                 document.getElementById('braCup').value = p[5] || '-';
                 document.getElementById('braSize').value = p[6] || '-';
-                
                 stopScan();
                 setTimeout(() => {
-                    const act = prompt("掃描成功！規格：" + getSpecStr(p[3], p[4], p[5], p[6]) + "\n1:入庫(1件) 2:出貨(1件) 0:僅填入資料", "1");
+                    const act = prompt("【掃描成功】\n規格：" + getSpecStr(p[3], p[4], p[5], p[6]) + "\n1:入庫(1件) 2:出貨(1件) 0:僅填入資料", "1");
                     if(act === "1") handleStock('IN');
                     else if(act === "2") handleStock('OUT');
                 }, 400);
@@ -220,12 +239,12 @@
         document.getElementById('selectVendor').innerHTML = vOps;
         document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
         document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="vendors.splice(${idx},1);save()">×</span></div>`).join('');
-        document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.braId} <span onclick="models.splice(${idx},1);save()">×</span></div>`).join('');
+        document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.braId}(${m.type}) <span onclick="models.splice(${idx},1);save()">×</span></div>`).join('');
         updateModelSelect();
         document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx)=>{
             const isLow = i.bq <= 3;
             return `<tr class="${isLow ? 'low-stock' : ''}">
-                <td>${i.vCode}<br><small>${i.braId}</small></td>
+                <td>${i.vCode}<br><small>${i.braId} (${i.type || '未分類'})</small></td>
                 <td>${getSpecStr(i.c, i.bb, i.bc, i.bz)}</td>
                 <td style="color:${isLow ?'#e53e3e':'#48bb78'};font-weight:bold;">${i.bq}${isLow ? '<br><span class="warning-badge">需補貨</span>' : ''}</td>
                 <td><button onclick="deleteItem(${inventory.length-1-idx})" class="btn-danger" style="padding:5px 10px; font-size:12px;">刪</button></td>
@@ -236,20 +255,21 @@
     function updateModelSelect() {
         const vCode = document.getElementById('selectVendor').value;
         const fil = models.filter(m => m.vCode === vCode);
-        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join('');
+        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId} (${m.type})</option>`).join('');
     }
     function addVendor() { const c = document.getElementById('vCodeInp').value.toUpperCase().trim(), n = document.getElementById('vNameInp').value.trim(); if(c && n) { vendors.push({code:c, name:n}); save(); } }
     function addModel() {
         const vCode = document.getElementById('setVendorRel').value, v = vendors.find(x => x.code === vCode);
         const b = document.getElementById('setBraId').value.trim();
-        if(v && b) { models.push({vCode, vName:v.name, braId:b, type: document.getElementById('itemType').value}); save(); }
+        const t = document.getElementById('itemType').value;
+        if(v && b) { models.push({vCode, vName:v.name, braId:b, type: t}); save(); }
     }
     function generateTag() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr), c = document.getElementById('selectColor').value;
         const bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
         new QRious({ element: document.getElementById('qr-canvas'), value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: 200 });
-        document.getElementById('qr-text').innerHTML = `${m.vCode} / ${m.braId}<br>${getSpecStr(c, bb, bc, bz)}`;
+        document.getElementById('qr-text').innerHTML = `${m.vCode} / ${m.braId} (${m.type})<br>${getSpecStr(c, bb, bc, bz)}`;
         document.getElementById('tag-content').style.display = 'block'; document.getElementById('invoice-content').style.display = 'none';
         document.getElementById('print-area').style.display = 'block';
     }
@@ -257,7 +277,7 @@
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
         const spec = getSpecStr(document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value);
-        invoiceItems.push({ name: `${m.vName}-${m.braId}`, spec: spec, qty: document.getElementById('braQty').value });
+        invoiceItems.push({ name: `${m.vName}-${m.braId}(${m.type})`, spec: spec, qty: document.getElementById('braQty').value });
         document.getElementById('inv-date').innerText = "列印日期: " + new Date().toLocaleDateString();
         document.getElementById('inv-body').innerHTML = invoiceItems.map(item => `<tr><td>${item.name}<br>${item.spec}</td><td>${item.qty} 件</td></tr>`).join('');
         document.getElementById('tag-content').style.display = 'none'; document.getElementById('invoice-content').style.display = 'block';
@@ -274,7 +294,7 @@
         const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); if(confirm("覆蓋現有資料？")) { vendors=d.v||[]; models=d.m||[]; inventory=d.i||[]; colors=d.c||colors; save(); alert("匯入成功"); } } catch(err) { alert("錯誤"); } };
         r.readAsText(f); e.target.value = '';
     }
-    function resetSystem() { if(confirm("⚠️ 警告：這將徹底清空所有資料！") && confirm("資料將無法恢復，確定重設？")) { localStorage.clear(); location.reload(); } }
+    function resetSystem() { if(confirm("確定清空所有資料？") && confirm("資料不可恢復！")) { localStorage.clear(); location.reload(); } }
     render();
 </script>
 </body>
