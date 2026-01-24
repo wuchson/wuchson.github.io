@@ -40,6 +40,14 @@
 
 <div class="container">
     <div class="card no-print">
+        <h3>0. 系統環境設定</h3>
+        <div class="field">
+            <label>公司名稱 (將顯示於單據)</label>
+            <input type="text" id="compNameInp" placeholder="例如：Lingerie Pro 精品內著" onchange="updateCompName()">
+        </div>
+    </div>
+
+    <div class="card no-print">
         <h3>1. 基礎設定 (廠商/款式/顏色)</h3>
         
         <div class="row-inputs">
@@ -126,11 +134,15 @@
     <div id="print-area">
         <div id="tag-content"><canvas id="qr-canvas"></canvas><div id="qr-text" style="font-weight:bold; font-size:1.2rem; margin-top:10px;"></div></div>
         <div id="invoice-content" style="display:none;">
-            <h2 id="inv-title">出貨單</h2>
+            <h2 id="inv-company" style="margin-bottom:5px;"></h2>
+            <h3 id="inv-title" style="border:none; padding:0; margin-bottom:20px;">出貨明細單</h3>
             <table style="width:100%; border-collapse:collapse; margin-top:10px;" border="1">
                 <thead><tr><th>品項規格</th><th>數量</th></tr></thead>
                 <tbody id="inv-body"></tbody>
             </table>
+            <div style="margin-top:20px; text-align:right; font-size:0.9rem;">
+                列印日期：<span id="print-date"></span>
+            </div>
             <button class="no-print btn-danger" onclick="clearInvoice()" style="margin-top:10px;">清空單據</button>
         </div>
         <button class="no-print" onclick="window.print()" style="margin-top:15px; background:#333; color:white;">確認列印</button>
@@ -166,7 +178,8 @@
         osc.start(); osc.stop(audioCtx.currentTime + 0.15);
     }
 
-    // 資料初始化，加入顏色陣列
+    // 資料初始化
+    let compName = localStorage.getItem('C_N') || "我的內衣小舖";
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
@@ -176,6 +189,7 @@
     let isProcessing = false;
 
     function save() {
+        localStorage.setItem('C_N', compName);
         localStorage.setItem('V_D', JSON.stringify(vendors));
         localStorage.setItem('M_D', JSON.stringify(models));
         localStorage.setItem('I_D', JSON.stringify(inventory));
@@ -184,23 +198,21 @@
     }
 
     function render() {
-        // 渲染廠商選單
+        document.getElementById('compNameInp').value = compName;
+        
         const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
         
-        // 渲染顏色選單
         const cOps = colors.map(c => `<option value="${c}">${c}</option>`).join('');
         document.getElementById('selectColor').innerHTML = cOps;
 
-        // 渲染標籤
         document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="vendors.splice(${idx},1);save()">×</span></div>`).join('');
         document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.braId} <span onclick="models.splice(${idx},1);save()">×</span></div>`).join('');
         document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c} <span onclick="colors.splice(${idx},1);save()">×</span></div>`).join('');
         
         updateModelSelect();
         
-        // 渲染庫存表格
         document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx)=>{
             const realIdx = inventory.length-1-idx;
             return `<tr>
@@ -210,6 +222,11 @@
                 <td><button onclick="deleteItem(${realIdx})" class="btn-danger" style="padding:4px 8px; font-size:12px;">刪</button></td>
             </tr>`;
         }).join('');
+    }
+
+    function updateCompName() {
+        compName = document.getElementById('compNameInp').value.trim();
+        save();
     }
 
     function addColor() {
@@ -257,15 +274,11 @@
             if(isProcessing) return;
             const p = txt.split(','); if(p.length < 4) return;
             const [vCode, braId, , c, bb, bc, bz] = p;
-            
-            // 掃描後如果系統內沒這個顏色，自動加入
             if(c && !colors.includes(c)) { colors.push(c); save(); }
-
             document.getElementById('selectVendor').value = vCode; updateModelSelect();
             const opts = document.getElementById('selectModel').options;
             for(let i=0; i<opts.length; i++) { if(JSON.parse(opts[i].value).braId === braId) { document.getElementById('selectModel').selectedIndex = i; break; } }
             document.getElementById('selectColor').value = c; document.getElementById('braBand').value = bb||'-'; document.getElementById('braCup').value = bc||'-'; document.getElementById('braSize').value = bz||'-';
-            
             if(mode.includes('AUTO')) {
                 isProcessing = true; updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', mode==='IN_AUTO'?1:-1);
                 document.getElementById('scan-feedback').style.display = 'block';
@@ -280,13 +293,13 @@
 
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('mode-active')); }
     function deleteItem(idx) { if(confirm("確定刪除此項庫存？")) { inventory.splice(idx,1); save(); } }
-    function addVendor() { 
-        const c = document.getElementById('vCodeInp').value.toUpperCase().trim(), n = document.getElementById('vNameInp').value.trim(); 
-        if(c && n) { vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value=''; } 
+    function addVendor() { 
+        const c = document.getElementById('vCodeInp').value.toUpperCase().trim(), n = document.getElementById('vNameInp').value.trim(); 
+        if(c && n) { vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value=''; } 
     }
-    function addModel() { 
-        const vCode = document.getElementById('setVendorRel').value, b = document.getElementById('setBraId').value.trim(), t = document.getElementById('itemType').value; 
-        if(vCode && b) { models.push({vCode, braId:b, type:t}); save(); document.getElementById('setBraId').value=''; } 
+    function addModel() { 
+        const vCode = document.getElementById('setVendorRel').value, b = document.getElementById('setBraId').value.trim(), t = document.getElementById('itemType').value; 
+        if(vCode && b) { models.push({vCode, braId:b, type:t}); save(); document.getElementById('setBraId').value=''; } 
     }
     function generateTag() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
@@ -302,21 +315,24 @@
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
         invoiceItems.push({ name: `${m.braId} ${document.getElementById('selectColor').value} (${document.getElementById('braBand').value}${document.getElementById('braCup').value} ${document.getElementById('braSize').value})`, qty: document.getElementById('braQty').value });
+        
+        document.getElementById('inv-company').innerText = compName;
+        document.getElementById('print-date').innerText = new Date().toLocaleString();
         document.getElementById('inv-body').innerHTML = invoiceItems.map(i => `<tr><td>${i.name}</td><td>${i.qty}</td></tr>`).join('');
         document.getElementById('tag-content').style.display='none'; document.getElementById('invoice-content').style.display='block'; document.getElementById('print-area').style.display='block';
     }
     function clearInvoice() { invoiceItems = []; document.getElementById('print-area').style.display='none'; }
-    function exportData() { 
-        const data = {v:vendors, m:models, i:inventory, c:colors}; // 加入顏色導出
-        const blob = new Blob([JSON.stringify(data)], {type:"application/json"}); 
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup_${new Date().toLocaleDateString()}.json`; a.click(); 
+    function exportData() { 
+        const data = {v:vendors, m:models, i:inventory, c:colors, cn:compName}; 
+        const blob = new Blob([JSON.stringify(data)], {type:"application/json"}); 
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup_${new Date().toLocaleDateString()}.json`; a.click(); 
     }
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) { 
-        const f = e.target.files[0]; if(!f) return; 
-        const r = new FileReader(); 
-        r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v||[]; models=d.m||[]; inventory=d.i||[]; colors=d.c||colors; save(); alert("匯入成功"); } catch(err) { alert("檔案格式錯誤"); } }; 
-        r.readAsText(f); 
+    function importData(e) { 
+        const f = e.target.files[0]; if(!f) return; 
+        const r = new FileReader(); 
+        r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v||[]; models=d.m||[]; inventory=d.i||[]; colors=d.c||colors; compName=d.cn||compName; save(); alert("匯入成功"); } catch(err) { alert("檔案格式錯誤"); } }; 
+        r.readAsText(f); 
     }
     render();
 </script>
