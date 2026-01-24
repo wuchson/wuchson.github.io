@@ -25,44 +25,35 @@
         .tag span { margin-left: 8px; color: var(--danger); font-weight: bold; cursor: pointer; }
 
         /* --- 核心列印區域設定 --- */
-        #print-area-labels { display: none; }
-        #print-area-invoice { 
-            display: none; 
-            background: white; 
-            padding: 20px; 
-            margin-top: 20px; 
-            border: 2px dashed var(--primary); 
-            border-radius: 12px;
-        }
+        #print-area-labels, #print-area-invoice { display: none; }
 
         @media print {
             .no-print { display: none !important; }
             html, body { background: white !important; margin: 0 !important; padding: 0 !important; }
             @page { size: A4 portrait; margin: 0 !important; }
 
-            /* 鶴屋64號標籤 */
+            /* 只有當元素被 JS 設為 display: grid/block 時才會印出 */
             #print-area-labels { 
-                display: grid !important; 
-                grid-template-columns: repeat(5, 38mm) !important; 
-                grid-template-rows: repeat(7, 38mm) !important;
-                column-gap: 2mm !important; 
-                row-gap: 0mm !important; 
-                padding-left: 6.0mm !important; 
-                padding-top: 15.5mm !important; 
-                box-sizing: border-box !important;
+                display: grid; 
+                grid-template-columns: repeat(5, 38mm); 
+                grid-template-rows: repeat(7, 38mm);
+                column-gap: 2mm; 
+                row-gap: 0mm; 
+                padding-left: 6.0mm; 
+                padding-top: 15.5mm; 
+                box-sizing: border-box;
                 page-break-after: always;
             }
             .label-item {
-                width: 38mm !important; height: 38mm !important;
-                display: flex !important; flex-direction: column !important;
-                align-items: center !important; justify-content: center !important;
-                overflow: hidden !important; text-align: center; color: black;
+                width: 38mm; height: 38mm;
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                overflow: hidden; text-align: center; color: black;
             }
             .label-item canvas { width: 25mm !important; height: 25mm !important; }
-            .label-item div { font-size: 8pt !important; font-weight: bold; line-height: 1.1; margin-top: 1mm; }
+            .label-item div { font-size: 8pt; font-weight: bold; line-height: 1.1; margin-top: 1mm; }
 
-            /* 出貨明細單 */
-            #print-area-invoice { display: block !important; border: none; padding: 10mm; }
+            #print-area-invoice { display: block; border: none; padding: 10mm; }
             table { width: 100%; border-collapse: collapse; margin-top: 15px; }
             th, td { border: 1px solid black; padding: 8px; text-align: left; }
         }
@@ -125,7 +116,7 @@
         </div>
 
         <div class="row-inputs" style="margin-top:10px;">
-            <button class="btn-accent" onclick="generateTag()">🖨️ 產生 35 格標籤</button>
+            <button class="btn-accent" onclick="generateTag()">🖨️ 產生標籤並列印</button>
             <button style="background:#4a5568;" onclick="generateInvoice()">📄 加入出貨單</button>
         </div>
     </div>
@@ -161,7 +152,7 @@
     </div>
     <div class="no-print" style="margin-top:30px; display:flex; gap:10px;">
         <button class="btn-danger" onclick="clearInvoice()" style="flex:1">清空單據</button>
-        <button onclick="window.print()" style="background:#333; color:white; flex:2">執行列印 (A4)</button>
+        <button onclick="doPrintInvoice()" style="background:#333; color:white; flex:2">執行列印出貨單 (A4)</button>
     </div>
 </div>
 
@@ -237,14 +228,18 @@
     }
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
 
+    // 修正：產生標籤時隱藏出貨單
     function generateTag() {
         const mStr = document.getElementById('selectModel').value; if(!mStr || mStr === "無款式") return;
         const m = JSON.parse(mStr);
         const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
+        
         const area = document.getElementById('print-area-labels');
+        const invArea = document.getElementById('print-area-invoice');
+        
         area.innerHTML = ''; 
-        document.getElementById('print-area-invoice').style.display = 'none';
-        area.style.display = 'grid';
+        invArea.style.display = 'none'; // 隱藏出貨單
+        area.style.display = 'grid'; // 顯示標籤
 
         for (let i = 0; i < 35; i++) {
             const item = document.createElement('div'); item.className = 'label-item';
@@ -255,7 +250,10 @@
             area.appendChild(item);
             new QRious({ element: canvas, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: 180 });
         }
-        setTimeout(() => window.print(), 500);
+        setTimeout(() => {
+            window.print();
+            area.style.display = 'none'; // 列印完隱藏標籤區
+        }, 500);
     }
 
     function generateInvoice() {
@@ -281,10 +279,16 @@
             </tr>
         `).join('');
         
-        document.getElementById('print-area-labels').style.display = 'none';
+        document.getElementById('print-area-labels').style.display = 'none'; // 隱藏標籤區
         const invArea = document.getElementById('print-area-invoice');
-        invArea.style.display = 'block';
+        invArea.style.display = 'block'; // 顯示出貨單
         invArea.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 修正：列印出貨單時確保標籤區隱藏
+    function doPrintInvoice() {
+        document.getElementById('print-area-labels').style.display = 'none';
+        window.print();
     }
 
     function clearInvoice() { if(confirm("確定清空單據？")) { invoiceItems = []; document.getElementById('print-area-invoice').style.display = 'none'; } }
