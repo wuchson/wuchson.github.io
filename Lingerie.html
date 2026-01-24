@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 專業智慧庫存版</title>
+    <title>Lingerie Pro - 專業智慧庫存系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <style>
@@ -13,8 +13,8 @@
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
         .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
-        .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; }
-        input, select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
+        .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
         button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:active { opacity: 0.7; }
         .btn-accent { background: var(--accent); }
@@ -41,35 +41,27 @@
     <div class="card no-print">
         <h3>1. 廠商與款式設定</h3>
         <div class="row-inputs">
-            <input type="text" id="vCodeInp" placeholder="廠商代碼 (如: V01)">
+            <input type="text" id="vCodeInp" placeholder="廠商代碼">
             <input type="text" id="vNameInp" placeholder="廠商名稱">
         </div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" class="tag-group"></div>
-        
         <div class="field"><label>選擇廠商設定款式</label><select id="setVendorRel"></select></div>
-        <div class="field">
-            <select id="itemType">
-                <option value="內衣/內褲組">內衣/內褲組(套裝)</option>
-                <option value="內衣">內衣(單件)</option><option value="內褲">內褲(單件)</option>
-                <option value="束身衣">束身衣</option><option value="束身褲">束身褲</option>
-            </select>
-        </div>
         <div class="row-inputs">
-            <input type="text" id="setBraId" placeholder="主要型號 (如: B123)">
-            <input type="text" id="setPantyId" placeholder="次要型號 (選填)">
+            <input type="text" id="setBraId" placeholder="型號 (如: B123)">
+            <select id="itemType" style="flex:0.6;">
+                <option value="內衣">內衣</option><option value="內褲">內褲</option>
+                <option value="套裝">套裝</option><option value="塑身">塑身</option>
+            </select>
         </div>
         <button class="btn-accent" onclick="addModel()">儲存款式</button>
         <div id="modelTags" class="tag-group"></div>
     </div>
 
-    <div class="card no-print" id="action-section">
-        <h3>2. 進出貨與標籤列印</h3>
+    <div class="card no-print">
+        <h3>2. 進出貨與標籤</h3>
         <button onclick="startScan()" style="background:#5a67d8; margin-bottom:10px;">📷 啟動掃描槍</button>
-        <div id="scanner-container">
-            <div id="reader"></div>
-            <button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button>
-        </div>
+        <div id="scanner-container"><div id="reader"></div><button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button></div>
         
         <div class="field"><label>廠商與款式</label>
             <select id="selectVendor" onchange="updateModelSelect()"></select>
@@ -77,13 +69,27 @@
         </div>
 
         <div class="row-inputs">
-            <select id="selectColor"></select>
-            <select id="braCup"><option value="-">-</option><script>"ABCDE".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
-            <select id="braBand"><option value="-">-</option><script>for(let i=32; i<=42; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
+            <select id="selectColor" title="顏色"></select>
+            
+            <select id="braBand" title="下圍">
+                <option value="-">下圍-</option>
+                <script>for(let i=30; i<=52; i+=2) document.write(`<option value="${i}">${i}</option>`);</script>
+                <option value="F">Free</option>
+            </select>
+
+            <select id="braCup" title="罩杯">
+                <option value="-">罩杯-</option>
+                <script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script>
+            </select>
+
+            <select id="braSize" title="尺碼">
+                <option value="-">尺碼-</option>
+                <script>["SS","S","M","L","XL","XXL","3XL","4XL"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script>
+            </select>
         </div>
         
         <div class="row-inputs">
-            <div class="field"><label>數量</label><input type="number" id="braQty" value="1"></div>
+            <div class="field" style="flex:1;"><label>數量</label><input type="number" id="braQty" value="1"></div>
         </div>
 
         <div class="row-inputs">
@@ -99,80 +105,77 @@
         <div id="print-area">
             <div id="tag-content">
                 <canvas id="qr-canvas"></canvas>
-                <div id="qr-text" style="font-weight:bold; margin-top:5px;"></div>
+                <div id="qr-text" style="font-weight:bold; margin-top:5px; font-size: 1.1rem;"></div>
             </div>
             <div id="invoice-content" style="display:none;">
-                <h2 id="inv-title">出貨清單</h2>
+                <h2 id="custom-inv-title">出貨單</h2>
                 <p id="inv-date"></p>
                 <table class="shipping-table">
                     <thead><tr><th>品項規格</th><th>數量</th></tr></thead>
                     <tbody id="inv-body"></tbody>
                 </table>
-                <button class="no-print btn-danger" style="margin-top:10px; padding:8px;" onclick="clearInvoice()">🗑️ 清空單據</button>
+                <button class="no-print btn-danger" style="margin-top:10px;" onclick="clearInvoice()">清空單據</button>
             </div>
-            <button class="no-print" onclick="window.print()" style="margin-top:15px; background:#333;">確認列印 (Print)</button>
+            <button class="no-print" onclick="window.print()" style="margin-top:15px; background:#333;">確認列印</button>
         </div>
     </div>
 
-    <div class="card no-print" id="inventory-section">
-        <h3>3. 庫存管理 (累計總額)</h3>
+    <div class="card no-print">
+        <h3>3. 庫存管理</h3>
         <div class="table-wrapper">
             <table>
                 <thead><tr><th>品項</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
-        
         <div class="row-inputs" style="margin-top:15px;">
-            <button style="background:#666;" onclick="exportData()">💾 匯出備份</button>
-            <button style="background:#718096;" onclick="triggerImport()">📂 匯入資料</button>
+            <button style="background:#666;" onclick="exportData()">💾 備份</button>
+            <button style="background:#718096;" onclick="triggerImport()">📂 匯入</button>
         </div>
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
-        
-        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc;">
-            <button class="btn-danger" style="background: #9b2c2c; opacity: 0.8;" onclick="resetSystem()">⚠️ 系統重設 (清空所有資料)</button>
-        </div>
+        <button class="btn-danger" style="background: #9b2c2c; margin-top:15px;" onclick="resetSystem()">⚠️ 系統重設</button>
     </div>
 </div>
 
 <script>
+    const storeName = "您的店鋪名稱"; 
+    document.getElementById('custom-inv-title').innerText = storeName + " - 出貨單";
+
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
-    let colors = JSON.parse(localStorage.getItem('C_D')) || ["黑色", "膚色", "粉色", "紫色"];
+    let colors = JSON.parse(localStorage.getItem('C_D')) || ["黑色", "膚色", "粉色", "紫色", "藍色", "紅色", "綠色", "白色"];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
     let invoiceItems = []; 
     let html5QrCode = null;
 
     function save() {
-        localStorage.setItem('V_D', JSON.stringify(vendors));
-        localStorage.setItem('C_D', JSON.stringify(colors));
-        localStorage.setItem('M_D', JSON.stringify(models));
-        localStorage.setItem('I_D', JSON.stringify(inventory));
+        localStorage.setItem('V_D', JSON.stringify(vendors)); localStorage.setItem('C_D', JSON.stringify(colors));
+        localStorage.setItem('M_D', JSON.stringify(models)); localStorage.setItem('I_D', JSON.stringify(inventory));
         render();
     }
 
+    function getSpecStr(c, bb, bc, bz) {
+        let sizePart = "";
+        if (bb !== '-' && bc !== '-') sizePart = bb + bc; // 34B
+        else if (bb !== '-') sizePart = bb; // 34
+        else if (bc !== '-') sizePart = bc; // B
+
+        if (bz !== '-') sizePart += (sizePart ? " " : "") + bz; // 34B L
+        
+        return c + (sizePart ? " " + sizePart : "");
+    }
+
     function handleStock(t) {
-        const mStr = document.getElementById('selectModel').value;
-        if(!mStr) return;
-        const m = JSON.parse(mStr);
-        const color = document.getElementById('selectColor').value;
-        const cup = document.getElementById('braCup').value;
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return;
+        const m = JSON.parse(mStr), color = document.getElementById('selectColor').value;
         const band = document.getElementById('braBand').value;
-        const qtyInput = parseInt(document.getElementById('braQty').value);
-        const changeQty = qtyInput * (t==='OUT' ? -1 : 1);
-
-        let item = inventory.find(i => 
-            i.vCode === m.vCode && i.braId === m.braId && i.c === color && i.bc === cup && i.bb === band
-        );
-
-        if (item) {
-            item.bq += changeQty;
-        } else {
-            inventory.push({
-                vCode: m.vCode, vFull: m.vName, braId: m.braId, 
-                type: m.type, c: color, bc: cup, bb: band, bq: changeQty
-            });
-        }
+        const cup = document.getElementById('braCup').value;
+        const bz = document.getElementById('braSize').value;
+        const qty = parseInt(document.getElementById('braQty').value) * (t==='OUT' ? -1 : 1);
+        
+        let item = inventory.find(i => i.vCode === m.vCode && i.braId === m.braId && i.c === color && i.bb === band && i.bc === cup && i.bz === bz);
+        if (item) item.bq += qty;
+        else inventory.push({ vCode: m.vCode, vFull: m.vName, braId: m.braId, c: color, bb: band, bc: cup, bz: bz, bq: qty });
         save();
     }
 
@@ -182,25 +185,15 @@
         await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
             const p = txt.split(',');
             if(p.length >= 4) {
-                document.getElementById('selectVendor').value = p[0];
-                updateModelSelect();
-                const options = document.getElementById('selectModel').options;
-                for(let i=0; i<options.length; i++){
-                    const data = JSON.parse(options[i].value);
-                    if(data.braId === p[1]) {
-                        document.getElementById('selectModel').selectedIndex = i;
-                        break;
-                    }
-                }
+                document.getElementById('selectVendor').value = p[0]; updateModelSelect();
+                const opts = document.getElementById('selectModel').options;
+                for(let i=0; i<opts.length; i++) if(JSON.parse(opts[i].value).braId === p[1]) { document.getElementById('selectModel').selectedIndex = i; break; }
                 document.getElementById('selectColor').value = p[3];
-                if(p[4]) document.getElementById('braCup').value = p[4];
-                if(p[5]) document.getElementById('braBand').value = p[5];
+                document.getElementById('braBand').value = p[4] || '-';
+                document.getElementById('braCup').value = p[5] || '-';
+                document.getElementById('braSize').value = p[6] || '-';
                 stopScan();
-                setTimeout(() => {
-                    const action = prompt("【掃描成功】\n輸入 1 入庫 ("+p[1]+")\n輸入 2 出貨 ("+p[1]+")", "1");
-                    if (action === "1") handleStock('IN');
-                    else if (action === "2") handleStock('OUT');
-                }, 400);
+                setTimeout(() => { const act = prompt("掃描成功！1:入庫 2:出貨", "1"); if(act==="1") handleStock('IN'); else if(act==="2") handleStock('OUT'); }, 400);
             }
         });
     }
@@ -215,106 +208,59 @@
         document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="vendors.splice(${idx},1);save()">×</span></div>`).join('');
         document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.braId} <span onclick="models.splice(${idx},1);save()">×</span></div>`).join('');
         updateModelSelect();
-        
         document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx)=>{
             const isLow = i.bq <= 3;
-            return `
-            <tr class="${isLow ? 'low-stock' : ''}">
+            return `<tr class="${isLow ? 'low-stock' : ''}">
                 <td>${i.vCode}<br><small>${i.braId}</small></td>
-                <td>${i.c} ${i.bc}${i.bb}</td>
-                <td style="color:${isLow ?'#e53e3e':'#48bb78'};font-weight:bold; font-size:1.1rem;">
-                    ${i.bq}${isLow ? '<br><span class="warning-badge">需補貨</span>' : ''}
-                </td>
-                <td><button onclick="deleteItem(${inventory.length - 1 - idx})" class="btn-danger" style="padding:5px 10px; font-size:12px;">刪</button></td>
+                <td>${getSpecStr(i.c, i.bb, i.bc, i.bz)}</td>
+                <td style="color:${isLow ?'#e53e3e':'#48bb78'};font-weight:bold;">${i.bq}${isLow ? '<br><span class="warning-badge">需補貨</span>' : ''}</td>
+                <td><button onclick="deleteItem(${inventory.length-1-idx})" class="btn-danger" style="padding:5px 10px; font-size:12px;">刪</button></td>
             </tr>`}).join('');
     }
 
-    function deleteItem(idx) { if(confirm("確定移除此項庫存紀錄?")) { inventory.splice(idx,1); save(); } }
-    
+    function deleteItem(idx) { if(confirm("確定移除?")) { inventory.splice(idx,1); save(); } }
     function updateModelSelect() {
         const vCode = document.getElementById('selectVendor').value;
         const fil = models.filter(m => m.vCode === vCode);
         document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join('');
     }
-
-    function addVendor() {
-        const c = document.getElementById('vCodeInp').value.toUpperCase().trim();
-        const n = document.getElementById('vNameInp').value.trim();
-        if(c && n) { vendors.push({code:c, name:n}); save(); }
-    }
-
+    function addVendor() { const c = document.getElementById('vCodeInp').value.toUpperCase().trim(), n = document.getElementById('vNameInp').value.trim(); if(c && n) { vendors.push({code:c, name:n}); save(); } }
     function addModel() {
-        const vCode = document.getElementById('setVendorRel').value;
-        const v = vendors.find(x => x.code === vCode);
+        const vCode = document.getElementById('setVendorRel').value, v = vendors.find(x => x.code === vCode);
         const b = document.getElementById('setBraId').value.trim();
-        const p = document.getElementById('setPantyId').value.trim();
-        if(v && b) { models.push({vCode, vName:v.name, braId:b, pantyId:p, type: document.getElementById('itemType').value}); save(); }
+        if(v && b) { models.push({vCode, vName:v.name, braId:b, type: document.getElementById('itemType').value}); save(); }
     }
-
     function generateTag() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
-        const m = JSON.parse(mStr);
-        const c = document.getElementById('selectColor').value;
-        const bc = document.getElementById('braCup').value;
-        const bb = document.getElementById('braBand').value;
-        const qrData = `${m.vCode},${m.braId},${m.pantyId||''},${c},${bc},${bb}`;
-        new QRious({ element: document.getElementById('qr-canvas'), value: qrData, size: 180 });
-        document.getElementById('qr-text').innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bc}${bb}`;
-        document.getElementById('tag-content').style.display = 'block';
-        document.getElementById('invoice-content').style.display = 'none';
+        const m = JSON.parse(mStr), c = document.getElementById('selectColor').value;
+        const bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
+        new QRious({ element: document.getElementById('qr-canvas'), value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: 200 });
+        document.getElementById('qr-text').innerHTML = `${m.vCode} / ${m.braId}<br>${getSpecStr(c, bb, bc, bz)}`;
+        document.getElementById('tag-content').style.display = 'block'; document.getElementById('invoice-content').style.display = 'none';
         document.getElementById('print-area').style.display = 'block';
     }
-
     function generateInvoice() {
         const mStr = document.getElementById('selectModel').value; if(!mStr) return;
         const m = JSON.parse(mStr);
-        invoiceItems.push({
-            name: `${m.vName}-${m.braId}`,
-            spec: `${document.getElementById('selectColor').value} ${document.getElementById('braCup').value}${document.getElementById('braBand').value}`,
-            qty: document.getElementById('braQty').value
-        });
-        document.getElementById('inv-date').innerText = "日期: " + new Date().toLocaleDateString();
+        const spec = getSpecStr(document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value);
+        invoiceItems.push({ name: `${m.vName}-${m.braId}`, spec: spec, qty: document.getElementById('braQty').value });
+        document.getElementById('inv-date').innerText = "列印日期: " + new Date().toLocaleDateString();
         document.getElementById('inv-body').innerHTML = invoiceItems.map(item => `<tr><td>${item.name}<br>${item.spec}</td><td>${item.qty} 件</td></tr>`).join('');
-        document.getElementById('tag-content').style.display = 'none';
-        document.getElementById('invoice-content').style.display = 'block';
+        document.getElementById('tag-content').style.display = 'none'; document.getElementById('invoice-content').style.display = 'block';
         document.getElementById('print-area').style.display = 'block';
     }
-
-    function clearInvoice() { if(confirm("清空目前出貨清單？")) { invoiceItems = []; document.getElementById('print-area').style.display = 'none'; } }
-
+    function clearInvoice() { if(confirm("清空？")) { invoiceItems = []; document.getElementById('print-area').style.display = 'none'; } }
     function exportData() {
-        const data = {v:vendors, m:models, i:inventory, c:colors};
-        const b = new Blob([JSON.stringify(data)], {type:"application/json"});
+        const b = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors})], {type:"application/json"});
         const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = "inventory_backup.json"; a.click();
     }
-
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (confirm("匯入將會覆蓋現有所有資料，確定嗎？")) {
-                    vendors = data.v || []; models = data.m || []; inventory = data.i || []; colors = data.c || colors;
-                    save(); alert("匯入成功！");
-                }
-            } catch (err) { alert("檔案格式錯誤"); }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
+    function importData(e) {
+        const f = e.target.files[0]; if(!f) return;
+        const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); if(confirm("覆蓋現有資料？")) { vendors=d.v||[]; models=d.m||[]; inventory=d.i||[]; colors=d.c||colors; save(); alert("匯入成功"); } } catch(err) { alert("錯誤"); } };
+        r.readAsText(f); e.target.value = '';
     }
-
-    function resetSystem() {
-        if (confirm("⚠️ 警告：這將刪除所有廠商、款式及庫存紀錄！")) {
-            if (confirm("最後確認：資料刪除後無法復原，確定要清空嗎？")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-    }
-
+    function resetSystem() { if(confirm("警告：清空所有？") && confirm("最後確認：不可復原！")) { localStorage.clear(); location.reload(); } }
     render();
 </script>
 </body>
