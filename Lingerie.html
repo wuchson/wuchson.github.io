@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 全功能旗艦版</title>
+    <title>Lingerie Pro - 智慧庫存版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <style>
@@ -19,20 +19,11 @@
         .btn-accent { background: var(--accent); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
-        
-        /* 列印區域 */
         #print-area { margin-top: 15px; padding: 15px; border: 2px dashed var(--border); text-align: center; border-radius: 8px; display: none; background: white; }
         #qr-canvas { background: #fff; padding: 5px; }
         .shipping-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
         .shipping-table th, .shipping-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; border: none; }
-            .no-print { display: none; }
-        }
-
+        @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; left: 0; top: 0; width: 100%; border: none; } .no-print { display: none; } }
         .tag-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         .tag span { margin-left: 8px; color: var(--danger); font-weight: bold; cursor: pointer; }
@@ -89,8 +80,7 @@
         </div>
         
         <div class="row-inputs">
-            <div class="field"><label>上裝量</label><input type="number" id="braQty" value="1"></div>
-            <div class="field"><label>下裝量</label><input type="number" id="pantyQty" value="1"></div>
+            <div class="field"><label>數量</label><input type="number" id="braQty" value="1"></div>
         </div>
 
         <div class="row-inputs">
@@ -121,7 +111,7 @@
     </div>
 
     <div class="card no-print" id="inventory-section">
-        <h3>3. 庫存管理</h3>
+        <h3>3. 庫存管理 (累計總額)</h3>
         <div class="table-wrapper">
             <table>
                 <thead><tr><th>品項</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
@@ -147,45 +137,34 @@
         render();
     }
 
-    // --- 列印功能 ---
-    function generateTag() {
+    // --- 核心邏輯：智慧累加 ---
+    function handleStock(t) {
         const mStr = document.getElementById('selectModel').value;
         if(!mStr) return;
         const m = JSON.parse(mStr);
-        const c = document.getElementById('selectColor').value;
-        const bc = document.getElementById('braCup').value;
-        const bb = document.getElementById('braBand').value;
+        const color = document.getElementById('selectColor').value;
+        const cup = document.getElementById('braCup').value;
+        const band = document.getElementById('braBand').value;
+        const qtyInput = parseInt(document.getElementById('braQty').value);
+        const changeQty = qtyInput * (t==='OUT' ? -1 : 1);
 
-        // QR資料格式: 廠商代碼,型號,次型號,顏色,罩杯,圍數
-        const qrData = `${m.vCode},${m.braId||''},${m.pantyId||''},${c},${bc},${bb}`;
-        new QRious({ element: document.getElementById('qr-canvas'), value: qrData, size: 180 });
+        // 尋找是否已有相同規格項目
+        let item = inventory.find(i => 
+            i.vCode === m.vCode && i.braId === m.braId && i.c === color && i.bc === cup && i.bb === band
+        );
 
-        document.getElementById('qr-text').innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bc}${bb}`;
-        document.getElementById('tag-content').style.display = 'block';
-        document.getElementById('invoice-content').style.display = 'none';
-        document.getElementById('print-area').style.display = 'block';
+        if (item) {
+            item.bq += changeQty; // 累加數量
+        } else {
+            inventory.push({
+                vCode: m.vCode, vFull: m.vName, braId: m.braId, 
+                type: m.type, c: color, bc: cup, bb: band, bq: changeQty
+            });
+        }
+        save();
     }
 
-    function generateInvoice() {
-        const mStr = document.getElementById('selectModel').value;
-        if(!mStr) return;
-        const m = JSON.parse(mStr);
-        const c = document.getElementById('selectColor').value;
-        const qty = document.getElementById('braQty').value;
-        
-        document.getElementById('inv-date').innerText = "日期: " + new Date().toLocaleDateString();
-        document.getElementById('inv-body').innerHTML = `
-            <tr>
-                <td>${m.vName} - ${m.braId}<br>顏色:${c} 規格:${document.getElementById('braCup').value}${document.getElementById('braBand').value}</td>
-                <td>${qty} 件</td>
-            </tr>
-        `;
-        document.getElementById('tag-content').style.display = 'none';
-        document.getElementById('invoice-content').style.display = 'block';
-        document.getElementById('print-area').style.display = 'block';
-    }
-
-    // --- 掃描功能 (含自動詢問) ---
+    // --- 掃描功能 ---
     async function startScan() {
         document.getElementById('scanner-container').style.display = 'block';
         html5QrCode = new Html5Qrcode("reader");
@@ -194,90 +173,96 @@
             if(p.length >= 4) {
                 document.getElementById('selectVendor').value = p[0];
                 updateModelSelect();
+                // 嘗試匹配型號
+                const options = document.getElementById('selectModel').options;
+                for(let i=0; i<options.length; i++){
+                    const data = JSON.parse(options[i].value);
+                    if(data.braId === p[1]) {
+                        document.getElementById('selectModel').selectedIndex = i;
+                        break;
+                    }
+                }
                 document.getElementById('selectColor').value = p[3];
                 if(p[4]) document.getElementById('braCup').value = p[4];
                 if(p[5]) document.getElementById('braBand').value = p[5];
 
                 stopScan();
-
                 setTimeout(() => {
-                    const action = prompt("【掃描成功】\n請輸入 1 入庫，輸入 2 出貨：", "1");
+                    const action = prompt("【掃描成功】\n輸入 1 入庫 ("+p[1]+")\n輸入 2 出貨 ("+p[1]+")", "1");
                     if (action === "1") handleStock('IN');
                     else if (action === "2") handleStock('OUT');
-                    document.getElementById('inventory-section').scrollIntoView({ behavior: 'smooth' });
                 }, 400);
             }
         });
     }
 
-    function stopScan() {
-        if(html5QrCode) html5QrCode.stop();
-        document.getElementById('scanner-container').style.display = 'none';
-    }
-
-    // --- 基礎邏輯 ---
-    function handleStock(t) {
-        const mStr = document.getElementById('selectModel').value;
-        if(!mStr) return;
-        const m = JSON.parse(mStr);
-        const bq = parseInt(document.getElementById('braQty').value) * (t==='OUT' ? -1 : 1);
-        inventory.push({vCode:m.vCode, vFull:m.vName, type:m.type, c:document.getElementById('selectColor').value, bc:document.getElementById('braCup').value, bb:document.getElementById('braBand').value, bq});
-        save();
-    }
+    function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
 
     function render() {
         const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
         document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
-        
         document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="vendors.splice(${idx},1);save()">×</span></div>`).join('');
         document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.braId} <span onclick="models.splice(${idx},1);save()">×</span></div>`).join('');
-        
         updateModelSelect();
         
-        // 渲染庫存 (最新在最上)
+        // 渲染庫存
         document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx)=>`
             <tr>
-                <td>${i.vCode}<br><small>${i.type}</small></td>
+                <td>${i.vCode}<br><small>${i.braId}</small></td>
                 <td>${i.c} ${i.bc}${i.bb}</td>
-                <td style="color:${i.bq>=0?'green':'red'};font-weight:bold;">${i.bq}</td>
-                <td><button onclick="deleteItem(${inventory.length - 1 - idx})" class="btn-danger" style="padding:5px;">刪</button></td>
+                <td style="color:${i.bq > 0 ?'#48bb78':'#e53e3e'};font-weight:bold; font-size:1.1rem;">${i.bq}</td>
+                <td><button onclick="deleteItem(${inventory.length - 1 - idx})" class="btn-danger" style="padding:5px 10px;">刪</button></td>
             </tr>`).join('');
     }
 
-    function deleteItem(idx) {
-        if(confirm("確定刪除?")) { inventory.splice(idx,1); save(); }
-    }
-
+    // 其餘輔助功能
+    function deleteItem(idx) { if(confirm("確定移除此項庫存紀錄?")) { inventory.splice(idx,1); save(); } }
     function updateModelSelect() {
         const vCode = document.getElementById('selectVendor').value;
         const fil = models.filter(m => m.vCode === vCode);
-        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId||m.pantyId}</option>`).join('');
+        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join('');
     }
-
     function addVendor() {
         const c = document.getElementById('vCodeInp').value.toUpperCase().trim();
         const n = document.getElementById('vNameInp').value.trim();
         if(c && n) { vendors.push({code:c, name:n}); save(); }
     }
-
     function addModel() {
         const vCode = document.getElementById('setVendorRel').value;
         const v = vendors.find(x => x.code === vCode);
         const b = document.getElementById('setBraId').value.trim();
         const p = document.getElementById('setPantyId').value.trim();
-        if(v && b) {
-            models.push({vCode, vName:v.name, braId:b, pantyId:p, type: document.getElementById('itemType').value});
-            save();
-        }
+        if(v && b) { models.push({vCode, vName:v.name, braId:b, pantyId:p, type: document.getElementById('itemType').value}); save(); }
     }
-
+    function generateTag() {
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return;
+        const m = JSON.parse(mStr);
+        const c = document.getElementById('selectColor').value;
+        const bc = document.getElementById('braCup').value;
+        const bb = document.getElementById('braBand').value;
+        const qrData = `${m.vCode},${m.braId},${m.pantyId||''},${c},${bc},${bb}`;
+        new QRious({ element: document.getElementById('qr-canvas'), value: qrData, size: 180 });
+        document.getElementById('qr-text').innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bc}${bb}`;
+        document.getElementById('tag-content').style.display = 'block';
+        document.getElementById('invoice-content').style.display = 'none';
+        document.getElementById('print-area').style.display = 'block';
+    }
+    function generateInvoice() {
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return;
+        const m = JSON.parse(mStr);
+        const qty = document.getElementById('braQty').value;
+        document.getElementById('inv-date').innerText = "日期: " + new Date().toLocaleDateString();
+        document.getElementById('inv-body').innerHTML = `<tr><td>${m.vName}-${m.braId}<br>${document.getElementById('selectColor').value} ${document.getElementById('braCup').value}${document.getElementById('braBand').value}</td><td>${qty} 件</td></tr>`;
+        document.getElementById('tag-content').style.display = 'none';
+        document.getElementById('invoice-content').style.display = 'block';
+        document.getElementById('print-area').style.display = 'block';
+    }
     function exportData() {
         const b = new Blob([JSON.stringify({v:vendors, m:models, i:inventory})], {type:"application/json"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = "data_backup.json"; a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = "inventory_backup.json"; a.click();
     }
-
     render();
 </script>
 </body>
