@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 專業四模式庫存系統</title>
+    <title>Lingerie Pro - 修正版庫存與標籤系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
@@ -15,36 +15,39 @@
         .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
         button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        button:active { opacity: 0.7; }
-        .btn-accent { background: var(--accent); }
-        .btn-danger { background: var(--danger); }
         
-        /* 模式按鈕網格 */
+        /* 四按鈕樣式 */
         .scan-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .mode-btn { font-size: 0.9rem; padding: 15px 5px; }
         .btn-in { background: var(--blue); }
         .btn-out { background: var(--success); }
+        .mode-active { outline: 3px solid #333; }
 
-        #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; border: 2px solid #333; }
-        #scan-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 10px 30px; border-radius: 30px; font-weight: bold; z-index: 100; display: none; font-size: 1.2rem; }
-        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
-        .tag span { margin-left: 8px; color: var(--danger); font-weight: bold; cursor: pointer; }
+        /* 掃描預覽 */
+        #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
+        #scan-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 10px 30px; border-radius: 30px; font-weight: bold; z-index: 100; display: none; }
+        
+        /* 標籤預覽區 */
+        #tag-preview-area { display: none; text-align: center; margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 12px; }
+        canvas { max-width: 100%; height: auto; }
 
-        @media print { .no-print { display: none !important; } }
+        @media print { 
+            .no-print { display: none !important; } 
+            #tag-preview-area { display: block !important; border: none; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container no-print">
     <div class="card">
-        <h3>1. 系統環境設定</h3>
+        <h3>1. 廠商與款式設定</h3>
         <div class="row-inputs">
-            <input type="text" id="vCodeInp" placeholder="廠商代碼">
+            <input type="text" id="vCodeInp" placeholder="代碼">
             <input type="text" id="vNameInp" placeholder="名稱">
             <button onclick="addVendor()" style="flex:0.4">+ 廠商</button>
         </div>
         <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-        
         <div class="row-inputs">
             <select id="setVendorRel"></select>
             <input type="text" id="setBraId" placeholder="型號">
@@ -53,12 +56,12 @@
     </div>
 
     <div class="card">
-        <h3>2. 掃描槍操作模式</h3>
+        <h3>2. 掃描與操作模式</h3>
         <div class="scan-mode-grid">
-            <button class="mode-btn btn-in" onclick="startScan('QUICK_IN')">📥 快速入庫(+1)</button>
-            <button class="mode-btn btn-in" style="opacity:0.8;" onclick="startScan('MANUAL_IN')">📝 入庫(填量)</button>
-            <button class="mode-btn btn-out" onclick="startScan('QUICK_OUT')">📤 快速出庫(-1)</button>
-            <button class="mode-btn btn-out" style="opacity:0.8;" onclick="startScan('MANUAL_OUT')">📝 出貨(填量)</button>
+            <button class="mode-btn btn-in" id="b-qi" onclick="startScan('QUICK_IN')">📥 快速入庫</button>
+            <button class="mode-btn btn-in" id="b-mi" style="opacity:0.8;" onclick="startScan('MANUAL_IN')">📝 入庫(填量)</button>
+            <button class="mode-btn btn-out" id="b-qo" onclick="startScan('QUICK_OUT')">📤 快速出庫</button>
+            <button class="mode-btn btn-out" id="b-mo" style="opacity:0.8;" onclick="startScan('MANUAL_OUT')">📝 出貨(填量)</button>
         </div>
         
         <div id="scanner-container">
@@ -81,35 +84,32 @@
             <select id="braSize"><option value="-">尺碼</option><script>["S","M","L","XL","XXL"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script></select>
         </div>
 
-        <div class="row-inputs" style="margin-top:10px;">
-            <button class="btn-accent" onclick="generateTag()">🖨️ 產生標籤</button>
-            <button style="background:#4a5568;" onclick="generateInvoice()">📄 加入單據</button>
-        </div>
+        <button class="btn-accent" style="margin-top:10px;" onclick="generateTag()">🖨️ 產生標籤條碼</button>
     </div>
 
     <div class="card">
-        <h3>3. 目前庫存狀態</h3>
-        <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse: collapse; font-size: 14px;">
-                <thead><tr style="background:#eee;"><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
-                <tbody id="stockTableBody"></tbody>
-            </table>
-        </div>
+        <h3>3. 庫存清單</h3>
+        <div style="overflow-x:auto;"><table style="width:100%; border-collapse: collapse; font-size: 14px;"><tbody id="stockTableBody"></tbody></table></div>
     </div>
 </div>
 
-<div id="print-area-labels" style="display:none;"></div>
+<div id="tag-preview-area">
+    <canvas id="qr-canvas"></canvas>
+    <div id="qr-text" style="font-weight:bold; font-size:1.2rem; margin-top:10px;"></div>
+    <button class="no-print" onclick="window.print()" style="margin-top:15px; background:#333;">確認列印</button>
+    <button class="no-print btn-danger" onclick="document.getElementById('tag-preview-area').style.display='none'" style="margin-top:5px;">取消</button>
+</div>
 
 <script>
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
     let html5QrCode = null;
-    let isProcessing = false; // 防止重複觸發
+    let isProcessing = false;
 
-    // 嗶聲提示音
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -129,20 +129,12 @@
     }
 
     function render() {
-        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="vendors.splice(${idx},1);save()">×</span></div>`).join('');
         const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
+        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div style="background:#eee;padding:5px;border-radius:5px;">${v.code}</div>`).join('');
         updateModelSelect();
-        
-        document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx) => `
-            <tr>
-                <td style="padding:8px; border-bottom:1px solid #eee;">${i.vCode}<br><small>${i.braId}</small></td>
-                <td style="padding:8px; border-bottom:1px solid #eee;">${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
-                <td style="padding:8px; border-bottom:1px solid #eee; font-weight:bold; color:var(--primary);">${i.bq}</td>
-                <td style="padding:8px; border-bottom:1px solid #eee;"><button onclick="deleteStock(${inventory.length-1-idx})" class="btn-danger" style="padding:4px 8px; font-size:12px;">刪</button></td>
-            </tr>
-        `).join('');
+        document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map(i => `<tr><td>${i.vCode} ${i.braId}</td><td>${i.c} ${i.bb}${i.bc}</td><td>${i.bq}</td></tr>`).join('');
     }
 
     function updateModelSelect() {
@@ -152,57 +144,48 @@
     }
 
     async function startScan(mode) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('mode-active'));
         document.getElementById('scanner-container').style.display = 'block';
         if(html5QrCode) await html5QrCode.stop();
-        
         html5QrCode = new Html5Qrcode("reader");
         await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
             if(isProcessing) return;
             const p = txt.split(','); if(p.length < 4) return;
             const [vCode, braId, , c, bb, bc, bz] = p;
-
-            // 自動帶入 UI 預覽
-            document.getElementById('selectVendor').value = vCode;
-            updateModelSelect();
-            document.getElementById('selectColor').value = c;
-            document.getElementById('braBand').value = bb || '-';
-            document.getElementById('braCup').value = bc || '-';
-            document.getElementById('braSize').value = bz || '-';
-
             if(mode.includes('QUICK')) {
-                // 快速模式：直接加減 1
                 isProcessing = true;
-                const qty = mode === 'QUICK_IN' ? 1 : -1;
-                updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', qty);
-                
+                updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', mode === 'QUICK_IN' ? 1 : -1);
                 playBeep();
                 document.getElementById('scan-feedback').style.display = 'block';
                 setTimeout(() => { document.getElementById('scan-feedback').style.display='none'; isProcessing = false; }, 1200);
             } else {
-                // 手動模式：暫停掃描並彈窗
                 stopScan();
                 playBeep();
-                const inputQty = prompt(`掃描成功！[${braId}-${c}]\n請輸入${mode==='MANUAL_IN'?'入庫':'出貨'}數量:`, "1");
-                if(inputQty && !isNaN(inputQty)) {
-                    const finalQty = parseInt(inputQty) * (mode === 'MANUAL_IN' ? 1 : -1);
-                    updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', finalQty);
-                }
+                const q = prompt("輸入數量", "1");
+                if(q) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', parseInt(q)*(mode==='MANUAL_IN'?1:-1));
             }
         });
     }
 
     function updateStock(vCode, braId, c, bb, bc, bz, qty) {
         let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
-        if(item) item.bq += qty;
-        else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty});
+        if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty});
         save();
     }
 
-    function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; isProcessing = false; }
+    function generateTag() {
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return;
+        const m = JSON.parse(mStr), c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
+        const qrVal = `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`;
+        new QRious({ element: document.getElementById('qr-canvas'), value: qrVal, size: 200 });
+        document.getElementById('qr-text').innerHTML = `${m.vCode} - ${m.braId}<br>${c} ${bb}${bc} ${bz}`;
+        document.getElementById('tag-preview-area').style.display='block';
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
     function addVendor() { const c = document.getElementById('vCodeInp').value.toUpperCase(), n = document.getElementById('vNameInp').value; if(c && n) { vendors.push({code:c, name:n}); save(); } }
     function addModel() { const v = document.getElementById('setVendorRel').value, b = document.getElementById('setBraId').value; if(v && b) { models.push({vCode:v, braId:b}); save(); } }
-    function deleteStock(idx) { if(confirm("刪除？")) { inventory.splice(idx,1); save(); } }
 
     render();
 </script>
