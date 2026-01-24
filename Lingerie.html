@@ -30,7 +30,7 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         .tag span { margin-left: 8px; color: var(--danger); font-weight: bold; cursor: pointer; }
-        .tag-model { background: #e2e8f0; border-color: #cbd5e0; } /* 型號標籤專用顏色 */
+        .tag-model { background: #e2e8f0; border-color: #cbd5e0; }
         .scan-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .mode-btn { font-size: 0.85rem; padding: 10px 5px; border: 2px solid transparent; opacity: 0.8; }
         .mode-active { border-color: #333; opacity: 1; outline: 3px solid #000; transform: scale(0.98); }
@@ -142,11 +142,11 @@
     </div>
 
     <div id="print-preview-zone">
-        <h4 style="margin:0 0 10px 0; color:var(--accent);">列印預覽</h4>
-        <div id="preview-msg" style="font-size:13px; margin-bottom:10px;"></div>
+        <h4 style="margin:0 0 10px 0; color:var(--accent);">列印預覽區域已準備</h4>
+        <div id="preview-msg" style="font-size:14px; margin-bottom:15px; color:#555; background:#fff9f0; padding:10px; border-radius:6px;"></div>
         <div class="row-inputs">
-            <button onclick="window.print()" style="background:#333;">確認列印</button>
-            <button onclick="closePreview()" class="btn-danger" style="flex:0.5">關閉</button>
+            <button onclick="window.print()" style="background:#333;">🖨️ 確認並執行列印</button>
+            <button onclick="closePreview()" class="btn-danger" style="flex:0.5">關閉預覽</button>
         </div>
     </div>
 
@@ -159,14 +159,15 @@
             </table>
         </div>
         <div class="row-inputs" style="margin-top:15px;">
-            <button style="background:#666;" onclick="exportData()">💾 備份</button>
-            <button style="background:#718096;" onclick="triggerImport()">📂 匯入</button>
+            <button style="background:#666;" onclick="exportData()">💾 備份資料</button>
+            <button style="background:#718096;" onclick="triggerImport()">📂 匯入資料</button>
         </div>
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
     </div>
 </div>
 
 <div id="print-label-page"></div>
+
 <div id="print-invoice-page">
     <h2 id="inv-header" style="text-align:center;"></h2>
     <h3 style="text-align:center;">出貨明細單</h3>
@@ -178,8 +179,9 @@
         <span>經手人：__________</span>
         <span>列印日期：<span id="print-date"></span></span>
     </div>
-    <div class="no-print" style="margin-top:20px;">
-        <button class="btn-danger" onclick="clearInvoice()">清空單據</button>
+    <div class="no-print" style="margin-top:30px; display:flex; gap:10px;">
+        <button onclick="window.print()" style="background:#333; flex:1;">🖨️ 立即列印此單據</button>
+        <button class="btn-danger" onclick="clearInvoice()" style="flex:0.5;">🗑️ 清空單據</button>
     </div>
 </div>
 
@@ -221,15 +223,9 @@
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
         document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
-        
         document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="deleteVendor(${idx})">×</span></div>`).join('');
         document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c} <span onclick="deleteColor(${idx})">×</span></div>`).join('');
-        
-        // 渲染型號標籤 (含刪除功能)
-        document.getElementById('modelTags').innerHTML = models.map((m,idx) => 
-            `<div class="tag tag-model">${m.vCode}-${m.braId} <span onclick="deleteModel(${idx})">×</span></div>`
-        ).join('');
-
+        document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag tag-model">${m.vCode}-${m.braId} <span onclick="deleteModel(${idx})">×</span></div>`).join('');
         updateModelSelect();
         document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx)=>{
             return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb||''}${i.bc||''} ${i.bz||''}</td>
@@ -240,24 +236,12 @@
     function updateCompName() { compName = document.getElementById('compNameInp').value; save(); }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
     function deleteColor(idx) { if(confirm("刪除顏色？")) { colors.splice(idx,1); save(); } }
-    function deleteVendor(idx) { if(confirm("刪除廠商？相關型號不會消失但建議先清理。")) { vendors.splice(idx,1); save(); } }
-
+    function deleteVendor(idx) { if(confirm("刪除廠商？相關型號不會消失。")) { vendors.splice(idx,1); save(); } }
     function addModel() { 
         const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value; 
-        if(v&&b){
-            models.push({vCode:v, braId:b, type:t}); 
-            document.getElementById('setBraId').value = ''; // 清空輸入框
-            save();
-        } 
+        if(v&&b){ models.push({vCode:v, braId:b, type:t}); document.getElementById('setBraId').value = ''; save(); } 
     }
-    
-    // 新增：刪除型號函式
-    function deleteModel(idx) {
-        if(confirm(`確定要刪除型號「${models[idx].braId}」嗎？\n這不會刪除已有的庫存紀錄。`)) {
-            models.splice(idx,1);
-            save();
-        }
-    }
+    function deleteModel(idx) { if(confirm(`確定要刪除型號「${models[idx].braId}」？`)) { models.splice(idx,1); save(); } }
 
     function updateModelSelect() {
         const v = document.getElementById('selectVendor').value;
@@ -278,7 +262,6 @@
     }
 
     async function startScan(mode) {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('mode-active'));
         document.getElementById('scanner-container').style.display = 'block';
         html5QrCode = new Html5Qrcode("reader");
         await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
@@ -303,8 +286,11 @@
         const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
         const page = document.getElementById('print-label-page');
         const inv = document.getElementById('print-invoice-page');
+        
         page.innerHTML = '';
+        page.style.display = 'grid'; 
         inv.style.display = 'none'; 
+        
         for(let i=0; i<35; i++) {
             const div = document.createElement('div');
             div.className = 'label-item';
@@ -316,8 +302,8 @@
             new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: 150 });
         }
         document.getElementById('print-preview-zone').style.display = 'block';
-        document.getElementById('preview-msg').innerText = `已產生 ${m.braId} (${c}) 整頁標籤，請準備鶴屋64號標籤紙。`;
-        window.scrollTo(0, document.body.scrollHeight);
+        document.getElementById('preview-msg').innerText = `已產生 ${m.braId} 整頁標籤預覽。`;
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
     function generateInvoice() {
@@ -326,18 +312,24 @@
         const color = document.getElementById('selectColor').value;
         const qty = document.getElementById('braQty').value;
         const spec = `${m.braId} ${color} (${document.getElementById('braBand').value}${document.getElementById('braCup').value} ${document.getElementById('braSize').value})`;
+        
         invoiceItems.push({ name: spec, qty: qty });
         document.getElementById('inv-header').innerText = compName;
         document.getElementById('print-date').innerText = new Date().toLocaleString();
         document.getElementById('inv-body').innerHTML = invoiceItems.map(i => `<tr><td>${i.name}</td><td style="text-align:center;">${i.qty}</td></tr>`).join('');
+        
         document.getElementById('print-label-page').style.display = 'none';
         document.getElementById('print-invoice-page').style.display = 'block';
         document.getElementById('print-preview-zone').style.display = 'block';
-        document.getElementById('preview-msg').innerText = `已加入出貨單。目前共 ${invoiceItems.length} 項品項。`;
-        window.scrollTo(0, document.body.scrollHeight);
+        document.getElementById('preview-msg').innerText = `已加入出貨單。目前累計 ${invoiceItems.length} 項品項。`;
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
-    function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
+    function closePreview() { 
+        document.getElementById('print-preview-zone').style.display = 'none'; 
+        document.getElementById('print-label-page').style.display = 'none';
+        document.getElementById('print-invoice-page').style.display = 'none';
+    }
     function clearInvoice() { invoiceItems = []; document.getElementById('print-invoice-page').style.display = 'none'; closePreview(); }
     function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
