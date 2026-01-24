@@ -21,11 +21,17 @@
         .btn-accent { background: var(--accent); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
+        
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
         
+        /* 螢幕預覽區樣式 */
         #print-area { margin-top: 15px; border: 2px dashed var(--border); border-radius: 8px; display: none; background: white; padding: 10px; }
-        
+        .label-item { border: 1px dotted #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px; }
+        .label-text { font-size: 10px; text-align: center; margin-top: 2px; }
+        #print-hint { background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.6; }
+
+        /* 庫存列表樣式 */
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
@@ -35,40 +41,48 @@
         .mode-btn { font-size: 0.85rem; padding: 10px 5px; border: 2px solid transparent; opacity: 0.8; }
         .mode-active { border-color: #333; opacity: 1; outline: 3px solid #000; transform: scale(0.98); }
 
-        /* 列印通知樣式 */
-        #print-hint { background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.5; }
-
+        /* --- 核心列印對位修正 (針對鶴屋64號) --- */
         @media print {
             .no-print { display: none !important; }
-            body { background: white; padding: 0; margin: 0; }
-            @page { size: A4; margin: 0; }
+            html, body { background: white !important; margin: 0 !important; padding: 0 !important; width: 210mm; height: 297mm; }
+            @page { size: A4 portrait; margin: 0 !important; }
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
             #print-area { 
                 display: grid !important; 
-                grid-template-columns: repeat(5, 38mm); 
-                grid-template-rows: repeat(7, 38mm);
-                gap: 2mm 2mm; 
-                padding-left: 6mm;   
-                padding-top: 15.5mm; 
-                border: none;
-                margin: 0;
+                grid-template-columns: repeat(5, 38mm) !important; 
+                grid-template-rows: repeat(7, 38mm) !important;
+                column-gap: 2mm !important; 
+                row-gap: 2mm !important; 
+                padding-left: 6mm !important;   /* 左邊距 */
+                padding-top: 15.5mm !important; /* 上邊距 */
+                border: none !important;
+                margin: 0 !important;
+                width: 210mm;
             }
             .label-item {
-                width: 38mm;
-                height: 38mm;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                overflow: hidden;
+                width: 38mm !important;
+                height: 38mm !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                overflow: hidden !important;
                 border: none !important;
             }
-            .label-item canvas { width: 23mm !important; height: 23mm !important; }
-            .label-text { font-size: 9px; text-align: center; margin-top: 1px; font-weight: bold; line-height: 1.1; }
+            .label-item canvas { 
+                width: 28mm !important; 
+                height: 28mm !important; 
+            }
+            .label-text { 
+                font-size: 9pt !important; 
+                text-align: center; 
+                margin-top: 1mm !important; 
+                font-weight: bold; 
+                line-height: 1.1; 
+                color: black !important;
+            }
         }
-
-        .label-item { border: 1px dotted #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px; }
-        .label-text { font-size: 10px; text-align: center; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -90,13 +104,17 @@
         </div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
+
         <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
         <div class="row-inputs">
             <input type="text" id="colorInp" placeholder="新增顏色名稱 (如: 莫蘭迪綠)">
             <button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增顏色</button>
         </div>
         <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+
         <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
         <div class="field"><label>新增款式</label>
             <select id="setVendorRel"></select>
             <div class="row-inputs" style="margin-top:5px;">
@@ -120,15 +138,18 @@
             <button class="mode-btn" id="m-out1" style="background:#48bb78;" onclick="startScan('OUT_AUTO')">📤 連續出 1</button>
             <button class="mode-btn" id="m-outN" style="background:#38a169;" onclick="startScan('OUT_MANUAL')">📤 出貨(填量)</button>
         </div>
+        
         <div id="scanner-container">
             <div id="scan-feedback">掃描成功 嗶！</div>
             <div id="reader"></div>
             <button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button>
         </div>
+
         <div class="field"><label>廠商與款式</label>
             <select id="selectVendor" onchange="updateModelSelect()"></select>
             <select id="selectModel" style="margin-top:5px;"></select>
         </div>
+
         <div class="row-inputs">
             <select id="selectColor"></select> <select id="braBand">
                 <option value="-">下圍-</option>
@@ -143,9 +164,11 @@
                 <script>["SS","S","M","L","XL","XXL","3XL","4XL"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script>
             </select>
         </div>
+
         <div class="field"><label>數量</label>
             <input type="number" id="braQty" value="1">
         </div>
+
         <div class="row-inputs">
             <button onclick="handleManual('IN')">📥 手動入庫</button>
             <button class="btn-success" onclick="handleManual('OUT')">📤 手動出貨</button>
@@ -160,10 +183,10 @@
     
     <div class="no-print" id="print-btn-float" style="display:none; text-align:center; padding:15px; background:white; border:1px solid var(--border); border-radius:12px; margin-top:10px;">
         <div id="print-hint">
-            <strong>⚠️ 列印前請確認設定：</strong><br>
-            1. 邊距：請選擇<strong>「無」 (None)</strong><br>
-            2. 縮放：請選擇<strong>「100%」</strong><br>
-            (若未正確設定，標籤對位將會偏移)
+            <strong>⚠️ 列印設定檢查清單：</strong><br>
+            1. 邊界 (Margins)：務必選 <strong>「無」</strong><br>
+            2. 縮放 (Scale)：務必選 <strong>「100%」</strong><br>
+            3. 選項：務必勾選 <strong>「背景圖形」</strong>
         </div>
         <button style="background:#333; width:220px;" onclick="confirmAndPrint()">確認列印整頁標籤</button>
     </div>
@@ -344,7 +367,7 @@
             new QRious({
                 element: canvas,
                 value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`,
-                size: 150,
+                size: 200, // 增加 QR 原始精度
                 level: 'M'
             });
         }
@@ -353,7 +376,7 @@
     }
 
     function confirmAndPrint() {
-        const check = confirm("【列印設定檢查】\n\n1. 邊距 (Margins) 是否已設為「無」？\n2. 縮放 (Scale) 是否已設為「100%」？\n\n請確認後再進行列印。");
+        const check = confirm("【最後列印檢查】\n\n1. 邊界：已選擇「無」？\n2. 縮放：已選擇「100%」？\n3. 背景圖形：已打勾？\n\n若以上皆正確，請按「確定」列印。");
         if(check) window.print();
     }
 
