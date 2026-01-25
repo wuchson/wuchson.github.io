@@ -157,13 +157,6 @@
                     <div><input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()"><span class="dir-hint">高間距(0)</span></div>
                 </div>
             </div>
-            <div class="config-group" style="margin-bottom:0;">
-                <label>🏷️ 單張標籤機內容微調 (mm)</label>
-                <div class="config-input-grid">
-                    <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">垂直(正下/負上)</span></div>
-                    <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">水平(正右/負左)</span></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -224,29 +217,33 @@
     let html5QrCode = null;
     let isProcessing = false;
 
-    // --- 核心改進：智慧解碼與特殊字元過濾 ---
+    // --- 強化版過濾器：處理亂碼與特殊符號 ---
     function cleanupText(t) {
         if (!t) return "";
-        // 過濾掉截圖中的引號、錢字號、亂碼符號、小老鼠、斜線
-        return t.replace(/["$@/]/g, "").trim();
+        // 1. 移除 Unicode 亂碼替換字元 () 與錢字號 ($)、斜線 (/)、小老鼠 (@)
+        // 2. 移除控制字元 (ASCII 0-31)
+        return t.replace(/[\uFFFD$@\/]/g, "")
+                .replace(/[\x00-\x1F\x7F-\x9F]/g, "")
+                .replace(/"/g, "")
+                .trim();
     }
 
     function smartParse(raw) {
-        const parts = raw.split(',').map(cleanupText);
-        if (parts.length < 4) return null;
+        // 先移除可能的頭尾引號，再用逗號分割
+        const parts = raw.split(',').map(p => cleanupText(p));
+        if (parts.length < 2) return null;
 
-        const vCode = parts[0];
-        const braId = parts[1];
+        const vCode = parts[0] || "UNK";
+        const braId = parts[1] || "MODEL";
         
-        // 針對顏色與規格的智慧切分：找到第一個數字作為下圍
-        let color = parts[3] || "未知";
+        // 根據您截圖的狀況，顏色常被擠到第4個欄位，或跟著規格走
+        let color = parts[3] || "預設色";
         let bb = parts[4] || "-";
         let bc = parts[5] || "-";
         let bz = parts[6] || "-";
 
-        // 如果顏色那格不小心抓到了下圍（純數字）
+        // 如果顏色那欄出現的是純數字，代表欄位對齊失敗，進行補救
         if (/^\d{2}$/.test(color)) {
-            // 往後挪一位
             bz = bc;
             bc = bb;
             bb = color;
@@ -278,12 +275,13 @@
                 updateStock(vCode, braId, color, bb, bc, bz, 1);
             }
 
-            document.getElementById('scan-feedback').innerText = `掃描成功：${color} ${bb}${bc}`;
+            document.getElementById('scan-feedback').innerText = `成功：${color} ${bb}${bc}`;
             document.getElementById('scan-feedback').style.display = 'block';
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800);
         });
     }
 
+    // 基本存檔渲染
     function save() {
         localStorage.setItem('C_N', compName);
         localStorage.setItem('T_R', taxRate);
@@ -324,17 +322,17 @@
         }).join('');
     }
 
-    // 基本功能函式
+    // 功能操作
     function adjStockQty(idx, delta) { inventory[idx].bq += delta; save(); }
     function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
-    function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
+    function deleteVendor(idx) { if(confirm("刪除？")) { vendors.splice(idx,1); save(); } }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
-    function deleteColor(idx) { if(confirm("刪除顏色？")) { colors.splice(idx,1); save(); } }
+    function deleteColor(idx) { if(confirm("刪除？")) { colors.splice(idx,1); save(); } }
     function addModel() {
         const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, p=document.getElementById('setPrice').value;
         if(v&&b){ models.push({vCode:v, braId:b, price:parseFloat(p)||0}); save(); document.getElementById('setBraId').value=''; document.getElementById('setPrice').value=''; }
     }
-    function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
+    function deleteModel(idx) { if(confirm("刪除？")) { models.splice(idx,1); save(); } }
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
     function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
@@ -346,7 +344,7 @@
     function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; taxRate=d.tr||5; save(); alert("匯入成功！"); } catch(err) { alert("失敗"); } }; r.readAsText(f); }
     function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0; save(); }
     function savePrintConfigs() { pCfg = { a4mt: parseFloat(document.getElementById('cfg-a4-mt').value), a4ml: parseFloat(document.getElementById('cfg-a4-ml').value), a4gx: parseFloat(document.getElementById('cfg-a4-gx').value), a4gy: parseFloat(document.getElementById('cfg-a4-gy').value), smt: parseFloat(document.getElementById('cfg-s-mt').value), sml: parseFloat(document.getElementById('cfg-s-ml').value) }; localStorage.setItem('L_P_CFG', JSON.stringify(pCfg)); applyCssConfigs(); }
-    function applyCssConfigs() { const r = document.documentElement; r.style.setProperty('--a4-mt', pCfg.a4mt + 'mm'); r.style.setProperty('--a4-ml', pCfg.a4ml + 'mm'); r.style.setProperty('--a4-gx', pCfg.a4gx + 'mm'); r.style.setProperty('--a4-gy', pCfg.a4gy + 'mm'); r.style.setProperty('--s-mt', pCfg.smt + 'mm'); r.style.setProperty('--s-ml', pCfg.sml + 'mm'); }
+    function applyCssConfigs() { const r = document.documentElement; r.style.setProperty('--a4-mt', pCfg.a4mt + 'mm'); r.style.setProperty('--a4-ml', pCfg.a4ml + 'mm'); r.style.setProperty('--a4-gx', pCfg.a4gx + 'mm'); r.style.setProperty('--a4-gy', pCfg.a4gy + 'mm'); }
 
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) {
         const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`;
@@ -374,8 +372,6 @@
         document.getElementById('cfg-a4-ml').value = pCfg.a4ml;
         document.getElementById('cfg-a4-gx').value = pCfg.a4gx;
         document.getElementById('cfg-a4-gy').value = pCfg.a4gy;
-        document.getElementById('cfg-s-mt').value = pCfg.smt;
-        document.getElementById('cfg-s-ml').value = pCfg.sml;
         applyCssConfigs();
         render();
     };
