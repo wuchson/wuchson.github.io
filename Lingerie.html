@@ -84,7 +84,7 @@
     </div>
 
     <div class="card">
-        <h3>1. 基礎設定 (請確保顏色名稱與標籤一致)</h3>
+        <h3>1. 基礎設定</h3>
         <div class="row-inputs"><input type="text" id="vCodeInp" placeholder="廠商代碼"><input type="text" id="vNameInp" placeholder="廠商名稱"></div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
@@ -306,9 +306,20 @@
 
         document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
             const originalIdx = inventory.findIndex(orig => orig === i);
+            
+            // 優化規格顯示：自動過濾掉 "-" 並加上美化分隔符號
+            let sizeParts = [];
+            if(i.bb && i.bb !== '-') sizeParts.push(i.bb);
+            if(i.bc && i.bc !== '-') sizeParts.push(i.bc);
+            let combinedSize = sizeParts.join(''); // 下圍+罩杯 (如 40F)
+            
+            let displaySpec = `<span style="color:var(--accent); font-weight:bold;">${i.c}</span>`;
+            if(combinedSize) displaySpec += ` <span style="margin:0 4px; color:#ccc;">|</span> ${combinedSize}`;
+            if(i.bz && i.bz !== '-') displaySpec += ` <span style="margin:0 4px; color:#ccc;">|</span> ${i.bz}`;
+
             return `<tr>
                 <td>${i.vCode}<br><small>${i.braId}</small></td>
-                <td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
+                <td>${displaySpec}</td>
                 <td>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button>
@@ -336,7 +347,6 @@
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
     function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
     
-    // --- 核心：智慧掃描辨識 ---
     async function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
         if(html5QrCode) try { await html5QrCode.stop(); } catch(e){}
@@ -346,25 +356,18 @@
             const parts = txt.split(',').map(s => s.trim());
             if(parts.length < 2) return;
 
-            let vCode = parts[0];
-            let braId = parts[1];
+            let vCode = parts[0], braId = parts[1];
             let c = "-", bb = "-", bc = "-", bz = "-";
 
-            // 遍歷所有段落進行關鍵字比對
             parts.forEach((p, idx) => {
-                if(idx < 2) return; // 跳過前兩位 (廠商, 型號)
+                if(idx < 2) return;
                 if(!p) return;
-                // 1. 比對顏色 (看是否在已存的顏色清單中)
                 if(colors.includes(p)) { c = p; }
-                // 2. 比對下胸圍 (30-52之間的純數字)
                 else if(/^\d+$/.test(p) && parseInt(p) >= 30 && parseInt(p) <= 52) { bb = p; }
-                // 3. 比對罩杯 (單個大寫字母 A-K)
                 else if(/^[A-K]$/.test(p)) { bc = p; }
-                // 4. 比對尺碼 (標籤常用關鍵字)
                 else if(["SS","S","M","L","XL","XXL","3XL","4XL","FREE"].includes(p.toUpperCase())) { bz = p.toUpperCase(); }
             });
 
-            // 後援機制：如果沒對到顏色但有文字，嘗試抓取第4位以後非數字的內容
             if(c === "-" && parts.length >= 4) {
                 const autoColor = parts.find((p, idx) => idx >= 3 && isNaN(p) && p.length >= 1 && !p.includes('$'));
                 if(autoColor) c = autoColor;
@@ -372,10 +375,10 @@
 
             isProcessing = true;
             if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb, bc, bz, 1); }
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[辨識結果]\n型號: ${braId}\n顏色: ${c}\n規格: ${bb}${bc} ${bz}\n\n請輸入數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q); }
+            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描成功]\n${braId}\n${c} ${bb}${bc} ${bz}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q); }
             else { updateStock(vCode, braId, c, bb, bc, bz, 1); }
             
-            document.getElementById('scan-feedback').innerText = `辨識成功: ${c} ${bb}${bc}`;
+            document.getElementById('scan-feedback').innerText = `掃描成功！`;
             document.getElementById('scan-feedback').style.display = 'block';
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800);
         });
