@@ -143,17 +143,17 @@
             <div class="config-group">
                 <label>📄 A4 標籤版面微調 (mm)</label>
                 <div class="config-input-grid">
-                    <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">上 15.5</span></div>
-                    <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">左 6.5</span></div>
-                    <div><input type="number" step="0.1" id="cfg-a4-gx" onchange="savePrintConfigs()"><span class="dir-hint">左右距 2.5</span></div>
-                    <div><input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()"><span class="dir-hint">上下距 0</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">上(大往下) 15.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">左(大往開) 6.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gx" onchange="savePrintConfigs()"><span class="dir-hint">左右間距 2.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()"><span class="dir-hint">上下間距 0</span></div>
                 </div>
             </div>
             <div class="config-group" style="margin-bottom:0;">
                 <label>🏷️ 單張標籤機內容微調 (mm)</label>
                 <div class="config-input-grid">
-                    <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">垂直 0</span></div>
-                    <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">水平 0</span></div>
+                    <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">垂直(正下/負上) 0</span></div>
+                    <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">水平(正右/負左) 0</span></div>
                 </div>
             </div>
         </div>
@@ -193,7 +193,13 @@
     <h2 id="inv-header" style="text-align:center;"></h2>
     <h3 style="text-align:center;">出貨明細單</h3>
     <table class="inv-table">
-        <thead><tr><th>品項規格</th><th style="width:120px; text-align:center;">數量</th></tr></thead>
+        <thead>
+            <tr>
+                <th>品項規格</th>
+                <th style="width:110px; text-align:center;">數量</th>
+                <th class="no-print" style="width:70px; text-align:center;">操作</th>
+            </tr>
+        </thead>
         <tbody id="inv-body"></tbody>
     </table>
     <div style="margin-top:30px; display:flex; justify-content: space-between;">
@@ -264,7 +270,6 @@
         document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.vCode}-${m.braId} <span onclick="deleteModel(${idx})">×</span></div>`).join('');
         updateModelSelect();
 
-        // 搜尋邏輯
         const searchTerm = document.getElementById('stockSearch') ? document.getElementById('stockSearch').value.toLowerCase() : "";
         const filteredInven = inventory.slice().reverse().filter(i => {
             const text = `${i.vCode} ${i.braId} ${i.c} ${i.bb||''} ${i.bc||''} ${i.bz||''}`.toLowerCase();
@@ -272,7 +277,6 @@
         });
 
         document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
-            // 找到原始數組中的正確索引以供刪除
             const originalIdx = inventory.findIndex(orig => orig === i);
             return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
                 <td style="font-weight:bold; color:${i.bq<0?'red':'inherit'}">${i.bq}</td><td><button onclick="deleteItem(${originalIdx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td></tr>`;
@@ -308,8 +312,53 @@
     }
     
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
-    function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) { const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`; let existing = invoiceItems.find(i => i.name === spec); if(existing) existing.qty += parseInt(qty); else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty)}); playBeep(); refreshInvoiceUI(); }
-    function refreshInvoiceUI() { document.getElementById('inv-header').innerText = compName; document.getElementById('print-date').innerText = new Date().toLocaleString(); document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => `<tr><td>${i.name}</td><td style="text-align:center;">${i.qty}</td></tr>`).join(''); document.getElementById('print-label-page').style.display = 'none'; document.getElementById('print-invoice-page').style.display = 'block'; document.getElementById('print-preview-zone').style.display = 'block'; }
+    
+    function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) { 
+        const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`; 
+        let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz); 
+        if(existing) existing.qty += parseInt(qty); 
+        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty)}); 
+        playBeep(); 
+        refreshInvoiceUI(); 
+    }
+
+    function refreshInvoiceUI() { 
+        document.getElementById('inv-header').innerText = compName; 
+        document.getElementById('print-date').innerText = new Date().toLocaleString(); 
+        document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => `
+            <tr>
+                <td>${i.name}</td>
+                <td style="text-align:center;">
+                    <div class="no-print" style="display:flex; align-items:center; justify-content:center; gap:5px;">
+                        <button onclick="adjInvQty(${idx},-1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">-</button>
+                        <span style="min-width:20px">${i.qty}</span>
+                        <button onclick="adjInvQty(${idx},1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">+</button>
+                    </div>
+                    <span class="only-print">${i.qty}</span>
+                </td>
+                <td class="no-print" style="text-align:center;">
+                    <button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button>
+                </td>
+            </tr>`).join(''); 
+        document.getElementById('print-label-page').style.display = 'none'; 
+        document.getElementById('print-invoice-page').style.display = 'block'; 
+        document.getElementById('print-preview-zone').style.display = 'block'; 
+    }
+
+    function adjInvQty(idx, delta) {
+        invoiceItems[idx].qty += delta;
+        if(invoiceItems[idx].qty <= 0) remInvItem(idx);
+        else refreshInvoiceUI();
+    }
+
+    function remInvItem(idx) {
+        if(confirm("移除此項？")) {
+            invoiceItems.splice(idx, 1);
+            if(invoiceItems.length === 0) clearInvoice();
+            else refreshInvoiceUI();
+        }
+    }
+
     function confirmAndShip() { if(!confirm("確定扣除庫存並完成出貨？")) return; invoiceItems.forEach(item => updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -item.qty)); alert("出貨完畢！"); clearInvoice(); }
     function handleManual(t) { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); }
     function generateInvoiceManual() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value); }
