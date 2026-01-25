@@ -65,7 +65,8 @@
             #print-invoice-page { display: block !important; padding: 10mm; }
             .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
             .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; font-size: 10pt; }
-            .total-area { margin-top: 10px; text-align: right; font-weight: bold; font-size: 12pt; }
+            .total-area { margin-top: 10px; text-align: right; font-size: 10pt; line-height: 1.6; }
+            .total-area .grand-total { font-size: 13pt; font-weight: bold; border-top: 1px double #000; display: inline-block; padding-top: 5px; }
         }
     </style>
 </head>
@@ -74,7 +75,10 @@
 <div class="container no-print">
     <div class="card">
         <h3>0. 系統環境設定</h3>
-        <div class="field"><label>公司名稱</label><input type="text" id="compNameInp" onchange="updateCompName()"></div>
+        <div class="row-inputs">
+            <div class="field" style="flex:2;"><label>公司名稱</label><input type="text" id="compNameInp" onchange="updateSysConfig()"></div>
+            <div class="field" style="flex:1;"><label>稅率 (%)</label><input type="number" id="taxRateInp" value="5" onchange="updateSysConfig()"></div>
+        </div>
     </div>
 
     <div class="card">
@@ -210,7 +214,9 @@
         <tbody id="inv-body"></tbody>
     </table>
     <div class="total-area">
-        應付總計：$ <span id="inv-total">0</span>
+        <div>未稅銷售額：$ <span id="inv-subtotal">0</span></div>
+        <div>稅額 (<span id="inv-tax-rate-display">5</span>%)：$ <span id="inv-tax">0</span></div>
+        <div class="grand-total">應付總計：$ <span id="inv-total">0</span></div>
     </div>
     <div style="margin-top:30px; display:flex; justify-content: space-between;">
         <span>經手人：__________</span>
@@ -227,6 +233,7 @@
     function playBeep() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = 850; gain.gain.setValueAtTime(0, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15); osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
 
     let compName = localStorage.getItem('C_N') || "我的內衣小舖";
+    let taxRate = parseFloat(localStorage.getItem('T_R')) || 5; // 預設 5%
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
@@ -236,7 +243,15 @@
     let html5QrCode = null;
     let isProcessing = false;
 
-    function save() { localStorage.setItem('C_N', compName); localStorage.setItem('V_D', JSON.stringify(vendors)); localStorage.setItem('M_D', JSON.stringify(models)); localStorage.setItem('I_D', JSON.stringify(inventory)); localStorage.setItem('C_D', JSON.stringify(colors)); render(); }
+    function save() { 
+        localStorage.setItem('C_N', compName); 
+        localStorage.setItem('T_R', taxRate);
+        localStorage.setItem('V_D', JSON.stringify(vendors)); 
+        localStorage.setItem('M_D', JSON.stringify(models)); 
+        localStorage.setItem('I_D', JSON.stringify(inventory)); 
+        localStorage.setItem('C_D', JSON.stringify(colors)); 
+        render(); 
+    }
 
     function savePrintConfigs() {
         pCfg = {
@@ -271,6 +286,7 @@
 
     function render() {
         document.getElementById('compNameInp').value = compName;
+        document.getElementById('taxRateInp').value = taxRate;
         const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
@@ -294,7 +310,12 @@
         applyCssConfigs();
     }
 
-    function updateCompName() { compName = document.getElementById('compNameInp').value; save(); }
+    function updateSysConfig() { 
+        compName = document.getElementById('compNameInp').value; 
+        taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0;
+        save(); 
+    }
+    
     function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
     function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
@@ -328,7 +349,6 @@
     
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) { 
         const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`; 
-        // 尋找對應型號的售價
         const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
         const unitPrice = modelData ? modelData.price : 0;
 
@@ -342,10 +362,10 @@
     function refreshInvoiceUI() { 
         document.getElementById('inv-header').innerText = compName; 
         document.getElementById('print-date').innerText = new Date().toLocaleString(); 
-        let total = 0;
+        let subtotal = 0;
         document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => {
-            const subtotal = i.qty * i.price;
-            total += subtotal;
+            const itemTotal = i.qty * i.price;
+            subtotal += itemTotal;
             return `
             <tr>
                 <td>${i.name}</td>
@@ -358,12 +378,21 @@
                     <span class="only-print">${i.qty}</span>
                 </td>
                 <td style="text-align:right;">${i.price}</td>
-                <td style="text-align:right;">${subtotal}</td>
+                <td style="text-align:right;">${itemTotal}</td>
                 <td class="no-print" style="text-align:center;">
                     <button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button>
                 </td>
             </tr>`}).join(''); 
-        document.getElementById('inv-total').innerText = total.toLocaleString();
+        
+        // 稅金計算
+        const taxAmount = Math.round(subtotal * (taxRate / 100));
+        const grandTotal = subtotal + taxAmount;
+
+        document.getElementById('inv-subtotal').innerText = subtotal.toLocaleString();
+        document.getElementById('inv-tax-rate-display').innerText = taxRate;
+        document.getElementById('inv-tax').innerText = taxAmount.toLocaleString();
+        document.getElementById('inv-total').innerText = grandTotal.toLocaleString();
+
         document.getElementById('print-label-page').style.display = 'none'; 
         document.getElementById('print-invoice-page').style.display = 'block'; 
         document.getElementById('print-preview-zone').style.display = 'block'; 
@@ -391,9 +420,9 @@
     function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
     function clearInvoice() { invoiceItems = []; closePreview(); document.getElementById('print-invoice-page').style.display = 'none'; }
     function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
-    function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup.json`; a.click(); }
+    function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName, tr:taxRate})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; taxRate=d.tr||5; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
 
     window.onload = render;
 </script>
