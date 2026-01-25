@@ -17,12 +17,6 @@
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
         
-        .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin: 10px 0; }
-        .config-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-        .config-input-grid div { display: flex; flex-direction: column; }
-        .config-input-grid input { height: 40px !important; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 14px !important; width: 100% !important; box-sizing: border-box !important; }
-        .dir-hint { font-size: 10px; color: #888; text-align: center; margin-top: 3px; line-height: 1.2; }
-
         .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
         .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
@@ -34,11 +28,11 @@
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
         #reader { width: 100%; }
+        
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
-        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         @media print {
@@ -48,18 +42,13 @@
                 display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm);
                 padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important;
                 column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important;
-                box-sizing: border-box; page-break-after: always;
             }
             body.print-mode-a4 .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
             body.print-mode-a4 .label-item canvas { width: 22mm !important; height: 22mm !important; }
-            body.print-mode-a4 .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
-            body.print-mode-single #print-label-page { display: flex !important; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding-top: var(--s-mt) !important; padding-left: var(--s-ml) !important; }
+            body.print-mode-single #print-label-page { display: flex !important; align-items: center; justify-content: center; width: 100vw; height: 100vh; }
             body.print-mode-single .label-item { width: 50mm; height: 30mm; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5mm; }
             body.print-mode-single .label-item canvas { width: 25mm !important; height: 25mm !important; }
-            body.print-mode-single .label-item .txt { font-size: 9pt; font-weight: bold; }
             #print-invoice-page { display: block !important; padding: 10mm; }
-            .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; font-size: 10pt; }
         }
     </style>
 </head>
@@ -79,7 +68,7 @@
         <div class="row-inputs"><input type="text" id="vCodeInp" placeholder="廠商代碼"><input type="text" id="vNameInp" placeholder="廠商名稱"></div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
-        <div class="row-inputs"><input type="text" id="colorInp" placeholder="顏色名稱"><button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增</button></div>
+        <div class="row-inputs"><input type="text" id="colorInp" placeholder="新增顏色名稱"><button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增</button></div>
         <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
         <div class="field">
             <select id="setVendorRel"></select>
@@ -131,27 +120,11 @@
             <select id="printType" style="flex:0.4"><option value="A4">A4</option><option value="SINGLE">單張</option></select>
             <button class="btn-accent" onclick="prepareTags()">🖨️ 產生標籤</button>
         </div>
-
-        <div class="config-card">
-            <div class="config-input-grid">
-                <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">A4 上邊距</span></div>
-                <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">A4 左邊距</span></div>
-                <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">標籤機垂直</span></div>
-                <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">標籤機水平</span></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="print-preview-zone">
-        <div class="row-inputs">
-            <button onclick="window.print()" style="background:#333;">🖨️ 確認列印</button>
-            <button onclick="closePreview()" class="btn-danger" style="flex:0.5">關閉</button>
-        </div>
     </div>
 
     <div class="card">
         <h3>3. 目前庫存狀態</h3>
-        <input type="text" id="stockSearch" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="render()" style="width:100%; margin-bottom:10px; height:40px; border-radius:8px; border:1px solid #ddd; padding:10px;">
+        <input type="text" id="stockSearch" placeholder="🔍 搜尋..." oninput="render()" style="width:100%; margin-bottom:10px; height:40px; border-radius:8px; border:1px solid #ddd; padding:10px;">
         <div class="table-wrapper">
             <table>
                 <thead><tr><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
@@ -161,12 +134,15 @@
     </div>
 </div>
 
-<div id="print-label-page"></div>
-<div id="print-invoice-page">
+<div id="print-label-page" style="display:none;"></div>
+<div id="print-invoice-page" style="display:none;">
     <h2 id="inv-header" style="text-align:center;"></h2>
-    <table class="inv-table"><thead><tr><th>品項</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody id="inv-body"></tbody></table>
-    <div style="text-align:right; margin-top:10px;">未稅: $ <span id="inv-subtotal">0</span> / 稅: $ <span id="inv-tax">0</span> / 總計: $ <span id="inv-total">0</span></div>
-    <div class="no-print" style="margin-top:20px; display:flex; gap:10px;"><button onclick="confirmAndShip()" style="background:var(--success); flex:1;">✅ 扣庫存出貨</button><button onclick="clearInvoice()" class="btn-danger">🗑️ 清空</button></div>
+    <table style="width:100%; border-collapse:collapse; margin-top:10px;" border="1">
+        <thead><tr><th>品項規格</th><th>數量</th><th>單價</th><th>小計</th></tr></thead>
+        <tbody id="inv-body"></tbody>
+    </table>
+    <div style="text-align:right; margin-top:10px;">總計: $ <span id="inv-total">0</span></div>
+    <div class="no-print" style="margin-top:20px;"><button onclick="confirmAndShip()" style="background:var(--success);">✅ 確認出貨扣庫存</button></div>
 </div>
 
 <script>
@@ -179,7 +155,6 @@
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
     let colors = JSON.parse(localStorage.getItem('C_D')) || ["黑色", "膚色"];
-    let pCfg = JSON.parse(localStorage.getItem('L_P_CFG')) || { a4mt:15.5, a4ml:6.5, a4gx:2.5, a4gy:0, smt:0, sml:0 };
     let invoiceItems = [];
     let html5QrCode = null;
     let isProcessing = false;
@@ -192,8 +167,6 @@
     }
 
     function render() {
-        document.getElementById('compNameInp').value = compName;
-        document.getElementById('taxRateInp').value = taxRate;
         const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
@@ -205,91 +178,114 @@
 
         const searchTerm = document.getElementById('stockSearch').value.toLowerCase();
         const filtered = inventory.slice().reverse().filter(i => `${i.vCode} ${i.braId} ${i.c} ${i.bb} ${i.bc} ${i.bz}`.toLowerCase().includes(searchTerm));
-
         document.getElementById('stockTableBody').innerHTML = filtered.map(i => {
-            const originalIdx = inventory.findIndex(orig => orig === i);
-            let specStr = [i.c, (i.bb==='-'?'':i.bb)+(i.bc==='-'?'':i.bc), i.bz==='-'?'':i.bz].filter(Boolean).join(' | ');
-            return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${specStr}</td><td><button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button> <b>${i.bq}</b> <button class="qty-btn" onclick="adjStockQty(${originalIdx},1)">+</button></td><td><button class="btn-danger" style="padding:4px" onclick="deleteItem(${originalIdx})">刪</button></td></tr>`;
+            const idx = inventory.findIndex(orig => orig === i);
+            return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb}${i.bc} ${i.bz}</td><td><button class="qty-btn" onclick="adjStockQty(${idx},-1)">-</button> <b>${i.bq}</b> <button class="qty-btn" onclick="adjStockQty(${idx},1)">+</button></td><td><button onclick="deleteItem(${idx})">刪</button></td></tr>`;
         }).join('');
-        applyCssConfigs();
     }
 
+    // --- 極致容錯解析 ---
     async function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
         html5QrCode = new Html5Qrcode("reader");
         await html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
             if(isProcessing) return;
             isProcessing = true;
-            const p = txt.split(',').map(s => s.trim());
-            // 寬鬆解析：只要前兩碼是廠商和型號就處理
-            const [vCode, braId, , c = "-", bb = "-", bc = "-", bz = "-"] = p;
-            if(!vCode || !braId) { isProcessing = false; return; }
+            
+            // 將內容按逗號切開，並過濾掉完全空白的項
+            const parts = txt.split(',').map(s => s.trim()).filter(s => s !== "");
+            
+            // 只要至少有 2 個部分（廠商, 型號）就運作
+            if(parts.length >= 2) {
+                const vCode = parts[0];
+                const braId = parts[1];
+                // 其餘部分自動填入，如果沒有就用 "-"
+                const c  = parts[2] || "-";
+                const bb = parts[3] || "-";
+                const bc = parts[4] || "-";
+                const bz = parts[5] || "-";
 
-            playBeep();
-            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb, bc, bz, 1); }
-            else if (mode === 'IN_MANUAL') { const q = parseInt(prompt(`[入庫] ${braId}\n數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q); }
-            else { updateStock(vCode, braId, c, bb, bc, bz, 1); }
-
-            document.getElementById('scan-feedback').style.display = 'block';
-            setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800);
+                playBeep();
+                if(mode === 'OUT_AUTO') addToInvoiceList(vCode, braId, c, bb, bc, bz, 1);
+                else if(mode === 'IN_MANUAL') {
+                    const q = parseInt(prompt(`掃描成功: ${braId}\n請輸入數量:`, "1"));
+                    if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q);
+                } else {
+                    updateStock(vCode, braId, c, bb, bc, bz, 1);
+                }
+                
+                document.getElementById('scan-feedback').style.display = 'block';
+                setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 600);
+            } else {
+                isProcessing = false; // 內容太少，不處理
+            }
         }).catch(err => alert("相機啟動失敗"));
     }
 
     function stopScan() { if(html5QrCode) html5QrCode.stop().then(()=>document.getElementById('scanner-container').style.display='none'); }
     function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0; save(); }
-    function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
-    function deleteVendor(idx) { if(confirm("刪？")) { vendors.splice(idx,1); save(); } }
-    function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
-    function deleteColor(idx) { if(confirm("刪？")) { colors.splice(idx,1); save(); } }
-    function addModel() {
-        const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, p=document.getElementById('setPrice').value;
-        if(v&&b){ models.push({vCode:v, braId:b, price:parseFloat(p)||0}); save(); document.getElementById('setBraId').value=''; }
-    }
-    function deleteModel(idx) { if(confirm("刪？")) { models.splice(idx,1); save(); } }
+    function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); } }
+    function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); } }
+    function addModel() { const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, p=document.getElementById('setPrice').value; if(v&&b){ models.push({vCode:v, braId:b, price:parseFloat(p)||0}); save(); } }
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
     function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); }
+    function adjStockQty(idx, d) { inventory[idx].bq += d; save(); }
+    function deleteItem(idx) { if(confirm("刪？")) { inventory.splice(idx,1); save(); } }
     
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) {
-        const specName = `${vCode}-${braId} ${c} ${bb}${bc} ${bz}`.replace(/-/g, '').trim();
         const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
-        const unitPrice = modelData ? modelData.price : 0;
-        let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz);
-        if(existing) existing.qty += parseInt(qty);
-        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:specName, qty:parseInt(qty), price: unitPrice});
+        const price = modelData ? modelData.price : 0;
+        let exist = invoiceItems.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
+        if(exist) exist.qty += qty;
+        else invoiceItems.push({vCode, braId, c, bb, bc, bz, qty, price, name: `${vCode}-${braId} ${c}`});
         refreshInvoiceUI();
     }
 
     function refreshInvoiceUI() {
+        let total = 0;
         document.getElementById('inv-header').innerText = compName;
-        let subtotal = 0;
-        document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => {
-            subtotal += i.qty * i.price;
+        document.getElementById('inv-body').innerHTML = invoiceItems.map(i => {
+            total += i.qty * i.price;
             return `<tr><td>${i.name}</td><td>${i.qty}</td><td>${i.price}</td><td>${i.qty*i.price}</td></tr>`;
         }).join('');
-        const tax = Math.round(subtotal * (taxRate/100));
-        document.getElementById('inv-subtotal').innerText = subtotal;
-        document.getElementById('inv-tax').innerText = tax;
-        document.getElementById('inv-total').innerText = subtotal + tax;
+        document.getElementById('inv-total').innerText = total;
         document.getElementById('print-invoice-page').style.display = 'block';
-        document.getElementById('print-preview-zone').style.display = 'block';
     }
 
     function handleManual(t) { const m = JSON.parse(document.getElementById('selectModel').value); updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); }
-    function generateInvoiceManual() { const m = JSON.parse(document.getElementById('selectModel').value); addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value); }
-    function prepareTags() { const m = JSON.parse(document.getElementById('selectModel').value); const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value; const type = document.getElementById('printType').value; const page = document.getElementById('print-label-page'); page.innerHTML = ''; page.style.display = 'grid'; document.body.classList.remove('print-mode-a4', 'print-mode-single'); if(type === 'A4') { document.body.classList.add('print-mode-a4'); for(let i=0; i<35; i++) page.appendChild(createLabelItem(m, c, bb, bc, bz, 150)); } else { document.body.classList.add('print-mode-single'); page.appendChild(createLabelItem(m, c, bb, bc, bz, 200)); } document.getElementById('print-preview-zone').style.display = 'block'; }
-    function createLabelItem(m, c, bb, bc, bz, qrSize) {
-        const div = document.createElement('div'); div.className = 'label-item'; const can = document.createElement('canvas'); const txt = document.createElement('div'); txt.className = 'txt';
-        txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`;
-        div.appendChild(can); div.appendChild(txt); new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: qrSize }); return div;
+    function generateInvoiceManual() { const m = JSON.parse(document.getElementById('selectModel').value); addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); }
+    
+    function prepareTags() {
+        const m = JSON.parse(document.getElementById('selectModel').value);
+        const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value;
+        const type = document.getElementById('printType').value;
+        const page = document.getElementById('print-label-page');
+        page.innerHTML = ''; page.style.display = 'grid';
+        document.body.classList.remove('print-mode-a4', 'print-mode-single');
+        if(type === 'A4') {
+            document.body.classList.add('print-mode-a4');
+            for(let i=0; i<35; i++) page.appendChild(createLabelItem(m, c, bb, bc, bz, 150));
+        } else {
+            document.body.classList.add('print-mode-single');
+            page.appendChild(createLabelItem(m, c, bb, bc, bz, 200));
+        }
+        document.getElementById('print-preview-zone').style.display = 'block';
     }
-    function adjStockQty(idx, d) { inventory[idx].bq += d; save(); }
-    function deleteItem(idx) { if(confirm("刪？")) { inventory.splice(idx,1); save(); } }
-    function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; document.getElementById('print-label-page').style.display='none'; document.getElementById('print-invoice-page').style.display='none'; }
-    function clearInvoice() { invoiceItems = []; closePreview(); }
-    function confirmAndShip() { if(!confirm("扣庫存？")) return; invoiceItems.forEach(item => updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -item.qty)); clearInvoice(); }
-    function savePrintConfigs() { pCfg = { a4mt: parseFloat(document.getElementById('cfg-a4-mt').value)||0, a4ml: parseFloat(document.getElementById('cfg-a4-ml').value)||0, smt: parseFloat(document.getElementById('cfg-s-mt').value)||0, sml: parseFloat(document.getElementById('cfg-s-ml').value)||0 }; localStorage.setItem('L_P_CFG', JSON.stringify(pCfg)); applyCssConfigs(); }
-    function applyCssConfigs() { const r = document.documentElement; r.style.setProperty('--a4-mt', pCfg.a4mt + 'mm'); r.style.setProperty('--a4-ml', pCfg.a4ml + 'mm'); r.style.setProperty('--s-mt', pCfg.smt + 'mm'); r.style.setProperty('--s-ml', pCfg.sml + 'mm'); document.getElementById('cfg-a4-mt').value=pCfg.a4mt; document.getElementById('cfg-a4-ml').value=pCfg.a4ml; document.getElementById('cfg-s-mt').value=pCfg.smt; document.getElementById('cfg-s-ml').value=pCfg.sml; }
 
+    function createLabelItem(m, c, bb, bc, bz, qrSize) {
+        const div = document.createElement('div');
+        div.className = 'label-item';
+        const can = document.createElement('canvas');
+        const txt = document.createElement('div');
+        txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb}${bc} ${bz}`;
+        div.appendChild(can); div.appendChild(txt);
+        // 重要：產生 QR Code 時，我們只放必要的內容
+        new QRious({ element: can, value: `${m.vCode},${m.braId},${c},${bb},${bc},${bz}`, size: qrSize });
+        return div;
+    }
+
+    function confirmAndShip() { invoiceItems.forEach(i => updateStock(i.vCode, i.braId, i.c, i.bb, i.bc, i.bz, -i.qty)); invoiceItems = []; document.getElementById('print-invoice-page').style.display = 'none'; alert("已扣庫存！"); }
+    function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
     window.onload = render;
 </script>
 </body>
