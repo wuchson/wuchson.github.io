@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 智慧庫存管理系統</title>
+    <title>Lingerie Pro - 智慧庫存管理系統 (英文代碼穩定版)</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
@@ -16,7 +16,7 @@
         .container { max-width: 600px; margin: auto; }
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
-       
+        
         .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin: 10px 0; }
         .config-group { margin-bottom: 12px; }
         .config-group label { display: block; font-size: 11px; font-weight: bold; color: #6b7e75; margin-bottom: 5px; }
@@ -32,7 +32,7 @@
         .btn-accent { background: var(--accent); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
-       
+        
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
@@ -40,7 +40,7 @@
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
-       
+        
         #print-label-page, #print-invoice-page { display: none; }
 
         .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
@@ -89,8 +89,13 @@
         <div class="row-inputs"><input type="text" id="vCodeInp" placeholder="廠商代碼"><input type="text" id="vNameInp" placeholder="廠商名稱"></div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
-        <div class="row-inputs"><input type="text" id="colorInp" placeholder="新增顏色名稱"><button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增顏色</button></div>
+        
+        <div class="row-inputs">
+            <input type="text" id="colorInp" placeholder="代碼:顏色 (如 BLK:黑色)">
+            <button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增</button>
+        </div>
         <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+        
         <div class="field">
             <select id="setVendorRel"></select>
             <div class="row-inputs" style="margin-top:5px;">
@@ -119,7 +124,7 @@
             <button style="background:#3182ce; padding:10px 5px; font-size:13px;" onclick="startScan('IN_MANUAL')">📥 入庫(填量)</button>
             <button style="background:#48bb78; padding:10px 5px; font-size:13px;" onclick="startScan('OUT_AUTO')">📤 出貨掃描</button>
         </div>
-       
+        
         <div id="scanner-container">
             <div id="scan-feedback">掃描成功！</div>
             <div id="reader"></div>
@@ -137,7 +142,7 @@
             <select id="braSize"><option value="-">尺碼-</option><script>["SS","S","M","L","XL","XXL","3XL","4XL","FREE"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script></select>
         </div>
         <div class="field"><label>數量</label><input type="number" id="braQty" value="1"></div>
-       
+        
         <div class="row-inputs">
             <button onclick="handleManual('IN')">📥 手動入庫</button>
             <button class="btn-success" onclick="generateInvoiceManual()">📄 加入出貨單</button>
@@ -185,7 +190,7 @@
         <div class="field" style="margin-bottom: 10px;">
             <input type="text" id="stockSearch" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="render()">
         </div>
-       
+        
         <div class="table-wrapper">
             <table>
                 <thead><tr><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
@@ -240,11 +245,23 @@
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
-    let colors = JSON.parse(localStorage.getItem('C_D')) || ["黑色", "膚色"];
+    
+    // 顏色數據結構改良：現在存的是物件 {code: "BLK", name: "黑色"}
+    let colors = JSON.parse(localStorage.getItem('C_D')) || [
+        {code: "BLK", name: "黑色"},
+        {code: "SKN", name: "膚色"}
+    ];
+    
     let pCfg = JSON.parse(localStorage.getItem('L_P_CFG')) || { a4mt:15.5, a4ml:6.5, a4gx:2.5, a4gy:0, smt:0, sml:0 };
     let invoiceItems = [];
     let html5QrCode = null;
     let isProcessing = false;
+
+    // 輔助函式：根據代碼找中文名稱，如果找不到則回傳原始值
+    function getColorName(code) {
+        const found = colors.find(c => c.code === code);
+        return found ? found.name : code;
+    }
 
     function save() {
         localStorage.setItem('C_N', compName);
@@ -293,15 +310,22 @@
         const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
         document.getElementById('setVendorRel').innerHTML = vOps;
         document.getElementById('selectVendor').innerHTML = vOps;
-        document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
-        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="deleteVendor(${idx})">×</span></div>`).join('');
-        document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c} <span onclick="deleteColor(${idx})">×</span></div>`).join('');
-        document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.vCode}-${m.braId} ($${m.price}) <span onclick="deleteModel(${idx})">×</span></div>`).join('');
+        
+        // 下拉選單顯示：中文 (代碼)
+        document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`).join('');
+        
+        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="deleteVendor(${idx})" style="cursor:pointer">×</span></div>`).join('');
+        
+        // 顏色標籤顯示：代碼:中文
+        document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c.code}:${c.name} <span onclick="deleteColor(${idx})" style="cursor:pointer">×</span></div>`).join('');
+        
+        document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.vCode}-${m.braId} ($${m.price}) <span onclick="deleteModel(${idx})" style="cursor:pointer">×</span></div>`).join('');
         updateModelSelect();
 
         const searchTerm = document.getElementById('stockSearch') ? document.getElementById('stockSearch').value.toLowerCase() : "";
         const filteredInven = inventory.slice().reverse().filter(i => {
-            const text = `${i.vCode} ${i.braId} ${i.c} ${i.bb||''} ${i.bc||''} ${i.bz||''}`.toLowerCase();
+            const colorDisplayName = getColorName(i.c);
+            const text = `${i.vCode} ${i.braId} ${i.c} ${colorDisplayName} ${i.bb||''} ${i.bc||''} ${i.bz||''}`.toLowerCase();
             return text.includes(searchTerm);
         });
 
@@ -309,7 +333,7 @@
             const originalIdx = inventory.findIndex(orig => orig === i);
             return `<tr>
                 <td>${i.vCode}<br><small>${i.braId}</small></td>
-                <td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
+                <td>${getColorName(i.c)} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
                 <td>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button>
@@ -323,7 +347,6 @@
         applyCssConfigs();
     }
 
-    // 新增：直接調整庫存量的函式
     function adjStockQty(idx, delta) {
         inventory[idx].bq += delta;
         save();
@@ -334,19 +357,43 @@
         taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0;
         save();
     }
-   
+    
     function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
     function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
-    function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
+
+    // 顏色新增：解析 代碼:中文
+    function addColor() { 
+        const v = document.getElementById('colorInp').value; 
+        if(v.includes(':')) {
+            const [code, name] = v.split(':');
+            colors.push({code: code.trim().toUpperCase(), name: name.trim()});
+            save(); 
+            document.getElementById('colorInp').value='';
+        } else if(v) {
+            // 如果沒打冒號，就當成代碼與名稱相同
+            colors.push({code: v.trim(), name: v.trim()});
+            save();
+            document.getElementById('colorInp').value='';
+        }
+    }
     function deleteColor(idx) { if(confirm("刪除顏色？")) { colors.splice(idx,1); save(); } }
+    
     function addModel() {
         const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value, cost=document.getElementById('setCost').value, price=document.getElementById('setPrice').value;
         if(v&&b){ models.push({vCode:v, braId:b, type:t, cost:parseFloat(cost)||0, price:parseFloat(price)||0}); save(); document.getElementById('setBraId').value=''; document.getElementById('setCost').value=''; document.getElementById('setPrice').value=''; }
     }
     function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
-    function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
-   
+    
+    // 更新庫存邏輯：統一存入 c (代碼)
+    function updateStock(vCode, braId, cCode, bb, bc, bz, qty) { 
+        let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===cCode && i.bb===bb && i.bc===bc && i.bz===bz); 
+        if(item) item.bq += qty; 
+        else inventory.push({vCode, braId, c:cCode, bb, bc, bz, bq:qty}); 
+        save(); 
+        playBeep(); 
+    }
+    
     async function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
         html5QrCode = new Html5Qrcode("reader");
@@ -354,26 +401,38 @@
             if(isProcessing) return;
             const p = txt.split(',');
             if(p.length < 4) return;
-            const [vCode, braId, , c, bb, bc, bz] = p;
+            const [vCode, braId, , colorCode, bb, bc, bz] = p; // 此處 colorCode 掃出來是英文
             isProcessing = true;
-            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); }
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); }
-            else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); }
+            
+            if(mode === 'OUT_AUTO') { 
+                addToInvoiceList(vCode, braId, colorCode, bb||'-', bc||'-', bz||'-', 1); 
+            }
+            else if (mode === 'IN_MANUAL') { 
+                playBeep(); 
+                const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); 
+                if(q > 0) updateStock(vCode, braId, colorCode, bb||'-', bc||'-', bz||'-', q); 
+            }
+            else { 
+                updateStock(vCode, braId, colorCode, bb||'-', bc||'-', bz||'-', 1); 
+            }
+            
+            document.getElementById('scan-feedback').innerText = `掃描成功: ${getColorName(colorCode)}`;
             document.getElementById('scan-feedback').style.display = 'block';
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800);
         });
     }
-   
+    
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
-   
-    function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) {
-        const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`;
+    
+    function addToInvoiceList(vCode, braId, cCode, bb, bc, bz, qty) {
+        const colorName = getColorName(cCode);
+        const spec = `${vCode}-${braId} ${colorName} (${bb}${bc} ${bz})`;
         const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
         const unitPrice = modelData ? modelData.price : 0;
 
-        let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz);
+        let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === cCode && i.bb === bb && i.bc === bc && i.bz === bz);
         if(existing) existing.qty += parseInt(qty);
-        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: unitPrice});
+        else invoiceItems.push({vCode, braId, c:cCode, colorName: colorName, bb, bc, bz, name:spec, qty:parseInt(qty), price: unitPrice});
         playBeep();
         refreshInvoiceUI();
     }
@@ -402,7 +461,7 @@
                     <button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button>
                 </td>
             </tr>`}).join('');
-       
+        
         const taxAmount = Math.round(subtotal * (taxRate / 100));
         const grandTotal = subtotal + taxAmount;
 
@@ -431,13 +490,63 @@
     }
 
     function confirmAndShip() { if(!confirm("確定扣除庫存並完成出貨？")) return; invoiceItems.forEach(item => updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -item.qty)); alert("出貨完畢！"); clearInvoice(); }
-    function handleManual(t) { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); }
-    function generateInvoiceManual() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value); }
-    function prepareTags() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value; const type = document.getElementById('printType').value; const page = document.getElementById('print-label-page'); page.innerHTML = ''; page.style.display = 'grid'; document.getElementById('print-invoice-page').style.display = 'none'; document.body.classList.remove('print-mode-a4', 'print-mode-single'); if(type === 'A4') { document.body.classList.add('print-mode-a4'); for(let i=0; i<35; i++) page.appendChild(createLabelItem(m, c, bb, bc, bz, 150)); } else { document.body.classList.add('print-mode-single'); page.appendChild(createLabelItem(m, c, bb, bc, bz, 200)); } document.getElementById('print-preview-zone').style.display = 'block'; }
-    function createLabelItem(m, c, bb, bc, bz, qrSize) { const div = document.createElement('div'); div.className = 'label-item'; const can = document.createElement('canvas'); const txt = document.createElement('div'); txt.className = 'txt'; txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`; div.appendChild(can); div.appendChild(txt); new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: qrSize }); return div; }
+    
+    // 手動入庫與出貨邏輯：使用下拉選單的 value (代碼)
+    function handleManual(t) { 
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return; 
+        const m = JSON.parse(mStr); 
+        updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); 
+    }
+    
+    function generateInvoiceManual() { 
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return; 
+        const m = JSON.parse(mStr); 
+        addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value); 
+    }
+    
+    function prepareTags() { 
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return; 
+        const m = JSON.parse(mStr); 
+        const cCode = document.getElementById('selectColor').value; 
+        const bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value; 
+        const type = document.getElementById('printType').value; 
+        const page = document.getElementById('print-label-page'); 
+        page.innerHTML = ''; page.style.display = 'grid'; 
+        document.getElementById('print-invoice-page').style.display = 'none'; 
+        document.body.classList.remove('print-mode-a4', 'print-mode-single'); 
+        
+        if(type === 'A4') { 
+            document.body.classList.add('print-mode-a4'); 
+            for(let i=0; i<35; i++) page.appendChild(createLabelItem(m, cCode, bb, bc, bz, 150)); 
+        } else { 
+            document.body.classList.add('print-mode-single'); 
+            page.appendChild(createLabelItem(m, cCode, bb, bc, bz, 200)); 
+        } 
+        document.getElementById('print-preview-zone').style.display = 'block'; 
+    }
+
+    // 標籤列印邏輯改良
+    function createLabelItem(m, cCode, bb, bc, bz, qrSize) { 
+        const div = document.createElement('div'); 
+        div.className = 'label-item'; 
+        const can = document.createElement('canvas'); 
+        const txt = document.createElement('div'); 
+        txt.className = 'txt'; 
+        
+        // 標籤上的文字依然顯示「中文」
+        txt.innerHTML = `${m.vCode} / ${m.braId}<br>${getColorName(cCode)} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`; 
+        div.appendChild(can); 
+        div.appendChild(txt); 
+        
+        // QR Code 內容使用 cCode (英文代碼) 以確保掃描穩定
+        new QRious({ element: can, value: `${m.vCode},${m.braId},,${cCode},${bb},${bc},${bz}`, size: qrSize }); 
+        return div; 
+    }
+
     function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
     function clearInvoice() { invoiceItems = []; closePreview(); document.getElementById('print-invoice-page').style.display = 'none'; }
     function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
+    
     function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName, tr:taxRate})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
     function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; taxRate=d.tr||5; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
