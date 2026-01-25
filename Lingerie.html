@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 智慧庫存管理系統</title>
+    <title>Lingerie Pro - 智慧庫存管理系統 (含價格版)</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
@@ -95,6 +95,10 @@
                     <optgroup label="男性系列"><option value="男內衣">男內衣</option><option value="男內褲">男內褲</option><option value="男保暖衣">男保暖衣</option><option value="男保暖褲">男保暖褲</option></optgroup>
                 </select>
             </div>
+            <div class="row-inputs">
+                <input type="number" id="setCost" placeholder="預設進價">
+                <input type="number" id="setPrice" placeholder="預設售價">
+            </div>
             <button class="btn-accent" onclick="addModel()">儲存款式</button>
             <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
         </div>
@@ -176,7 +180,7 @@
         
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
+                <thead><tr><th>型號</th><th>規格/價格</th><th>存量</th><th>操作</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
@@ -196,6 +200,7 @@
         <thead>
             <tr>
                 <th>品項規格</th>
+                <th style="width:80px; text-align:center;">單價</th>
                 <th style="width:110px; text-align:center;">數量</th>
                 <th class="no-print" style="width:70px; text-align:center;">操作</th>
             </tr>
@@ -278,8 +283,15 @@
 
         document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
             const originalIdx = inventory.findIndex(orig => orig === i);
-            return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
-                <td style="font-weight:bold; color:${i.bq<0?'red':'inherit'}">${i.bq}</td><td><button onclick="deleteItem(${originalIdx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td></tr>`;
+            return `<tr>
+                <td>${i.vCode}<br><small>${i.braId}</small></td>
+                <td>
+                    ${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}<br>
+                    <small style="color:#888">進:$${i.cost || 0} / 售:$${i.price || 0}</small>
+                </td>
+                <td style="font-weight:bold; color:${i.bq<0?'red':'inherit'}">${i.bq}</td>
+                <td><button onclick="deleteItem(${originalIdx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td>
+            </tr>`;
         }).join('');
         applyCssConfigs();
     }
@@ -289,10 +301,35 @@
     function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
     function deleteColor(idx) { if(confirm("刪除顏色？")) { colors.splice(idx,1); save(); } }
-    function addModel() { const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value; if(v&&b){ models.push({vCode:v, braId:b, type:t}); save(); document.getElementById('setBraId').value=''; } }
+    
+    function addModel() { 
+        const v=document.getElementById('setVendorRel').value, 
+              b=document.getElementById('setBraId').value, 
+              t=document.getElementById('itemType').value,
+              cost=document.getElementById('setCost').value || 0,
+              price=document.getElementById('setPrice').value || 0;
+        if(v&&b){ 
+            models.push({vCode:v, braId:b, type:t, cost: parseInt(cost), price: parseInt(price)}); 
+            save(); 
+            document.getElementById('setBraId').value=''; 
+        } 
+    }
+    
     function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
-    function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
-    function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
+    function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId} (售:${m.price})</option>`).join(''); }
+    
+    function updateStock(vCode, braId, c, bb, bc, bz, qty, cost = 0, price = 0) { 
+        let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); 
+        if(item) {
+            item.bq += qty;
+            if(cost > 0) item.cost = cost; // 更新最新進價
+            if(price > 0) item.price = price; // 更新最新售價
+        } else {
+            inventory.push({vCode, braId, c, bb, bc, bz, bq:qty, cost, price}); 
+        }
+        save(); 
+        playBeep(); 
+    }
     
     async function startScan(mode) { 
         document.getElementById('scanner-container').style.display = 'block'; 
@@ -301,11 +338,12 @@
             if(isProcessing) return; 
             const p = txt.split(','); 
             if(p.length < 4) return; 
-            const [vCode, braId, , c, bb, bc, bz] = p; 
+            // 格式: vCode, braId, , c, bb, bc, bz, cost, price
+            const [vCode, braId, , c, bb, bc, bz, cost, price] = p; 
             isProcessing = true; 
-            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); } 
-            else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
+            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1, price); } 
+            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q, cost, price); } 
+            else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1, cost, price); } 
             document.getElementById('scan-feedback').style.display = 'block'; 
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800); 
         }); 
@@ -313,11 +351,11 @@
     
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
     
-    function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) { 
+    function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty, price = 0) { 
         const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`; 
         let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz); 
         if(existing) existing.qty += parseInt(qty); 
-        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty)}); 
+        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: parseInt(price)}); 
         playBeep(); 
         refreshInvoiceUI(); 
     }
@@ -328,6 +366,7 @@
         document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => `
             <tr>
                 <td>${i.name}</td>
+                <td style="text-align:center;">$${i.price}</td>
                 <td style="text-align:center;">
                     <div class="no-print" style="display:flex; align-items:center; justify-content:center; gap:5px;">
                         <button onclick="adjInvQty(${idx},-1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">-</button>
@@ -360,10 +399,52 @@
     }
 
     function confirmAndShip() { if(!confirm("確定扣除庫存並完成出貨？")) return; invoiceItems.forEach(item => updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -item.qty)); alert("出貨完畢！"); clearInvoice(); }
-    function handleManual(t) { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); }
-    function generateInvoiceManual() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value); }
-    function prepareTags() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value; const type = document.getElementById('printType').value; const page = document.getElementById('print-label-page'); page.innerHTML = ''; page.style.display = 'grid'; document.getElementById('print-invoice-page').style.display = 'none'; document.body.classList.remove('print-mode-a4', 'print-mode-single'); if(type === 'A4') { document.body.classList.add('print-mode-a4'); for(let i=0; i<35; i++) page.appendChild(createLabelItem(m, c, bb, bc, bz, 150)); } else { document.body.classList.add('print-mode-single'); page.appendChild(createLabelItem(m, c, bb, bc, bz, 200)); } document.getElementById('print-preview-zone').style.display = 'block'; }
-    function createLabelItem(m, c, bb, bc, bz, qrSize) { const div = document.createElement('div'); div.className = 'label-item'; const can = document.createElement('canvas'); const txt = document.createElement('div'); txt.className = 'txt'; txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`; div.appendChild(can); div.appendChild(txt); new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: qrSize }); return div; }
+    
+    function handleManual(t) { 
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return; 
+        const m = JSON.parse(mStr); 
+        updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value), m.cost, m.price); 
+    }
+    
+    function generateInvoiceManual() { 
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return; 
+        const m = JSON.parse(mStr); 
+        addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value, m.price); 
+    }
+    
+    function prepareTags() { 
+        const mStr = document.getElementById('selectModel').value; if(!mStr) return; 
+        const m = JSON.parse(mStr); 
+        const c = document.getElementById('selectColor').value, bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value; 
+        const type = document.getElementById('printType').value; 
+        const page = document.getElementById('print-label-page'); 
+        page.innerHTML = ''; page.style.display = 'grid'; 
+        document.getElementById('print-invoice-page').style.display = 'none'; 
+        document.body.classList.remove('print-mode-a4', 'print-mode-single'); 
+        if(type === 'A4') { 
+            document.body.classList.add('print-mode-a4'); 
+            for(let i=0; i<35; i++) page.appendChild(createLabelItem(m, c, bb, bc, bz, 150)); 
+        } else { 
+            document.body.classList.add('print-mode-single'); 
+            page.appendChild(createLabelItem(m, c, bb, bc, bz, 200)); 
+        } 
+        document.getElementById('print-preview-zone').style.display = 'block'; 
+    }
+    
+    function createLabelItem(m, c, bb, bc, bz, qrSize) { 
+        const div = document.createElement('div'); 
+        div.className = 'label-item'; 
+        const can = document.createElement('canvas'); 
+        const txt = document.createElement('div'); 
+        txt.className = 'txt'; 
+        txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`; 
+        div.appendChild(can); 
+        div.appendChild(txt); 
+        // QR Code 內容增加價格欄位
+        new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz},${m.cost},${m.price}`, size: qrSize }); 
+        return div; 
+    }
+    
     function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
     function clearInvoice() { invoiceItems = []; closePreview(); document.getElementById('print-invoice-page').style.display = 'none'; }
     function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
