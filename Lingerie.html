@@ -322,8 +322,8 @@
         let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); 
         if(item) {
             item.bq += qty;
-            if(cost > 0) item.cost = cost; // 更新最新進價
-            if(price > 0) item.price = price; // 更新最新售價
+            if(cost > 0) item.cost = cost; 
+            if(price > 0) item.price = price; 
         } else {
             inventory.push({vCode, braId, c, bb, bc, bz, bq:qty, cost, price}); 
         }
@@ -331,6 +331,7 @@
         playBeep(); 
     }
     
+    // --- 修正後的掃描邏輯 ---
     async function startScan(mode) { 
         document.getElementById('scanner-container').style.display = 'block'; 
         html5QrCode = new Html5Qrcode("reader"); 
@@ -338,12 +339,31 @@
             if(isProcessing) return; 
             const p = txt.split(','); 
             if(p.length < 4) return; 
-            // 格式: vCode, braId, , c, bb, bc, bz, cost, price
-            const [vCode, braId, , c, bb, bc, bz, cost, price] = p; 
+            
+            // 解析資料 (格式: vCode, braId, , c, bb, bc, bz, cost, price)
+            const vCode = p[0];
+            const braId = p[1];
+            const c = p[3];
+            const bb = p[4] || '-';
+            const bc = p[5] || '-';
+            const bz = p[6] || '-';
+            const cost = parseInt(p[7]) || 0;
+            const price = parseInt(p[8]) || 0;
+            
             isProcessing = true; 
-            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1, price); } 
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q, cost, price); } 
-            else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1, cost, price); } 
+            if(mode === 'OUT_AUTO') { 
+                // 確保這裡的 price 傳入是正確讀取到的數字
+                addToInvoiceList(vCode, braId, c, bb, bc, bz, 1, price); 
+            } 
+            else if (mode === 'IN_MANUAL') { 
+                playBeep(); 
+                const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); 
+                if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q, cost, price); 
+            } 
+            else { 
+                // 連續入庫模式
+                updateStock(vCode, braId, c, bb, bc, bz, 1, cost, price); 
+            } 
             document.getElementById('scan-feedback').style.display = 'block'; 
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800); 
         }); 
@@ -354,8 +374,12 @@
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty, price = 0) { 
         const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`; 
         let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz); 
-        if(existing) existing.qty += parseInt(qty); 
-        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: parseInt(price)}); 
+        if(existing) {
+            existing.qty += parseInt(qty);
+            if(price > 0) existing.price = price; // 更新最新價格
+        } else {
+            invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: parseInt(price)}); 
+        }
         playBeep(); 
         refreshInvoiceUI(); 
     }
@@ -440,7 +464,7 @@
         txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`; 
         div.appendChild(can); 
         div.appendChild(txt); 
-        // QR Code 內容增加價格欄位
+        // 寫入 QR Code 的格式要與 startScan 解析的順序一致
         new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz},${m.cost},${m.price}`, size: qrSize }); 
         return div; 
     }
