@@ -41,14 +41,15 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         
+        /* 庫存顯示美化 */
+        .spec-color { color: var(--accent); font-weight: bold; }
+        .spec-divider { color: #ddd; margin: 0 4px; }
+        .spec-size { color: #555; }
+
         #print-label-page, #print-invoice-page { display: none; }
 
         .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .qty-btn:active { background: #cbd5e0; }
-
-        /* 規格樣式美化 */
-        .spec-color { color: var(--accent); font-weight: bold; }
-        .spec-divider { color: #ccc; margin: 0 4px; }
 
         @media print {
             .no-print { display: none !important; }
@@ -192,7 +193,7 @@
         
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
+                <thead><tr><th>型號</th><th>規格 (顏色|尺寸|尺碼)</th><th>存量</th><th>操作</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
@@ -312,15 +313,18 @@
         document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
             const originalIdx = inventory.findIndex(orig => orig === i);
             
-            // 規格顯示美化邏輯
-            let specHtml = `<span class="spec-color">${i.c}</span>`;
-            let bandCup = (i.bb && i.bb !== '-' ? i.bb : '') + (i.bc && i.bc !== '-' ? i.bc : '');
-            if(bandCup) specHtml += `<span class="spec-divider">|</span>${bandCup}`;
-            if(i.bz && i.bz !== '-') specHtml += `<span class="spec-divider">|</span>${i.bz}`;
+            // --- 格式化顯示規格 ---
+            let colorHtml = `<span class="spec-color">${i.c}</span>`;
+            let sizeStr = (i.bb === '-' ? '' : i.bb) + (i.bc === '-' ? '' : i.bc);
+            let bzStr = (i.bz === '-' ? '' : i.bz);
+            
+            let specDisplay = colorHtml;
+            if(sizeStr) specDisplay += `<span class="spec-divider">|</span><span class="spec-size">${sizeStr}</span>`;
+            if(bzStr) specDisplay += `<span class="spec-divider">|</span><span class="spec-size">${bzStr}</span>`;
 
             return `<tr>
                 <td>${i.vCode}<br><small>${i.braId}</small></td>
-                <td>${specHtml}</td>
+                <td>${specDisplay}</td>
                 <td>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button>
@@ -334,17 +338,8 @@
         applyCssConfigs();
     }
 
-    function adjStockQty(idx, delta) {
-        inventory[idx].bq += delta;
-        save();
-    }
-
-    function updateSysConfig() {
-        compName = document.getElementById('compNameInp').value;
-        taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0;
-        save();
-    }
-   
+    function adjStockQty(idx, delta) { inventory[idx].bq += delta; save(); }
+    function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0; save(); }
     function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
     function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
@@ -355,7 +350,14 @@
     }
     function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
-    function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
+    
+    function updateStock(vCode, braId, c, bb, bc, bz, qty) { 
+        let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); 
+        if(item) item.bq += qty; 
+        else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); 
+        save(); 
+        playBeep(); 
+    }
    
     async function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
@@ -365,19 +367,27 @@
             const p = txt.split(',');
             if(p.length < 4) return;
             
-            // --- 修正解構賦值索引，確保對應到正確的罩杯位置 ---
-            const vCode = p[0]; 
-            const braId = p[1];
-            // p[2] 是空項
-            const c     = p[3] || "-"; // 顏色
-            const bb    = p[4] || "-"; // 下圍
-            const bc    = p[5] || "-"; // 罩杯 (原本可能偏移的地方)
-            const bz    = p[6] || "-"; // 尺碼
-            
+            // --- 核心修正：對應產生標籤時的順序 ---
+            // 標籤產生順序：vCode, braId, (empty), c, bb, bc, bz
+            const vCode = p[0].trim();
+            const braId = p[1].trim();
+            const c     = p[3].trim() || "-";
+            const bb    = p[4].trim() || "-";
+            const bc    = p[5].trim() || "-";
+            const bz    = p[6].trim() || "-";
+
             isProcessing = true;
-            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb, bc, bz, 1); }
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q); }
-            else { updateStock(vCode, braId, c, bb, bc, bz, 1); }
+            if(mode === 'OUT_AUTO') { 
+                addToInvoiceList(vCode, braId, c, bb, bc, bz, 1); 
+            }
+            else if (mode === 'IN_MANUAL') { 
+                playBeep(); 
+                const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); 
+                if(!isNaN(q) && q > 0) updateStock(vCode, braId, c, bb, bc, bz, q); 
+            }
+            else { 
+                updateStock(vCode, braId, c, bb, bc, bz, 1); 
+            }
             
             document.getElementById('scan-feedback').style.display = 'block';
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800);
@@ -387,14 +397,14 @@
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
    
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) {
-        // 出貨單顯示名稱修正
-        const spec = `${vCode}-${braId} ${c} (${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz})`;
+        // 出貨單顯示名稱也統一格式
+        const specName = `${vCode}-${braId} ${c} | ${bb==='-'?'':bb}${bc==='-'?'':bc} | ${bz==='-'?'':bz}`;
         const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
         const unitPrice = modelData ? modelData.price : 0;
 
         let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz);
         if(existing) existing.qty += parseInt(qty);
-        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: unitPrice});
+        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:specName, qty:parseInt(qty), price: unitPrice});
         playBeep();
         refreshInvoiceUI();
     }
@@ -423,7 +433,7 @@
                     <button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button>
                 </td>
             </tr>`}).join('');
-       
+        
         const taxAmount = Math.round(subtotal * (taxRate / 100));
         const grandTotal = subtotal + taxAmount;
 
