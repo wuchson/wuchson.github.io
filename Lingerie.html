@@ -43,6 +43,9 @@
         
         #print-label-page, #print-invoice-page { display: none; }
 
+        .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .qty-btn:active { background: #cbd5e0; }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white; margin: 0; padding: 0; }
@@ -233,7 +236,7 @@
     function playBeep() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = 850; gain.gain.setValueAtTime(0, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15); osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
 
     let compName = localStorage.getItem('C_N') || "我的內衣小舖";
-    let taxRate = parseFloat(localStorage.getItem('T_R')) || 5; // 預設 5%
+    let taxRate = parseFloat(localStorage.getItem('T_R')) || 5; 
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
@@ -304,10 +307,26 @@
 
         document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
             const originalIdx = inventory.findIndex(orig => orig === i);
-            return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
-                <td style="font-weight:bold; color:${i.bq<0?'red':'inherit'}">${i.bq}</td><td><button onclick="deleteItem(${originalIdx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td></tr>`;
+            return `<tr>
+                <td>${i.vCode}<br><small>${i.braId}</small></td>
+                <td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button>
+                        <span style="font-weight:bold; min-width:25px; text-align:center; color:${i.bq<0?'red':'inherit'}">${i.bq}</span>
+                        <button class="qty-btn" onclick="adjStockQty(${originalIdx},1)">+</button>
+                    </div>
+                </td>
+                <td><button onclick="deleteItem(${originalIdx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td>
+            </tr>`;
         }).join('');
         applyCssConfigs();
+    }
+
+    // 新增：直接調整庫存量的函式
+    function adjStockQty(idx, delta) {
+        inventory[idx].bq += delta;
+        save();
     }
 
     function updateSysConfig() { 
@@ -384,7 +403,6 @@
                 </td>
             </tr>`}).join(''); 
         
-        // 稅金計算
         const taxAmount = Math.round(subtotal * (taxRate / 100));
         const grandTotal = subtotal + taxAmount;
 
