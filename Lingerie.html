@@ -34,17 +34,20 @@
         .btn-danger { background: var(--danger); }
         
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
-        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; white-space: nowrap; }
+        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         
+        /* 庫存顏色勳章樣式 */
+        .color-badge { display: inline-block; background: #6b7e75; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 3px; }
+        .spec-bold { font-weight: bold; color: var(--accent); }
+
         #print-label-page, #print-invoice-page { display: none; }
 
         .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .qty-btn:active { background: #cbd5e0; }
 
         @media print {
             .no-print { display: none !important; }
@@ -56,20 +59,14 @@
                 box-sizing: border-box; page-break-after: always;
             }
             body.print-mode-a4 .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-            body.print-mode-a4 .label-item canvas { width: 22mm !important; height: 22mm !important; }
-            body.print-mode-a4 .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
             body.print-mode-single #print-label-page { 
                 display: flex !important; align-items: center; justify-content: center; width: 100vw; height: 100vh; 
                 padding-top: var(--s-mt) !important; padding-left: var(--s-ml) !important;
             }
-            body.print-mode-single .label-item { width: 50mm; height: 30mm; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5mm; }
-            body.print-mode-single .label-item canvas { width: 25mm !important; height: 25mm !important; }
-            body.print-mode-single .label-item .txt { font-size: 9pt; font-weight: bold; }
             #print-invoice-page { display: block !important; padding: 10mm; }
             .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
             .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; font-size: 10pt; }
-            .total-area { margin-top: 10px; text-align: right; font-size: 10pt; line-height: 1.6; }
-            .total-area .grand-total { font-size: 13pt; font-weight: bold; border-top: 1px double #000; display: inline-block; padding-top: 5px; }
+            .inv-color-cell { font-size: 13pt; font-weight: bold; text-align: center; }
             .only-print { display: inline !important; }
         }
         .only-print { display: none; }
@@ -101,8 +98,7 @@
                     <optgroup label="女性內著"><option value="內衣內褲套組">內衣內褲套組</option><option value="單內衣">單內衣</option><option value="單內褲">單內褲</option></optgroup>
                     <optgroup label="塑身系列"><option value="連身塑身衣">連身塑身衣</option><option value="半身塑身衣">半身塑身衣</option><option value="塑身褲">塑身褲</option></optgroup>
                     <optgroup label="居家/保暖"><option value="保暖衣">保暖衣</option><option value="保暖褲">保暖褲</option><option value="睡衣">睡衣</option><option value="睡褲">睡褲</option></optgroup>
-                    <optgroup label="情趣系列"><option value="情趣內衣">情趣內衣</option><option value="情趣內褲">情趣內褲</option></optgroup>
-                    <optgroup label="男性系列"><option value="男內衣">男內衣</option><option value="男內褲">男內褲</option><option value="男保暖衣">男保暖衣</option><option value="男保暖褲">男保暖褲</option></optgroup>
+                    <optgroup label="男性系列"><option value="男內衣">男內衣</option><option value="男內褲">男內褲</option></optgroup>
                 </select>
             </div>
             <div class="row-inputs">
@@ -117,7 +113,7 @@
     <div class="card">
         <h3>2. 進出貨與操作</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-            <button style="background:#4299e1; padding:10px 5px; font-size:13px;" onclick="startScan('IN_AUTO')">📥 連續入1</button>
+            <button style="background:#4299e1; padding:10px 5px; font-size:13px;" onclick="startScan('IN_AUTO')">📥 連續入庫</button>
             <button style="background:#3182ce; padding:10px 5px; font-size:13px;" onclick="startScan('IN_MANUAL')">📥 入庫(填量)</button>
             <button style="background:#48bb78; padding:10px 5px; font-size:13px;" onclick="startScan('OUT_AUTO')">📤 出貨掃描</button>
         </div>
@@ -157,17 +153,10 @@
             <div class="config-group">
                 <label>📄 A4 標籤版面微調 (mm)</label>
                 <div class="config-input-grid">
-                    <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">上(大往下) 15.5</span></div>
-                    <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">左(大往開) 6.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">上 15.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">左 6.5</span></div>
                     <div><input type="number" step="0.1" id="cfg-a4-gx" onchange="savePrintConfigs()"><span class="dir-hint">左右間距 2.5</span></div>
                     <div><input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()"><span class="dir-hint">上下間距 0</span></div>
-                </div>
-            </div>
-            <div class="config-group" style="margin-bottom:0;">
-                <label>🏷️ 單張標籤機內容微調 (mm)</label>
-                <div class="config-input-grid">
-                    <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">垂直(正下/負上) 0</span></div>
-                    <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">水平(正右/負左) 0</span></div>
                 </div>
             </div>
         </div>
@@ -190,7 +179,7 @@
         
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>型號</th><th>規格(顏色)</th><th>存量</th><th>操作</th></tr></thead>
+                <thead><tr><th>型號</th><th>顏色與規格</th><th>存量</th><th>操作</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
@@ -209,7 +198,8 @@
     <table class="inv-table">
         <thead>
             <tr>
-                <th>品項規格</th>
+                <th style="width:80px; text-align:center;">顏色</th>
+                <th>品項規格 (型號/尺寸)</th>
                 <th style="width:50px; text-align:center;">數量</th>
                 <th style="width:80px; text-align:center;">單價</th>
                 <th style="width:80px; text-align:center;">小計</th>
@@ -258,28 +248,7 @@
         render(); 
     }
 
-    function savePrintConfigs() {
-        pCfg = {
-            a4mt: parseFloat(document.getElementById('cfg-a4-mt').value) || 0,
-            a4ml: parseFloat(document.getElementById('cfg-a4-ml').value) || 0,
-            a4gx: parseFloat(document.getElementById('cfg-a4-gx').value) || 0,
-            a4gy: parseFloat(document.getElementById('cfg-a4-gy').value) || 0,
-            smt: parseFloat(document.getElementById('cfg-s-mt').value) || 0,
-            sml: parseFloat(document.getElementById('cfg-s-ml').value) || 0
-        };
-        localStorage.setItem('L_P_CFG', JSON.stringify(pCfg));
-        applyCssConfigs();
-    }
-
     function applyCssConfigs() {
-        if(document.getElementById('cfg-a4-mt')) {
-            document.getElementById('cfg-a4-mt').value = pCfg.a4mt;
-            document.getElementById('cfg-a4-ml').value = pCfg.a4ml;
-            document.getElementById('cfg-a4-gx').value = pCfg.a4gx;
-            document.getElementById('cfg-a4-gy').value = pCfg.a4gy;
-            document.getElementById('cfg-s-mt').value = pCfg.smt;
-            document.getElementById('cfg-s-ml').value = pCfg.sml;
-        }
         const r = document.documentElement;
         r.style.setProperty('--a4-mt', pCfg.a4mt + 'mm');
         r.style.setProperty('--a4-ml', pCfg.a4ml + 'mm');
@@ -307,15 +276,20 @@
             return text.includes(searchTerm);
         });
 
+        // 庫存表顯示修正：顯著顯示顏色
         document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
             const originalIdx = inventory.findIndex(orig => orig === i);
+            const specStr = `${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}`;
             return `<tr>
-                <td>${i.vCode}<br><small>${i.braId}</small></td>
-                <td><strong>${i.c}</strong><br>${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
+                <td>${i.vCode}<br><b>${i.braId}</b></td>
+                <td>
+                    <span class="color-badge">${i.c}</span><br>
+                    <span class="spec-bold">${specStr}</span>
+                </td>
                 <td>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button>
-                        <span style="font-weight:bold; min-width:25px; text-align:center; color:${i.bq<0?'red':'inherit'}">${i.bq}</span>
+                        <span style="font-weight:bold; min-width:25px; text-align:center;">${i.bq}</span>
                         <button class="qty-btn" onclick="adjStockQty(${originalIdx},1)">+</button>
                     </div>
                 </td>
@@ -325,25 +299,14 @@
         applyCssConfigs();
     }
 
-    function adjStockQty(idx, delta) {
-        inventory[idx].bq += delta;
-        save();
-    }
-
-    function updateSysConfig() { 
-        compName = document.getElementById('compNameInp').value; 
-        taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0;
-        save(); 
-    }
-    
+    function adjStockQty(idx, delta) { inventory[idx].bq += delta; save(); }
+    function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
+    function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0; save(); }
     function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
     function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
     function addColor() { const v = document.getElementById('colorInp').value; if(v){colors.push(v); save(); document.getElementById('colorInp').value='';} }
     function deleteColor(idx) { if(confirm("刪除顏色？")) { colors.splice(idx,1); save(); } }
-    function addModel() { 
-        const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value, cost=document.getElementById('setCost').value, price=document.getElementById('setPrice').value; 
-        if(v&&b){ models.push({vCode:v, braId:b, type:t, cost:parseFloat(cost)||0, price:parseFloat(price)||0}); save(); document.getElementById('setBraId').value=''; document.getElementById('setCost').value=''; document.getElementById('setPrice').value=''; } 
-    }
+    function addModel() { const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemType').value, cost=document.getElementById('setCost').value, price=document.getElementById('setPrice').value; if(v&&b){ models.push({vCode:v, braId:b, type:t, cost:parseFloat(cost)||0, price:parseFloat(price)||0}); save(); document.getElementById('setBraId').value=''; document.getElementById('setCost').value=''; document.getElementById('setPrice').value=''; } }
     function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
     function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
@@ -357,14 +320,9 @@
             if(p.length < 4) return; 
             const [vCode, braId, , c, bb, bc, bz] = p; 
             isProcessing = true; 
-            
-            // 掃描反饋顯示顏色
-            document.getElementById('scan-feedback').innerText = `掃描成功: ${c} / ${braId}`;
-            
             if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描成功] 型號:${braId}\n顏色:${c}\n請輸入入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); } 
+            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描成功] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); } 
             else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
-            
             document.getElementById('scan-feedback').style.display = 'block'; 
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800); 
         }); 
@@ -373,16 +331,18 @@
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
     
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) { 
+        const specLabel = `${vCode}-${braId} (${bb}${bc} ${bz})`; 
         const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
         const unitPrice = modelData ? modelData.price : 0;
 
         let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz); 
         if(existing) existing.qty += parseInt(qty); 
-        else invoiceItems.push({vCode, braId, c, bb, bc, bz, qty:parseInt(qty), price: unitPrice}); 
+        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:specLabel, qty:parseInt(qty), price: unitPrice}); 
         playBeep(); 
         refreshInvoiceUI(); 
     }
 
+    // 出貨單顯示修正：顏色獨立欄位
     function refreshInvoiceUI() { 
         document.getElementById('inv-header').innerText = compName; 
         document.getElementById('print-date').innerText = new Date().toLocaleString(); 
@@ -390,54 +350,36 @@
         document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => {
             const itemTotal = i.qty * i.price;
             subtotal += itemTotal;
-            // 規格顯示優化：加粗顏色
-            const specDisplay = `<b>${i.c}</b> | ${i.vCode}-${i.braId}<br><small>(${i.bb}${i.bc} ${i.bz})</small>`;
-            
             return `
             <tr>
-                <td style="line-height:1.4;">${specDisplay}</td>
+                <td class="inv-color-cell">${i.c}</td>
+                <td>${i.name}</td>
                 <td style="text-align:center;">
                     <div class="no-print" style="display:flex; align-items:center; justify-content:center; gap:5px;">
-                        <button onclick="adjInvQty(${idx},-1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">-</button>
-                        <span style="min-width:20px">${i.qty}</span>
-                        <button onclick="adjInvQty(${idx},1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">+</button>
+                        <button onclick="adjInvQty(${idx},-1)" style="padding:2px 8px; width:auto; background:#edf2f7;">-</button>
+                        <span>${i.qty}</span>
+                        <button onclick="adjInvQty(${idx},1)" style="padding:2px 8px; width:auto; background:#edf2f7;">+</button>
                     </div>
                     <span class="only-print">${i.qty}</span>
                 </td>
                 <td style="text-align:right;">${i.price}</td>
                 <td style="text-align:right;">${itemTotal}</td>
-                <td class="no-print" style="text-align:center;">
-                    <button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button>
-                </td>
+                <td class="no-print" style="text-align:center;"><button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td>
             </tr>`}).join(''); 
         
         const taxAmount = Math.round(subtotal * (taxRate / 100));
         const grandTotal = subtotal + taxAmount;
-
         document.getElementById('inv-subtotal').innerText = subtotal.toLocaleString();
         document.getElementById('inv-tax-rate-display').innerText = taxRate;
         document.getElementById('inv-tax').innerText = taxAmount.toLocaleString();
         document.getElementById('inv-total').innerText = grandTotal.toLocaleString();
-
         document.getElementById('print-label-page').style.display = 'none'; 
         document.getElementById('print-invoice-page').style.display = 'block'; 
         document.getElementById('print-preview-zone').style.display = 'block'; 
     }
 
-    function adjInvQty(idx, delta) {
-        invoiceItems[idx].qty += delta;
-        if(invoiceItems[idx].qty <= 0) remInvItem(idx);
-        else refreshInvoiceUI();
-    }
-
-    function remInvItem(idx) {
-        if(confirm("移除此項？")) {
-            invoiceItems.splice(idx, 1);
-            if(invoiceItems.length === 0) clearInvoice();
-            else refreshInvoiceUI();
-        }
-    }
-
+    function adjInvQty(idx, delta) { invoiceItems[idx].qty += delta; if(invoiceItems[idx].qty <= 0) remInvItem(idx); else refreshInvoiceUI(); }
+    function remInvItem(idx) { if(confirm("移除此項？")) { invoiceItems.splice(idx, 1); if(invoiceItems.length === 0) clearInvoice(); else refreshInvoiceUI(); } }
     function confirmAndShip() { if(!confirm("確定扣除庫存並完成出貨？")) return; invoiceItems.forEach(item => updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -item.qty)); alert("出貨完畢！"); clearInvoice(); }
     function handleManual(t) { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); }
     function generateInvoiceManual() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value); }
@@ -445,12 +387,30 @@
     function createLabelItem(m, c, bb, bc, bz, qrSize) { const div = document.createElement('div'); div.className = 'label-item'; const can = document.createElement('canvas'); const txt = document.createElement('div'); txt.className = 'txt'; txt.innerHTML = `${m.vCode} / ${m.braId}<br>${c} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`; div.appendChild(can); div.appendChild(txt); new QRious({ element: can, value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`, size: qrSize }); return div; }
     function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
     function clearInvoice() { invoiceItems = []; closePreview(); document.getElementById('print-invoice-page').style.display = 'none'; }
-    function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
     function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName, tr:taxRate})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; taxRate=d.tr||5; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; taxRate=d.tr||5; save(); alert("匯入成功！"); } catch(err) { alert("格式錯誤"); } }; r.readAsText(f); }
+    function savePrintConfigs() {
+        pCfg = {
+            a4mt: parseFloat(document.getElementById('cfg-a4-mt').value) || 15.5,
+            a4ml: parseFloat(document.getElementById('cfg-a4-ml').value) || 6.5,
+            a4gx: parseFloat(document.getElementById('cfg-a4-gx').value) || 2.5,
+            a4gy: parseFloat(document.getElementById('cfg-a4-gy').value) || 0,
+            smt: 0, sml: 0
+        };
+        localStorage.setItem('L_P_CFG', JSON.stringify(pCfg));
+        applyCssConfigs();
+    }
 
-    window.onload = render;
+    window.onload = () => {
+        if(document.getElementById('cfg-a4-mt')) {
+            document.getElementById('cfg-a4-mt').value = pCfg.a4mt;
+            document.getElementById('cfg-a4-ml').value = pCfg.a4ml;
+            document.getElementById('cfg-a4-gx').value = pCfg.a4gx;
+            document.getElementById('cfg-a4-gy').value = pCfg.a4gy;
+        }
+        render();
+    };
 </script>
 </body>
 </html>
