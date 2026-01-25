@@ -17,7 +17,6 @@
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
         
-        /* 列印微調面板樣式 */
         .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin: 10px 0; }
         .config-group { margin-bottom: 12px; }
         .config-group label { display: block; font-size: 11px; font-weight: bold; color: #6b7e75; margin-bottom: 5px; }
@@ -95,7 +94,6 @@
                     <optgroup label="情趣系列"><option value="情趣內衣">情趣內衣</option><option value="情趣內褲">情趣內褲</option></optgroup>
                     <optgroup label="男性系列"><option value="男內衣">男內衣</option><option value="男內褲">男內褲</option><option value="男保暖衣">男保暖衣</option><option value="男保暖褲">男保暖褲</option></optgroup>
                 </select>
-
             </div>
             <button class="btn-accent" onclick="addModel()">儲存款式</button>
             <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
@@ -145,39 +143,21 @@
             <div class="config-group">
                 <label>📄 A4 標籤版面微調 (mm)</label>
                 <div class="config-input-grid">
-                    <div>
-                        <input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()">
-                        <span class="dir-hint">上(大往下) 15.5</span>
-                    </div>
-                    <div>
-                        <input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()">
-                        <span class="dir-hint">左(大往開) 6.5</span>
-                    </div>
-                    <div>
-                        <input type="number" step="0.1" id="cfg-a4-gx" onchange="savePrintConfigs()">
-                        <span class="dir-hint">左右間距 2.5</span>
-                    </div>
-                    <div>
-                        <input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()">
-                        <span class="dir-hint">上下間距 0</span>
-                    </div>
+                    <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">上 15.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">左 6.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gx" onchange="savePrintConfigs()"><span class="dir-hint">左右距 2.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()"><span class="dir-hint">上下距 0</span></div>
                 </div>
             </div>
             <div class="config-group" style="margin-bottom:0;">
                 <label>🏷️ 單張標籤機內容微調 (mm)</label>
                 <div class="config-input-grid">
-                    <div>
-                        <input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()">
-                        <span class="dir-hint">垂直(正下/負上) 0</span>
-                    </div>
-                    <div>
-                        <input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()">
-                        <span class="dir-hint">水平(正右/負左) 0</span>
-                    </div>
+                    <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">垂直 0</span></div>
+                    <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">水平 0</span></div>
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 
     <div id="print-preview-zone">
         <h4 style="margin:0 0 10px 0; color:var(--accent);">預覽區域</h4>
@@ -190,6 +170,10 @@
 
     <div class="card">
         <h3>3. 目前庫存狀態</h3>
+        <div class="field" style="margin-bottom: 10px;">
+            <input type="text" id="stockSearch" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="render()">
+        </div>
+        
         <div class="table-wrapper">
             <table>
                 <thead><tr><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
@@ -252,12 +236,14 @@
     }
 
     function applyCssConfigs() {
-        document.getElementById('cfg-a4-mt').value = pCfg.a4mt;
-        document.getElementById('cfg-a4-ml').value = pCfg.a4ml;
-        document.getElementById('cfg-a4-gx').value = pCfg.a4gx;
-        document.getElementById('cfg-a4-gy').value = pCfg.a4gy;
-        document.getElementById('cfg-s-mt').value = pCfg.smt;
-        document.getElementById('cfg-s-ml').value = pCfg.sml;
+        if(document.getElementById('cfg-a4-mt')) {
+            document.getElementById('cfg-a4-mt').value = pCfg.a4mt;
+            document.getElementById('cfg-a4-ml').value = pCfg.a4ml;
+            document.getElementById('cfg-a4-gx').value = pCfg.a4gx;
+            document.getElementById('cfg-a4-gy').value = pCfg.a4gy;
+            document.getElementById('cfg-s-mt').value = pCfg.smt;
+            document.getElementById('cfg-s-ml').value = pCfg.sml;
+        }
         const r = document.documentElement;
         r.style.setProperty('--a4-mt', pCfg.a4mt + 'mm');
         r.style.setProperty('--a4-ml', pCfg.a4ml + 'mm');
@@ -277,9 +263,19 @@
         document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c} <span onclick="deleteColor(${idx})">×</span></div>`).join('');
         document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.vCode}-${m.braId} <span onclick="deleteModel(${idx})">×</span></div>`).join('');
         updateModelSelect();
-        document.getElementById('stockTableBody').innerHTML = inventory.slice().reverse().map((i,idx)=>{
-            return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb||''}${i.bc||''} ${i.bz||''}</td>
-                <td style="font-weight:bold;">${i.bq}</td><td><button onclick="deleteItem(${inventory.length-1-idx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td></tr>`;
+
+        // 搜尋邏輯
+        const searchTerm = document.getElementById('stockSearch') ? document.getElementById('stockSearch').value.toLowerCase() : "";
+        const filteredInven = inventory.slice().reverse().filter(i => {
+            const text = `${i.vCode} ${i.braId} ${i.c} ${i.bb||''} ${i.bc||''} ${i.bz||''}`.toLowerCase();
+            return text.includes(searchTerm);
+        });
+
+        document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
+            // 找到原始數組中的正確索引以供刪除
+            const originalIdx = inventory.findIndex(orig => orig === i);
+            return `<tr><td>${i.vCode}<br><small>${i.braId}</small></td><td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
+                <td style="font-weight:bold; color:${i.bq<0?'red':'inherit'}">${i.bq}</td><td><button onclick="deleteItem(${originalIdx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td></tr>`;
         }).join('');
         applyCssConfigs();
     }
@@ -293,7 +289,24 @@
     function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
     function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
-    async function startScan(mode) { document.getElementById('scanner-container').style.display = 'block'; html5QrCode = new Html5Qrcode("reader"); await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => { if(isProcessing) return; const p = txt.split(','); if(p.length < 4) return; const [vCode, braId, , c, bb, bc, bz] = p; isProcessing = true; if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); } else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } document.getElementById('scan-feedback').style.display = 'block'; setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800); }); }
+    
+    async function startScan(mode) { 
+        document.getElementById('scanner-container').style.display = 'block'; 
+        html5QrCode = new Html5Qrcode("reader"); 
+        await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => { 
+            if(isProcessing) return; 
+            const p = txt.split(','); 
+            if(p.length < 4) return; 
+            const [vCode, braId, , c, bb, bc, bz] = p; 
+            isProcessing = true; 
+            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
+            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); } 
+            else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
+            document.getElementById('scan-feedback').style.display = 'block'; 
+            setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800); 
+        }); 
+    }
+    
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) { const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`; let existing = invoiceItems.find(i => i.name === spec); if(existing) existing.qty += parseInt(qty); else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty)}); playBeep(); refreshInvoiceUI(); }
     function refreshInvoiceUI() { document.getElementById('inv-header').innerText = compName; document.getElementById('print-date').innerText = new Date().toLocaleString(); document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => `<tr><td>${i.name}</td><td style="text-align:center;">${i.qty}</td></tr>`).join(''); document.getElementById('print-label-page').style.display = 'none'; document.getElementById('print-invoice-page').style.display = 'block'; document.getElementById('print-preview-zone').style.display = 'block'; }
@@ -307,7 +320,7 @@
     function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
     function exportData() { const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; save(); alert("匯入成功！"); }; r.readAsText(f); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
 
     window.onload = render;
 </script>
