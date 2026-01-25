@@ -34,7 +34,7 @@
         .btn-danger { background: var(--danger); }
         
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
-        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
+        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; white-space: nowrap; }
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
@@ -70,7 +70,9 @@
             .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; font-size: 10pt; }
             .total-area { margin-top: 10px; text-align: right; font-size: 10pt; line-height: 1.6; }
             .total-area .grand-total { font-size: 13pt; font-weight: bold; border-top: 1px double #000; display: inline-block; padding-top: 5px; }
+            .only-print { display: inline !important; }
         }
+        .only-print { display: none; }
     </style>
 </head>
 <body>
@@ -188,7 +190,7 @@
         
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead>
+                <thead><tr><th>型號</th><th>規格(顏色)</th><th>存量</th><th>操作</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table>
         </div>
@@ -309,7 +311,7 @@
             const originalIdx = inventory.findIndex(orig => orig === i);
             return `<tr>
                 <td>${i.vCode}<br><small>${i.braId}</small></td>
-                <td>${i.c} ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
+                <td><strong>${i.c}</strong><br>${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
                 <td>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button>
@@ -323,7 +325,6 @@
         applyCssConfigs();
     }
 
-    // 新增：直接調整庫存量的函式
     function adjStockQty(idx, delta) {
         inventory[idx].bq += delta;
         save();
@@ -356,9 +357,14 @@
             if(p.length < 4) return; 
             const [vCode, braId, , c, bb, bc, bz] = p; 
             isProcessing = true; 
+            
+            // 掃描反饋顯示顏色
+            document.getElementById('scan-feedback').innerText = `掃描成功: ${c} / ${braId}`;
+            
             if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描] ${braId}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); } 
+            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描成功] 型號:${braId}\n顏色:${c}\n請輸入入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); } 
             else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); } 
+            
             document.getElementById('scan-feedback').style.display = 'block'; 
             setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800); 
         }); 
@@ -367,13 +373,12 @@
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
     
     function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) { 
-        const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`; 
         const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
         const unitPrice = modelData ? modelData.price : 0;
 
         let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz); 
         if(existing) existing.qty += parseInt(qty); 
-        else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: unitPrice}); 
+        else invoiceItems.push({vCode, braId, c, bb, bc, bz, qty:parseInt(qty), price: unitPrice}); 
         playBeep(); 
         refreshInvoiceUI(); 
     }
@@ -385,9 +390,12 @@
         document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => {
             const itemTotal = i.qty * i.price;
             subtotal += itemTotal;
+            // 規格顯示優化：加粗顏色
+            const specDisplay = `<b>${i.c}</b> | ${i.vCode}-${i.braId}<br><small>(${i.bb}${i.bc} ${i.bz})</small>`;
+            
             return `
             <tr>
-                <td>${i.name}</td>
+                <td style="line-height:1.4;">${specDisplay}</td>
                 <td style="text-align:center;">
                     <div class="no-print" style="display:flex; align-items:center; justify-content:center; gap:5px;">
                         <button onclick="adjInvQty(${idx},-1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">-</button>
