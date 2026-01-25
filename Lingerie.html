@@ -337,40 +337,47 @@
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
     function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
     
-    // --- 核心修正版：智慧掃描偵測 ---
+    // --- 優化後的掃描功能 ---
     async function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
         if(html5QrCode) await html5QrCode.stop();
         html5QrCode = new Html5Qrcode("reader");
         await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
             if(isProcessing) return;
-            const p = txt.split(',');
-            if(p.length < 2) return; 
+            isProcessing = true;
+            
+            // 處理標籤內容：移除可能的引號並分割
+            const p = txt.replace(/"/g, '').split(',');
+            if(p.length < 2) { isProcessing = false; return; }
 
-            // 固定前兩項
-            const vCode = p[0];
-            const braId = p[1];
-
-            // 智慧搜尋：尋找顏色（尋找第一個包含中文字或字母的非純數字欄位）
+            const vCode = p[0].trim();
+            const braId = p[1].trim();
+            
+            // 智慧顏色偵測：從第3格(索引2)開始找第一個包含「非數字」字元的格子
             let c = "未知";
-            let cIdx = 3; 
-            for (let i = 2; i < p.length; i++) {
-                if (p[i] && isNaN(p[i])) { // 如果這格有字且不是數字
-                    c = p[i];
-                    cIdx = i;
+            let colorIdx = 2;
+            for(let i=2; i<p.length; i++) {
+                if(/[^\d]/.test(p[i])) { 
+                    c = p[i].trim();
+                    colorIdx = i;
                     break;
                 }
             }
 
-            // 根據顏色位置抓取後面的規格
-            const bb = p[cIdx + 1] || '-';
-            const bc = p[cIdx + 2] || '-';
-            const bz = p[cIdx + 3] || '-';
+            // 抓取規格
+            const bb = p[colorIdx + 1] || '-';
+            const bc = p[colorIdx + 2] || '-';
+            const bz = p[colorIdx + 3] || '-';
 
-            isProcessing = true;
-            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb, bc, bz, 1); }
-            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描成功]\n型號：${braId}\n顏色：${c}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q); }
-            else { updateStock(vCode, braId, c, bb, bc, bz, 1); }
+            if(mode === 'OUT_AUTO') {
+                addToInvoiceList(vCode, braId, c, bb, bc, bz, 1);
+            } else if (mode === 'IN_MANUAL') {
+                playBeep();
+                const q = parseInt(prompt(`[掃描] ${vCode}-${braId}\n顏色: ${c}\n規格: ${bb}${bc} ${bz}\n請輸入入庫數量:`, "1"));
+                if(q > 0) updateStock(vCode, braId, c, bb, bc, bz, q);
+            } else {
+                updateStock(vCode, braId, c, bb, bc, bz, 1);
+            }
 
             document.getElementById('scan-feedback').innerText = `已辨識：${c} ${bb}${bc}`;
             document.getElementById('scan-feedback').style.display = 'block';
@@ -384,6 +391,7 @@
         const spec = `${vCode}-${braId} ${c} (${bb}${bc} ${bz})`;
         const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
         const unitPrice = modelData ? modelData.price : 0;
+
         let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz);
         if(existing) existing.qty += parseInt(qty);
         else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: unitPrice});
@@ -398,13 +406,32 @@
         document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => {
             const itemTotal = i.qty * i.price;
             subtotal += itemTotal;
-            return `<tr><td>${i.name}</td><td style="text-align:center;"><div class="no-print" style="display:flex; align-items:center; justify-content:center; gap:5px;"><button onclick="adjInvQty(${idx},-1)" class="qty-btn">-</button><span>${i.qty}</span><button onclick="adjInvQty(${idx},1)" class="qty-btn">+</button></div><span class="only-print">${i.qty}</span></td><td style="text-align:right;">${i.price}</td><td style="text-align:right;">${itemTotal}</td><td class="no-print" style="text-align:center;"><button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button></td></tr>`}).join('');
+            return `
+            <tr>
+                <td>${i.name}</td>
+                <td style="text-align:center;">
+                    <div class="no-print" style="display:flex; align-items:center; justify-content:center; gap:5px;">
+                        <button onclick="adjInvQty(${idx},-1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">-</button>
+                        <span style="min-width:20px">${i.qty}</span>
+                        <button onclick="adjInvQty(${idx},1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">+</button>
+                    </div>
+                    <span class="only-print">${i.qty}</span>
+                </td>
+                <td style="text-align:right;">${i.price}</td>
+                <td style="text-align:right;">${itemTotal}</td>
+                <td class="no-print" style="text-align:center;">
+                    <button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button>
+                </td>
+            </tr>`}).join('');
+        
         const taxAmount = Math.round(subtotal * (taxRate / 100));
         const grandTotal = subtotal + taxAmount;
+
         document.getElementById('inv-subtotal').innerText = subtotal.toLocaleString();
         document.getElementById('inv-tax-rate-display').innerText = taxRate;
         document.getElementById('inv-tax').innerText = taxAmount.toLocaleString();
         document.getElementById('inv-total').innerText = grandTotal.toLocaleString();
+
         document.getElementById('print-label-page').style.display = 'none';
         document.getElementById('print-invoice-page').style.display = 'block';
         document.getElementById('print-preview-zone').style.display = 'block';
