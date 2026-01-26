@@ -83,13 +83,9 @@
             <div class="row-inputs" style="margin-top:5px;">
                 <input type="text" id="setBraId" placeholder="型號">
                 <select id="itemType">
-                    <optgroup label="女性內著"><option value="內衣內褲套組">內衣內褲套組</option><option value="單內衣">單內衣</option><option value="單內褲">單內褲</option></optgroup>
-                    <optgroup label="塑身系列"><option value="連身塑身衣">連身塑身衣</option><option value="半身塑身衣">半身塑身衣</option><option value="塑身褲">塑身褲</option></optgroup>
-                    <optgroup label="居家/保暖"><option value="保暖衣">保暖衣</option><option value="保暖褲">保暖褲</option><option value="睡衣">睡衣</option><option value="睡褲">睡褲</option></optgroup>
-                    <optgroup label="情趣系列"><option value="情趣內衣">情趣內衣</option><option value="情趣內褲">情趣內褲</option></optgroup>
-                    <optgroup label="男性系列"><option value="男內衣">男內衣</option><option value="男內褲">男內褲</option><option value="男保暖衣">男保暖衣</option><option value="男保暖褲">男保暖褲</option></optgroup>
+                    <option value="內衣內褲套組">內衣內褲套組</option>
+                    <option value="單內衣">單內衣</option>
                 </select>
-
             </div>
             <div class="row-inputs">
                 <input type="number" id="setCost" placeholder="進價">
@@ -114,11 +110,10 @@
         </div>
         <div class="row-inputs">
             <select id="selectColor"></select>
-            <select id="braBand"><option value="-">下圍-</option><script>for(let i=30; i<=52; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
-            <select id="braCup"><option value="-">罩杯-</option><script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
-            <select id="braSize"><option value="-">尺碼-</option><script>["SS","S","M","L","XL","XXL","3XL","4XL","FREE"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script></select>
+            <select id="braBand"><option value="-">下圍-</option><script>for(let i=32; i<=42; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
+            <select id="braCup"><option value="-">罩杯-</option><script>"ABCDEF".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
+            <select id="braSize"><option value="-">尺碼-</option><script>["S","M","L","XL","XXL"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script></select>
         </div>
-
         <div class="field"><label>數量</label><input type="number" id="braQty" value="1"></div>
         <div class="row-inputs">
             <button onclick="handleManual('IN')">📥 手動入庫</button>
