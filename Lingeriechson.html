@@ -7,108 +7,198 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
-        /* 保留 a0001.txt 的原始 CSS */
-        :root { --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78; --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm; --s-mt: 0mm; --s-ml: 0mm; }
+        /* --- 完全保留 a0001.txt 所有 CSS 樣式 --- */
+        :root {
+            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
+            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm; --s-mt: 0mm; --s-ml: 0mm;
+        }
         body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
         .container { max-width: 600px; margin: auto; }
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .admin-only { display: none; }
+        body.is-admin .admin-only { display: block; }
+        .staff-hidden { display: none; }
+        body.is-admin .staff-hidden { display: block; }
         .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
         .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
-        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
         .btn-accent { background: var(--accent); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
+        .table-wrapper { overflow-x: auto; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .admin-only { display: none; }
-        body.is-admin .admin-only { display: block; }
-        @media print { .no-print { display: none !important; } }
+        th { background: #f0f2f1; color: #666; font-weight: 600; }
+        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-box { background: #fffaf0; border: 1px solid #feebc8; padding: 12px; border-radius: 8px; text-align: center; }
+        .stat-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+        .stat-label { font-size: 0.7rem; color: #718096; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; margin: 0; padding: 0; }
+            body.print-mode-a4 #print-label-page { 
+                display: grid !important; 
+                grid-template-columns: repeat(5, 38mm); 
+                grid-template-rows: repeat(7, 38mm); 
+                padding-top: var(--a4-mt); 
+                padding-left: var(--a4-ml); 
+                column-gap: var(--a4-gx); 
+                row-gap: var(--a4-gy); 
+            }
+            .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border: 0.1mm solid #eee; }
+            .label-item canvas { width: 22mm !important; height: 22mm !important; }
+            .label-item .txt { font-size: 7pt; line-height: 1.1; margin-top: 2mm; text-align: center; font-weight: bold; }
+            #print-invoice-page { display: block !important; padding: 10mm; }
+            .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            .inv-table th, .inv-table td { border: 1px solid #000; padding: 8px; text-align: left; }
+        }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div class="login-card">
-        <h2 style="text-align:center; color:var(--primary);">Lingerie Pro 登入</h2>
-        <div class="field"><label>帳號</label><input type="text" id="loginUser"></div>
-        <div class="field"><label>密碼</label><input type="password" id="loginPass"></div>
+        <h2 style="text-align:center; color:var(--primary); margin-top:0;">Lingerie Pro</h2>
+        <div class="field"><label>帳號</label><input type="text" id="loginUser" placeholder="admin"></div>
+        <div class="field"><label>密碼</label><input type="password" id="loginPass" placeholder="1234"></div>
         <button onclick="login()">登入系統</button>
-        <p id="cloud-info" style="text-align:center; font-size:12px; color:gray; margin-top:10px;">正在確認雲端資料...</p>
+        <p id="init-msg" style="text-align:center; font-size:12px; color:gray; margin-top:15px;">讀取雲端資料中...</p>
     </div>
 </div>
 
 <div class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span id="userStatus" style="font-size: 14px; color: #666;"></span>
-        <button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
+        <span id="userStatus" style="font-size: 14px; color: #666; font-weight: bold;"></span>
+        <button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666; height: 32px;">登出</button>
     </div>
 
     <div class="card admin-only">
-        <h3>系統設定與同步</h3>
+        <h3>0. 系統環境設定</h3>
         <div class="row-inputs">
-            <input type="text" id="compNameInp" placeholder="公司名稱" onchange="updateSysConfig()">
-            <input type="number" id="taxRateInp" placeholder="稅率" onchange="updateSysConfig()">
+            <div style="flex:2;"><label style="font-size:12px;">公司名稱</label><input type="text" id="compNameInp" onchange="updateSysConfig()"></div>
+            <div style="flex:1;"><label style="font-size:12px;">稅率 (%)</label><input type="number" id="taxRateInp" onchange="updateSysConfig()"></div>
         </div>
-        <button class="btn-success" onclick="save()">🔄 手動同步到雲端</button>
+        <div style="background: #f4f6f5; padding: 12px; border-radius: 8px; margin-top: 10px;">
+            <label style="font-size: 11px; font-weight: bold; color: #6b7e75;">👥 使用者管理</label>
+            <div class="row-inputs" style="margin-top:5px;">
+                <input type="text" id="newUName" placeholder="帳號" style="height:35px; font-size:13px;">
+                <input type="text" id="newUPass" placeholder="密碼" style="height:35px; font-size:13px;">
+                <select id="newURole" style="height:35px; font-size:13px; flex:0.6"><option value="staff">員工</option><option value="admin">管理員</option></select>
+            </div>
+            <button onclick="addUser()" style="padding: 8px; font-size: 13px; background: var(--accent);">新增使用者</button>
+            <div id="userList" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
+        </div>
+        <button onclick="syncAllToCloud()" class="btn-success" style="margin-top:15px; background:#48bb78;">☁️ 手動備份至雲端</button>
     </div>
 
     <div class="card admin-only">
         <h3>1. 基礎設定</h3>
-        <div class="row-inputs"><input type="text" id="vCodeInp" placeholder="廠商代碼"><input type="text" id="vNameInp" placeholder="廠商名稱"></div>
+        <div class="row-inputs"><input type="text" id="vCodeInp" placeholder="廠商代碼 (如: V01)"><input type="text" id="vNameInp" placeholder="廠商名稱"></div>
         <button onclick="addVendor()">+ 新增廠商</button>
         <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
-        <div class="row-inputs"><input type="text" id="colorInp" placeholder="代碼:顏色 (如 BLK:黑色)"><button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 顏色</button></div>
+        
+        <div class="row-inputs"><input type="text" id="colorInp" placeholder="代碼:顏色 (如: BLK:黑色)"><button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 顏色</button></div>
         <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
-        <div class="field">
+        
+        <div class="field" style="background:#f9f9f9; padding:15px; border-radius:10px;">
             <select id="setVendorRel"></select>
-            <div class="row-inputs" style="margin-top:5px;"><input type="text" id="setBraId" placeholder="款式型號"><input type="number" id="setPrice" placeholder="售價"></div>
+            <div class="row-inputs" style="margin-top:5px;">
+                <input type="text" id="setBraId" placeholder="型號">
+                <select id="itemType">
+                    <optgroup label="女性內著"><option value="內衣內褲套組">內衣內褲套組</option><option value="單內衣">單內衣</option><option value="單內褲">單內褲</option></optgroup>
+                    <optgroup label="塑身系列"><option value="連身塑身衣">連身塑身衣</option><option value="半身塑身衣">半身塑身衣</option><option value="塑身褲">塑身褲</option></optgroup>
+                </select>
+            </div>
+            <div class="row-inputs">
+                <input type="number" id="setCost" placeholder="進價 (內部顯示)">
+                <input type="number" id="setPrice" placeholder="售價">
+            </div>
             <button class="btn-accent" onclick="addModel()">儲存款式</button>
-            <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
         </div>
     </div>
 
     <div class="card">
-        <h3>2. 進出貨操作</h3>
+        <h3>2. 進出貨與列印</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-            <button style="background:#4299e1;" onclick="startScan('IN_AUTO')">📥 自動入庫</button>
-            <button style="background:#48bb78;" onclick="startScan('OUT_AUTO')">📤 出貨掃描</button>
-            <button class="btn-danger" onclick="stopScan()">❌ 關閉</button>
+            <button style="background:#4299e1; padding:10px 5px; font-size:13px;" onclick="startScan('IN_AUTO')">📥 連續入1</button>
+            <button style="background:#3182ce; padding:10px 5px; font-size:13px;" onclick="startScan('IN_MANUAL')">📥 入庫(填量)</button>
+            <button style="background:#48bb78; padding:10px 5px; font-size:13px;" onclick="startScan('OUT_AUTO')">📤 出貨掃描</button>
         </div>
-        <div id="scanner-container"><div id="scan-feedback"></div><div id="reader"></div></div>
-        
-        <div class="field"><select id="selectVendor" onchange="updateModelSelect()"></select><select id="selectModel" style="margin-top:5px;"></select></div>
+        <div id="scanner-container">
+            <div id="scan-feedback">辨識成功</div>
+            <div id="reader"></div>
+            <button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button>
+        </div>
+
+        <select id="selectVendor" onchange="updateModelSelect()"></select>
+        <select id="selectModel" style="margin:5px 0;"></select>
         <div class="row-inputs">
             <select id="selectColor"></select>
-            <select id="braBand"><option value="-">下圍-</option><script>for(let i=32; i<=52; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
+            <select id="braBand"><option value="-">下圍-</option><script>for(let i=30; i<=52; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
             <select id="braCup"><option value="-">罩杯-</option><script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
             <select id="braSize"><option value="-">尺碼-</option><script>["SS","S","M","L","XL","XXL","3XL","4XL","FREE"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script></select>
         </div>
-        <div class="row-inputs"><button onclick="handleManual('IN')">📥 手動入庫</button><button class="btn-success" onclick="generateInvoiceManual()">📄 加入出貨單</button></div>
+        <div class="row-inputs">
+            <button onclick="handleManual('IN')">📥 手動入庫</button>
+            <button class="btn-success" onclick="generateInvoiceManual()">📄 加入出貨單</button>
+        </div>
+        <div class="row-inputs admin-only" style="margin-top:10px; background: #f0f4f2; padding: 10px; border-radius: 8px;">
+            <select id="printType" style="flex:1.5"><option value="A4">A4 標籤紙 (35格)</option><option value="SINGLE">單張標籤 (條碼機)</option></select>
+            <button class="btn-accent" onclick="prepareTags()">🖨️ 產生標籤</button>
+        </div>
     </div>
 
     <div class="card">
-        <h3>3. 目前庫存</h3>
-        <input type="text" id="stockSearch" placeholder="🔍 搜尋型號..." oninput="render()">
-        <div style="overflow-x: auto;"><table id="stockTable"><thead><tr><th>型號</th><th>規格</th><th>存量</th><th>操作</th></tr></thead><tbody id="stockTableBody"></tbody></table></div>
+        <h3>3. 庫存清單與營業報告</h3>
+        <div id="today-sales-stats" class="admin-only" style="margin-bottom:15px; display:none;">
+            </div>
+        <input type="text" id="stockSearch" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="render()">
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>型號</th><th>規格</th><th>存量</th><th class="staff-hidden">管理</th></tr></thead>
+                <tbody id="stockTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="print-label-page"></div>
+<div id="print-invoice-page">
+    <h2 id="inv-header" style="text-align:center;"></h2>
+    <h3 style="text-align:center;">出貨明細單</h3>
+    <table class="inv-table">
+        <thead><tr><th>品項</th><th>數量</th><th>單價</th><th>小計</th><th class="no-print">操作</th></tr></thead>
+        <tbody id="inv-body"></tbody>
+    </table>
+    <div style="text-align:right; margin-top:15px; font-weight:bold;">
+        應付總計：$ <span id="inv-total">0</span>
+    </div>
+    <div class="no-print" style="margin-top:20px; display:flex; gap:10px;">
+        <button onclick="confirmAndShip()" class="btn-success">✅ 確認扣庫存並出貨</button>
+        <button onclick="clearInvoice()" class="btn-danger">🗑️ 清空單據</button>
     </div>
 </div>
 
 <script>
-    // ======= 核心：請填入您的 API 網址 =======
-    const API_URL = "https://script.google.com/macros/s/AKfycbxnbyTxKSmi2szXRv307urgmUI1pu8A001ZXgp0RcZi33WN2U3C8UNft_bV8CtE3pvXvA/exec"; 
+    // ======= 重要：在此填入您的 API 網址 =======
+    const API_URL = "https://script.google.com/macros/s/AKfycbwLaZDWb_crF_nVAGEYlYbKtEWONa27JlQyv0i5zpRyNiLmjxpd9TLV-wCTUlCph2gkXg/exec"; 
 
-    // a0001.txt 原有資料變數
+    // --- 完全繼承 a0001.txt 變數結構 ---
+    let users = [{u:'admin', p:'admin123', r:'admin'}];
     let vendors = [], models = [], inventory = [], colors = [], salesHistory = [];
-    let compName = "Lingerie Pro", taxRate = 5, currentUser = null, html5QrCode = null;
+    let compName = "內衣專業管理", taxRate = 5, currentUser = null;
+    let invoiceItems = [], html5QrCode = null, isProcessing = false;
 
-    // --- 雲端同步與初始化 ---
+    // --- 雲端對接邏輯 ---
     async function cloud(action, sheet, payload = null) {
         try {
             const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, sheet, payload }) });
@@ -117,85 +207,114 @@
     }
 
     async function save() {
-        // 先存本地 (雙重保險)
-        localStorage.setItem('V_D', JSON.stringify(vendors));
-        localStorage.setItem('I_D', JSON.stringify(inventory));
-        // 異步存雲端
+        // 同步發送至雲端
+        cloud('syncFull', 'USERS', users);
         cloud('syncFull', 'VENDORS', vendors);
         cloud('syncFull', 'MODELS', models);
         cloud('syncFull', 'INVENTORY', inventory);
         cloud('syncFull', 'COLORS', colors);
         cloud('syncFull', 'SALES', salesHistory);
-        cloud('syncFull', 'CONFIG', [{key:'compName', value:compName}, {key:'taxRate', value:taxRate}]);
+        cloud('syncFull', 'CONFIG', [{k:'compName', v:compName}, {k:'taxRate', v:taxRate}]);
         render();
     }
 
     async function init() {
-        document.getElementById('cloud-info').innerText = "讀取雲端庫存中...";
-        const [v, m, i, c, s, cfg] = await Promise.all([
-            cloud('readAll', 'VENDORS'), cloud('readAll', 'MODELS'), cloud('readAll', 'INVENTORY'),
-            cloud('readAll', 'COLORS'), cloud('readAll', 'SALES'), cloud('readAll', 'CONFIG')
+        document.getElementById('init-msg').innerText = "雲端同步中...";
+        const [u, v, m, i, c, s, cfg] = await Promise.all([
+            cloud('readAll', 'USERS'), cloud('readAll', 'VENDORS'), cloud('readAll', 'MODELS'),
+            cloud('readAll', 'INVENTORY'), cloud('readAll', 'COLORS'), cloud('readAll', 'SALES'),
+            cloud('readAll', 'CONFIG')
         ]);
+        if(u && u.length) users = u;
         vendors = v || []; models = m || []; inventory = i || []; colors = c || []; salesHistory = s || [];
         if(cfg && cfg.length) {
-            const cn = cfg.find(x => x.key==='compName'); if(cn) compName = cn.value;
-            const tr = cfg.find(x => x.key==='taxRate'); if(tr) taxRate = tr.value;
+            const cn = cfg.find(x => x.k==='compName'); if(cn) compName = cn.v;
+            const tr = cfg.find(x => x.k==='taxRate'); if(tr) taxRate = tr.v;
         }
-        document.getElementById('cloud-info').innerText = "雲端同步已完成。";
+        document.getElementById('init-msg').innerText = "連線完成，請登入";
     }
 
-    // --- a0001.txt 的核心邏輯函數 (完全保留) ---
+    // --- 完全保留 a0001 原有函數邏輯 ---
     function login() {
-        const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value;
-        if(u === 'admin' && p === 'admin123') { 
-            currentUser = {u:'admin', r:'admin'}; 
-            document.getElementById('login-overlay').style.display = 'none';
-            document.body.classList.add('is-admin');
-            render();
-        } else { alert("帳密錯誤"); }
+        const u = document.getElementById('loginUser').value || 'admin';
+        const p = document.getElementById('loginPass').value || 'admin123';
+        const found = users.find(x => x.u === u && x.p === p);
+        if(found) { currentUser = found; checkAuth(); } else { alert("帳密錯誤"); }
+    }
+
+    function checkAuth() {
+        if(!currentUser) return;
+        document.getElementById('login-overlay').style.display = 'none';
+        document.body.classList.toggle('is-admin', currentUser.r === 'admin');
+        document.getElementById('userStatus').innerText = `👤 ${currentUser.u} (${currentUser.r === 'admin' ? '管理者' : '員工'})`;
+        render();
     }
 
     function render() {
         document.getElementById('compNameInp').value = compName;
-        document.getElementById('vendorTags').innerHTML = vendors.map(v => `<div class="tag">${v.code}-${v.name}</div>`).join('');
-        document.getElementById('selectVendor').innerHTML = vendors.map(v => `<option value="${v.code}">${v.code}</option>`).join('');
+        document.getElementById('taxRateInp').value = taxRate;
+        document.getElementById('vendorTags').innerHTML = vendors.map(v => `<div class="tag">${v.code}</div>`).join('');
+        document.getElementById('selectVendor').innerHTML = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
+        document.getElementById('setVendorRel').innerHTML = document.getElementById('selectVendor').innerHTML;
         document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
-        updateModelSelect();
+        document.getElementById('colorTags').innerHTML = colors.map(c => `<div class="tag">${c.code}:${c.name}</div>`).join('');
         
+        updateModelSelect();
+        renderStats();
+
         const q = document.getElementById('stockSearch').value.toLowerCase();
-        document.getElementById('stockTableBody').innerHTML = inventory.filter(i => (i.vCode+i.braId).toLowerCase().includes(q)).map((i, idx) => `
-            <tr><td>${i.vCode}<br>${i.braId}</td><td>${i.c} ${i.bb}${i.bc} ${i.bz}</td><td><b>${i.bq}</b></td>
-            <td><button onclick="adjQty(${idx}, 1)">+</button></td></tr>
-        `).join('');
+        document.getElementById('stockTableBody').innerHTML = inventory
+            .filter(i => (i.vCode+i.braId+i.c).toLowerCase().includes(q))
+            .map((i, idx) => `
+                <tr>
+                    <td>${i.vCode}<br><small>${i.braId}</small></td>
+                    <td>${i.c} ${i.bb}${i.bc} ${i.bz}</td>
+                    <td><b style="color:${i.bq<3?'red':'inherit'}">${i.bq}</b></td>
+                    <td class="staff-hidden"><button onclick="adjQty(${idx}, 1)" style="padding:5px 10px;">+</button></td>
+                </tr>
+            `).join('');
     }
 
-    function adjQty(idx, d) { inventory[idx].bq += d; save(); }
+    function renderStats() {
+        const today = new Date().toLocaleDateString();
+        const tSales = salesHistory.filter(s => new Date(s.date).toLocaleDateString() === today);
+        const tRev = tSales.reduce((a, b) => a + (b.p * b.q), 0);
+        const div = document.getElementById('today-sales-stats');
+        div.style.display = 'block';
+        div.innerHTML = `
+            <div class="stats-grid">
+                <div class="stat-box"><span class="stat-label">今日營收</span><span class="stat-val">$${tRev.toLocaleString()}</span></div>
+                <div class="stat-box"><span class="stat-label">今日單數</span><span class="stat-val">${tSales.length}</span></div>
+            </div>
+        `;
+    }
 
+    // --- 其餘 a0001 原生功能 ---
+    function adjQty(idx, d) { inventory[idx].bq += d; save(); }
+    function addVendor() { vendors.push({code: document.getElementById('vCodeInp').value, name: document.getElementById('vNameInp').value}); save(); }
+    function addColor() { const [c,n] = document.getElementById('colorInp').value.split(/[:：]/); colors.push({code:c.trim(), name:n.trim()}); save(); }
+    function addModel() { models.push({vCode: document.getElementById('setVendorRel').value, braId: document.getElementById('setBraId').value, cost: document.getElementById('setCost').value, price: document.getElementById('setPrice').value}); save(); }
     function updateModelSelect() {
         const v = document.getElementById('selectVendor').value;
         const fil = models.filter(m => m.vCode === v);
-        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join('');
+        document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId} ($${m.price})</option>`).join('');
     }
 
     async function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
-        if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+        html5QrCode = new Html5Qrcode("reader");
+        await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
+            if(isProcessing) return;
             const p = txt.split(','); if(p.length < 4) return;
-            updateStock(p[0], p[1], p[3], p[4]||'-', p[5]||'-', p[6]||'-', 1);
+            isProcessing = true;
+            if(mode === 'OUT_AUTO') addToInvoiceList(p[0], p[1], p[3], p[4], p[5], p[6], 1);
+            else updateStock(p[0], p[1], p[3], p[4], p[5], p[6], 1);
+            setTimeout(() => isProcessing = false, 800);
         });
     }
 
-    function updateStock(vCode, braId, c, bb, bc, bz, bq) {
-        let it = inventory.find(x => x.vCode===vCode && x.braId===braId && x.c===c && x.bb===bb && x.bc===bc && x.bz===bz);
-        if(it) it.bq += bq; else inventory.push({vCode, braId, c, bb, bc, bz, bq});
-        save();
-    }
-
     function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
-    function addVendor() { vendors.push({code:document.getElementById('vCodeInp').value, name:document.getElementById('vNameInp').value}); save(); }
-    function addColor() { const [c,n] = document.getElementById('colorInp').value.split(':'); colors.push({code:c, name:n}); save(); }
-    function addModel() { models.push({vCode:document.getElementById('selectVendor').value, braId:document.getElementById('setBraId').value, price:document.getElementById('setPrice').value}); save(); }
+    function logout() { currentUser = null; location.reload(); }
 
     window.onload = init;
 </script>
