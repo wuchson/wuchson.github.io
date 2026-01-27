@@ -157,7 +157,7 @@
             cloud('readAll', 'COLORS'), cloud('readAll', 'USERS'), cloud('readAll', 'SALES'), cloud('readAll', 'CONFIG')
         ]);
         vendors = v || []; models = m || []; inventory = i || []; colors = c || [];
-        users = u || [{u:'admin', p:'1234', r:'admin'}]; salesHistory = s || [];
+        users = u || [{u:'admin', p:'admin123', r:'admin'}]; salesHistory = s || [];
         if(cfg) {
             let cn = cfg.find(x => x.key==='compName'); if(cn) compName = cn.value;
             let tr = cfg.find(x => x.key==='taxRate'); if(tr) taxRate = tr.value;
