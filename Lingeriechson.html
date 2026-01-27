@@ -227,7 +227,7 @@
 
 <script>
     // --- 核心配置：請修改此處 ---
-    const API_URL = "在此輸入您的部署網址";
+    const API_URL = "https://script.google.com/macros/s/AKfycbySqrRVsyERTha-RoqwyvuAwOpY7nXEMPapE3tZv7IJVxLUR1bltxF2La3ALQXrnpE7Yg/exec";
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = 850; gain.gain.setValueAtTime(0, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15); osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
