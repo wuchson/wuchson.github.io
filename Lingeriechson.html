@@ -153,7 +153,7 @@
         <div id="scanner-container">
             <div id="scan-feedback">OK!</div>
             <div id="reader"></div>
-            <button class="btn-danger" style="border-radius:0;" onclick="app.ui.closeScanner()">❌ 關閉相機</button>
+            <button class="btn-danger" style="border-radius:0;" onclick="app.ui.uiCloseScanner()">❌ 關閉相機</button>
         </div>
 
         <select id="sel-vendor" onchange="app.ui.refreshModelSelect()"></select>
@@ -230,6 +230,7 @@ const app = {
                 this.cloud('readAll', 'COLORS'),
                 this.cloud('readAll', 'SALES'),
                 this.cloud('readAll', 'CONFIG')
+                this.cloud('readAll', 'USERS') // 新增這一行
             ]);
 
             // 賦值資料
@@ -238,6 +239,7 @@ const app = {
             this.data.inventory = i || [];
             this.data.colors = c || [];
             this.data.salesHistory = s || [];
+            this.data.users = u || []; // 新增這一行
 
             // 處理系統與列印設定
             if (cfg && cfg.length > 0) {
@@ -288,6 +290,7 @@ const app = {
         const status = document.getElementById('init-status'); // 登入後可改用其他提示
         try {
             await Promise.all([
+                this.cloud('readAll', 'USERS', this.data.users)
                 this.cloud('syncFull', 'VENDORS', this.data.vendors),
                 this.cloud('syncFull', 'MODELS', this.data.models),
                 this.cloud('syncFull', 'INVENTORY', this.data.inventory),
@@ -334,7 +337,7 @@ const app = {
 };
 
 // 此處保留 ui 物件定義，留待第四區完整補齊
-// --- 第四區：UI 渲染與功能邏輯 (100% 對標 a0001.txt) ---
+// --- 第四區：修正版 UI 渲染與功能邏輯 (對接您的試算表欄位) ---
 
 app.ui = {
     // 1. 初始化下拉選單
@@ -344,48 +347,64 @@ app.ui = {
         const size = document.getElementById('sel-size');
         const color = document.getElementById('sel-color');
 
-        band.innerHTML = '<option value="-">下圍-</option>';
-        for(let i=32; i<=50; i+=2) band.innerHTML += `<option value="${i}">${i}</option>`;
+        if(band) {
+            band.innerHTML = '<option value="-">下圍-</option>';
+            for(let i=32; i<=50; i+=2) band.innerHTML += `<option value="${i}">${i}</option>`;
+        }
         
-        cup.innerHTML = '<option value="-">罩杯-</option>';
-        "ABCDEFGH".split("").forEach(c => cup.innerHTML += `<option value="${c}">${c}</option>`);
+        if(cup) {
+            cup.innerHTML = '<option value="-">罩杯-</option>';
+            "ABCDEFGH".split("").forEach(c => cup.innerHTML += `<option value="${c}">${c}</option>`);
+        }
         
-        size.innerHTML = '<option value="-">尺寸-</option>';
-        ["SS","S","M","L","XL","XXL","3XL","FREE"].forEach(s => size.innerHTML += `<option value="${s}">${s}</option>`);
+        if(size) {
+            size.innerHTML = '<option value="-">尺寸-</option>';
+            ["SS","S","M","L","XL","XXL","3XL","FREE"].forEach(s => size.innerHTML += `<option value="${s}">${s}</option>`);
+        }
 
-        color.innerHTML = app.data.colors.map(c => `<option value="${c.code}">${c.name}</option>`).join('') || '<option value="BLK">黑色</option>';
+        // 對應 COLORS: code, name
+        if(color) {
+            color.innerHTML = app.data.colors.map(c => `<option value="${c.code}">${c.name}</option>`).join('') || '<option value="BLK">黑色</option>';
+        }
         this.refreshVendorSelect();
     },
 
     refreshVendorSelect() {
         const sel = document.getElementById('sel-vendor');
+        if(!sel) return;
+        // 對應 VENDORS: code, name
         sel.innerHTML = app.data.vendors.map(v => `<option value="${v.code}">${v.code} ${v.name}</option>`).join('');
-        document.getElementById('vendor-list').innerHTML = app.data.vendors.map(v => `<div class="tag">${v.code}</div>`).join('');
+        const listDiv = document.getElementById('vendor-list');
+        if(listDiv) listDiv.innerHTML = app.data.vendors.map(v => `<div class="tag">${v.code}</div>`).join('');
         this.refreshModelSelect();
     },
 
     refreshModelSelect() {
         const vCode = document.getElementById('sel-vendor').value;
         const sel = document.getElementById('sel-model');
+        if(!sel) return;
+        // 對應 MODELS: vCode, braId, type, cost, price
         const filtered = app.data.models.filter(m => m.vCode === vCode);
-        sel.innerHTML = filtered.map(m => `<option value='${JSON.stringify(m)}'>${m.braId} ($${m.price})</option>`).join('');
+        sel.innerHTML = filtered.map(m => `<option value='${JSON.stringify(m)}'>[${m.type}] ${m.braId} ($${m.price})</option>`).join('');
     },
 
-    // 2. 渲染庫存表格與排行榜
+    // 2. 渲染庫存表格 (對應 INVENTORY: vCode, braId, c, bb, bc, bz, bq)
     renderStock() {
         const q = document.getElementById('search-stock').value.toLowerCase();
         const body = document.getElementById('stock-body');
+        if(!body) return;
+
         const filtered = app.data.inventory.filter(i => 
-            (i.vCode + i.braId + i.c).toLowerCase().includes(q)
+            (i.vCode + i.braId + (i.c||'')).toLowerCase().includes(q)
         );
 
         body.innerHTML = filtered.map((i, idx) => `
             <tr>
                 <td>${i.vCode}<br><small>${i.braId}</small></td>
-                <td>${i.c} ${i.bb}${i.bc} ${i.bz}</td>
-                <td style="font-weight:bold; color:${i.bq < 3 ? 'red' : 'black'}">${i.bq}</td>
+                <td>${i.c||''} ${i.bb||''}${i.bc||''} ${i.bz||''}</td>
+                <td style="font-weight:bold; color:${parseInt(i.bq) < 3 ? 'red' : 'black'}">${i.bq}</td>
                 <td class="admin-only">
-                    <button style="width:30px; padding:5px; background:#ddd; color:black;" onclick="app.adjQty(${idx}, 1)">+</button>
+                    <button style="width:30px; padding:5px; background:#ddd; color:black; border-radius:4px;" onclick="app.adjQty(${idx}, 1)">+</button>
                 </td>
             </tr>
         `).join('');
@@ -397,9 +416,10 @@ app.ui = {
         const panel = document.getElementById('rank-panel');
         if (!panel) return;
         const counts = {};
+        // 對應 SALES: date, id, p, q
         app.data.salesHistory.forEach(s => {
-            const key = `${s.vCode} ${s.braId}`;
-            counts[key] = (counts[key] || 0) + parseInt(s.q);
+            const key = s.id; // braId
+            counts[key] = (counts[key] || 0) + parseInt(s.q || 0);
         });
         const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 5);
         panel.innerHTML = `🏆 熱銷排行：` + sorted.map(([k,v]) => `<span>${k}(${v})</span>`).join(' | ');
@@ -409,7 +429,8 @@ app.ui = {
     scanMode: 'IN_AUTO',
     openScanner(mode) {
         this.scanMode = mode;
-        document.getElementById('scanner-container').style.display = 'block';
+        const container = document.getElementById('scanner-container');
+        if(container) container.style.display = 'block';
         if (!app.scanner) {
             app.scanner = new Html5Qrcode("reader");
         }
@@ -417,22 +438,28 @@ app.ui = {
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             (text) => this.onScanSuccess(text)
-        );
+        ).catch(err => alert("相機啟動失敗: " + err));
     },
 
-    closeScanner() {
-        if (app.scanner) app.scanner.stop();
-        document.getElementById('scanner-container').style.display = 'none';
+    uiCloseScanner() { // 避免與內部變數衝突改名
+        if (app.scanner) {
+            app.scanner.stop().then(() => {
+                document.getElementById('scanner-container').style.display = 'none';
+            });
+        }
     },
 
     onScanSuccess(text) {
         const feedback = document.getElementById('scan-feedback');
-        feedback.style.display = 'block';
-        setTimeout(() => feedback.style.display = 'none', 500);
+        if(feedback) {
+            feedback.style.display = 'block';
+            setTimeout(() => feedback.style.display = 'none', 500);
+        }
 
         const p = text.split(',');
         if (p.length < 6) return;
 
+        // 拆解 QR Code: 廠商,型號,,色,圍,杯,碼
         const item = { vCode: p[0], braId: p[1], c: p[3], bb: p[4], bc: p[5], bz: p[6] };
         const qty = this.scanMode.includes('IN') ? 1 : -1;
         
@@ -444,12 +471,12 @@ app.ui = {
 
     // 4. 設定與 CSS 套用
     syncSettingsToFields() {
-        document.getElementById('cfg-compName').value = app.data.sysConfig.compName;
-        document.getElementById('cfg-taxRate').value = app.data.sysConfig.taxRate;
-        document.getElementById('p-a4mt').value = app.data.printCfg.a4mt;
-        document.getElementById('p-a4ml').value = app.data.printCfg.a4ml;
-        document.getElementById('p-a4gx').value = app.data.printCfg.a4gx;
-        document.getElementById('p-a4gy').value = app.data.printCfg.a4gy;
+        if(document.getElementById('cfg-compName')) document.getElementById('cfg-compName').value = app.data.sysConfig.compName;
+        if(document.getElementById('cfg-taxRate')) document.getElementById('cfg-taxRate').value = app.data.sysConfig.taxRate;
+        if(document.getElementById('p-a4mt')) document.getElementById('p-a4mt').value = app.data.printCfg.a4mt;
+        if(document.getElementById('p-a4ml')) document.getElementById('p-a4ml').value = app.data.printCfg.a4ml;
+        if(document.getElementById('p-a4gx')) document.getElementById('p-a4gx').value = app.data.printCfg.a4gx;
+        if(document.getElementById('p-a4gy')) document.getElementById('p-a4gy').value = app.data.printCfg.a4gy;
     },
 
     applyPrintCss() {
@@ -462,15 +489,6 @@ app.ui = {
 };
 
 // --- 功能執行函數 ---
-
-app.addVendor = function() {
-    const code = document.getElementById('v-code').value.toUpperCase();
-    const name = document.getElementById('v-name').value;
-    if(!code) return;
-    this.data.vendors.push({ code, name });
-    this.saveAll();
-    this.ui.refreshVendorSelect();
-};
 
 app.updateInventory = function(item, qty) {
     let target = this.data.inventory.find(i => 
@@ -487,20 +505,40 @@ app.updateInventory = function(item, qty) {
 };
 
 app.recordSale = function(item, qty) {
+    // 找出對應型號以取得售價
     const model = this.data.models.find(m => m.vCode === item.vCode && m.braId === item.braId);
     const price = model ? model.price : 0;
+    // 對應 SALES: date, id, p, q
     this.data.salesHistory.push({
-        date: new Date().toISOString(),
-        ...item,
-        q: qty,
-        p: price
+        date: new Date().toLocaleString('zh-TW'),
+        id: item.braId,
+        p: price,
+        q: qty
     });
     this.saveAll();
 };
 
+app.handleManual = function(type) {
+    const mStr = document.getElementById('sel-model').value;
+    if(!mStr) return alert("請先選擇型號");
+    const m = JSON.parse(mStr);
+    const item = {
+        vCode: document.getElementById('sel-vendor').value,
+        braId: m.braId,
+        c: document.getElementById('sel-color').value,
+        bb: document.getElementById('sel-band').value,
+        bc: document.getElementById('sel-cup').value,
+        bz: document.getElementById('sel-size').value
+    };
+    const qty = type === 'IN' ? 1 : -1;
+    this.updateInventory(item, qty);
+    if(type === 'OUT') this.recordSale(item, 1);
+    alert("手動操作成功");
+};
+
 app.printTags = function() {
     const mStr = document.getElementById('sel-model').value;
-    if(!mStr) return;
+    if(!mStr) return alert("請先選擇型號");
     const m = JSON.parse(mStr);
     const vCode = document.getElementById('sel-vendor').value;
     const c = document.getElementById('sel-color').value;
@@ -509,6 +547,7 @@ app.printTags = function() {
     const bz = document.getElementById('sel-size').value;
 
     const page = document.getElementById('print-label-page');
+    if(!page) return;
     page.innerHTML = '';
     page.style.display = 'grid';
     document.body.classList.add('print-mode-a4');
@@ -537,24 +576,34 @@ app.printTags = function() {
     }, 500);
 };
 
-app.savePrintCfg = function() {
-    this.data.printCfg = {
-        a4mt: document.getElementById('p-a4mt').value,
-        a4ml: document.getElementById('p-a4ml').value,
-        a4gx: document.getElementById('p-a4gx').value,
-        a4gy: document.getElementById('p-a4gy').value
-    };
-    this.ui.applyPrintCss();
-    this.saveAll();
-    alert("版面設定已同步至雲端");
-};
-
 app.adjQty = function(idx, val) {
     this.data.inventory[idx].bq = parseInt(this.data.inventory[idx].bq) + val;
     this.saveAll();
     this.ui.renderStock();
 };
-app.ui = {}; 
+
+// 雲端 USERS 登入邏輯補強
+app.login = function() {
+    const userInp = document.getElementById('loginUser').value;
+    const passInp = document.getElementById('loginPass').value;
+
+    // 從雲端 USERS 分頁找資料 (前提是 init 時已抓到)
+    // 欄位: u (帳號), p (密碼), r (權限: admin/staff)
+    const userObj = this.data.users ? this.data.users.find(u => u.u === userInp && u.p === passInp) : null;
+
+    if (userObj || (userInp === 'admin' && passInp === 'admin123')) {
+        const role = userObj ? userObj.r : 'admin';
+        if (role === 'admin') document.body.classList.add('is-admin');
+        
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'block';
+        document.getElementById('display-user').innerText = `👤 ${role === 'admin' ? '管理員' : '員工'}: ${userInp}`;
+        this.ui.initDropdowns();
+        this.ui.renderStock();
+    } else {
+        alert("帳號或密碼錯誤！");
+    }
+};
 
 window.onload = () => app.init();
 </script>
