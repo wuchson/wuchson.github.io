@@ -584,12 +584,17 @@ app.adjQty = function(idx, val) {
 
 // 雲端 USERS 登入邏輯補強
 app.login = function() {
-    const userInp = document.getElementById('loginUser').value;
-    const passInp = document.getElementById('loginPass').value;
+    // 使用 .trim() 移除前後空格，並確保轉為字串比對
+    const userInp = document.getElementById('loginUser').value.trim();
+    const passInp = document.getElementById('loginPass').value.trim();
 
-    // 從雲端 USERS 分頁找資料 (前提是 init 時已抓到)
-    // 欄位: u (帳號), p (密碼), r (權限: admin/staff)
-    const userObj = this.data.users ? this.data.users.find(u => u.u === userInp && u.p === passInp) : null;
+    console.log("正在嘗試登入:", userInp);
+    console.log("現有雲端用戶資料:", this.data.users);
+
+    // 從雲端資料中找尋
+    const userObj = this.data.users ? this.data.users.find(u => 
+        String(u.u).trim() === userInp && String(u.p).trim() === passInp
+    ) : null;
 
     if (userObj || (userInp === 'admin' && passInp === 'admin123')) {
         const role = userObj ? userObj.r : 'admin';
@@ -601,10 +606,9 @@ app.login = function() {
         this.ui.initDropdowns();
         this.ui.renderStock();
     } else {
-        alert("帳號或密碼錯誤！");
+        alert("帳號或密碼錯誤！請檢查試算表 USERS 分頁。");
     }
 };
-
 window.onload = () => app.init();
 </script>
 
