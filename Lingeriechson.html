@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 雲端旗艦版</title>
+    <title>Lingerie Pro - 雲端版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
-        /* 直接繼承您原始檔的 CSS 變數 */
         :root {
             --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2;
             --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
@@ -17,19 +16,23 @@
         .container { max-width: 600px; margin: auto; display: none; }
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
-        .admin-only { display: none; }
-        body.is-admin .admin-only { display: block; }
+        
+        /* 管理員權限控制：預設隱藏 */
+        .admin-only { display: none !important; }
+        /* 當 body 有 is-admin 類別時強制顯示 */
+        body.is-admin .admin-only { display: block !important; }
+        body.is-admin table .admin-only { display: table-cell !important; }
+
         input, select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; margin-bottom: 8px; }
         .row-inputs { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
         .row-inputs > * { flex: 1; min-width: 80px; }
         button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
         .btn-success { background: var(--success); } .btn-accent { background: var(--accent); } .btn-danger { background: var(--danger); }
         
-        /* 統計看板樣式 */
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
         .stat-val { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-        .stat-label { font-size: 0.8rem; color: #888; margin-top: 4px; }
+        .stat-label { font-size: 0.8rem; color: #888; }
 
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #reader { width: 100%; }
@@ -42,23 +45,19 @@
             .no-print { display: none !important; }
             body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; }
             .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-            .label-item canvas { width: 22mm !important; height: 22mm !important; }
-            .label-txt { font-size: 8px; text-align: center; margin-top: 2px; line-height: 1.1; }
         }
     </style>
 </head>
 <body>
-
 <div id="login-overlay">
     <div class="card" style="width: 85%; max-width: 350px; text-align:center;">
         <h2 style="color:var(--primary);">Lingerie Pro Cloud</h2>
         <input type="text" id="loginUser" placeholder="帳號">
         <input type="password" id="loginPass" placeholder="密碼">
         <button onclick="app.login()">進入系統</button>
-        <div id="init-status" style="font-size:12px; color:gray; margin-top:10px;">🔄 雲端同步中...</div>
+        <div id="init-status" style="font-size:12px; color:gray; margin-top:10px;">🔄 正在載入雲端資料庫...</div>
     </div>
 </div>
-
 <div id="main-ui" class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span id="display-user" style="font-size:14px; font-weight:bold; color:var(--primary);"></span>
@@ -73,14 +72,14 @@
     <div class="card admin-only">
         <h3>📄 A4 標籤微調 (mm)</h3>
         <div class="row-inputs">
-            <div>上：<input type="number" step="0.1" id="p-a4mt"></div>
-            <div>左：<input type="number" step="0.1" id="p-a4ml"></div>
+            <div>上：<input type="number" step="0.1" id="p-a4mt" value="15.5"></div>
+            <div>左：<input type="number" step="0.1" id="p-a4ml" value="6.5"></div>
         </div>
-        <button class="btn-accent" onclick="app.savePrintCfg()">💾 儲存版面設定</button>
+        <button class="btn-accent" onclick="app.savePrintCfg()">💾 儲存並套用設定</button>
     </div>
 
     <div class="card">
-        <h3>📥 進出貨與操作</h3>
+        <h3>📥 進出貨操作</h3>
         <div class="row-inputs">
             <button onclick="app.ui.openScanner('IN_AUTO')" style="background:#4299e1;">連續入庫</button>
             <button onclick="app.ui.openScanner('OUT_AUTO')" class="btn-success">掃描出貨</button>
@@ -89,6 +88,7 @@
             <div id="reader"></div>
             <button class="btn-danger" style="border-radius:0;" onclick="app.ui.uiCloseScanner()">❌ 關閉相機</button>
         </div>
+        
         <select id="sel-vendor" onchange="app.ui.refreshModelSelect()"></select>
         <select id="sel-model"></select>
         <div class="row-inputs">
@@ -101,13 +101,13 @@
             <button onclick="app.handleManual('IN')">📥 手動入庫</button>
             <button class="btn-success" onclick="app.handleManual('OUT')">📄 記錄銷售</button>
         </div>
-        <button class="btn-accent admin-only" style="margin-top:10px;" onclick="app.printTags()">🖨️ 產生 35 枚標籤</button>
+        <button class="btn-accent admin-only" style="margin-top:10px;" onclick="app.printTags()">🖨️ 產生 35 枚 A4 標籤</button>
     </div>
 
     <div class="card">
-        <h3>📊 庫存統計與搜尋</h3>
+        <h3>📊 庫存明細</h3>
         <div id="rank-panel" style="background:#fffaf0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:13px; color:#d4a373;"></div>
-        <input type="text" id="search-stock" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="app.ui.renderStock()">
+        <input type="text" id="search-stock" placeholder="🔍 搜尋型號..." oninput="app.ui.renderStock()">
         <table>
             <thead><tr><th>品項規格</th><th>存量</th><th class="admin-only">操作</th></tr></thead>
             <tbody id="stock-body"></tbody>
@@ -115,14 +115,12 @@
     </div>
 </div>
 <div id="print-label-page" style="display:none;"></div>
-
 <script>
 const app = {
     CONFIG: { API_URL: "https://script.google.com/macros/s/AKfycbywN_36nh6hI9JSCXwf2ohcMI9MCFvEAQFPQfvIcSu75ZyKrR2sCgNzbwQE1UjAVXb8/exec" },
     data: { vendors: [], models: [], inventory: [], colors: [], salesHistory: [], users: [], printCfg: {} },
 
     async init() {
-        const status = document.getElementById('init-status');
         try {
             const sheets = ['VENDORS', 'MODELS', 'INVENTORY', 'COLORS', 'SALES', 'USERS', 'CONFIG'];
             const res = await Promise.all(sheets.map(s => this.cloud('readAll', s)));
@@ -133,8 +131,8 @@ const app = {
                 const pc = cfg.find(x => x.k === 'printCfg'); if(pc) this.data.printCfg = JSON.parse(pc.v);
             }
             this.ui.syncSettingsToFields(); this.ui.applyPrintCss();
-            status.innerText = "✅ 雲端連線成功";
-        } catch (e) { status.innerText = "❌ 連線失敗"; }
+            document.getElementById('init-status').innerText = "✅ 同步成功";
+        } catch (e) { document.getElementById('init-status').innerText = "❌ 連線失敗"; }
     },
 
     async cloud(action, sheet, payload = null) {
@@ -144,16 +142,23 @@ const app = {
     },
 
     login() {
-        const u = document.getElementById('loginUser').value.trim(), p = document.getElementById('loginPass').value.trim();
+        const u = document.getElementById('loginUser').value.trim();
+        const p = document.getElementById('loginPass').value.trim();
+        
+        // 修正後的權限判斷：雲端資料比對 OR 硬編碼管理員帳號
         const user = this.data.users.find(x => String(x.u) === u && String(x.p) === p);
+        const isAdmin = (u === 'admin' && p === 'admin123') || (user && user.r === 'admin');
+
         if (user || (u === 'admin' && p === 'admin123')) {
-            const role = user ? user.r : 'admin';
-            if (role === 'admin') document.body.classList.add('is-admin');
+            if (isAdmin) {
+                document.body.classList.add('is-admin'); // 這一行負責開啟隱藏功能
+                console.log("Admin Mode Activated");
+            }
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
-            document.getElementById('display-user').innerText = `👤 ${role === 'admin' ? '管理員' : '員工'}: ${u}`;
+            document.getElementById('display-user').innerText = `👤 ${isAdmin ? '管理員' : '員工'}: ${u}`;
             this.ui.initDropdowns(); this.ui.renderStock();
-        } else { alert("帳號密碼錯誤！"); }
+        } else { alert("帳號密碼錯誤"); }
     },
 
     async saveAll() {
@@ -161,6 +166,11 @@ const app = {
             this.cloud('syncFull', 'INVENTORY', this.data.inventory),
             this.cloud('syncFull', 'SALES', this.data.salesHistory)
         ]);
+    },
+
+    adjQty(v,b,c,bb,bc,bz, qty) {
+        let t = this.data.inventory.find(i => i.vCode===v && i.braId===b && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
+        if(t) { t.bq = parseInt(t.bq) + qty; this.saveAll(); this.ui.renderStock(); }
     }
 };
 
@@ -185,15 +195,13 @@ app.ui = {
     renderStock() {
         const q = document.getElementById('search-stock').value.toLowerCase();
         const f = app.data.inventory.filter(i => (i.vCode + i.braId + (i.c||'')).toLowerCase().includes(q));
-        document.getElementById('stock-body').innerHTML = f.map((i, idx) => `
+        document.getElementById('stock-body').innerHTML = f.map(i => `
             <tr>
                 <td><strong>${i.braId}</strong><br><small>${i.c} ${i.bb}${i.bc} ${i.bz}</small></td>
                 <td style="font-weight:bold; color:${i.bq < 3 ? 'var(--danger)':'var(--primary)'};">${i.bq}</td>
                 <td class="admin-only"><button onclick="app.adjQty('${i.vCode}','${i.braId}','${i.c}','${i.bb}','${i.bc}','${i.bz}', 1)" style="padding:4px 8px; width:auto;">+</button></td>
             </tr>
         `).join('');
-        
-        // 更新統計看板 [cite: 190]
         document.getElementById('stat-stock').innerText = app.data.inventory.reduce((a,b)=> a + parseInt(b.bq), 0);
         const today = new Date().toLocaleDateString();
         document.getElementById('stat-sales').innerText = app.data.salesHistory.filter(s => s.date.includes(today)).reduce((a,b)=> a + parseInt(b.q), 0);
@@ -257,11 +265,6 @@ app.printTags = function() {
         new QRious({ element: can, value: `${m.vCode},${m.braId},,${document.getElementById('sel-color').value},${document.getElementById('sel-band').value},${document.getElementById('sel-cup').value},${document.getElementById('sel-size').value}`, size: 100 });
     }
     setTimeout(() => { window.print(); document.body.classList.remove('print-mode-a4'); p.style.display = 'none'; }, 500);
-};
-
-app.adjQty = function(v,b,c,bb,bc,bz, qty) {
-    let t = this.data.inventory.find(i => i.vCode===v && i.braId===b && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
-    if(t) { t.bq = parseInt(t.bq) + qty; this.saveAll(); this.ui.renderStock(); }
 };
 
 app.savePrintCfg = function() {
