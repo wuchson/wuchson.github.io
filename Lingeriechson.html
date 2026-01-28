@@ -201,7 +201,7 @@
 const app = {
     // 1. 設定區：請務必填入您的 GAS 部署網址
     CONFIG: {
-        API_URL: "您的_GOOGLE_APPS_SCRIPT_網址", 
+        API_URL: "https://script.google.com/macros/s/AKfycbzW8Na_mluygI7ptBcOU-NvnbyNTOyH4arEezCYSJ2p0plm51F9Y9Mxtr_fAPk4SbQIhw/exec", 
         VERSION: "1.0.0"
     },
 
@@ -310,7 +310,7 @@ const app = {
         const pass = document.getElementById('loginPass').value;
 
         // 預設帳密 (可隨意修改或之後連動資料庫)
-        if (user === 'admin' && pass === '1234') {
+        if (user === 'admin' && pass === 'admin123') {
             document.body.classList.add('is-admin');
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
