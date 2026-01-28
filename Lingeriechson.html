@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 雲端版</title>
+    <title>Lingerie Pro - 雲端版 (修正版)</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
@@ -17,9 +17,8 @@
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
         
-        /* 管理員權限控制：預設隱藏 */
+        /* 管理員權限顯示邏輯 */
         .admin-only { display: none !important; }
-        /* 當 body 有 is-admin 類別時強制顯示 */
         body.is-admin .admin-only { display: block !important; }
         body.is-admin table .admin-only { display: table-cell !important; }
 
@@ -29,6 +28,7 @@
         button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
         .btn-success { background: var(--success); } .btn-accent { background: var(--accent); } .btn-danger { background: var(--danger); }
         
+        /* 統計方塊 */
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .stat-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
         .stat-val { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
@@ -45,19 +45,22 @@
             .no-print { display: none !important; }
             body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; }
             .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+            .label-txt { font-size: 8px; text-align: center; margin-top: 2px; }
         }
     </style>
 </head>
 <body>
+
 <div id="login-overlay">
     <div class="card" style="width: 85%; max-width: 350px; text-align:center;">
         <h2 style="color:var(--primary);">Lingerie Pro Cloud</h2>
         <input type="text" id="loginUser" placeholder="帳號">
         <input type="password" id="loginPass" placeholder="密碼">
         <button onclick="app.login()">進入系統</button>
-        <div id="init-status" style="font-size:12px; color:gray; margin-top:10px;">🔄 正在載入雲端資料庫...</div>
+        <div id="init-status" style="font-size:12px; color:gray; margin-top:10px;">🔄 正在連線雲端資料庫...</div>
     </div>
 </div>
+
 <div id="main-ui" class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span id="display-user" style="font-size:14px; font-weight:bold; color:var(--primary);"></span>
@@ -115,6 +118,7 @@
     </div>
 </div>
 <div id="print-label-page" style="display:none;"></div>
+
 <script>
 const app = {
     CONFIG: { API_URL: "https://script.google.com/macros/s/AKfycbywN_36nh6hI9JSCXwf2ohcMI9MCFvEAQFPQfvIcSu75ZyKrR2sCgNzbwQE1UjAVXb8/exec" },
@@ -122,17 +126,27 @@ const app = {
 
     async init() {
         try {
-            const sheets = ['VENDORS', 'MODELS', 'INVENTORY', 'COLORS', 'SALES', 'USERS', 'CONFIG'];
+            const sheets = ['VENDORS', 'MODELS', 'INVENTORY', 'COLORS', 'SALES', 'CONFIG', 'USERS'];
             const res = await Promise.all(sheets.map(s => this.cloud('readAll', s)));
-            this.data.vendors = res[0]||[]; this.data.models = res[1]||[]; this.data.inventory = res[2]||[];
-            this.data.colors = res[3]||[]; this.data.salesHistory = res[4]||[]; this.data.users = res[5]||[];
-            const cfg = res[6]||[];
+            this.data.vendors = res[0]||[]; 
+            this.data.models = res[1]||[]; 
+            this.data.inventory = res[2]||[];
+            this.data.colors = res[3]||[]; 
+            this.data.salesHistory = res[4]||[]; 
+            this.data.users = res[6]||[]; // 修正：對應第七個讀取的 USERS
+            
+            const cfg = res[5]||[];
             if (cfg.length) {
-                const pc = cfg.find(x => x.k === 'printCfg'); if(pc) this.data.printCfg = JSON.parse(pc.v);
+                const pc = cfg.find(x => x.k === 'printCfg'); 
+                if(pc) this.data.printCfg = JSON.parse(pc.v);
             }
-            this.ui.syncSettingsToFields(); this.ui.applyPrintCss();
+            this.ui.syncSettingsToFields(); 
+            this.ui.applyPrintCss();
             document.getElementById('init-status').innerText = "✅ 同步成功";
-        } catch (e) { document.getElementById('init-status').innerText = "❌ 連線失敗"; }
+        } catch (e) { 
+            document.getElementById('init-status').innerText = "❌ 連線失敗"; 
+            console.error(e);
+        }
     },
 
     async cloud(action, sheet, payload = null) {
@@ -142,35 +156,31 @@ const app = {
     },
 
     login() {
-        const u = document.getElementById('loginUser').value.trim();
-        const p = document.getElementById('loginPass').value.trim();
+        const uInp = document.getElementById('loginUser').value.trim();
+        const pInp = document.getElementById('loginPass').value.trim();
         
-        // 修正後的權限判斷：雲端資料比對 OR 硬編碼管理員帳號
-        const user = this.data.users.find(x => String(x.u) === u && String(x.p) === p);
-        const isAdmin = (u === 'admin' && p === 'admin123') || (user && user.r === 'admin');
+        // 修正後的權限判斷
+        const userObj = this.data.users.find(x => String(x.u) === uInp && String(x.p) === pInp);
+        const isAdmin = (uInp === 'admin' && pInp === 'admin123') || (userObj && userObj.r === 'admin');
 
-        if (user || (u === 'admin' && p === 'admin123')) {
-            if (isAdmin) {
-                document.body.classList.add('is-admin'); // 這一行負責開啟隱藏功能
-                console.log("Admin Mode Activated");
-            }
+        if (userObj || (uInp === 'admin' && pInp === 'admin123')) {
+            if (isAdmin) document.body.classList.add('is-admin');
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
-            document.getElementById('display-user').innerText = `👤 ${isAdmin ? '管理員' : '員工'}: ${u}`;
+            document.getElementById('display-user').innerText = `👤 ${isAdmin ? '管理員' : '員工'}: ${uInp}`;
             this.ui.initDropdowns(); this.ui.renderStock();
-        } else { alert("帳號密碼錯誤"); }
+        } else { 
+            alert("帳號密碼錯誤！請檢查試算表 USERS 分頁。"); 
+        }
     },
 
     async saveAll() {
-        await Promise.all([
-            this.cloud('syncFull', 'INVENTORY', this.data.inventory),
-            this.cloud('syncFull', 'SALES', this.data.salesHistory)
-        ]);
-    },
-
-    adjQty(v,b,c,bb,bc,bz, qty) {
-        let t = this.data.inventory.find(i => i.vCode===v && i.braId===b && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
-        if(t) { t.bq = parseInt(t.bq) + qty; this.saveAll(); this.ui.renderStock(); }
+        try {
+            await Promise.all([
+                this.cloud('syncFull', 'INVENTORY', this.data.inventory),
+                this.cloud('syncFull', 'SALES', this.data.salesHistory)
+            ]);
+        } catch(e) { alert("雲端存檔失敗"); }
     }
 };
 
@@ -195,16 +205,18 @@ app.ui = {
     renderStock() {
         const q = document.getElementById('search-stock').value.toLowerCase();
         const f = app.data.inventory.filter(i => (i.vCode + i.braId + (i.c||'')).toLowerCase().includes(q));
-        document.getElementById('stock-body').innerHTML = f.map(i => `
+        document.getElementById('stock-body').innerHTML = f.map((i, idx) => `
             <tr>
                 <td><strong>${i.braId}</strong><br><small>${i.c} ${i.bb}${i.bc} ${i.bz}</small></td>
-                <td style="font-weight:bold; color:${i.bq < 3 ? 'var(--danger)':'var(--primary)'};">${i.bq}</td>
+                <td style="font-weight:bold; color:${parseInt(i.bq) < 3 ? 'var(--danger)':'var(--primary)'};">${i.bq}</td>
                 <td class="admin-only"><button onclick="app.adjQty('${i.vCode}','${i.braId}','${i.c}','${i.bb}','${i.bc}','${i.bz}', 1)" style="padding:4px 8px; width:auto;">+</button></td>
             </tr>
         `).join('');
-        document.getElementById('stat-stock').innerText = app.data.inventory.reduce((a,b)=> a + parseInt(b.bq), 0);
-        const today = new Date().toLocaleDateString();
-        document.getElementById('stat-sales').innerText = app.data.salesHistory.filter(s => s.date.includes(today)).reduce((a,b)=> a + parseInt(b.q), 0);
+        
+        // 更新統計方塊
+        document.getElementById('stat-stock').innerText = app.data.inventory.reduce((a,b)=> a + parseInt(b.bq || 0), 0);
+        const todayStr = new Date().toLocaleDateString();
+        document.getElementById('stat-sales').innerText = app.data.salesHistory.filter(s => s.date.includes(todayStr)).reduce((a,b)=> a + parseInt(b.q || 0), 0);
         this.renderRank();
     },
     renderRank() {
@@ -251,6 +263,11 @@ app.handleManual = function(type) {
     const m = JSON.parse(mStr);
     const item = { vCode: document.getElementById('sel-vendor').value, braId: m.braId, c: document.getElementById('sel-color').value, bb: document.getElementById('sel-band').value, bc: document.getElementById('sel-cup').value, bz: document.getElementById('sel-size').value };
     this.updateInventory(item, type==='IN'?1:-1); if(type==='OUT') this.recordSale(item, 1);
+};
+
+app.adjQty = function(v,b,c,bb,bc,bz, qty) {
+    let t = this.data.inventory.find(i => i.vCode===v && i.braId===b && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
+    if(t) { t.bq = parseInt(t.bq) + qty; this.saveAll(); this.ui.renderStock(); }
 };
 
 app.printTags = function() {
