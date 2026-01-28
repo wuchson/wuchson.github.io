@@ -3,51 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 雲端版 (修正版)</title>
+    <title>Lingerie Pro - 雲端旗艦版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <style>
-        :root {
-            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2;
-            --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
-            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
-        }
-        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
-        .container { max-width: 600px; margin: auto; display: none; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
-        
-        /* 管理員權限顯示邏輯 */
-        .admin-only { display: none !important; }
-        body.is-admin .admin-only { display: block !important; }
-        body.is-admin table .admin-only { display: table-cell !important; }
-
-        input, select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; margin-bottom: 8px; }
-        .row-inputs { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-        .row-inputs > * { flex: 1; min-width: 80px; }
-        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-        .btn-success { background: var(--success); } .btn-accent { background: var(--accent); } .btn-danger { background: var(--danger); }
-        
-        /* 統計方塊 */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
-        .stat-val { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-        .stat-label { font-size: 0.8rem; color: #888; }
-
-        #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
-        #reader { width: 100%; }
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #f0efeb; }
-
-        @media print {
-            .no-print { display: none !important; }
-            body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; }
-            .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-            .label-txt { font-size: 8px; text-align: center; margin-top: 2px; }
-        }
-    </style>
 </head>
 <body>
 
@@ -63,7 +21,7 @@
 
 <div id="main-ui" class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span id="display-user" style="font-size:14px; font-weight:bold; color:var(--primary);"></span>
+        <span id="display-user" style="font-size:14px; font-weight:bold; color:var(--primary);">👤 載入中...</span>
         <button onclick="location.reload()" style="width:auto; padding:5px 15px; font-size:12px; background:#666;">登出</button>
     </div>
 
@@ -109,7 +67,7 @@
 
     <div class="card">
         <h3>📊 庫存明細</h3>
-        <div id="rank-panel" style="background:#fffaf0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:13px; color:#d4a373;"></div>
+        <div id="rank-panel" style="background:#fffaf0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:13px; color:#d4a373;">🏆 熱銷排行載入中...</div>
         <input type="text" id="search-stock" placeholder="🔍 搜尋型號..." oninput="app.ui.renderStock()">
         <table>
             <thead><tr><th>品項規格</th><th>存量</th><th class="admin-only">操作</th></tr></thead>
@@ -118,7 +76,47 @@
     </div>
 </div>
 <div id="print-label-page" style="display:none;"></div>
+<style>
+    :root {
+        --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2;
+        --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
+        --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
+    }
+    body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
+    .container { max-width: 600px; margin: auto; display: none; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
+    
+    /* 權限控制修正 */
+    .admin-only { display: none !important; }
+    body.is-admin .admin-only { display: block !important; }
+    body.is-admin table .admin-only { display: table-cell !important; }
 
+    input, select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; margin-bottom: 8px; }
+    .row-inputs { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .row-inputs > * { flex: 1; min-width: 80px; }
+    button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+    .btn-success { background: var(--success); } .btn-accent { background: var(--accent); } .btn-danger { background: var(--danger); }
+    
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .stat-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+    .stat-val { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 0.8rem; color: #888; }
+
+    #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
+    #reader { width: 100%; }
+    #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #f0efeb; }
+
+    @media print {
+        .no-print { display: none !important; }
+        #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt); padding-left: var(--a4-ml); }
+        .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 0.1px solid #eee; }
+        .label-txt { font-size: 8px; text-align: center; margin-top: 2px; }
+    }
+</style>
 <script>
 const app = {
     CONFIG: { API_URL: "https://script.google.com/macros/s/AKfycbywN_36nh6hI9JSCXwf2ohcMI9MCFvEAQFPQfvIcSu75ZyKrR2sCgNzbwQE1UjAVXb8/exec" },
@@ -133,9 +131,9 @@ const app = {
             this.data.inventory = res[2]||[];
             this.data.colors = res[3]||[]; 
             this.data.salesHistory = res[4]||[]; 
-            this.data.users = res[6]||[]; // 修正：對應第七個讀取的 USERS
-            
             const cfg = res[5]||[];
+            this.data.users = res[6]||[]; // 讀取第七個分頁 USERS
+            
             if (cfg.length) {
                 const pc = cfg.find(x => x.k === 'printCfg'); 
                 if(pc) this.data.printCfg = JSON.parse(pc.v);
@@ -145,7 +143,6 @@ const app = {
             document.getElementById('init-status').innerText = "✅ 同步成功";
         } catch (e) { 
             document.getElementById('init-status').innerText = "❌ 連線失敗"; 
-            console.error(e);
         }
     },
 
@@ -156,31 +153,27 @@ const app = {
     },
 
     login() {
-        const uInp = document.getElementById('loginUser').value.trim();
-        const pInp = document.getElementById('loginPass').value.trim();
+        const u = document.getElementById('loginUser').value.trim();
+        const p = document.getElementById('loginPass').value.trim();
         
-        // 修正後的權限判斷
-        const userObj = this.data.users.find(x => String(x.u) === uInp && String(x.p) === pInp);
-        const isAdmin = (uInp === 'admin' && pInp === 'admin123') || (userObj && userObj.r === 'admin');
+        // 權限比對
+        const userObj = this.data.users.find(x => String(x.u) === u && String(x.p) === p);
+        const isAdmin = (u === 'admin' && p === 'admin123') || (userObj && userObj.r === 'admin');
 
-        if (userObj || (uInp === 'admin' && pInp === 'admin123')) {
+        if (userObj || (u === 'admin' && p === 'admin123')) {
             if (isAdmin) document.body.classList.add('is-admin');
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
-            document.getElementById('display-user').innerText = `👤 ${isAdmin ? '管理員' : '員工'}: ${uInp}`;
+            document.getElementById('display-user').innerText = `👤 ${isAdmin ? '管理員' : '員工'}: ${u}`;
             this.ui.initDropdowns(); this.ui.renderStock();
-        } else { 
-            alert("帳號密碼錯誤！請檢查試算表 USERS 分頁。"); 
-        }
+        } else { alert("帳號密碼錯誤！"); }
     },
 
     async saveAll() {
-        try {
-            await Promise.all([
-                this.cloud('syncFull', 'INVENTORY', this.data.inventory),
-                this.cloud('syncFull', 'SALES', this.data.salesHistory)
-            ]);
-        } catch(e) { alert("雲端存檔失敗"); }
+        await Promise.all([
+            this.cloud('syncFull', 'INVENTORY', this.data.inventory),
+            this.cloud('syncFull', 'SALES', this.data.salesHistory)
+        ]);
     }
 };
 
@@ -205,7 +198,7 @@ app.ui = {
     renderStock() {
         const q = document.getElementById('search-stock').value.toLowerCase();
         const f = app.data.inventory.filter(i => (i.vCode + i.braId + (i.c||'')).toLowerCase().includes(q));
-        document.getElementById('stock-body').innerHTML = f.map((i, idx) => `
+        document.getElementById('stock-body').innerHTML = f.map(i => `
             <tr>
                 <td><strong>${i.braId}</strong><br><small>${i.c} ${i.bb}${i.bc} ${i.bz}</small></td>
                 <td style="font-weight:bold; color:${parseInt(i.bq) < 3 ? 'var(--danger)':'var(--primary)'};">${i.bq}</td>
@@ -213,7 +206,6 @@ app.ui = {
             </tr>
         `).join('');
         
-        // 更新統計方塊
         document.getElementById('stat-stock').innerText = app.data.inventory.reduce((a,b)=> a + parseInt(b.bq || 0), 0);
         const todayStr = new Date().toLocaleDateString();
         document.getElementById('stat-sales').innerText = app.data.salesHistory.filter(s => s.date.includes(todayStr)).reduce((a,b)=> a + parseInt(b.q || 0), 0);
