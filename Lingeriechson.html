@@ -197,24 +197,19 @@
 <script>
     // 這裡將會放入第三、四區的 Javascript 
 // --- 核心變數與初始化邏輯 ---
-
-const app = {
-    // 1. 設定區：請務必填入您的 GAS 部署網址
-    CONFIG: {
-        API_URL: "https://script.google.com/macros/s/AKfycbywN_36nh6hI9JSCXwf2ohcMI9MCFvEAQFPQfvIcSu75ZyKrR2sCgNzbwQE1UjAVXb8/exec", 
-        VERSION: "1.0.0"
-    },
-
-    // 2. 資料狀態 (Data State)
-    data: {
-        vendors: [],
-        models: [],
-        inventory: [],
-        colors: [],
-        salesHistory: [],
-        sysConfig: { compName: "My Lingerie Pro", taxRate: 5 },
-        printCfg: { a4mt: 15.5, a4ml: 6.5, a4gx: 2.5, a4gy: 0 }
-    },
+    const app = {
+        CONFIG: {
+            API_URL: "https://script.google.com/macros/s/AKfycbywN_36nh6hI9JSCXwf2ohcMI9MCFvEAQFPQfvIcSu75ZyKrR2sCgNzbwQE1UjAVXb8/exec",
+            VERSION: "1.0.0"
+        },
+        data: {
+            vendors: [], models: [], inventory: [], colors: [], 
+            salesHistory: [], users: [],
+            sysConfig: { compName: "My Lingerie Pro", taxRate: 5 },
+            printCfg: { a4mt: 15.5, a4ml: 6.5, a4gx: 2.5, a4gy: 0 }
+        },
+        // ... 這裡放 init(), cloud(), saveAll() ...
+    }; // <--- 確保這裡有一個分號結束物件定義
 
     // 3. 初始化程序
     async init() {
@@ -378,7 +373,33 @@ app.ui = {
         if(listDiv) listDiv.innerHTML = app.data.vendors.map(v => `<div class="tag">${v.code}</div>`).join('');
         this.refreshModelSelect();
     },
+// 雲端 USERS 登入邏輯補強
+app.login = function() {
+    // 使用 .trim() 移除前後空格，並確保轉為字串比對
+    const userInp = document.getElementById('loginUser').value.trim();
+    const passInp = document.getElementById('loginPass').value.trim();
 
+    console.log("正在嘗試登入:", userInp);
+    console.log("現有雲端用戶資料:", this.data.users);
+
+    // 從雲端資料中找尋
+    const userObj = this.data.users ? this.data.users.find(u => 
+        String(u.u).trim() === userInp && String(u.p).trim() === passInp
+    ) : null;
+
+    if (userObj || (userInp === 'admin' && passInp === 'admin123')) {
+        const role = userObj ? userObj.r : 'admin';
+        if (role === 'admin') document.body.classList.add('is-admin');
+        
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'block';
+        document.getElementById('display-user').innerText = `👤 ${role === 'admin' ? '管理員' : '員工'}: ${userInp}`;
+        this.ui.initDropdowns();
+        this.ui.renderStock();
+    } else {
+        alert("帳號或密碼錯誤！請檢查試算表 USERS 分頁。");
+    }
+};
     refreshModelSelect() {
         const vCode = document.getElementById('sel-vendor').value;
         const sel = document.getElementById('sel-model');
@@ -582,34 +603,8 @@ app.adjQty = function(idx, val) {
     this.ui.renderStock();
 };
 
-// 雲端 USERS 登入邏輯補強
-app.login = function() {
-    // 使用 .trim() 移除前後空格，並確保轉為字串比對
-    const userInp = document.getElementById('loginUser').value.trim();
-    const passInp = document.getElementById('loginPass').value.trim();
-
-    console.log("正在嘗試登入:", userInp);
-    console.log("現有雲端用戶資料:", this.data.users);
-
-    // 從雲端資料中找尋
-    const userObj = this.data.users ? this.data.users.find(u => 
-        String(u.u).trim() === userInp && String(u.p).trim() === passInp
-    ) : null;
-
-    if (userObj || (userInp === 'admin' && passInp === 'admin123')) {
-        const role = userObj ? userObj.r : 'admin';
-        if (role === 'admin') document.body.classList.add('is-admin');
-        
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('main-ui').style.display = 'block';
-        document.getElementById('display-user').innerText = `👤 ${role === 'admin' ? '管理員' : '員工'}: ${userInp}`;
-        this.ui.initDropdowns();
-        this.ui.renderStock();
-    } else {
-        alert("帳號或密碼錯誤！請檢查試算表 USERS 分頁。");
-    }
-};
-window.onload = () => app.init();
+// --- 第四步：啟動系統 ---
+    window.onload = () => app.init();
 </script>
 
 </body>
