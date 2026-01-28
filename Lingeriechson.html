@@ -7,24 +7,34 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #6a8d92; --secondary: #c0966b; --bg: #f9f7f2; --card: #ffffff;
+            [cite_start]--primary: #6a8d92; [cite: 1]
+            [cite_start]--secondary: #c0966b; [cite: 2]
+            [cite_start]--bg: #f9f7f2; [cite: 2]
+            [cite_start]--card: #ffffff; [cite: 2]
         }
-        body { font-family: 'PingFang TC', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #444; }
-        .container { max-width: 900px; margin: 0 auto; }
-        .section-card { background: var(--card); border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid var(--secondary); }
-        h2 { font-size: 1.3rem; margin-top: 0; display: flex; align-items: center; }
-        h2 i { margin-right: 10px; color: var(--secondary); }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-size: 1rem; }
-        .btn { cursor: pointer; border: none; border-radius: 8px; padding: 12px; transition: 0.3s; width: 100%; font-size: 1rem; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: var(--secondary); color: white; }
-        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .tag { background: #f1f1f1; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; }
-        .tag i { margin-left: 8px; cursor: pointer; color: #888; }
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #eee; padding: 10px; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
+        body { font-family: 'PingFang TC', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #444; [cite_start]} [cite: 3]
+        .container { max-width: 900px; margin: 0 auto; [cite_start]} [cite: 3, 4]
+        .section-card { 
+            background: var(--card); border-radius: 15px; padding: 25px; 
+            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            [cite_start]border-left: 5px solid var(--secondary); [cite: 4, 5]
+        }
+        h2 { font-size: 1.3rem; margin-top: 0; display: flex; align-items: center; [cite_start]} [cite: 6]
+        h2 i { margin-right: 10px; color: var(--secondary); [cite_start]} [cite: 7, 8]
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-size: 1rem; [cite_start]} [cite: 8, 9]
+        .btn { cursor: pointer; border: none; border-radius: 8px; padding: 12px; transition: 0.3s; width: 100%; font-size: 1rem; [cite_start]} [cite: 9, 10]
+        .btn-primary { background: var(--primary); color: white; [cite_start]} [cite: 11]
+        .btn-secondary { background: var(--secondary); color: white; [cite_start]} [cite: 12]
+        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; [cite_start]} [cite: 13]
+        .tag { background: #f1f1f1; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; [cite_start]} [cite: 14, 15]
+        #loader { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255,255,255,0.8); display: none; 
+            [cite_start]justify-content: center; align-items: center; z-index: 1000; [cite: 16, 17]
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; [cite_start]} [cite: 18]
+        th { background: #eee; padding: 10px; text-align: left; [cite_start]} [cite: 19]
+        td { padding: 10px; border-bottom: 1px solid #eee; [cite_start]} [cite: 20]
     </style>
 </head>
 <body>
@@ -35,23 +45,127 @@
     <div class="section-card">
         <h2><i class="fas fa-cog"></i> 0. 系統環境設定</h2>
         <div style="display: flex; gap: 10px;">
-            <input type="text" id="cfgName" placeholder="公司名稱">
-            <input type="number" id="cfgTax" placeholder="稅率%">
+            [cite_start]<input type="text" id="cfgName" placeholder="公司名稱"> [cite: 21]
+            [cite_start]<input type="number" id="cfgTax" placeholder="稅率%"> [cite: 21]
         </div>
-        <button class="btn btn-primary" onclick="updateConfig()">同步雲端設定</button>
-        <div id="userList" class="tag-container"></div>
+        [cite_start]<button class="btn btn-primary" onclick="updateConfig()">同步雲端設定</button> [cite: 21]
+        [cite_start]<div id="userList" class="tag-container"></div> [cite: 21]
+    </div>
+<div class="section-card">
+        <h2><i class="fas fa-database"></i> 1. 基礎設定</h2>
+        
+        <div style="background: #fdfaf5; padding: 15px; border-radius: 10px;">
+            <p style="margin-top:0;"><strong>廠商與顏色管理</strong></p>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="vCode" placeholder="廠商代碼">
+                <input type="text" id="vName" placeholder="廠商名稱">
+                <button class="btn btn-secondary" style="width:120px" onclick="addVendor()">新增</button>
+            </div>
+            <div id="vList" class="tag-container" style="margin-bottom:15px;"></div>
+
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="cIn" placeholder="代碼:名稱 (如 BLK:黑色)">
+                <button class="btn btn-secondary" style="width:120px" onclick="addColor()">新增</button>
+            </div>
+            <div id="cList" class="tag-container"></div>
+        </div>
+
+        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+
+        <p><strong>款式管理 (MODELS)</strong></p>
+        <select id="selV"></select>
+      
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="mId" placeholder="型號 (如 A001)">
+            <select id="mCat">
+                <option value="內衣內褲套組">內衣內褲套組</option>
+                <option value="單件內衣">單件內衣</option>
+                <option value="單件內褲">單件內褲</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="mCst" placeholder="進價">
+            <input type="number" id="mPri" placeholder="售價">
+        </div>
+        <button class="btn btn-secondary" onclick="saveModel()">儲存款式至雲端</button>
+        <div id="mList" class="tag-container"></div>
+    </div>
+<div class="section-card" style="border-left-color: var(--primary);">
+        <h2><i class="fas fa-exchange-alt"></i> 2. 進出貨與操作</h2>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn btn-primary" style="flex:1" onclick="setMode('IN')">📥 入庫模式</button>
+            <button class="btn btn-primary" style="flex:1; background:#4caf50;" onclick="setMode('OUT')">📤 出貨模式</button>
+        </div>
+
+        <p id="modeStatus" style="font-weight:bold; color:var(--primary);">目前模式：入庫</p>
+
+        <select id="selMOp" onchange="onModelOpChange()"></select>
+        <select id="selCOp"></select>
+        
+        <div style="display: flex; gap: 10px;">
+            <select id="selBB"><option value="">下圍</option></select>
+            <select id="selBC"><option value="">罩杯</option></select>
+            <select id="selBZ"><option value="">尺碼</option></select>
+        </div>
+
+        <label>數量</label>
+        <input type="number" id="opQty" value="1">
+
+        <button id="btnSubmit" class="btn btn-secondary" style="background:#8ca09a;" onclick="handleOp()">確認執行</button>
+
+        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+
+        <div style="background: #fdfaf5; padding: 15px; border-radius: 10px;">
+            <p style="margin-top:0;"><i class="fas fa-print"></i> 標籤列印微調 (mm)</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="number" id="mTop" placeholder="上邊距" value="15.5">
+                <input type="number" id="mLeft" placeholder="左邊距" value="5">
+            </div>
+            <button class="btn btn-secondary" style="margin-top:10px; background:#c0966b;" onclick="alert('標籤產生功能已就緒')">產生 PDF 標籤</button>
+        </div>
     </div>
 
-    <div id="mount-part2"></div>
-    <div id="mount-part3"></div>
-    <div id="mount-part4"></div>
-</div>
+    <div class="section-card" style="border-left-color: #9e9e9e;">
+        <h2><i class="fas fa-chart-line"></i> 3. 目前庫存與營業統計</h2>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+            <div style="background:#fff3e0; padding:15px; border-radius:10px; text-align:center;">
+                <small>今日營業額</small><br><strong id="statToday" style="font-size:1.2rem; color:#e65100;">$0</strong>
+            </div>
+            <div style="background:#e8f5e9; padding:15px; border-radius:10px; text-align:center;">
+                <small>本月銷售額</small><br><strong id="statMonth" style="font-size:1.2rem; color:#2e7d32;">$0</strong>
+            </div>
+        </div>
 
+        <div style="position: relative; margin-bottom: 15px;">
+            <i class="fas fa-search" style="position:absolute; left:12px; top:14px; color:#aaa;"></i>
+            <input type="text" id="invSearch" placeholder="搜尋型號、顏色..." style="padding-left:35px;" oninput="renderPart4()">
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>型號/廠商</th>
+                        <th>規格/顏色</th>
+                        <th>數量</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="invBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div> <p style="text-align:center; color:#999; font-size:0.8rem; margin-top:30px;">
+    雲端系統已連線 | 數據來源：Google Sheets API
+</p>
 <script>
     // 【重要】請填入你的 GAS 部署網址
     const GAS_URL = "你的_GAS_網址";
     let CLOUD_DATA = { users:[], config:[], vendors:[], colors:[], models:[], inventory:[], sales:[] };
 
+    // 通用 API 呼叫函式 [cite: 24, 25]
     async function callAPI(method, payload = {}) {
         document.getElementById('loader').style.display = 'flex';
         const url = method === "GET" ? `${GAS_URL}?action=${payload.action}` : GAS_URL;
@@ -65,342 +179,170 @@
             return json;
         } catch (e) {
             document.getElementById('loader').style.display = 'none';
-            console.error(e);
+            console.error("API Error:", e);
             return null;
         }
     }
 
+    // 0. 系統環境設定 [cite: 29]
     async function updateConfig() {
         const res = await callAPI("POST", {
             action: "updateConfig",
             companyName: document.getElementById('cfgName').value,
             taxRate: document.getElementById('cfgTax').value
         });
-        if(res) alert("設定已更新");
+        if(res) alert("設定已同步至雲端");
     }
-</script>
-<div class="section-card">
-    <h2><i class="fas fa-database"></i> 1. 基礎設定</h2>
-    
-    <div style="background: #fdfaf5; padding: 15px; border-radius: 10px;">
-        <p style="margin-top:0;"><strong>廠商與顏色管理</strong></p>
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="vCode" placeholder="廠商代碼">
-            <input type="text" id="vName" placeholder="廠商名稱">
-            <button class="btn btn-secondary" style="width:120px" onclick="addVendor()">新增</button>
-        </div>
-        <div id="vList" class="tag-container" style="margin-bottom:15px;"></div>
 
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="cIn" placeholder="代碼:名稱 (如 BLK:黑色)">
-            <button class="btn btn-secondary" style="width:120px" onclick="addColor()">新增</button>
-        </div>
-        <div id="cList" class="tag-container"></div>
-    </div>
-
-    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-
-    <p><strong>款式管理 (MODELS)</strong></p>
-    <select id="selV"></select>
-    <div style="display: flex; gap: 10px;">
-        <input type="text" id="mId" placeholder="型號 (如 A001)">
-        <select id="mCat">
-            <option value="內衣內褲套組">內衣內褲套組</option>
-            <option value="單件內衣">單件內衣</option>
-            <option value="單件內褲">單件內褲</option>
-        </select>
-    </div>
-    <div style="display: flex; gap: 10px;">
-        <input type="number" id="mCst" placeholder="進價">
-        <input type="number" id="mPri" placeholder="售價">
-    </div>
-    <button class="btn btn-secondary" onclick="saveModel()">儲存款式至雲端</button>
-    <div id="mList" class="tag-container"></div>
-</div>
-// 功能 1: 廠商、顏色、款式相關邏輯
-async function addVendor() {
-    const code = document.getElementById('vCode').value;
-    const name = document.getElementById('vName').value;
-    if (!code || !name) return alert("請輸入完整廠商資訊");
-    const res = await callAPI("POST", { action: "addVendor", code, name });
-    if (res?.status === "success") {
-        document.getElementById('vCode').value = '';
-        document.getElementById('vName').value = '';
-        await initApp();
+    // 1. 基礎設定邏輯 (廠商、顏色、款式) [cite: 33, 34, 36]
+    async function addVendor() {
+        const code = document.getElementById('vCode').value;
+        const name = document.getElementById('vName').value;
+        if (!code || !name) return alert("請輸入完整廠商資訊");
+        const res = await callAPI("POST", { action: "addVendor", code, name });
+        if (res?.status === "success") {
+            document.getElementById('vCode').value = '';
+            document.getElementById('vName').value = '';
+            await initApp();
+        }
     }
-}
 
-async function addColor() {
-    const raw = document.getElementById('cIn').value;
-    if (!raw.includes(':')) return alert("格式: 代碼:名稱");
-    const [code, name] = raw.split(':');
-    const res = await callAPI("POST", { action: "addColor", code, name });
-    if (res?.status === "success") {
-        document.getElementById('cIn').value = '';
-        await initApp();
+    async function addColor() {
+        const raw = document.getElementById('cIn').value;
+        if (!raw.includes(':')) return alert("格式: 代碼:名稱");
+        const [code, name] = raw.split(':');
+        const res = await callAPI("POST", { action: "addColor", code, name });
+        if (res?.status === "success") {
+            document.getElementById('cIn').value = '';
+            await initApp();
+        }
     }
-}
 
-async function saveModel() {
-    const payload = {
-        action: "saveModel",
-        vCode: document.getElementById('selV').value,
-        braId: document.getElementById('mId').value,
-        type: document.getElementById('mCat').value,
-        cost: document.getElementById('mCst').value,
-        price: document.getElementById('mPri').value
-    };
-    if (!payload.vCode || !payload.braId) return alert("廠商與型號為必填");
-    const res = await callAPI("POST", payload);
-    if (res?.status === "success") {
-        alert("款式已同步");
-        await initApp();
+    async function saveModel() {
+        const payload = {
+            action: "saveModel",
+            vCode: document.getElementById('selV').value,
+            braId: document.getElementById('mId').value,
+            type: document.getElementById('mCat').value,
+            cost: document.getElementById('mCst').value,
+            price: document.getElementById('mPri').value
+        };
+        if (!payload.vCode || !payload.braId) return alert("廠商與型號為必填");
+        const res = await callAPI("POST", payload);
+        if (res?.status === "success") { alert("款式已同步"); await initApp(); }
     }
-}
 
-// 渲染 Part 2 的 UI
-function renderPart2() {
-    // 廠商
-    const vL = document.getElementById('vList');
-    const vS = document.getElementById('selV');
-    vL.innerHTML = ''; vS.innerHTML = '<option value="">選擇廠商</option>';
-    CLOUD_DATA.vendors.forEach(v => {
-        vL.innerHTML += `<span class="tag">${v.code}</span>`;
-        vS.innerHTML += `<option value="${v.code}">${v.code}</option>`;
-    });
-
-    // 顏色
-    const cL = document.getElementById('cList');
-    cL.innerHTML = '';
-    CLOUD_DATA.colors.forEach(c => {
-        cL.innerHTML += `<span class="tag">${c.code}:${c.name}</span>`;
-    });
-
-    // 款式
-    const mL = document.getElementById('mList');
-    mL.innerHTML = '';
-    CLOUD_DATA.models.forEach(m => {
-        mL.innerHTML += `<span class="tag" style="background:#e8d8c3">${m.vCode}-${m.braId}</span>`;
-    });
-}
-<div class="section-card" style="border-left-color: var(--primary);">
-    <h2><i class="fas fa-exchange-alt"></i> 2. 進出貨與操作</h2>
-    
-    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <button class="btn btn-primary" style="flex:1" onclick="setMode('IN')">📥 入庫模式</button>
-        <button class="btn btn-primary" style="flex:1; background:#4caf50;" onclick="setMode('OUT')">📤 出貨模式</button>
-    </div>
-
-    <p id="modeStatus" style="font-weight:bold; color:var(--primary);">目前模式：入庫</p>
-
-    <select id="selMOp" onchange="onModelOpChange()"></select>
-    <select id="selCOp"></select>
-    
-    <div style="display: flex; gap: 10px;">
-        <select id="selBB"><option value="">下圍</option></select>
-        <select id="selBC"><option value="">罩杯</option></select>
-        <select id="selBZ"><option value="">尺碼</option></select>
-    </div>
-
-    <label>數量</label>
-    <input type="number" id="opQty" value="1">
-
-    <button id="btnSubmit" class="btn btn-secondary" style="background:#8ca09a;" onclick="handleOp()">確認執行</button>
-
-    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-
-    <div style="background: #fdfaf5; padding: 15px; border-radius: 10px;">
-        <p style="margin-top:0;"><i class="fas fa-print"></i> 標籤列印微調 (mm)</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <input type="number" id="mTop" placeholder="上邊距" value="15.5">
-            <input type="number" id="mLeft" placeholder="左邊距" value="5">
-        </div>
-        <button class="btn btn-secondary" style="margin-top:10px; background:#c0966b;" onclick="alert('標籤產生功能已就緒')">產生 PDF 標籤</button>
-    </div>
-</div>
-let currentMode = 'IN';
-
-function setMode(mode) {
-    currentMode = mode;
-    const status = document.getElementById('modeStatus');
-    const btn = document.getElementById('btnSubmit');
-    if(mode === 'IN') {
-        status.innerText = "目前模式：入庫";
-        status.style.color = "var(--primary)";
-        btn.innerText = "確認執行入庫";
-    } else {
-        status.innerText = "目前模式：出貨";
-        status.style.color = "#4caf50";
-        btn.innerText = "確認加入出貨單";
+    // 2. 進出貨操作邏輯 [cite: 49, 56, 58]
+    let currentMode = 'IN';
+    function setMode(mode) {
+        currentMode = mode;
+        const status = document.getElementById('modeStatus');
+        const btn = document.getElementById('btnSubmit');
+        status.innerText = mode === 'IN' ? "目前模式：入庫" : "目前模式：出貨";
+        status.style.color = mode === 'IN' ? "var(--primary)" : "#4caf50";
+        btn.innerText = mode === 'IN' ? "確認執行入庫" : "確認加入出貨單";
     }
-}
 
-// 當 Part 2 選擇型號後更新 Part 3 的選單
-function onModelOpChange() {
-    initSizeOptions(); // 確保尺寸選單已初始化
-    // 這裡可加入自動帶入價格或過濾顏色的邏輯
-}
-
-function initSizeOptions() {
-    const bb = document.getElementById('selBB');
-    const bc = document.getElementById('selBC');
-    const bz = document.getElementById('selBZ');
-    if(bb.options.length <= 1) {
-        ['32','34','36','38','40','42'].forEach(v => bb.innerHTML += `<option value="${v}">${v}</option>`);
-        ['A','B','C','D','E','F','G'].forEach(v => bc.innerHTML += `<option value="${v}">${v}</option>`);
-        ['S','M','L','XL','XXL','Free'].forEach(v => bz.innerHTML += `<option value="${v}">${v}</option>`);
+    function initSizeOptions() {
+        const bb = document.getElementById('selBB'), bc = document.getElementById('selBC'), bz = document.getElementById('selBZ');
+        if(bb.options.length <= 1) {
+            ['32','34','36','38','40','42'].forEach(v => bb.innerHTML += `<option value="${v}">${v}</option>`);
+            ['A','B','C','D','E','F','G'].forEach(v => bc.innerHTML += `<option value="${v}">${v}</option>`);
+            ['S','M','L','XL','XXL','Free'].forEach(v => bz.innerHTML += `<option value="${v}">${v}</option>`);
+        }
     }
-}
 
-async function handleOp() {
-    const mVal = document.getElementById('selMOp').value;
-    if (!mVal) return alert("請選擇型號");
-    const [vCode, braId] = mVal.split('-');
-
-    const payload = {
-        action: "processTransaction",
-        type: currentMode,
-        vCode, braId,
-        c: document.getElementById('selCOp').value,
-        bb: document.getElementById('selBB').value,
-        bc: document.getElementById('selBC').value,
-        bz: document.getElementById('selBZ').value,
-        qty: document.getElementById('opQty').value,
-        price: CLOUD_DATA.models.find(m => m.braId === braId)?.price || 0
-    };
-
-    const res = await callAPI("POST", payload);
-    if (res?.status === "success") {
-        alert(currentMode === 'IN' ? "入庫成功" : "出貨成功");
-        await initApp();
+    async function handleOp() {
+        const mVal = document.getElementById('selMOp').value;
+        if (!mVal) return alert("請選擇型號");
+        const [vCode, braId] = mVal.split('-');
+        const res = await callAPI("POST", {
+            action: "processTransaction",
+            type: currentMode,
+            vCode, braId,
+            c: document.getElementById('selCOp').value,
+            bb: document.getElementById('selBB').value,
+            bc: document.getElementById('selBC').value,
+            bz: document.getElementById('selBZ').value,
+            qty: document.getElementById('opQty').value,
+            price: CLOUD_DATA.models.find(m => m.braId === braId)?.price || 0
+        });
+        if (res?.status === "success") { alert(currentMode === 'IN' ? "入庫成功" : "出貨成功"); await initApp(); }
     }
-}
 
-function renderPart3() {
-    const mS = document.getElementById('selMOp');
-    const cS = document.getElementById('selCOp');
-    mS.innerHTML = '<option value="">選擇型號</option>';
-    cS.innerHTML = '<option value="">選擇顏色</option>';
-    
-    CLOUD_DATA.models.forEach(m => mS.innerHTML += `<option value="${m.vCode}-${m.braId}">${m.vCode}-${m.braId}</option>`);
-    CLOUD_DATA.colors.forEach(c => cS.innerHTML += `<option value="${c.code}">${c.name}</option>`);
-    initSizeOptions();
-}
-<div class="section-card" style="border-left-color: #9e9e9e;">
-    <h2><i class="fas fa-chart-line"></i> 3. 目前庫存與營業統計</h2>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-        <div style="background:#fff3e0; padding:15px; border-radius:10px; text-align:center;">
-            <small>今日營業額</small><br><strong id="statToday" style="font-size:1.2rem; color:#e65100;">$0</strong>
-        </div>
-        <div style="background:#e8f5e9; padding:15px; border-radius:10px; text-align:center;">
-            <small>本月銷售額</small><br><strong id="statMonth" style="font-size:1.2rem; color:#2e7d32;">$0</strong>
-        </div>
-    </div>
+    // 3. 渲染與統計邏輯 [cite: 67, 71, 72]
+    function renderPart2() {
+        const vL = document.getElementById('vList'), vS = document.getElementById('selV');
+        vL.innerHTML = ''; vS.innerHTML = '<option value="">選擇廠商</option>';
+        CLOUD_DATA.vendors.forEach(v => {
+            vL.innerHTML += `<span class="tag">${v.code}</span>`;
+            vS.innerHTML += `<option value="${v.code}">${v.code}</option>`;
+        });
+        const cL = document.getElementById('cList'); cL.innerHTML = '';
+        CLOUD_DATA.colors.forEach(c => cL.innerHTML += `<span class="tag">${c.code}:${c.name}</span>`);
+        const mL = document.getElementById('mList'); mL.innerHTML = '';
+        CLOUD_DATA.models.forEach(m => mL.innerHTML += `<span class="tag" style="background:#e8d8c3">${m.vCode}-${m.braId}</span>`);
+    }
 
-    <div style="position: relative; margin-bottom: 15px;">
-        <i class="fas fa-search" style="position:absolute; left:12px; top:14px; color:#aaa;"></i>
-        <input type="text" id="invSearch" placeholder="搜尋型號、顏色..." style="padding-left:35px;" oninput="renderPart4()">
-    </div>
+    function renderPart3() {
+        const mS = document.getElementById('selMOp'), cS = document.getElementById('selCOp');
+        mS.innerHTML = '<option value="">選擇型號</option>';
+        cS.innerHTML = '<option value="">選擇顏色</option>';
+        CLOUD_DATA.models.forEach(m => mS.innerHTML += `<option value="${m.vCode}-${m.braId}">${m.vCode}-${m.braId}</option>`);
+        CLOUD_DATA.colors.forEach(c => cS.innerHTML += `<option value="${c.code}">${c.name}</option>`);
+        initSizeOptions();
+    }
 
-    <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>型號/廠商</th>
-                    <th>規格/顏色</th>
-                    <th>數量</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="invBody"></tbody>
-        </table>
-    </div>
-</div>
-
-<p style="text-align:center; color:#999; font-size:0.8rem; margin-top:30px;">
-    雲端系統已連線 | 數據來源：Google Sheets API
-</p>
-/**
- * 功能 3: 渲染庫存列表與計算報表
- */
-function renderPart4() {
-    const tbody = document.getElementById('invBody');
-    const search = document.getElementById('invSearch').value.toLowerCase();
-    tbody.innerHTML = '';
-
-    // 1. 計算統計
-    calculateStats();
-
-    // 2. 渲染表格
-    CLOUD_DATA.inventory.forEach((item, index) => {
-        const fullText = `${item.vCode} ${item.braId} ${item.c}`.toLowerCase();
-        if (search && !fullText.includes(search)) return;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${item.vCode}</strong><br><small>${item.braId}</small></td>
-            <td>${item.c}<br><small>${item.bb}${item.bc} ${item.bz}</small></td>
-            <td>
-                <div style="display:flex; align-items:center; gap:5px;">
-                    <button class="btn" style="padding:2px 8px; width:auto; background:#eee;" onclick="adjustQty(${index}, -1)">-</button>
+    function renderPart4() {
+        const tbody = document.getElementById('invBody'), search = document.getElementById('invSearch').value.toLowerCase();
+        tbody.innerHTML = ''; calculateStats();
+        CLOUD_DATA.inventory.forEach((item, index) => {
+            if (search && !`${item.vCode} ${item.braId} ${item.c}`.toLowerCase().includes(search)) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td><strong>${item.vCode}</strong><br><small>${item.braId}</small></td>
+                <td>${item.c}<br><small>${item.bb}${item.bc} ${item.bz}</small></td>
+                <td><div style="display:flex; align-items:center; gap:5px;">
+                    <button class="btn" style="padding:2px 8px; width:auto; background:#eee;" onclick="adjustQty(${index},-1)">-</button>
                     <strong>${item.qty}</strong>
-                    <button class="btn" style="padding:2px 8px; width:auto; background:#eee;" onclick="adjustQty(${index}, 1)">+</button>
-                </div>
-            </td>
-            <td><i class="fas fa-history" title="查看紀錄"></i></td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function calculateStats() {
-    const today = new Date().toLocaleDateString('zh-TW');
-    const thisMonth = today.substring(0, 7);
-    let tTotal = 0, mTotal = 0;
-
-    CLOUD_DATA.sales.forEach(s => {
-        const sDate = new Date(s.Timestamp).toLocaleDateString('zh-TW');
-        const total = (Number(s.p) || 0) * (Number(s.q) || 0);
-        if (sDate === today) tTotal += total;
-        if (sDate.startsWith(thisMonth)) mTotal += total;
-    });
-
-    document.getElementById('statToday').innerText = `$${tTotal.toLocaleString()}`;
-    document.getElementById('statMonth').innerText = `$${mTotal.toLocaleString()}`;
-}
-
-async function adjustQty(idx, diff) {
-    const item = CLOUD_DATA.inventory[idx];
-    const res = await callAPI("POST", {
-        action: "processTransaction",
-        type: diff > 0 ? "IN" : "OUT",
-        vCode: item.vCode, braId: item.braId, c: item.c, 
-        bb: item.bb, bc: item.bc, bz: item.bz, 
-        qty: Math.abs(diff), price: 0
-    });
-    if (res?.status === "success") await initApp();
-}
-
-/**
- * 【全系統初始化】
- * 串聯所有 Part 的渲染函式
- */
-async function initApp() {
-    const data = await callAPI("GET", { action: "loadAll" });
-    if (data) {
-        CLOUD_DATA = data;
-        
-        // 更新功能 0 (環境設定)
-        document.getElementById('cfgName').value = data.config.find(c => c.Property === "companyName")?.Value || "";
-        document.getElementById('cfgTax').value = data.config.find(c => c.Property === "taxRate")?.Value || "";
-
-        // 執行各分段 UI 渲染
-        renderPart2();
-        renderPart3();
-        renderPart4();
+                    <button class="btn" style="padding:2px 8px; width:auto; background:#eee;" onclick="adjustQty(${index},1)">+</button>
+                </div></td><td><i class="fas fa-history"></i></td>`;
+            tbody.appendChild(tr);
+        });
     }
-}
 
-// 頁面開啟時自動執行
-window.onload = initApp;
+    function calculateStats() {
+        const today = new Date().toLocaleDateString('zh-TW'), thisMonth = today.substring(0, 7);
+        let tTotal = 0, mTotal = 0;
+        CLOUD_DATA.sales.forEach(s => {
+            const sDate = new Date(s.Timestamp).toLocaleDateString('zh-TW');
+            const total = (Number(s.p) || 0) * (Number(s.q) || 0);
+            if (sDate === today) tTotal += total;
+            if (sDate.startsWith(thisMonth)) mTotal += total;
+        });
+        document.getElementById('statToday').innerText = `$${tTotal.toLocaleString()}`;
+        document.getElementById('statMonth').innerText = `$${mTotal.toLocaleString()}`;
+    }
+
+    async function adjustQty(idx, diff) {
+        const item = CLOUD_DATA.inventory[idx];
+        await callAPI("POST", {
+            action: "processTransaction", type: diff > 0 ? "IN" : "OUT",
+            vCode: item.vCode, braId: item.braId, c: item.c, bb: item.bb, bc: item.bc, bz: item.bz, qty: Math.abs(diff), price: 0
+        });
+        await initApp();
+    }
+
+    async function initApp() {
+        const data = await callAPI("GET", { action: "loadAll" });
+        if (data) {
+            CLOUD_DATA = data;
+            document.getElementById('cfgName').value = data.config.find(c => c.Property === "companyName")?.Value || "";
+            document.getElementById('cfgTax').value = data.config.find(c => c.Property === "taxRate")?.Value || "";
+            renderPart2(); renderPart3(); renderPart4();
+        }
+    }
+
+    window.onload = initApp;
+</script>
+</body>
+</html>
