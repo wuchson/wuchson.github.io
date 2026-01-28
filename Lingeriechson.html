@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 雲端版</title>
+    <title>Lingerie Pro - 雲端正式版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
@@ -13,7 +13,7 @@
             --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
         }
         body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
-        .container { max-width: 600px; margin: auto; display: none; }
+        .container { max-width: 600px; margin: auto; display: none; } /* 預設隱藏，登入後顯示 */
         .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
         .admin-only { display: none; }
@@ -22,20 +22,13 @@
         .row-inputs { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
         .row-inputs > * { flex: 1; min-width: 80px; }
         button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-        .btn-accent { background: var(--accent); } .btn-danger { background: var(--danger); } .btn-success { background: var(--success); }
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #reader { width: 100%; }
-        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 20px; border-radius: 20px; z-index: 10; display: none; }
-        .tag { background: #f0f2f1; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px; display: inline-block; }
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.9rem; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #f0efeb; }
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         @media print {
             .no-print { display: none !important; }
             body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; }
             .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-            .label-item canvas { width: 22mm !important; height: 22mm !important; }
         }
     </style>
 </head>
@@ -46,9 +39,10 @@
         <input type="text" id="loginUser" placeholder="帳號">
         <input type="password" id="loginPass" placeholder="密碼">
         <button onclick="app.login()">系統登入</button>
-        <div id="init-status" style="text-align:center; font-size:12px; color:gray; margin-top:10px;">正在同步雲端資料...</div>
+        <div id="init-status" style="text-align:center; font-size:12px; color:gray; margin-top:10px;">🔄 同步雲端資料中...</div>
     </div>
 </div>
+
 <div id="main-ui" class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px;">
         <span id="display-user"></span>
@@ -56,33 +50,23 @@
     </div>
 
     <div class="card admin-only">
-        <h3>1. 基礎與環境設定</h3>
+        <h3>1. 基礎設定</h3>
         <div class="row-inputs">
-            <input type="text" id="cfg-compName" placeholder="公司名稱">
-            <input type="number" id="cfg-taxRate" placeholder="稅率 %">
+            上邊距：<input type="number" step="0.1" id="p-a4mt" placeholder="上邊距">
+            左邊距：<input type="number" step="0.1" id="p-a4ml" placeholder="左邊距">
         </div>
-        <div style="background:#f4f6f5; padding:10px; border-radius:8px; margin-bottom:10px;">
-            <label style="font-size:11px; font-weight:bold; color:#6b7e75;">📄 A4 標籤微調 (mm)</label>
-            <div class="row-inputs" style="margin-top:5px;">
-                <input type="number" step="0.1" id="p-a4mt" placeholder="上邊距">
-                <input type="number" step="0.1" id="p-a4ml" placeholder="左邊距">
-                <input type="number" step="0.1" id="p-a4gx" placeholder="間距X">
-                <input type="number" step="0.1" id="p-a4gy" placeholder="間距Y">
-            </div>
-            <button class="btn-accent" style="padding:8px; font-size:13px;" onclick="app.savePrintCfg()">儲存版面設定</button>
-        </div>
+        <button class="btn-accent" onclick="app.savePrintCfg()">💾 儲存設定</button>
     </div>
 
     <div class="card">
-        <h3>2. 進出貨與操作</h3>
+        <h3>2. 進出貨操作</h3>
         <div class="row-inputs">
-            <button onclick="app.ui.openScanner('IN_AUTO')" style="background:#4299e1;">📥 連續入庫</button>
-            <button onclick="app.ui.openScanner('OUT_AUTO')" class="btn-success">📤 掃描出貨</button>
+            <button onclick="app.ui.openScanner('IN_AUTO')" style="background:#4299e1;">📥 掃描入庫</button>
+            <button onclick="app.ui.openScanner('OUT_AUTO')" style="background:#48bb78;">📤 掃描出貨</button>
         </div>
         <div id="scanner-container">
-            <div id="scan-feedback">OK!</div>
             <div id="reader"></div>
-            <button class="btn-danger" style="border-radius:0;" onclick="app.ui.uiCloseScanner()">❌ 關閉相機</button>
+            <button onclick="app.ui.uiCloseScanner()" style="background:red;">❌ 關閉相機</button>
         </div>
         <select id="sel-vendor" onchange="app.ui.refreshModelSelect()"></select>
         <select id="sel-model"></select>
@@ -94,21 +78,19 @@
         </div>
         <div class="row-inputs">
             <button onclick="app.handleManual('IN')">📥 手動入庫</button>
-            <button class="btn-success" onclick="app.handleManual('OUT')">📄 手動出貨</button>
+            <button onclick="app.handleManual('OUT')" style="background:#48bb78;">📤 手動出貨</button>
         </div>
-        <button class="btn-accent admin-only" onclick="app.printTags()">🖨️ 產生 A4 標籤</button>
+        <button class="admin-only" onclick="app.printTags()" style="background:#d4a373; margin-top:10px;">🖨️ 產生 A4 標籤</button>
     </div>
 
     <div class="card">
-        <h3>3. 庫存統計與排行</h3>
+        <h3>3. 庫存統計</h3>
         <div id="rank-panel" style="background:#fffaf0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:13px;"></div>
-        <input type="text" id="search-stock" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="app.ui.renderStock()">
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>型號</th><th>規格</th><th>存量</th><th class="admin-only">操作</th></tr></thead>
-                <tbody id="stock-body"></tbody>
-            </table>
-        </div>
+        <input type="text" id="search-stock" placeholder="🔍 搜尋..." oninput="app.ui.renderStock()">
+        <table>
+            <thead><tr><th>型號</th><th>規格</th><th>存量</th><th class="admin-only">操作</th></tr></thead>
+            <tbody id="stock-body"></tbody>
+        </table>
     </div>
 </div>
 <div id="print-label-page" style="display:none;"></div>
@@ -116,37 +98,61 @@
 const app = {
     CONFIG: {
         API_URL: "https://script.google.com/macros/s/AKfycbywN_36nh6hI9JSCXwf2ohcMI9MCFvEAQFPQfvIcSu75ZyKrR2sCgNzbwQE1UjAVXb8/exec",
-        VERSION: "1.2.1"
+        VERSION: "1.2.2"
     },
     data: { vendors: [], models: [], inventory: [], colors: [], salesHistory: [], users: [], sysConfig: {}, printCfg: {} },
 
     async init() {
         const status = document.getElementById('init-status');
         try {
-            const [v, m, i, c, s, cfg, u] = await Promise.all([
-                this.cloud('readAll', 'VENDORS'), this.cloud('readAll', 'MODELS'),
-                this.cloud('readAll', 'INVENTORY'), this.cloud('readAll', 'COLORS'),
-                this.cloud('readAll', 'SALES'), this.cloud('readAll', 'CONFIG'),
-                this.cloud('readAll', 'USERS')
-            ]);
-            this.data.vendors = v || []; this.data.models = m || [];
-            this.data.inventory = i || []; this.data.colors = c || [];
-            this.data.salesHistory = s || []; this.data.users = u || [];
-            if (cfg) {
+            // [cite: 194, 195, 201] 確保所有雲端分頁都有讀取，且包含 USERS
+            const sheets = ['VENDORS', 'MODELS', 'INVENTORY', 'COLORS', 'SALES', 'CONFIG', 'USERS'];
+            const results = await Promise.all(sheets.map(s => this.cloud('readAll', s)));
+            
+            this.data.vendors = results[0] || [];
+            this.data.models = results[1] || [];
+            this.data.inventory = results[2] || [];
+            this.data.colors = results[3] || [];
+            this.data.salesHistory = results[4] || [];
+            const cfg = results[5] || [];
+            this.data.users = results[6] || [];
+
+            if (cfg.length > 0) {
                 const sc = cfg.find(x => x.k === 'sysConfig'); if (sc) this.data.sysConfig = JSON.parse(sc.v);
                 const pc = cfg.find(x => x.k === 'printCfg'); if (pc) this.data.printCfg = JSON.parse(pc.v);
             }
+            // [cite: 200, 256, 259] 初始化 UI
             this.ui.syncSettingsToFields();
+            this.ui.applyPrintCss();
             status.innerText = "✅ 同步成功，請登入";
         } catch (err) {
-            status.innerText = "❌ 連線失敗"; status.style.color = "red";
+            console.error(err);
+            status.innerText = "❌ 連線失敗，請檢查 API 網址";
+            status.style.color = "red";
         }
     },
 
     async cloud(action, sheet, payload = null) {
+        // [cite: 202, 203, 204] Fetch 核心
         const resp = await fetch(this.CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action, sheet, payload }) });
         const txt = await resp.text();
-        return action === 'readAll' ? JSON.parse(txt) : txt;
+        try { return JSON.parse(txt); } catch(e) { return txt; }
+    },
+
+    login() {
+        // [cite: 230, 232, 235] 雲端登入邏輯
+        const uInp = document.getElementById('loginUser').value.trim();
+        const pInp = document.getElementById('loginPass').value.trim();
+        const user = this.data.users.find(x => String(x.u) === uInp && String(x.p) === pInp);
+        
+        if (user || (uInp === 'admin' && pInp === 'admin123')) {
+            const role = user ? user.r : 'admin';
+            if (role === 'admin') document.body.classList.add('is-admin');
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'block';
+            document.getElementById('display-user').innerText = `👤 ${uInp}`;
+            this.ui.initDropdowns(); this.ui.renderStock();
+        } else { alert("帳密錯誤"); }
     },
 
     async saveAll() {
@@ -160,29 +166,42 @@ const app = {
         ]);
     },
 
-    login() {
-        const uInp = document.getElementById('loginUser').value.trim();
-        const pInp = document.getElementById('loginPass').value.trim();
-        const user = this.data.users.find(x => String(x.u) === uInp && String(x.p) === pInp);
-        if (user || (uInp === 'admin' && pInp === 'admin123')) {
-            const role = user ? user.r : 'admin';
-            if (role === 'admin') document.body.classList.add('is-admin');
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'block';
-            document.getElementById('display-user').innerText = `👤 ${uInp}`;
-            this.ui.initDropdowns(); this.ui.renderStock();
-        } else { alert("帳密錯誤"); }
+    handleManual(type) {
+        const mStr = document.getElementById('sel-model').value; if(!mStr) return alert("請選型號");
+        const m = JSON.parse(mStr);
+        const item = { 
+            vCode: document.getElementById('sel-vendor').value, braId: m.braId, 
+            c: document.getElementById('sel-color').value, bb: document.getElementById('sel-band').value, 
+            bc: document.getElementById('sel-cup').value, bz: document.getElementById('sel-size').value 
+        };
+        this.updateInventory(item, type==='IN'?1:-1);
+        if(type==='OUT') this.recordSale(item, 1);
+        alert("操作成功");
     },
+
+    updateInventory(item, qty) {
+        let t = this.data.inventory.find(i => i.vCode===item.vCode && i.braId===item.braId && i.c===item.c && i.bb===item.bb && i.bc===item.bc && i.bz===item.bz);
+        if(t) t.bq = parseInt(t.bq) + qty; else this.data.inventory.push({...item, bq: qty});
+        this.saveAll(); this.ui.renderStock();
+    },
+
+    recordSale(item, qty) {
+        const m = this.data.models.find(x => x.vCode===item.vCode && x.braId===item.braId);
+        this.data.salesHistory.push({ date: new Date().toLocaleString(), id: item.braId, p: m?m.price:0, q: qty });
+        this.saveAll();
+    },
+
     logout() { location.reload(); }
 };
 
 app.ui = {
+    // [cite: 220, 221, 225] 下拉選單邏輯
     initDropdowns() {
         const b = document.getElementById('sel-band'), cp = document.getElementById('sel-cup'), sz = document.getElementById('sel-size'), cl = document.getElementById('sel-color');
         b.innerHTML = '<option value="-">下圍-</option>'; for(let i=32; i<=50; i+=2) b.innerHTML += `<option value="${i}">${i}</option>`;
         cp.innerHTML = '<option value="-">罩杯-</option>'; "ABCDEFGH".split("").forEach(x => cp.innerHTML += `<option value="${x}">${x}</option>`);
         sz.innerHTML = '<option value="-">尺寸-</option>'; ["SS","S","M","L","XL","XXL","3XL","FREE"].forEach(x => sz.innerHTML += `<option value="${x}">${x}</option>`);
-        cl.innerHTML = app.data.colors.map(x => `<option value="${x.code}">${x.name}</option>`).join('');
+        cl.innerHTML = app.data.colors.map(x => `<option value="${x.code}">${x.name}</option>`).join('') || '<option value="BLK">黑色</option>';
         this.refreshVendorSelect();
     },
     refreshVendorSelect() {
@@ -197,15 +216,19 @@ app.ui = {
         s.innerHTML = f.map(m => `<option value='${JSON.stringify(m)}'>${m.braId} ($${m.price})</option>`).join('');
     },
     renderStock() {
+        // [cite: 239, 241, 242] 表格渲染
         const q = document.getElementById('search-stock').value.toLowerCase();
         const f = app.data.inventory.filter(i => (i.vCode + i.braId + (i.c||'')).toLowerCase().includes(q));
-        document.getElementById('stock-body').innerHTML = f.map((i, idx) => `<tr><td>${i.vCode}<br>${i.braId}</td><td>${i.c} ${i.bb}${i.bc} ${i.bz}</td><td>${i.bq}</td><td class="admin-only"><button onclick="app.adjQty(${idx}, 1)" style="width:40px;padding:5px">+</button></td></tr>`).join('');
+        document.getElementById('stock-body').innerHTML = f.map((i, idx) => `
+            <tr><td>${i.vCode}<br>${i.braId}</td><td>${i.c} ${i.bb}${i.bc} ${i.bz}</td><td>${i.bq}</td>
+            <td class="admin-only"><button onclick="app.updateInventory(${JSON.stringify(i)}, 1)">+</button></td></tr>`).join('');
         this.renderRank();
     },
     renderRank() {
+        // [cite: 243, 245] 排行榜
         const counts = {}; app.data.salesHistory.forEach(s => { counts[s.id] = (counts[s.id] || 0) + parseInt(s.q); });
         const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 5);
-        document.getElementById('rank-panel').innerHTML = "🏆 排行: " + sorted.map(([k,v]) => `${k}(${v})`).join(' | ');
+        document.getElementById('rank-panel').innerHTML = "🏆 排行: " + sorted.map(([k,v]) => `<span>${k}(${v})</span>`).join(' | ');
     },
     openScanner(mode) {
         this.scanMode = mode; document.getElementById('scanner-container').style.display = 'block';
@@ -220,33 +243,19 @@ app.ui = {
         if(this.scanMode.includes('OUT')) app.recordSale(item, 1);
     },
     syncSettingsToFields() {
-        const c = app.data.sysConfig, p = app.data.printCfg;
-        if(document.getElementById('cfg-compName')) document.getElementById('cfg-compName').value = c.compName || '';
-        if(document.getElementById('p-a4mt')) document.getElementById('p-a4mt').value = p.a4mt || 15.5;
+        if(document.getElementById('p-a4mt')) document.getElementById('p-a4mt').value = app.data.printCfg.a4mt || 15.5;
+        if(document.getElementById('p-a4ml')) document.getElementById('p-a4ml').value = app.data.printCfg.a4ml || 6.5;
+    },
+    applyPrintCss() {
+        const r = document.documentElement;
+        r.style.setProperty('--a4-mt', (app.data.printCfg.a4mt || 15.5) + 'mm');
     }
 };
 
-app.updateInventory = function(item, qty) {
-    let t = this.data.inventory.find(i => i.vCode===item.vCode && i.braId===item.braId && i.c===item.c && i.bb===item.bb && i.bc===item.bc && i.bz===item.bz);
-    if(t) t.bq = parseInt(t.bq) + qty; else this.data.inventory.push({...item, bq: qty});
-    this.saveAll(); this.ui.renderStock();
+app.savePrintCfg = function() {
+    app.data.printCfg = { a4mt: document.getElementById('p-a4mt').value, a4ml: document.getElementById('p-a4ml').value };
+    app.saveAll(); alert("儲存成功");
 };
-
-app.recordSale = function(item, qty) {
-    const m = this.data.models.find(x => x.vCode===item.vCode && x.braId===item.braId);
-    this.data.salesHistory.push({ date: new Date().toLocaleString(), id: item.braId, p: m?m.price:0, q: qty });
-    this.saveAll();
-};
-
-app.handleManual = function(type) {
-    const mStr = document.getElementById('sel-model').value; if(!mStr) return;
-    const m = JSON.parse(mStr);
-    const item = { vCode: document.getElementById('sel-vendor').value, braId: m.braId, c: document.getElementById('sel-color').value, bb: document.getElementById('sel-band').value, bc: document.getElementById('sel-cup').value, bz: document.getElementById('sel-size').value };
-    this.updateInventory(item, type==='IN'?1:-1); if(type==='OUT') this.recordSale(item, 1);
-};
-
-app.adjQty = function(idx, v) { this.data.inventory[idx].bq += v; this.saveAll(); this.ui.renderStock(); };
-app.savePrintCfg = function() { alert("設定已儲存"); };
 
 window.onload = () => app.init();
 </script>
