@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 雲端版</title>
+    <title>Lingerie Pro - 雲端旗艦版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
+        /* 直接繼承您原始檔的 CSS 變數 */
         :root {
             --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2;
             --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
@@ -22,36 +23,42 @@
         .row-inputs { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
         .row-inputs > * { flex: 1; min-width: 80px; }
         button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-        .btn-success { background: var(--success); } .btn-danger { background: var(--danger); } .btn-accent { background: var(--accent); }
+        .btn-success { background: var(--success); } .btn-accent { background: var(--accent); } .btn-danger { background: var(--danger); }
+        
+        /* 統計看板樣式 */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-val { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 0.8rem; color: #888; margin-top: 4px; }
+
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
         #reader { width: 100%; }
-        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 20px; border-radius: 20px; z-index: 10; display: none; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: #fff; padding: 12px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
-        .stat-val { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-        .stat-label { font-size: 0.75rem; color: #888; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #f0efeb; }
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+
         @media print {
             .no-print { display: none !important; }
             body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; }
             .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; }
             .label-item canvas { width: 22mm !important; height: 22mm !important; }
-            .label-txt { font-size: 8px; text-align: center; line-height: 1.2; margin-top: 2px; }
+            .label-txt { font-size: 8px; text-align: center; margin-top: 2px; line-height: 1.1; }
         }
     </style>
 </head>
 <body>
+
 <div id="login-overlay">
-    <div class="card" style="width: 85%; max-width: 350px;">
-        <h2 style="text-align:center; color:var(--primary);">Lingerie Pro Cloud</h2>
+    <div class="card" style="width: 85%; max-width: 350px; text-align:center;">
+        <h2 style="color:var(--primary);">Lingerie Pro Cloud</h2>
         <input type="text" id="loginUser" placeholder="帳號">
         <input type="password" id="loginPass" placeholder="密碼">
         <button onclick="app.login()">進入系統</button>
-        <div id="init-status" style="text-align:center; font-size:12px; color:gray; margin-top:10px;">🔄 正在連接雲端資料庫...</div>
+        <div id="init-status" style="font-size:12px; color:gray; margin-top:10px;">🔄 雲端同步中...</div>
     </div>
 </div>
+
 <div id="main-ui" class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span id="display-user" style="font-size:14px; font-weight:bold; color:var(--primary);"></span>
@@ -64,14 +71,12 @@
     </div>
 
     <div class="card admin-only">
-        <h3>📄 A4 標籤列印微調 (mm)</h3>
+        <h3>📄 A4 標籤微調 (mm)</h3>
         <div class="row-inputs">
-            <div>上：<input type="number" step="0.1" id="p-a4mt" value="15.5"></div>
-            <div>左：<input type="number" step="0.1" id="p-a4ml" value="6.5"></div>
-            <div>橫：<input type="number" step="0.1" id="p-a4gx" value="2.5"></div>
-            <div>縱：<input type="number" step="0.1" id="p-a4gy" value="0"></div>
+            <div>上：<input type="number" step="0.1" id="p-a4mt"></div>
+            <div>左：<input type="number" step="0.1" id="p-a4ml"></div>
         </div>
-        <button class="btn-accent" onclick="app.savePrintCfg()">💾 儲存並套用版面設定</button>
+        <button class="btn-accent" onclick="app.savePrintCfg()">💾 儲存版面設定</button>
     </div>
 
     <div class="card">
@@ -81,11 +86,9 @@
             <button onclick="app.ui.openScanner('OUT_AUTO')" class="btn-success">掃描出貨</button>
         </div>
         <div id="scanner-container">
-            <div id="scan-feedback">OK!</div>
             <div id="reader"></div>
             <button class="btn-danger" style="border-radius:0;" onclick="app.ui.uiCloseScanner()">❌ 關閉相機</button>
         </div>
-        
         <select id="sel-vendor" onchange="app.ui.refreshModelSelect()"></select>
         <select id="sel-model"></select>
         <div class="row-inputs">
@@ -98,41 +101,40 @@
             <button onclick="app.handleManual('IN')">📥 手動入庫</button>
             <button class="btn-success" onclick="app.handleManual('OUT')">📄 記錄銷售</button>
         </div>
-        <button class="btn-accent admin-only" style="margin-top:10px;" onclick="app.printTags()">🖨️ 產生 35 枚 A4 標籤</button>
+        <button class="btn-accent admin-only" style="margin-top:10px;" onclick="app.printTags()">🖨️ 產生 35 枚標籤</button>
     </div>
 
     <div class="card">
         <h3>📊 庫存統計與搜尋</h3>
         <div id="rank-panel" style="background:#fffaf0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:13px; color:#d4a373;"></div>
-        <input type="text" id="search-stock" placeholder="🔍 搜尋型號、顏色、下圍..." oninput="app.ui.renderStock()">
-        <div style="overflow-x:auto;">
-            <table>
-                <thead><tr><th>品項規格</th><th>存量</th><th class="admin-only">操作</th></tr></thead>
-                <tbody id="stock-body"></tbody>
-            </table>
-        </div>
+        <input type="text" id="search-stock" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="app.ui.renderStock()">
+        <table>
+            <thead><tr><th>品項規格</th><th>存量</th><th class="admin-only">操作</th></tr></thead>
+            <tbody id="stock-body"></tbody>
+        </table>
     </div>
 </div>
 <div id="print-label-page" style="display:none;"></div>
+
 <script>
 const app = {
     CONFIG: { API_URL: "https://script.google.com/macros/s/AKfycbywN_36nh6hI9JSCXwf2ohcMI9MCFvEAQFPQfvIcSu75ZyKrR2sCgNzbwQE1UjAVXb8/exec" },
-    data: { vendors: [], models: [], inventory: [], colors: [], salesHistory: [], users: [], sysConfig: {}, printCfg: {} },
+    data: { vendors: [], models: [], inventory: [], colors: [], salesHistory: [], users: [], printCfg: {} },
 
     async init() {
+        const status = document.getElementById('init-status');
         try {
-            const sheets = ['VENDORS', 'MODELS', 'INVENTORY', 'COLORS', 'SALES', 'CONFIG', 'USERS'];
+            const sheets = ['VENDORS', 'MODELS', 'INVENTORY', 'COLORS', 'SALES', 'USERS', 'CONFIG'];
             const res = await Promise.all(sheets.map(s => this.cloud('readAll', s)));
             this.data.vendors = res[0]||[]; this.data.models = res[1]||[]; this.data.inventory = res[2]||[];
-            this.data.colors = res[3]||[]; this.data.salesHistory = res[4]||[]; this.data.users = res[6]||[];
-            const cfg = res[5]||[];
+            this.data.colors = res[3]||[]; this.data.salesHistory = res[4]||[]; this.data.users = res[5]||[];
+            const cfg = res[6]||[];
             if (cfg.length) {
-                const sc = cfg.find(x => x.k === 'sysConfig'); if(sc) this.data.sysConfig = JSON.parse(sc.v);
                 const pc = cfg.find(x => x.k === 'printCfg'); if(pc) this.data.printCfg = JSON.parse(pc.v);
             }
             this.ui.syncSettingsToFields(); this.ui.applyPrintCss();
-            document.getElementById('init-status').innerText = "✅ 雲端同步成功";
-        } catch (e) { document.getElementById('init-status').innerText = "❌ 連線失敗"; }
+            status.innerText = "✅ 雲端連線成功";
+        } catch (e) { status.innerText = "❌ 連線失敗"; }
     },
 
     async cloud(action, sheet, payload = null) {
@@ -149,16 +151,15 @@ const app = {
             if (role === 'admin') document.body.classList.add('is-admin');
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
-            document.getElementById('display-user').innerText = `👤 權限: ${role === 'admin' ? '管理員' : '員工'} (${u})`;
+            document.getElementById('display-user').innerText = `👤 ${role === 'admin' ? '管理員' : '員工'}: ${u}`;
             this.ui.initDropdowns(); this.ui.renderStock();
-        } else { alert("帳密錯誤"); }
+        } else { alert("帳號密碼錯誤！"); }
     },
 
     async saveAll() {
         await Promise.all([
             this.cloud('syncFull', 'INVENTORY', this.data.inventory),
-            this.cloud('syncFull', 'SALES', this.data.salesHistory),
-            this.cloud('syncFull', 'CONFIG', [{k:'sysConfig', v:JSON.stringify(this.data.sysConfig)}, {k:'printCfg', v:JSON.stringify(this.data.printCfg)}])
+            this.cloud('syncFull', 'SALES', this.data.salesHistory)
         ]);
     }
 };
@@ -167,9 +168,9 @@ app.ui = {
     initDropdowns() {
         const b = document.getElementById('sel-band'), cp = document.getElementById('sel-cup'), sz = document.getElementById('sel-size'), cl = document.getElementById('sel-color');
         b.innerHTML = '<option value="-">下圍-</option>'; for(let i=32; i<=50; i+=2) b.innerHTML += `<option value="${i}">${i}</option>`;
-        cp.innerHTML = '<option value="-">罩杯-</option>'; "ABCDEFGH".split("").forEach(x => cp.innerHTML += `<option value="${x}">${x}</option>`);
-        sz.innerHTML = '<option value="-">尺寸-</option>'; ["SS","S","M","L","XL","XXL","3XL","FREE"].forEach(x => sz.innerHTML += `<option value="${x}">${x}</option>`);
-        cl.innerHTML = app.data.colors.map(x => `<option value="${x.code}">${x.name}</option>`).join('');
+        cp.innerHTML = '<option value="-">罩杯-</option>'; "ABCDEFGH".split("").forEach(c => cp.innerHTML += `<option value="${c}">${c}</option>`);
+        sz.innerHTML = '<option value="-">尺寸-</option>'; ["SS","S","M","L","XL","XXL","3XL","FREE"].forEach(s => sz.innerHTML += `<option value="${s}">${s}</option>`);
+        cl.innerHTML = app.data.colors.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
         this.refreshVendorSelect();
     },
     refreshVendorSelect() {
@@ -188,9 +189,11 @@ app.ui = {
             <tr>
                 <td><strong>${i.braId}</strong><br><small>${i.c} ${i.bb}${i.bc} ${i.bz}</small></td>
                 <td style="font-weight:bold; color:${i.bq < 3 ? 'var(--danger)':'var(--primary)'};">${i.bq}</td>
-                <td class="admin-only"><button onclick="app.adjQty('${i.vCode}','${i.braId}','${i.c}','${i.bb}','${i.bc}','${i.bz}', 1)" style="padding:4px 8px;">+</button></td>
+                <td class="admin-only"><button onclick="app.adjQty('${i.vCode}','${i.braId}','${i.c}','${i.bb}','${i.bc}','${i.bz}', 1)" style="padding:4px 8px; width:auto;">+</button></td>
             </tr>
         `).join('');
+        
+        // 更新統計看板 [cite: 190]
         document.getElementById('stat-stock').innerText = app.data.inventory.reduce((a,b)=> a + parseInt(b.bq), 0);
         const today = new Date().toLocaleDateString();
         document.getElementById('stat-sales').innerText = app.data.salesHistory.filter(s => s.date.includes(today)).reduce((a,b)=> a + parseInt(b.q), 0);
@@ -212,15 +215,14 @@ app.ui = {
         const item = { vCode: p[0], braId: p[1], c: p[3], bb: p[4], bc: p[5], bz: p[6] };
         app.updateInventory(item, this.scanMode.includes('IN') ? 1 : -1);
         if(this.scanMode.includes('OUT')) app.recordSale(item, 1);
-        const fb = document.getElementById('scan-feedback'); fb.style.display='block'; setTimeout(()=>fb.style.display='none', 500);
     },
     syncSettingsToFields() {
         const p = app.data.printCfg;
-        if(p.a4mt) { document.getElementById('p-a4mt').value = p.a4mt; document.getElementById('p-a4ml').value = p.a4ml; document.getElementById('p-a4gx').value = p.a4gx; document.getElementById('p-a4gy').value = p.a4gy; }
+        if(p.a4mt) { document.getElementById('p-a4mt').value = p.a4mt; document.getElementById('p-a4ml').value = p.a4ml; }
     },
     applyPrintCss() {
         const r = document.documentElement; const p = app.data.printCfg;
-        if(p.a4mt) { r.style.setProperty('--a4-mt', p.a4mt+'mm'); r.style.setProperty('--a4-ml', p.a4ml+'mm'); r.style.setProperty('--a4-gx', p.a4gx+'mm'); r.style.setProperty('--a4-gy', p.a4gy+'mm'); }
+        if(p.a4mt) { r.style.setProperty('--a4-mt', p.a4mt+'mm'); r.style.setProperty('--a4-ml', p.a4ml+'mm'); }
     }
 };
 
@@ -263,8 +265,9 @@ app.adjQty = function(v,b,c,bb,bc,bz, qty) {
 };
 
 app.savePrintCfg = function() {
-    app.data.printCfg = { a4mt: document.getElementById('p-a4mt').value, a4ml: document.getElementById('p-a4ml').value, a4gx: document.getElementById('p-a4gx').value, a4gy: document.getElementById('p-a4gy').value };
-    app.ui.applyPrintCss(); app.saveAll(); alert("版面設定已儲存至雲端");
+    app.data.printCfg = { a4mt: document.getElementById('p-a4mt').value, a4ml: document.getElementById('p-a4ml').value };
+    app.cloud('syncFull', 'CONFIG', [{k:'printCfg', v:JSON.stringify(app.data.printCfg)}]);
+    app.ui.applyPrintCss(); alert("版面設定已儲存");
 };
 
 window.onload = () => app.init();
