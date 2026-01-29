@@ -398,7 +398,7 @@
         const tr = document.getElementById('taxRateInp').value;
         pushToCloud('updateConfig', { compName: cn, taxRate: tr });
     }
-</script>
+
 // --- 進出貨與庫存處理 ---
     async function handleManual(type) {
         const v = document.getElementById('selectVendor').value;
@@ -487,6 +487,7 @@
     }
     
     // (其餘輔助函數如 savePrintConfigs, loadPrintConfigs 等保留不變...)
+    </script>
 // --- 補充缺少的輔助函數 ---
 
 function loadPrintConfigs() {
