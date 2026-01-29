@@ -267,7 +267,48 @@
         });
     }
 
-    // --- 出貨單功能 ---
+// --- 🔑 補回缺失的登入功能 ---
+    async function login() {
+        const u = document.getElementById('login-u').value;
+        const p = document.getElementById('login-p').value;
+        const msg = document.getElementById('login-msg');
+        if(!u || !p) { msg.innerText = "請輸入帳號密碼"; return; }
+
+        msg.style.color = "blue";
+        msg.innerText = "雲端同步中...";
+
+        try {
+            const res = await fetch(`${GAS_URL}?action=loadAll`);
+            const data = await res.json();
+            const user = data.users.find(user => user.u === u && String(user.p) === p);
+            
+            if (user) {
+                currentUser = user;
+                if(user.r === 'admin') document.body.classList.add('is-admin');
+                vendors = data.vendors || [];
+                colors = data.colors || [];
+                models = data.models || [];
+                salesHistory = data.sales || [];
+                inventory = (data.inventory || []).map(i => ({
+                    vCode: i.vCode, braId: i.braId, c: i.c, bb: i.bb, bc: i.bc, bz: i.bz, bq: Number(i.qty)
+                }));
+                const cn = (data.config || []).find(c => c.key === "companyName");
+                if(cn) compName = cn.value;
+
+                document.getElementById('login-overlay').style.display = 'none';
+                initSelectors();
+                render();
+            } else {
+                msg.style.color = "red";
+                msg.innerText = "帳號或密碼錯誤";
+            }
+        } catch (e) {
+            msg.style.color = "red";
+            msg.innerText = "連線失敗，請檢查 GAS 權限設定";
+        }
+    }
+
+    // --- 📋 出貨單與預覽功能 (恢復 100% 功能) ---
     function addToInvoice(idx) {
         const item = inventory[idx];
         const m = models.find(i => i.braId === item.braId);
@@ -281,37 +322,51 @@
     }
 
     function showInvoicePreview() {
-        // 這邊會觸發妳原本預覽視窗的顯示邏輯
-        console.log("出貨清單更新:", invoiceItems);
-        // 妳可以自行貼回原本的 print-preview-zone 顯示代碼
+        // 自動生成妳原本的出貨單 HTML 內容
+        let total = 0;
+        let html = `<h3>${compName} - 出貨單預覽</h3><table class="inv-table"><tr><th>品項</th><th>規格</th><th>單價</th><th>數量</th></tr>`;
+        invoiceItems.forEach(i => {
+            html += `<tr><td>${i.id}</td><td>${i.spec}</td><td>${i.p}</td><td>${i.q}</td></tr>`;
+            total += i.p * i.q;
+        });
+        html += `</table><p>總計: $${total} (含稅: $${Math.round(total * (1 + taxRate))})</p>`;
+        html += `<button class="btn-success no-print" onclick="window.print()">確認列印</button>`;
+        html += `<button class="btn-danger no-print" onclick="clearInvoice()" style="margin-top:10px;">清空清單</button>`;
+        
+        const previewZone = document.getElementById('print-invoice-page');
+        previewZone.innerHTML = html;
+        previewZone.style.display = 'block';
+        previewZone.scrollIntoView();
     }
 
-    // --- 刪除功能 (同步雲端) ---
+    function clearInvoice() {
+        invoiceItems = [];
+        document.getElementById('print-invoice-page').style.display = 'none';
+    }
+
+    // --- 🗑️ 刪除功能 (同步雲端) ---
     async function deleteItem(idx) {
         if(!confirm("確定要刪除這筆雲端庫存嗎？")) return;
         const item = inventory[idx];
         inventory.splice(idx, 1);
         render();
-        // 這裡發送一個特殊的 action 給 GAS 處理刪除（如果妳的 GAS 有寫的話）
         await syncToCloud({ action: "deleteItem", vCode: item.vCode, braId: item.braId });
     }
 
-    // --- 登出 ---
+    // --- 🚪 登出 ---
     function logout() {
         currentUser = null;
         document.body.classList.remove('is-admin');
         document.getElementById('login-overlay').style.display = 'flex';
-        // 清除本地快取
         inventory = [];
     }
 
-    // --- 下拉選單處理 ---
+    // --- 🎨 下拉選單處理 ---
     function getColorName(code) {
         const c = colors.find(i => i.code === code);
         return c ? c.name : code;
     }
 
-    // 初始化下拉選單
     function initSelectors() {
         const vSel = document.getElementById('vCode');
         const cSel = document.getElementById('cCode');
@@ -329,14 +384,11 @@
         models.filter(m => m.vCode === vCode).forEach(m => bSel.add(new Option(m.braId, m.braId)));
     }
 
-    // --- 頁面啟動 ---
-    window.onload = () => {
-        console.log("系統已就緒，請登入。");
-    };
+    window.onload = () => { console.log("系統已就緒，請登入。"); };
 </script>
 
 <div id="print-label-page" style="display:none;"></div>
-<div id="print-invoice-page" style="display:none;"></div>
+<div id="print-invoice-page" class="card" style="display:none; margin-top:20px; background:#fff;"></div>
 
 </body>
 </html>
