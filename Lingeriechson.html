@@ -487,6 +487,57 @@
     }
     
     // (其餘輔助函數如 savePrintConfigs, loadPrintConfigs 等保留不變...)
+// --- 補充缺少的輔助函數 ---
+
+function loadPrintConfigs() {
+    const cfg = localStorage.getItem('printConfigs');
+    if (cfg) {
+        const d = JSON.parse(cfg);
+        document.getElementById('cfg-a4-mt').value = d.a4mt;
+        document.getElementById('cfg-a4-ml').value = d.a4ml;
+        document.getElementById('cfg-a4-gx').value = d.a4gx;
+        document.getElementById('cfg-a4-gy').value = d.a4gy;
+        document.getElementById('cfg-s-mt').value = d.smt;
+        document.getElementById('cfg-s-ml').value = d.sml;
+        applyConfigsToCSS(d);
+    } else {
+        // 預設值
+        document.getElementById('cfg-a4-mt').value = 15.5;
+        document.getElementById('cfg-a4-ml').value = 6.5;
+        document.getElementById('cfg-a4-gx').value = 2.5;
+        document.getElementById('cfg-a4-gy').value = 0;
+        document.getElementById('cfg-s-mt').value = 0;
+        document.getElementById('cfg-s-ml').value = 0;
+    }
+}
+
+function savePrintConfigs() {
+    const d = {
+        a4mt: document.getElementById('cfg-a4-mt').value,
+        a4ml: document.getElementById('cfg-a4-ml').value,
+        a4gx: document.getElementById('cfg-a4-gx').value,
+        a4gy: document.getElementById('cfg-a4-gy').value,
+        smt: document.getElementById('cfg-s-mt').value,
+        sml: document.getElementById('cfg-s-ml').value
+    };
+    localStorage.setItem('printConfigs', JSON.stringify(d));
+    applyConfigsToCSS(d);
+    alert("版面設定已儲存");
+}
+
+function applyConfigsToCSS(d) {
+    const root = document.querySelector(':root');
+    root.style.setProperty('--a4-mt', d.a4mt + 'mm');
+    root.style.setProperty('--a4-ml', d.a4ml + 'mm');
+    root.style.setProperty('--a4-gx', d.a4gx + 'mm');
+    root.style.setProperty('--a4-gy', d.a4gy + 'mm');
+    root.style.setProperty('--s-mt', d.smt + 'mm');
+    root.style.setProperty('--s-ml', d.sml + 'mm');
+}
+
+function closePreview() {
+    document.getElementById('print-preview-zone').style.display = 'none';
+}
 </script>
 </body>
 </html>
