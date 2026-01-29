@@ -233,7 +233,6 @@ function stopScanner() {
 }
 
 function handleScannedText(txt) {
-    // 支援格式: 廠商,型號,顏色,尺寸
     const p = txt.split(',');
     if (p.length >= 2) {
         document.getElementById('in-vCode').value = p[0];
@@ -245,39 +244,38 @@ function handleScannedText(txt) {
     }
 }
 
-// --- 4. 核心：雲端資料提交 (POST) ---
+// --- 4. 提交資料到雲端 (POST) ---
 async function submitInbound() {
-    const data = {
-        vCode: document.getElementById('in-vCode').value,
-        braId: document.getElementById('in-braId').value,
-        c: document.getElementById('in-color').value,
-        bz: document.getElementById('in-size').value,
-        qty: document.getElementById('in-qty').value,
-        type: 'IN'
-    };
-
-    if(!data.vCode || !data.braId || !data.qty) return alert("請填寫完整資訊");
+    const v = document.getElementById('in-vCode').value;
+    const m = document.getElementById('in-braId').value;
+    const q = document.getElementById('in-qty').value;
+    
+    if(!v || !m || !q) return alert("請填寫完整資訊");
 
     const btn = document.getElementById('in-submit-btn');
     btn.disabled = true;
-    btn.innerText = "雲端同步中...";
+    btn.innerText = "同步中...";
 
     try {
-        // 使用 no-cors 模式發送至 Google Apps Script
         await fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({
                 action: "processTransaction",
-                ...data
+                vCode: v,
+                braId: m,
+                c: document.getElementById('in-color').value,
+                bz: document.getElementById('in-size').value,
+                qty: q,
+                type: 'IN'
             })
         });
         
-        alert("入庫同步成功！");
-        await loadAllData(); // 重新載入最新雲端庫存
+        alert("同步成功！");
+        await loadAllData(); 
         switchTab('stock', document.querySelector('.tab'));
     } catch (err) {
-        alert("提交失敗: " + err.message);
+        alert("失敗: " + err.message);
     } finally {
         btn.disabled = false;
         btn.innerText = "確認入庫同步";
@@ -291,51 +289,46 @@ function playBeep() {
     osc.start();
     osc.stop(actx.currentTime + 0.1);
 }
-</script>
 // --- 1. 庫存列表渲染 ---
 function renderStockList() {
     const s = document.getElementById('stockSearch').value.toLowerCase();
     const list = document.getElementById('stock-list');
     let h = '';
     
-    inventory.filter(i => (i.vCode + i.braId + (i.c||'')).toLowerCase().includes(s)).forEach(i => {
+    inventory.filter(i => (i.vCode + i.braId).toLowerCase().includes(s)).forEach(i => {
         h += `
             <div class="stock-item">
                 <div class="stock-info">
-                    <b>${i.braId}</b><br>
-                    <small>${i.vCode} | ${i.c} | ${i.bz}</small>
+                    <b>${i.braId}</b><br><small>${i.vCode} | ${i.c || 'N/A'}</small>
                 </div>
-                <div class="stock-qty" style="color:${i.bq <= 0 ? 'var(--danger)' : 'var(--primary)'}">
-                    ${i.bq}
-                </div>
-                <button class="btn" style="width:auto; padding:5px 10px; font-size:12px; background:#ddd;" 
+                <div class="stock-qty" style="color:${i.bq <= 2 ? 'red' : 'var(--primary)'}">${i.bq}</div>
+                <button class="btn" style="width:auto; padding:5px 10px; font-size:12px;" 
                     onclick="openLabelPreview('${i.vCode}','${i.braId}','${i.c}','${i.bz}')">標籤</button>
             </div>
         `;
     });
-    list.innerHTML = h || '<p style="text-align:center; padding:20px;">無資料</p>';
+    list.innerHTML = h || '<p style="text-align:center; padding:20px;">無匹配資料</p>';
     updateUIHeaders();
 }
 
-// --- 2. 出貨結帳 UI ---
+// --- 2. 出貨結帳 ---
 function initOutboundUI() {
     document.getElementById('tab-out').innerHTML = `
         <div class="card">
-            <h3>出貨結帳</h3>
-            <div id="out-scanner" style="width:100%; height:100px; border:2px dashed #ccc; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="startScanner()">
-                點擊掃描商品
-            </div>
-            <div id="out-list" style="margin-top:10px;"></div>
+            <h3>出貨結帳 (自動扣庫存)</h3>
+            <input type="text" id="out-v" placeholder="廠商">
+            <input type="text" id="out-m" placeholder="型號">
+            <input type="number" id="out-q" placeholder="數量" value="1">
             <button class="btn btn-primary" style="background:var(--success);" onclick="finalizeCloudSale()">確認結帳同步</button>
         </div>
     `;
 }
 
 async function finalizeCloudSale() {
-    const v = prompt("請輸入廠商代碼:");
-    const m = prompt("請輸入型號:");
-    const q = prompt("數量:", "1");
-    if(!v || !m) return;
+    const v = document.getElementById('out-v').value;
+    const m = document.getElementById('out-m').value;
+    const q = document.getElementById('out-q').value;
+    if(!v || !m) return alert("請填資料");
 
     try {
         await fetch(GAS_URL, {
@@ -343,14 +336,15 @@ async function finalizeCloudSale() {
             mode: 'no-cors',
             body: JSON.stringify({ action: "processTransaction", vCode: v, braId: m, qty: q, type: 'OUT' })
         });
-        alert("出貨已同步至雲端");
-        loadAllData();
+        alert("出貨已紀錄");
+        await loadAllData();
+        switchTab('stock', document.querySelector('.tab'));
     } catch(e) { alert("同步失敗"); }
 }
 
 // --- 3. 銷售紀錄渲染 ---
 function renderHistory() {
-    let h = `<h3>銷售紀錄 (雲端)</h3><div class="card">`;
+    let h = `<h3>銷售紀錄 (雲端同步)</h3><div class="card">`;
     salesHistory.reverse().forEach(s => {
         h += `<div style="padding:8px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
                 <span>${s.日期.split('T')[0]} ${s.品名}</span>
@@ -360,42 +354,36 @@ function renderHistory() {
     document.getElementById('tab-history').innerHTML = h + `</div>`;
 }
 
-// --- 4. 標籤列印功能 (保留原本 0129-3 的 A4 設定概念) ---
+// --- 4. 系統設定與標籤 ---
+function initSettingsUI() {
+    document.getElementById('tab-settings').innerHTML = `
+        <div class="card">
+            <h3>系統設定</h3>
+            <p>店名：${compName}</p>
+            <button class="btn btn-danger" onclick="sessionStorage.clear(); location.reload();">登出系統</button>
+        </div>
+    `;
+}
+
 function openLabelPreview(v, m, c, z) {
     const area = document.getElementById('print-canvas-area');
     area.innerHTML = '';
     document.getElementById('print-preview-zone').style.display = 'block';
-    
-    // 生成 QR Code 標籤
     const div = document.createElement('div');
     div.className = 'print-label';
     const can = document.createElement('canvas');
     const txt = document.createElement('div');
     txt.innerHTML = `<b>${v} / ${m}</b><br>${c} ${z}`;
-    
     div.appendChild(can);
     div.appendChild(txt);
     area.appendChild(div);
-
-    new QRious({
-        element: can,
-        value: `${v},${m},${c},${z}`,
-        size: 80
-    });
+    new QRious({ element: can, value: `${v},${m},${c},${z}`, size: 80 });
 }
 
-// --- 5. 系統設定 UI ---
-function initSettingsUI() {
-    document.getElementById('tab-settings').innerHTML = `
-        <div class="card">
-            <h3>系統設定</h3>
-            <p>店名：<input type="text" value="${compName}" onchange="compName=this.value"></p>
-            <p>稅率：<input type="number" value="${taxRate}" onchange="taxRate=this.value">%</p>
-            <button class="btn btn-danger" onclick="sessionStorage.clear(); location.reload();">登出系統</button>
-        </div>
-    `;
+// 最後補上渲染啟動
+function render() {
+    renderStockList();
 }
 </script>
-
 </body>
 </html>
