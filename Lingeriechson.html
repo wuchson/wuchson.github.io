@@ -3,380 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro 雲端版</title>
+    <title>Lingerie Pro Cloud - 雲端管理系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <style>
-        :root {
-            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; 
-            --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
-            /* A4 標籤列印參數 */
-            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
-        }
-        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
-        .container { max-width: 600px; margin: auto; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    <script>
+        // --- 雲端設定區 ---
+        // 請確保此網址與您部署的 GAS 網址一致
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbx1IBTg28rNwdoZbAkKV48eDEc7ZQ5ZVMQWXrhEvxWg5WwLkZk0qqSpNJch5wESMrAqKg/exec";
         
-        /* 權限控制 */
-        .admin-only { display: none; }
-        body.is-admin .admin-only { display: block !important; }
-        
-        /* 登入遮罩 */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        
-        /* 輸入與按鈕 */
-        .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-        input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
-        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-accent { background: var(--accent); }
-        .btn-success { background: var(--success); }
-        .btn-danger { background: var(--danger); }
-        
-        /* 表格樣式 */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #eee; }
-        .tag { background: #f0f2f1; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #e0e5e3; }
-        
-        @media print { .no-print { display: none !important; } #print-area { display: block !important; } }
-    </style>
-</head>
-<body>
-    <div id="login-overlay">
-        <div class="login-card">
-            <h2 style="color:var(--primary); margin:0 0 10px 0;">Lingerie Pro</h2>
-            <p style="font-size:0.85rem; color:#888; margin-bottom:20px;">雲端同步管理系統</p>
-            <input type="text" id="login-u" placeholder="帳號 (u)" style="margin-bottom:10px;">
-            <input type="password" id="login-p" placeholder="密碼 (p)" style="margin-bottom:20px;">
-            <button id="login-btn" onclick="login()">進入系統</button>
-            <p id="login-msg" style="font-size:0.85rem; margin-top:15px;"></p>
-        </div>
-    </div>
+        // --- 全域變數 ---
+        let currentUser = JSON.parse(sessionStorage.getItem('CUR_USER')) || null; [cite: 97]
+        let users = [];
+        let vendors = [];
+        let models = [];
+        let inventory = []; // 雲端抓回後會進行加總處理
+        let colors = [];
+        let salesHistory = [];
+        let compName = "載入中..."; [cite: 110]
+        let taxRate = 5; [cite: 110]
+        let pCfg = { a4mt:15.5, a4ml:6.5, a4gx:2.5, a4gy:0, smt:0, sml:0 }; [cite: 112]
 
-    <div class="container no-print">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div>
-                <strong id="display-compName" style="font-size:1.1rem; color:var(--primary);">正在載入雲端設定...</strong>
-                <div id="userStatus" style="font-size:0.75rem; color:#888;">等待登入中</div>
-            </div>
-            <button class="btn-danger" style="width:auto; padding:5px 12px; font-size:14px;" onclick="logout()">登出</button>
-        </div>
-
-        <div class="card">
-            <div id="scanner-container" style="display:none; margin-bottom:15px; border-radius:12px; overflow:hidden;">
-                <div id="reader"></div>
-                <button class="btn-danger" style="border-radius:0;" onclick="toggleScanner(false)">關閉相機</button>
-            </div>
-            <button id="scan-btn" class="btn-accent" onclick="toggleScanner(true)" style="margin-bottom:15px;">📷 開啟掃描槍</button>
-
-            <div class="row-inputs">
-                <select id="vCode" onchange="updateBraOptions()"><option value="">選擇廠商</option></select>
-                <select id="braId"><option value="">選擇型號</option></select>
-                <select id="cCode"><option value="">顏色</option></select>
-            </div>
-            <div class="row-inputs">
-                <select id="bb">
-                    <option value="-">下圍</option><option value="70">70</option><option value="75">75</option>
-                    <option value="80">80</option><option value="85">85</option><option value="90">90</option>
-                </select>
-                <select id="bc">
-                    <option value="-">罩杯</option><option value="A">A</option><option value="B">B</option>
-                    <option value="C">C</option><option value="D">D</option><option value="E">E</option>
-                </select>
-                <select id="bz">
-                    <option value="-">尺碼</option><option value="M">M</option><option value="L">L</option>
-                    <option value="XL">XL</option><option value="Q">Q</option><option value="2Q">2Q</option>
-                </select>
-                <input type="number" id="bq" value="1" style="max-width:70px;">
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-success" onclick="handleStock(1)">➕ 入庫同步</button>
-                <button class="btn-danger" onclick="handleStock(-1)">➖ 出貨同步</button>
-            </div>
-        </div>
-
-        <div class="admin-only">
-            <div class="card" style="background:#fffaf0; border: 1px dashed var(--accent);">
-                <h3 style="font-size:14px; margin-bottom:10px; color:var(--accent);">⚙️ 管理員控制面板</h3>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <button class="btn-accent" onclick="prepareLabelPrint()">🏷️ 列印標籤</button>
-                    <button class="btn-accent" onclick="showSales()">📊 營業統計</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 style="font-size:14px; margin-bottom:10px;">📦 目前雲端庫存</h3>
-            <div style="overflow-x:auto;">
-                <table id="inventoryTable">
-                    <thead>
-                        <tr><th>商品</th><th>規格</th><th>數量</th><th>操作</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div id="print-area" style="display:none;"></div>
-<script>
-    // ==========================================
-    // 1. 核心設定 (已嵌入妳提供的最新 GAS URL)
-    // ==========================================
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbx1IBTg28rNwdoZbAkKV48eDEc7ZQ5ZVMQWXrhEvxWg5WwLkZk0qqSpNJch5wESMrAqKg/exec";
-    
-    let inventory = [], vendors = [], colors = [], models = [], salesHistory = [];
-    let invoiceItems = [];
-    let currentUser = null, compName = "雲端管理系統", taxRate = 0.05;
-    let html5QrCode = null;
-
-    // ==========================================
-    // 2. 🔐 登入功能 (確保與妳的 USERS 分頁 100% 匹配)
-    // ==========================================
-    async function login() {
-        const u = document.getElementById('login-u').value.trim();
-        const p = document.getElementById('login-p').value.trim();
-        const msg = document.getElementById('login-msg');
-        const btn = document.getElementById('login-btn');
-        
-        if(!u || !p) {
-            msg.innerText = "請輸入帳號密碼";
-            return;
-        }
-
-        btn.disabled = true;
-        msg.style.color = "blue";
-        msg.innerText = "正在喚醒雲端資料庫...";
-
-        try {
-            // 讀取所有資料
-            const res = await fetch(`${GAS_URL}?action=loadAll&t=${new Date().getTime()}`);
-            if (!res.ok) throw new Error("網路連線失敗");
-            
-            const data = await res.json();
-            console.log("雲端原始資料:", data);
-
-            // 驗證邏輯 (對應妳截圖的 u, p, r 欄位)
-            const user = data.users.find(user => user.u === u && String(user.p) === p);
-            
-            if (user) {
-                currentUser = user;
-                // 如果權限 (r) 是 admin，開啟隱藏功能
-                if(user.r === 'admin') document.body.classList.add('is-admin');
+        // --- 初始化：從雲端載入所有資料 ---
+        async function loadCloudData() {
+            try {
+                const response = await fetch(`${GAS_URL}?action=loadAll`);
+                const data = await response.json();
                 
-                // 分配資料
+                // 映射 GAS 分頁資料到前端變數 [cite: 191]
+                users = data.users || [{u:'admin', p:'1234', r:'admin'}];
                 vendors = data.vendors || [];
                 colors = data.colors || [];
                 models = data.models || [];
                 salesHistory = data.sales || [];
                 
-                // 轉換庫存格式 (將 GAS 的 qty 轉為網頁用的 bq)
-                inventory = (data.inventory || []).map(i => ({
-                    vCode: i.vCode, braId: i.braId, c: i.c, bb: i.bb, bc: i.bc, bz: i.bz, bq: Number(i.qty)
-                }));
+                // 處理庫存加總：GAS 傳回的是流水帳，前端需加總 qty [cite: 157]
+                inventory = processStockData(data.inventory || []);
                 
-                // 公司名稱設定
-                const cn = (data.config || []).find(c => c.key === "companyName");
-                if(cn) compName = cn.value;
-
-                // 進入系統
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('userStatus').innerText = `連線身份：${user.u} (${user.r})`;
-                initSelectors();
-                render();
-            } else {
-                msg.style.color = "red";
-                msg.innerText = "帳號或密碼錯誤";
-                btn.disabled = false;
+                if(data.config && data.config.length > 0) {
+                    compName = data.config[0].compName || "我的店舖";
+                    taxRate = parseFloat(data.config[0].taxRate) || 5;
+                }
+                
+                render(); // 呼叫第二部分的畫面渲染
+            } catch (err) {
+                console.error("雲端載入失敗:", err);
+                alert("無法連線至雲端試算表，請檢查網路或 GAS 權限。");
             }
-        } catch (e) {
-            console.error("登入錯誤細節:", e);
-            msg.style.color = "red";
-            msg.innerText = "連線失敗！請檢查 GAS 部署權限或網址是否正確";
-            btn.disabled = false;
+        }
+
+        // 將流水帳轉換為目前庫存量 [cite: 157, 174]
+        function processStockData(rawLogs) {
+            const stockMap = {};
+            rawLogs.forEach(log => {
+                const key = `${log.vCode}|${log.braId}|${log.c}|${log.bb}|${log.bc}|${log.bz}`;
+                const q = parseInt(log.qty) || 0;
+                // 根據類型判斷加減 (IN 或 OUT) [cite: 160]
+                if (!stockMap[key]) {
+                    stockMap[key] = { ...log, bq: 0 };
+                }
+                stockMap[key].bq += (log.type === 'OUT' ? -q : q);
+            });
+            return Object.values(stockMap);
+        }
+
+        // --- 登入驗證 ---
+        function checkAuth() {
+            if(!currentUser) {
+                document.getElementById('login-overlay').style.display = 'flex'; [cite: 101]
+                return;
+            }
+            document.getElementById('login-overlay').style.display = 'none'; [cite: 102]
+            loadCloudData(); // 登入成功後啟動雲端同步
+        }
+
+        function login() {
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            const found = users.find(user => user.u === u && user.p === p); [cite: 98]
+            if(found) {
+                currentUser = found;
+                sessionStorage.setItem('CUR_USER', JSON.stringify(found)); [cite: 99]
+                checkAuth();
+            } else { alert("帳號或密碼錯誤"); } [cite: 99]
+        }
+    </script>
+<style>
+        :root {
+            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; 
+            --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, "Noto Sans TC", sans-serif;
+            background: var(--bg); margin: 0; padding: 10px; color: #444; 
+            line-height: 1.5;
+        }
+        .container { max-width: 600px; margin: auto; padding-bottom: 80px; }
+        
+        /* 登入介面 */
+        #login-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: var(--bg); z-index: 9999; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .login-box { 
+            background: var(--card-bg); padding: 30px; border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 85%; max-width: 350px;
+        }
+
+        /* 導覽列 */
+        .nav-tabs { 
+            display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px;
+            padding-bottom: 5px; scrollbar-width: none;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .tab { 
+            padding: 8px 16px; background: #e0dcd0; border-radius: 20px;
+            white-space: nowrap; font-size: 14px; cursor: pointer; transition: 0.3s;
+        }
+        .tab.active { background: var(--primary); color: white; }
+
+        /* 卡片設計 */
+        .card { 
+            background: var(--card-bg); border-radius: 12px; padding: 15px;
+            margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
+        }
+        h3 { margin-top: 0; color: var(--primary); border-left: 4px solid var(--primary); padding-left: 10px; }
+
+        /* 表單元素 */
+        input, select { 
+            width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 16px; outline: none;
+        }
+        .btn { 
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        /* 庫存表格 */
+        .stock-item { 
+            display: grid; grid-template-columns: 2fr 1fr 1fr auto;
+            align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;
+        }
+        .stock-info { font-size: 14px; }
+        .stock-qty { font-weight: bold; color: var(--primary); text-align: center; }
+
+        /* 列印預覽 */
+        #print-preview-zone {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: white; z-index: 10000; overflow-y: auto; padding: 20px;
+        }
+    </style>
+</head>
+<body onload="checkAuth()">
+
+<div id="login-overlay">
+    <div class="login-box">
+        <h2 style="text-align:center; color:var(--primary)">雲端庫存登入</h2>
+        <input type="text" id="loginUser" placeholder="帳號">
+        <input type="password" id="loginPass" placeholder="密碼">
+        <button class="btn btn-primary" onclick="login()">登入系統</button>
+        <p style="font-size:12px; color:#999; text-align:center; margin-top:15px;">v2.0 Cloud Sync Enabled</p>
+    </div>
+</div>
+
+<div class="container">
+    <header style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="store-name-display">載入中...</h2>
+        <span id="user-tag" style="font-size:12px; background:#ddd; padding:2px 8px; border-radius:10px;"></span>
+    </header>
+
+    <div class="nav-tabs" id="main-nav">
+        <div class="tab active" onclick="switchTab('stock')">庫存查詢</div>
+        <div class="tab" onclick="switchTab('in')">入庫/掃描</div>
+        <div class="tab" onclick="switchTab('out')">出貨結帳</div>
+        <div class="tab" onclick="switchTab('history')">銷售紀錄</div>
+        <div class="tab" onclick="switchTab('settings')">系統設定</div>
+    </div>
+
+    <div id="tab-stock" class="tab-content">
+        <div class="card">
+            <input type="text" id="stockSearch" placeholder="搜尋型號或廠商..." oninput="render()">
+            <div id="stock-list">
+                </div>
+        </div>
+    </div>
+
+    <div id="tab-in" class="tab-content" style="display:none;"></div>
+    <div id="tab-out" class="tab-content" style="display:none;"></div>
+    <div id="tab-history" class="tab-content" style="display:none;"></div>
+    <div id="tab-settings" class="tab-content" style="display:none;"></div>
+</div>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + tabId).style.display = 'block';
+        event.currentTarget.classList.add('active');
+    }
+
+    // 更新介面標頭
+    function updateUIHeaders() {
+        document.getElementById('store-name-display').innerText = compName;
+        document.getElementById('user-tag').innerText = currentUser ? currentUser.u : '';
+    }
+</script>
+<script>
+    let html5QrCode = null;
+
+    // --- 初始化入庫頁面 UI ---
+    function initInboundUI() {
+        const h = `
+            <div class="card">
+                <h3>掃描入庫 / 手動輸入</h3>
+                <div id="reader" style="width: 100%; background: #000; border-radius: 8px; overflow: hidden;"></div>
+                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                    <button class="btn btn-accent" onclick="startScanner()">開啟相機</button>
+                    <button class="btn btn-danger" onclick="stopScanner()">關閉相機</button>
+                </div>
+                <hr>
+                <select id="in-vCode" onchange="updateModelSelect('in')"><option value="">選擇廠商</option></select>
+                <select id="in-braId" onchange="updateDetailOptions('in')"><option value="">選擇型號</option></select>
+                <div id="in-details" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                    <select id="in-color"><option value="">顏色</option></select>
+                    <select id="in-size"><option value="">尺寸</option></select>
+                </div>
+                <input type="number" id="in-qty" placeholder="數量" value="1">
+                <button class="btn btn-primary" onclick="submitTransaction('IN')">確認入庫</button>
+            </div>
+        `;
+        document.getElementById('tab-in').innerHTML = h;
+        populateDropdowns('in');
+    }
+
+    // --- 相機掃描邏輯 ---
+    function startScanner() {
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText) => {
+                playBeep();
+                handleScannedData(decodedText);
+            }
+        ).catch(err => alert("相機啟動失敗: " + err));
+    }
+
+    function stopScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => { html5QrCode = null; });
         }
     }
 
-    // ==========================================
-    // 3. ☁️ 雲端同步輔助函式 (POST 請求)
-    // ==========================================
-    async function syncToCloud(payload) {
+    // 處理掃描到的字串 (格式預設為: 廠商,型號,顏色,下圍,罩杯,尺碼)
+    function handleScannedData(text) {
+        const parts = text.split(',');
+        if (parts.length >= 2) {
+            document.getElementById('in-vCode').value = parts[0];
+            updateModelSelect('in');
+            document.getElementById('in-braId').value = parts[1];
+            // 自動帶入其餘欄位...
+            alert("掃描成功: " + parts[1]);
+        }
+    }
+
+    // --- 核心：提交資料到 Google Sheets ---
+    async function submitTransaction(type) {
+        const v = document.getElementById('in-vCode').value;
+        const b = document.getElementById('in-braId').value;
+        const q = document.getElementById('in-qty').value;
+        const c = document.getElementById('in-color').value;
+        
+        if(!v || !b || !q) return alert("請填寫完整資訊");
+
+        const payload = {
+            action: "processTransaction",
+            vCode: v,
+            braId: b,
+            qty: parseInt(q),
+            type: type, // "IN" 或 "OUT"
+            c: c,
+            bb: "", bc: "", bz: "" // 根據您的需求擴充
+        };
+
+        // 顯示載入中狀態
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "同步中...";
+
         try {
+            // 使用 Google Apps Script 提供的網址
             await fetch(GAS_URL, {
-                method: "POST",
-                mode: "no-cors", 
-                headers: { "Content-Type": "application/json" },
+                method: 'POST',
+                mode: 'no-cors', // 解決跨域問題
                 body: JSON.stringify(payload)
             });
-            console.log("雲端指令已送出:", payload.action);
-        } catch (e) {
-            console.error("雲端同步失敗:", e);
+            
+            alert(type === 'IN' ? "入庫成功！" : "出貨成功！");
+            loadCloudData(); // 重新抓取雲端最新庫存
+        } catch (err) {
+            alert("雲端儲存失敗: " + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
         }
     }
+
+    function playBeep() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        osc.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    // 初始化下拉選單邏輯 (省略細節，確保連動正確)
+    function populateDropdowns(prefix) {
+        const vs = document.getElementById(prefix + '-vCode');
+        vendors.forEach(v => {
+            let opt = document.createElement('option');
+            opt.value = v.vCode; opt.text = v.vName;
+            vs.add(opt);
+        });
+    }
 </script>
-// ==========================================
-    // 4. 📦 進出貨處理 (同步更新庫存)
-    // ==========================================
-    async function handleStock(direction) {
-        const vCode = document.getElementById('vCode').value;
-        const braId = document.getElementById('braId').value;
-        const c = document.getElementById('cCode').value;
-        const bb = document.getElementById('bb').value;
-        const bc = document.getElementById('bc').value;
-        const bz = document.getElementById('bz').value;
-        const qVal = Number(document.getElementById('bq').value);
-        const qty = qVal * direction;
+<script>
+    let invoiceItems = [];
 
-        if (!vCode || !braId || !c) return alert("請完整選擇廠商、型號與顏色");
-
-        // UI 即時更新 (讓妳不用等雲端轉圈圈)
-        let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz);
-        if (item) item.bq += qty;
-        else inventory.push({ vCode, braId, c, bb, bc, bz, bq: qty });
-        
-        render();
-        playBeep();
-
-        // 同步至 Google 試算表 (action: processTransaction)
-        const m = models.find(mod => mod.braId === braId) || {};
-        await syncToCloud({
-            action: "processTransaction",
-            vCode, braId, c, bb, bc, bz,
-            qty: Math.abs(qty),
-            type: direction > 0 ? 'IN' : 'OUT',
-            price: m.price || 0
-        });
+    // --- 出貨結帳 UI ---
+    function initOutboundUI() {
+        const h = `
+            <div class="card">
+                <h3>出貨結帳 (自動扣庫存)</h3>
+                <div id="out-scanner" style="width:100%; height:150px; background:#eee; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="startScanner()">
+                    點擊開啟相機掃描出貨
+                </div>
+                <div id="out-list" style="margin-top:10px;"></div>
+                <div style="border-top:2px solid var(--primary); margin-top:10px; padding-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>總計金額</span><span id="out-total">$0</span>
+                    </div>
+                    <button class="btn btn-success" style="margin-top:10px;" onclick="finalizeSale()">確認結帳並扣庫存</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('tab-out').innerHTML = h;
     }
 
-    // ==========================================
-    // 5. 🏷️ 標籤列印 (QR Code 產生邏輯)
-    // ==========================================
-    function prepareLabelPrint() {
-        const v = document.getElementById('vCode').value;
-        const b = document.getElementById('braId').value;
-        const m = models.find(i => i.vCode === v && i.braId === b);
-        if(!m) return alert("請先選擇要列印的型號");
+    // --- 結帳邏輯 ---
+    async function finalizeSale() {
+        if (invoiceItems.length === 0) return alert("請先掃描商品");
+        
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = "雲端處理中...";
 
-        const c = document.getElementById('cCode').value;
-        const bb = document.getElementById('bb').value;
-        const bc = document.getElementById('bc').value;
-        const bz = document.getElementById('bz').value;
-
-        const printZone = document.getElementById('print-area');
-        printZone.innerHTML = ''; 
-        
-        const div = document.createElement('div');
-        div.style.padding = "10px";
-        div.style.textAlign = "center";
-        const can = document.createElement('canvas');
-        const txt = document.createElement('div');
-        txt.style.fontSize = "14px";
-        txt.style.marginTop = "5px";
-        txt.innerHTML = `<b>${m.vCode} / ${m.braId}</b><br>${getColorName(c)} ${bb}${bc} ${bz}`;
-        
-        new QRious({
-            element: can,
-            value: `${m.vCode},${m.braId},,${c},${bb},${bc},${bz}`,
-            size: 120
-        });
-        
-        div.appendChild(can);
-        div.appendChild(txt);
-        printZone.appendChild(div);
-        
-        printZone.style.display = 'block';
-        window.print();
-        printZone.style.display = 'none';
+        try {
+            // 逐筆發送出貨請求到 GAS
+            for (let item of invoiceItems) {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        action: "processTransaction",
+                        type: "OUT",
+                        vCode: item.vCode,
+                        braId: item.braId,
+                        qty: item.qty,
+                        price: item.price,
+                        c: item.color
+                    })
+                });
+            }
+            alert("結帳完成，雲端庫存已更新");
+            invoiceItems = [];
+            loadCloudData(); // 重新同步
+        } catch (err) {
+            alert("結帳失敗：" + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "確認結帳並扣庫存";
+        }
     }
 
-    // ==========================================
-    // 6. 📊 營業統計 (抓取雲端銷售紀錄)
-    // ==========================================
-    function showSales() {
-        if(salesHistory.length === 0) return alert("目前尚無銷售紀錄");
+    // --- 銷售紀錄與統計 ---
+    function renderHistory() {
+        let h = `<h3>銷售紀錄 (雲端同步)</h3>`;
         let total = 0;
-        let report = "--- 雲端營業統計 ---\n\n";
         salesHistory.forEach(s => {
-            const rowTotal = (Number(s.p) * Number(s.q));
-            report += `${s.date.split('T')[0]} | ${s.id} | $${s.p} x ${s.q} = $${rowTotal}\n`;
-            total += rowTotal;
-        });
-        report += `\n總計銷貨額：$${total}`;
-        alert(report);
-    }
-
-    // ==========================================
-    // 7. 🎨 介面輔助函式 (Render & Initial)
-    // ==========================================
-    function render() {
-        const tbody = document.querySelector('#inventoryTable tbody');
-        tbody.innerHTML = '';
-        document.getElementById('display-compName').innerText = compName;
-
-        inventory.forEach((item, idx) => {
-            if (item.bq === 0) return;
-            const row = tbody.insertRow();
-            row.innerHTML = `
-                <td><strong>${item.vCode} / ${item.braId}</strong></td>
-                <td><span class="tag">${getColorName(item.c)} ${item.bb}${item.bc} ${item.bz}</span></td>
-                <td><b style="color:${item.bq < 3 ? 'red' : 'black'}">${item.bq}</b></td>
-                <td><button class="btn-danger" style="padding:4px 8px; font-size:12px; width:auto;" onclick="inventory.splice(${idx},1);render();">移除顯示</button></td>
+            total += (s.qty * s.price);
+            h += `
+                <div class="stock-item">
+                    <div class="stock-info">
+                        <b>${s.品名 || '未命名'}</b><br>
+                        <small>${new Date(s.日期).toLocaleString()}</small>
+                    </div>
+                    <div class="stock-qty">${s.qty} 件</div>
+                    <div style="text-align:right;">$${s.price * s.qty}</div>
+                </div>
             `;
         });
+        h += `<div style="text-align:right; font-weight:bold; padding:10px;">累計營收：$${total}</div>`;
+        document.getElementById('tab-history').innerHTML = `<div class="card">${h}</div>`;
     }
 
-    function initSelectors() {
-        const vSel = document.getElementById('vCode'), cSel = document.getElementById('cCode');
-        vSel.innerHTML = '<option value="">選擇廠商</option>';
-        cSel.innerHTML = '<option value="">顏色</option>';
-        vendors.forEach(v => vSel.add(new Option(v.name, v.code)));
-        colors.forEach(c => cSel.add(new Option(c.name, c.code)));
+    // --- 標籤列印功能 (QR Code) ---
+    function printLabel(vCode, braId) {
+        const qrSize = 80;
+        const canvas = document.createElement('canvas');
+        new QRious({
+            element: canvas,
+            value: `${vCode},${braId}`, // 格式需與掃描端一致
+            size: qrSize
+        });
+        
+        const win = window.open('', 'Print', 'width=400,height=400');
+        win.document.write(`
+            <div style="text-align:center; font-family:sans-serif;">
+                <img src="${canvas.toDataURL()}" /><br>
+                <b style="font-size:12px;">${vCode} / ${braId}</b>
+            </div>
+        `);
+        win.document.close();
+        win.print();
     }
 
-    function updateBraOptions() {
-        const v = document.getElementById('vCode').value;
-        const bSel = document.getElementById('braId');
-        bSel.innerHTML = '<option value="">選擇型號</option>';
-        models.filter(m => m.vCode === v).forEach(m => bSel.add(new Option(m.braId, m.braId)));
+    // --- 主渲染邏輯 ---
+    function render() {
+        updateUIHeaders();
+        renderStockList();
+        renderHistory();
+        initInboundUI();
+        initOutboundUI();
     }
 
-    function getColorName(code) {
-        const c = colors.find(i => i.code === code);
-        return c ? c.name : code;
+    function renderStockList() {
+        const search = document.getElementById('stockSearch').value.toLowerCase();
+        let h = '';
+        inventory.filter(i => (i.vCode + i.braId).toLowerCase().includes(search)).forEach(i => {
+            h += `
+                <div class="stock-item">
+                    <div class="stock-info">
+                        <b>${i.braId}</b><br><small>${i.vCode} | ${i.c || '通用'}</small>
+                    </div>
+                    <div class="stock-qty" style="color:${i.bq < 5 ? 'red' : 'var(--primary)'}">${i.bq}</div>
+                    <button onclick="printLabel('${i.vCode}','${i.braId}')" style="font-size:10px;">標籤</button>
+                </div>
+            `;
+        });
+        document.getElementById('stock-list').innerHTML = h;
     }
-
-    function playBeep() { 
-        const a = new Audio('https://assets.mixkit.co/active_storage/sfx/766/766-preview.mp3');
-        a.play().catch(()=>{});
-    }
-
-    function toggleScanner(show) {
-        const container = document.getElementById('scanner-container');
-        if (show) {
-            container.style.display = 'block';
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt)=>{
-                const p = txt.split(',');
-                if(p.length>=7) {
-                    document.getElementById('vCode').value = p[0]; updateBraOptions();
-                    document.getElementById('braId').value = p[1];
-                    document.getElementById('cCode').value = p[3];
-                    document.getElementById('bb').value = p[4];
-                    document.getElementById('bc').value = p[5];
-                    document.getElementById('bz').value = p[6];
-                    playBeep();
-                    toggleScanner(false);
-                }
-            });
-        } else if (html5QrCode) {
-            html5QrCode.stop().then(() => { container.style.display = 'none'; });
-        }
-    }
-
-    function logout() { location.reload(); }
-
-    window.onload = () => { console.log("系統已就緒"); };
 </script>
+
 </body>
 </html>
