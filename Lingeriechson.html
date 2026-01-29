@@ -3,190 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro Cloud - 雲端整合版</title>
+    <title>Lingerie Pro - 雲端整合版</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        :root {
+            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; 
+            --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
+            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
+            --s-mt: 0mm; --s-ml: 0mm;
+        }
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
+        .container { max-width: 600px; margin: auto; padding-bottom: 80px; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+        .nav-tabs { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; padding-bottom: 5px; scrollbar-width: none; }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .tab { padding: 8px 16px; background: #e0dcd0; border-radius: 20px; white-space: nowrap; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .tab.active { background: var(--primary); color: white; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; outline: none; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .print-label { display: inline-block; width: 40mm; height: 30mm; border: 0.1mm solid #ccc; padding: 2mm; text-align: center; page-break-inside: avoid; }
+    </style>
     <script>
-        // --- 1. 雲端設定區 ---
-        // 請務必確認此網址為您 GAS 部署的「網頁應用程式」網址
+        // --- 雲端設定區 ---
         const GAS_URL = "https://script.google.com/macros/s/AKfycbx1IBTg28rNwdoZbAkKV48eDEc7ZQ5ZVMQWXrhEvxWg5WwLkZk0qqSpNJch5wESMrAqKg/exec";
         
-        // --- 2. 全域變數 ---
-        let currentUser = JSON.parse(sessionStorage.getItem('CUR_USER')) || null;
-        let vendors = [];
-        let models = [];
-        let inventory = [];    // 這裡存儲計算後的「目前庫存」
-        let rawLogs = [];      // 這裡存儲從雲端抓回的「原始流水帳」
-        let colors = [];
-        let salesHistory = [];
-        let compName = "載入中...";
-        let taxRate = 5;
+        // --- 全域變數 (保留 0129-3.txt 的變數結構) ---
+        let currentUser = JSON.parse(sessionStorage.getItem('L_USER')) || null;
+        let vendors = [], models = [], inventory = [], colors = [], salesHistory = [];
+        let compName = "雲端管理系統", taxRate = 5;
+        let pCfg = { a4mt:15.5, a4ml:6.5, a4gx:2.5, a4gy:0, smt:0, sml:0 };
 
-        // --- 3. 初始化與資料抓取 ---
-        async function initSystem() {
-            if (!currentUser) {
-                document.getElementById('login-overlay').style.display = 'flex';
-                return;
-            }
-            await loadCloudData();
-        }
-
-        async function loadCloudData() {
-            console.log("正在同步雲端資料...");
+        // --- 初始化：雲端同步邏輯 ---
+        async function loadAllData() {
             try {
                 const response = await fetch(`${GAS_URL}?action=loadAll`);
                 const data = await response.json();
                 
-                // 將雲端分頁資料存入變數
                 vendors = data.vendors || [];
-                colors = data.colors || [];
                 models = data.models || [];
+                colors = data.colors || [];
                 salesHistory = data.sales || [];
-                rawLogs = data.inventory || []; // 這是 STOCK 分頁的原始資料
                 
-                // 核心邏輯：將流水帳轉化為「目前庫存量」
-                calculateCurrentStock();
+                // 核心：將 GAS 流水帳處理成 0129-3 所需的庫存格式
+                processCloudInventory(data.inventory || []);
                 
                 if(data.config && data.config.length > 0) {
-                    compName = data.config[0].compName || "我的商店";
+                    compName = data.config[0].compName || compName;
+                    taxRate = data.config[0].taxRate || 5;
                 }
                 
-                render(); // 此函式將在後續部分定義
-                console.log("同步完成");
+                render(); // 後續部分定義渲染邏輯
             } catch (err) {
-                console.error("雲端同步失敗:", err);
-                alert("連線不到雲端，將使用上次暫存資料");
+                console.error("雲端載入失敗:", err);
             }
         }
 
-        // 解決「功能不一樣」的關鍵：將每一筆 IN/OUT 紀錄加總
-        function calculateCurrentStock() {
-            const stockMap = {};
-            rawLogs.forEach(log => {
-                // 建立唯一鍵值：型號+顏色+尺寸
-                const key = `${log.vCode}|${log.braId}|${log.c}|${log.bz}`;
-                const q = parseInt(log.qty) || 0;
-                
-                if (!stockMap[key]) {
-                    stockMap[key] = { ...log, bq: 0 }; // bq 代表目前數量
-                }
-                
-                // 如果類型是 OUT 就減，否則就加
-                if (log.type === 'OUT') {
-                    stockMap[key].bq -= q;
-                } else {
-                    stockMap[key].bq += q;
-                }
+        function processCloudInventory(logs) {
+            // 雲端是流水帳，這裡將其彙整為型號餘額
+            const map = {};
+            logs.forEach(log => {
+                const key = `${log.vCode}|${log.braId}|${log.c}|${log.bb}|${log.bc}|${log.bz}`;
+                if (!map[key]) map[key] = { ...log, bq: 0 };
+                map[key].bq += (log.type === 'OUT' ? -parseInt(log.qty) : parseInt(log.qty));
             });
-            // 將物件轉回陣列供 UI 顯示
-            inventory = Object.values(stockMap);
+            inventory = Object.values(map);
+        }
+
+        function checkAuth() {
+            if(!currentUser) { document.getElementById('login-overlay').style.display = 'flex'; return; }
+            document.getElementById('login-overlay').style.display = 'none';
+            loadAllData();
         }
 
         function login() {
             const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
-            // 範例驗證，建議在 GAS USERS 分頁設定
-            if(u === 'admin' && p === '1234') {
-                currentUser = { u: u };
-                sessionStorage.setItem('CUR_USER', JSON.stringify(currentUser));
-                document.getElementById('login-overlay').style.display = 'none';
-                loadCloudData();
-            } else {
-                alert("帳號密碼錯誤");
-            }
+            if(u === 'admin' && p === '1234') { // 可改為對接 GAS USERS
+                currentUser = {u:u};
+                sessionStorage.setItem('L_USER', JSON.stringify(currentUser));
+                checkAuth();
+            } else { alert("帳號或密碼錯誤"); }
         }
     </script>
-<style>
-        :root {
-            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; 
-            --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            font-family: -apple-system, "Noto Sans TC", sans-serif;
-            background: var(--bg); margin: 0; padding: 10px; color: #444; 
-        }
-        .container { max-width: 600px; margin: auto; padding-bottom: 80px; }
-        
-        /* 登入遮罩 */
-        #login-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%; 
-            background: var(--bg); z-index: 9999; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-        
-        /* 導覽列 */
-        .nav-tabs { 
-            display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px;
-            padding: 5px 0; border-bottom: 1px solid var(--border);
-        }
-        .tab { 
-            padding: 8px 18px; background: #e0dcd0; border-radius: 20px;
-            white-space: nowrap; font-size: 14px; cursor: pointer; transition: 0.3s;
-        }
-        .tab.active { background: var(--primary); color: white; }
-
-        /* 卡片與列表 */
-        .card { 
-            background: var(--card-bg); border-radius: 12px; padding: 15px;
-            margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid var(--border);
-        }
-        .stock-item { 
-            display: grid; grid-template-columns: 2fr 1fr auto;
-            align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;
-        }
-        .stock-qty { font-weight: bold; color: var(--primary); text-align: center; font-size: 1.1em; }
-
-        /* 表單元件 */
-        input, select { 
-            width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border);
-            border-radius: 8px; font-size: 16px; 
-        }
-        .btn { 
-            width: 100%; padding: 12px; border: none; border-radius: 8px;
-            font-size: 16px; font-weight: bold; cursor: pointer;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-accent { background: var(--accent); color: white; }
-        
-        /* 列印預覽專用樣式 */
-        @media print {
-            .container, .nav-tabs { display: none !important; }
-            #print-zone { display: block !important; }
-        }
-    </style>
 </head>
-<body onload="initSystem()">
-
+<body onload="checkAuth()">
 <div id="login-overlay">
     <div class="card" style="width: 85%; max-width: 350px; text-align: center;">
-        <h2 style="color:var(--primary)">雲端庫存登入</h2>
-        <input type="text" id="loginUser" placeholder="帳號">
-        <input type="password" id="loginPass" placeholder="密碼">
-        <button class="btn btn-primary" onclick="login()">進入系統</button>
+        <h2 style="color:var(--primary); margin-bottom: 20px;">Lingerie Pro Cloud</h2>
+        <input type="text" id="loginUser" placeholder="管理員帳號">
+        <input type="password" id="loginPass" placeholder="管理員密碼">
+        <button class="btn btn-primary" onclick="login()">登入系統</button>
+        <p style="font-size: 12px; color: #999; margin-top: 15px;">版本 2.0 (雲端同步已啟動)</p>
     </div>
 </div>
 
-<div class="container">
+<div class="container" id="app-content">
     <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
-        <h2 id="store-name-display" style="margin:0; font-size: 1.2em;">載入中...</h2>
-        <span id="user-tag" style="font-size:12px; background:#e0dcd0; padding:2px 10px; border-radius:15px;"></span>
+        <h2 id="comp-name-display" style="margin:0; font-size: 1.2em;">載入中...</h2>
+        <span id="user-display" style="font-size:12px; background:#e0dcd0; padding:2px 10px; border-radius:15px;"></span>
     </header>
 
     <nav class="nav-tabs" id="main-nav">
         <div class="tab active" onclick="switchTab('stock', this)">庫存查詢</div>
-        <div class="tab" onclick="switchTab('in', this)">入庫/掃描</div>
+        <div class="tab" onclick="switchTab('in', this)">入庫/標籤</div>
         <div class="tab" onclick="switchTab('out', this)">出貨結帳</div>
-        <div class="tab" onclick="switchTab('history', this)">銷售報表</div>
+        <div class="tab" onclick="switchTab('history', this)">銷售紀錄</div>
         <div class="tab" onclick="switchTab('settings', this)">系統設定</div>
     </nav>
 
     <div id="tab-stock" class="tab-content">
         <div class="card">
-            <input type="text" id="stockSearch" placeholder="搜尋型號或廠商..." oninput="renderStockList()">
+            <input type="text" id="stockSearch" placeholder="搜尋型號、廠商或細節..." oninput="renderStockList()">
             <div id="stock-list">
-                <p style="text-align:center; color:#999;">正在連線雲端資料庫...</p>
+                <p style="text-align:center; padding:20px; color:#999;">正在連線雲端資料庫...</p>
             </div>
         </div>
     </div>
@@ -195,293 +127,274 @@
     <div id="tab-out" class="tab-content" style="display:none;"></div>
     <div id="tab-history" class="tab-content" style="display:none;"></div>
     <div id="tab-settings" class="tab-content" style="display:none;"></div>
+
+    <div id="print-preview-zone" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:10000; overflow-y:auto; padding:20px;">
+        <div style="margin-bottom:20px; display:flex; gap:10px;" class="no-print">
+            <button class="btn btn-primary" style="width:auto; padding:8px 20px;" onclick="window.print()">執行列印</button>
+            <button class="btn btn-danger" style="width:auto; padding:8px 20px;" onclick="closePreview()">關閉預覽</button>
+        </div>
+        <div id="print-canvas-area"></div>
+    </div>
 </div>
 
 <script>
-    // 更新介面頂部資訊
-    function updateUIHeaders() {
-        document.getElementById('store-name-display').innerText = compName;
-        document.getElementById('user-tag').innerText = currentUser ? `使用者: ${currentUser.u}` : '';
-    }
-
-    // 分頁切換邏輯
+    // --- UI 切換邏輯 ---
     function switchTab(tabId, el) {
-        // 隱藏所有區塊
+        // 隱藏所有分頁內容
         document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-        // 移除所有 Tab 的 active 狀態
+        // 移除所有 Tab 的選中狀態
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         
-        // 顯示當前區塊並啟動對應渲染
-        document.getElementById('tab-' + tabId).style.display = 'block';
-        el.classList.add('active');
-        
-        // 根據分頁觸發特定的渲染函式
+        // 顯示目標分頁
+        const target = document.getElementById('tab-' + tabId);
+        if (target) {
+            target.style.display = 'block';
+            el.classList.add('active');
+        }
+
+        // 觸發對應分頁的渲染
         if(tabId === 'stock') renderStockList();
         if(tabId === 'in') initInboundUI();
         if(tabId === 'out') initOutboundUI();
         if(tabId === 'history') renderHistory();
+        if(tabId === 'settings') initSettingsUI();
+    }
+
+    // 更新標頭資訊
+    function updateUIHeaders() {
+        document.getElementById('comp-name-display').innerText = compName;
+        document.getElementById('user-display').innerText = currentUser ? `帳號: ${currentUser.u}` : '';
+    }
+
+    // 關閉列印預覽
+    function closePreview() {
+        document.getElementById('print-preview-zone').style.display = 'none';
     }
 </script>
-<script>
-    let html5QrCode = null;
+// --- 1. 初始化入庫頁面 UI ---
+function initInboundUI() {
+    const h = `
+        <div class="card">
+            <h3>掃描 / 手動入庫</h3>
+            <div id="reader" style="width: 100%; background: #000; border-radius: 8px; overflow: hidden;"></div>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <button class="btn btn-primary" onclick="startScanner()">開啟相機</button>
+                <button class="btn btn-danger" onclick="stopScanner()">關閉相機</button>
+            </div>
+            <hr>
+            <select id="in-vCode" onchange="updateModelOptions()"><option value="">選擇廠商</option></select>
+            <select id="in-braId"><option value="">選擇型號</option></select>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <select id="in-color"><option value="">顏色</option></select>
+                <input type="text" id="in-size" placeholder="尺寸 (如 34B / L)">
+            </div>
+            <input type="number" id="in-qty" placeholder="入庫數量" value="1">
+            <button id="in-submit-btn" class="btn btn-primary" onclick="submitInbound()">確認入庫同步</button>
+        </div>
+    `;
+    document.getElementById('tab-in').innerHTML = h;
+    populateInboundDropdowns();
+}
 
-    // --- 1. 初始化入庫頁面 UI ---
-    function initInboundUI() {
-        const h = `
-            <div class="card">
-                <h3>掃描 / 手動入庫</h3>
-                <div id="reader" style="width: 100%; background: #000; border-radius: 8px; overflow: hidden;"></div>
-                <div style="display: flex; gap: 5px; margin-top: 10px;">
-                    <button class="btn btn-primary" onclick="startScanner()">開啟相機</button>
-                    <button class="btn btn-danger" onclick="stopScanner()">關閉相機</button>
+// --- 2. 下拉選單連動邏輯 ---
+function populateInboundDropdowns() {
+    const vSelect = document.getElementById('in-vCode');
+    vendors.forEach(v => vSelect.add(new Option(v.vName || v.vCode, v.vCode)));
+    
+    const cSelect = document.getElementById('in-color');
+    colors.forEach(c => cSelect.add(new Option(c.cName, c.cCode)));
+}
+
+function updateModelOptions() {
+    const vCode = document.getElementById('in-vCode').value;
+    const mSelect = document.getElementById('in-braId');
+    mSelect.innerHTML = '<option value="">選擇型號</option>';
+    models.filter(m => m.vCode === vCode).forEach(m => mSelect.add(new Option(m.braId, m.braId)));
+}
+
+// --- 3. 相機掃描控制 ---
+function startScanner() {
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: 250 },
+        (txt) => {
+            stopScanner();
+            playBeep();
+            handleScannedText(txt);
+        }
+    ).catch(err => alert("相機啟動失敗: " + err));
+}
+
+function stopScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => { html5QrCode = null; });
+    }
+}
+
+function handleScannedText(txt) {
+    // 支援格式: 廠商,型號,顏色,尺寸
+    const p = txt.split(',');
+    if (p.length >= 2) {
+        document.getElementById('in-vCode').value = p[0];
+        updateModelOptions();
+        document.getElementById('in-braId').value = p[1];
+        if(p[2]) document.getElementById('in-color').value = p[2];
+        if(p[3]) document.getElementById('in-size').value = p[3];
+        alert("掃描成功：" + p[1]);
+    }
+}
+
+// --- 4. 核心：雲端資料提交 (POST) ---
+async function submitInbound() {
+    const data = {
+        vCode: document.getElementById('in-vCode').value,
+        braId: document.getElementById('in-braId').value,
+        c: document.getElementById('in-color').value,
+        bz: document.getElementById('in-size').value,
+        qty: document.getElementById('in-qty').value,
+        type: 'IN'
+    };
+
+    if(!data.vCode || !data.braId || !data.qty) return alert("請填寫完整資訊");
+
+    const btn = document.getElementById('in-submit-btn');
+    btn.disabled = true;
+    btn.innerText = "雲端同步中...";
+
+    try {
+        // 使用 no-cors 模式發送至 Google Apps Script
+        await fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                action: "processTransaction",
+                ...data
+            })
+        });
+        
+        alert("入庫同步成功！");
+        await loadAllData(); // 重新載入最新雲端庫存
+        switchTab('stock', document.querySelector('.tab'));
+    } catch (err) {
+        alert("提交失敗: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "確認入庫同步";
+    }
+}
+
+function playBeep() {
+    const actx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = actx.createOscillator();
+    osc.connect(actx.destination);
+    osc.start();
+    osc.stop(actx.currentTime + 0.1);
+}
+</script>
+// --- 1. 庫存列表渲染 ---
+function renderStockList() {
+    const s = document.getElementById('stockSearch').value.toLowerCase();
+    const list = document.getElementById('stock-list');
+    let h = '';
+    
+    inventory.filter(i => (i.vCode + i.braId + (i.c||'')).toLowerCase().includes(s)).forEach(i => {
+        h += `
+            <div class="stock-item">
+                <div class="stock-info">
+                    <b>${i.braId}</b><br>
+                    <small>${i.vCode} | ${i.c} | ${i.bz}</small>
                 </div>
-                <hr>
-                <select id="in-vCode" onchange="updateModelOptions()"><option value="">選擇廠商</option></select>
-                <select id="in-braId"><option value="">選擇型號</option></select>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                    <select id="in-color"><option value="">顏色</option></select>
-                    <input type="text" id="in-size" placeholder="尺寸 (如 34B)">
+                <div class="stock-qty" style="color:${i.bq <= 0 ? 'var(--danger)' : 'var(--primary)'}">
+                    ${i.bq}
                 </div>
-                <input type="number" id="in-qty" placeholder="入庫數量" value="1">
-                <button id="in-submit-btn" class="btn btn-primary" onclick="handleInboundSubmit()">確認入庫同步</button>
+                <button class="btn" style="width:auto; padding:5px 10px; font-size:12px; background:#ddd;" 
+                    onclick="openLabelPreview('${i.vCode}','${i.braId}','${i.c}','${i.bz}')">標籤</button>
             </div>
         `;
-        document.getElementById('tab-in').innerHTML = h;
-        populateStaticDropdowns();
-    }
+    });
+    list.innerHTML = h || '<p style="text-align:center; padding:20px;">無資料</p>';
+    updateUIHeaders();
+}
 
-    // --- 2. 下拉選單連動 ---
-    function populateStaticDropdowns() {
-        const vSelect = document.getElementById('in-vCode');
-        const cSelect = document.getElementById('in-color');
-        
-        vendors.forEach(v => {
-            const opt = new Option(v.vName || v.vCode, v.vCode);
-            vSelect.add(opt);
-        });
-        
-        colors.forEach(c => {
-            const opt = new Option(c.cName || c.cCode, c.cCode);
-            cSelect.add(opt);
-        });
-    }
-
-    function updateModelOptions() {
-        const vCode = document.getElementById('in-vCode').value;
-        const mSelect = document.getElementById('in-braId');
-        mSelect.innerHTML = '<option value="">選擇型號</option>';
-        
-        models.filter(m => m.vCode === vCode).forEach(m => {
-            const opt = new Option(m.braId, m.braId);
-            mSelect.add(opt);
-        });
-    }
-
-    // --- 3. 相機掃描邏輯 ---
-    function startScanner() {
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "environment" }, 
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            (decodedText) => {
-                stopScanner();
-                playBeep();
-                parseScannedData(decodedText);
-            }
-        ).catch(err => alert("相機啟動失敗: " + err));
-    }
-
-    function stopScanner() {
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => { html5QrCode = null; });
-        }
-    }
-
-    function parseScannedData(text) {
-        // 假設標籤格式: 廠商,型號,顏色,尺寸
-        const parts = text.split(',');
-        if (parts.length >= 2) {
-            document.getElementById('in-vCode').value = parts[0];
-            updateModelOptions();
-            document.getElementById('in-braId').value = parts[1];
-            if(parts[2]) document.getElementById('in-color').value = parts[2];
-            if(parts[3]) document.getElementById('in-size').value = parts[3];
-            alert("掃描成功: " + parts[1]);
-        }
-    }
-
-    // --- 4. 提交資料到 GAS ---
-    async function handleInboundSubmit() {
-        const data = {
-            vCode: document.getElementById('in-vCode').value,
-            braId: document.getElementById('in-braId').value,
-            c: document.getElementById('in-color').value,
-            bz: document.getElementById('in-size').value,
-            qty: document.getElementById('in-qty').value,
-            type: 'IN'
-        };
-
-        if(!data.vCode || !data.braId || !data.qty) return alert("請填寫完整資訊");
-
-        const btn = document.getElementById('in-submit-btn');
-        btn.disabled = true;
-        btn.innerText = "同步中...";
-
-        try {
-            await fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors', // 重要：GAS 必須使用 no-cors
-                body: JSON.stringify({
-                    action: "processTransaction",
-                    ...data
-                })
-            });
-            
-            alert("同步指令已發送至雲端");
-            // 由於 no-cors 無法取得回傳，直接重新載入最新資料
-            await loadCloudData(); 
-            switchTab('stock', document.querySelector('.tab'));
-        } catch (err) {
-            alert("同步失敗: " + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "確認入庫同步";
-        }
-    }
-
-    function playBeep() {
-        const context = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = context.createOscillator();
-        osc.type = 'sine';
-        osc.connect(context.destination);
-        osc.start();
-        osc.stop(context.currentTime + 0.1);
-    }
-</script>
-<script>
-    // --- 1. 庫存列表渲染 ---
-    function renderStockList() {
-        const search = document.getElementById('stockSearch').value.toLowerCase();
-        const listDiv = document.getElementById('stock-list');
-        let h = '';
-        
-        // 過濾並顯示庫存
-        const filtered = inventory.filter(i => 
-            (i.vCode + i.braId).toLowerCase().includes(search)
-        );
-
-        if (filtered.length === 0) {
-            listDiv.innerHTML = '<p style="text-align:center; padding:20px;">無匹配資料</p>';
-            return;
-        }
-
-        filtered.forEach(i => {
-            h += `
-                <div class="stock-item">
-                    <div class="stock-info">
-                        <b>${i.braId}</b><br>
-                        <small>${i.vCode} | ${i.c || 'N/A'} | ${i.bz || 'F'}</small>
-                    </div>
-                    <div class="stock-qty" style="color:${i.bq <= 0 ? 'var(--danger)' : 'var(--primary)'}">
-                        ${i.bq}
-                    </div>
-                    <button class="btn" style="width:auto; padding:5px 10px; font-size:12px; background:#ddd;" 
-                        onclick="printSingleLabel('${i.vCode}','${i.braId}','${i.c}','${i.bz}')">標籤</button>
-                </div>
-            `;
-        });
-        listDiv.innerHTML = h;
-    }
-
-    // --- 2. 出貨結帳 UI 與邏輯 ---
-    function initOutboundUI() {
-        const h = `
-            <div class="card">
-                <h3>出貨結帳 (自動扣庫存)</h3>
-                <p style="font-size:13px; color:#666;">掃描商品標籤即可自動列入出貨清單</p>
-                <div id="out-scanner-placeholder" style="width:100%; height:100px; border:2px dashed #ccc; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="startScanner()">
-                    點擊開啟掃描儀
-                </div>
-                <div id="out-items-list" style="margin-top:15px;"></div>
-                <hr>
-                <button class="btn btn-accent" onclick="processCheckout()">確認結帳並扣除雲端庫存</button>
+// --- 2. 出貨結帳 UI ---
+function initOutboundUI() {
+    document.getElementById('tab-out').innerHTML = `
+        <div class="card">
+            <h3>出貨結帳</h3>
+            <div id="out-scanner" style="width:100%; height:100px; border:2px dashed #ccc; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="startScanner()">
+                點擊掃描商品
             </div>
-        `;
-        document.getElementById('tab-out').innerHTML = h;
-    }
+            <div id="out-list" style="margin-top:10px;"></div>
+            <button class="btn btn-primary" style="background:var(--success);" onclick="finalizeCloudSale()">確認結帳同步</button>
+        </div>
+    `;
+}
 
-    async function processCheckout() {
-        // 這邊僅為示範，實務上會從 out-items-list 抓取暫存清單
-        // 為了簡化，我們直接呼叫同步 API
-        const v = prompt("請輸入廠商代碼進行測試出貨:");
-        const m = prompt("請輸入型號:");
-        const q = prompt("出貨數量:", "1");
+async function finalizeCloudSale() {
+    const v = prompt("請輸入廠商代碼:");
+    const m = prompt("請輸入型號:");
+    const q = prompt("數量:", "1");
+    if(!v || !m) return;
 
-        if(!v || !m || !q) return;
-
-        try {
-            await fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    action: "processTransaction",
-                    vCode: v, braId: m, qty: q, type: 'OUT'
-                })
-            });
-            alert("出貨成功，雲端庫存已更新");
-            loadCloudData();
-        } catch(e) { alert("出貨失敗"); }
-    }
-
-    // --- 3. 銷售報表渲染 ---
-    function renderHistory() {
-        let h = `<h3>銷售歷史紀錄</h3><div class="card">`;
-        if(salesHistory.length === 0) h += '<p>尚無銷售紀錄</p>';
-        salesHistory.reverse().forEach(s => {
-            h += `
-                <div style="border-bottom:1px solid #eee; padding:8px 0; display:flex; justify-content:space-between;">
-                    <span>${s.日期.split('T')[0]} - ${s.品名}</span>
-                    <b>$${s.單價 || 0} x ${s.數量}</b>
-                </div>
-            `;
+    try {
+        await fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: "processTransaction", vCode: v, braId: m, qty: q, type: 'OUT' })
         });
-        h += `</div>`;
-        document.getElementById('tab-history').innerHTML = h;
-    }
+        alert("出貨已同步至雲端");
+        loadAllData();
+    } catch(e) { alert("同步失敗"); }
+}
 
-    // --- 4. 標籤列印功能 ---
-    function printSingleLabel(v, m, c, z) {
-        const qrSize = 100;
-        const canvas = document.createElement('canvas');
-        // 標籤內容格式：廠商,型號,顏色,尺寸
-        new QRious({
-            element: canvas,
-            value: `${v},${m},${c},${z}`,
-            size: qrSize
-        });
+// --- 3. 銷售紀錄渲染 ---
+function renderHistory() {
+    let h = `<h3>銷售紀錄 (雲端)</h3><div class="card">`;
+    salesHistory.reverse().forEach(s => {
+        h += `<div style="padding:8px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                <span>${s.日期.split('T')[0]} ${s.品名}</span>
+                <b>$${s.單價 || 0} x ${s.數量}</b>
+              </div>`;
+    });
+    document.getElementById('tab-history').innerHTML = h + `</div>`;
+}
 
-        const printWin = window.open('', '_blank');
-        printWin.document.write(`
-            <html><body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; font-family:sans-serif;">
-                <img src="${canvas.toDataURL()}" style="width:120px;">
-                <div style="margin-top:10px; font-weight:bold; font-size:14px;">${v} / ${m}</div>
-                <div style="font-size:12px;">${c} - ${z}</div>
-                <script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script>
-            </body></html>
-        `);
-        printWin.document.close();
-    }
+// --- 4. 標籤列印功能 (保留原本 0129-3 的 A4 設定概念) ---
+function openLabelPreview(v, m, c, z) {
+    const area = document.getElementById('print-canvas-area');
+    area.innerHTML = '';
+    document.getElementById('print-preview-zone').style.display = 'block';
+    
+    // 生成 QR Code 標籤
+    const div = document.createElement('div');
+    div.className = 'print-label';
+    const can = document.createElement('canvas');
+    const txt = document.createElement('div');
+    txt.innerHTML = `<b>${v} / ${m}</b><br>${c} ${z}`;
+    
+    div.appendChild(can);
+    div.appendChild(txt);
+    area.appendChild(div);
 
-    // --- 5. 總渲染入口 ---
-    function render() {
-        updateUIHeaders();
-        renderStockList();
-    }
-</script>
+    new QRious({
+        element: can,
+        value: `${v},${m},${c},${z}`,
+        size: 80
+    });
+}
 
-<script>
-    // 啟動系統
-    window.addEventListener('load', initSystem);
+// --- 5. 系統設定 UI ---
+function initSettingsUI() {
+    document.getElementById('tab-settings').innerHTML = `
+        <div class="card">
+            <h3>系統設定</h3>
+            <p>店名：<input type="text" value="${compName}" onchange="compName=this.value"></p>
+            <p>稅率：<input type="number" value="${taxRate}" onchange="taxRate=this.value">%</p>
+            <button class="btn btn-danger" onclick="sessionStorage.clear(); location.reload();">登出系統</button>
+        </div>
+    `;
+}
 </script>
 
 </body>
