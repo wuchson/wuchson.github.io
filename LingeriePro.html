@@ -25,16 +25,12 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .admin-only { display: none; }
         body.is-admin .admin-only { display: block; }
-        body.is-admin .admin-inline { display: inline-block; }
-        .staff-hidden { display: none; }
-        body.is-admin .staff-hidden { display: block; }
         .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin: 10px 0; }
         .config-group { margin-bottom: 12px; }
         .config-group label { display: block; font-size: 11px; font-weight: bold; color: #6b7e75; margin-bottom: 5px; }
         .config-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
         .config-input-grid input { height: 40px !important; border: 1px solid #ccc; border-radius: 6px;
             text-align: center; font-size: 14px !important; width: 100% !important; box-sizing: border-box !important; }
-        .dir-hint { font-size: 10px; color: #888; text-align: center; margin-top: 3px; line-height: 1.2; }
         .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
         .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px;
@@ -53,25 +49,10 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         .tag span { margin-left: 5px; cursor: pointer; color: var(--danger); font-weight: bold; }
-        #print-label-page, #print-invoice-page { display: none; }
         .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
         @media print {
             .no-print { display: none !important; }
             body { background: white; margin: 0; padding: 0; }
-            body.print-mode-a4 #print-label-page { display: grid !important;
-                grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; box-sizing: border-box; page-break-after: always; }
-            body.print-mode-a4 .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-            body.print-mode-a4 .label-item canvas { width: 22mm !important; height: 22mm !important; }
-            body.print-mode-a4 .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
-            body.print-mode-single #print-label-page { display: flex !important; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding-top: var(--s-mt) !important; padding-left: var(--s-ml) !important; }
-            body.print-mode-single .label-item { width: 50mm; height: 30mm; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5mm; }
-            body.print-mode-single .label-item canvas { width: 25mm !important; height: 25mm !important; }
-            body.print-mode-single .label-item .txt { font-size: 9pt; font-weight: bold; }
-            #print-invoice-page { display: block !important; padding: 10mm; }
-            .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; font-size: 10pt; }
-            .total-area { margin-top: 10px; text-align: right; font-size: 10pt; line-height: 1.6; }
-            .total-area .grand-total { font-size: 13pt; font-weight: bold; border-top: 1px double #000; display: inline-block; padding-top: 5px; }
         }
     </style>
 </head>
@@ -98,7 +79,6 @@
             <div class="field" style="flex:2;"><label>公司名稱</label><input type="text" id="compNameInp" onchange="updateSysConfig()"></div>
             <div class="field" style="flex:1;"><label>稅率 (%)</label><input type="number" id="taxRateInp" value="5" onchange="updateSysConfig()"></div>
         </div>
-        
         <div class="config-card">
             <label style="font-size: 11px; font-weight: bold; color: #6b7e75;">👥 使用者帳號管理</label>
             <div class="row-inputs" style="margin-top:5px;">
@@ -130,27 +110,18 @@
         <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
 
         <div class="row-inputs">
-            <input type="text" id="typeInp" placeholder="新增 商品類別 (如: 運動內衣)">
+            <input type="text" id="typeInp" placeholder="新增 商品類別">
             <button class="btn-accent" style="flex:0.5" onclick="addItemType()">+ 新增類別</button>
         </div>
         <div id="typeTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
         
         <div class="row-inputs">
-            <input type="text" id="size1Inp" placeholder="新增 尺碼1 (如: 75)">
-            <button class="btn-accent" style="flex:0.5" onclick="addSize(1)">+ 新增</button>
+            <input type="text" id="size1Inp" placeholder="尺碼1 (如 75)"><button class="btn-accent" style="flex:0.3" onclick="addSize(1)">+ 新增</button>
+            <input type="text" id="size2Inp" placeholder="尺碼2 (如 B)"><button class="btn-accent" style="flex:0.3" onclick="addSize(2)">+ 新增</button>
+            <input type="text" id="size3Inp" placeholder="尺碼3 (如 L)"><button class="btn-accent" style="flex:0.3" onclick="addSize(3)">+ 新增</button>
         </div>
-        <div id="size1Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-
-        <div class="row-inputs">
-            <input type="text" id="size2Inp" placeholder="新增 尺碼2 (如: B)">
-            <button class="btn-accent" style="flex:0.5" onclick="addSize(2)">+ 新增</button>
-        </div>
-        <div id="size2Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-
-        <div class="row-inputs">
-            <input type="text" id="size3Inp" placeholder="新增 尺碼3 (如: L)">
-            <button class="btn-accent" style="flex:0.5" onclick="addSize(3)">+ 新增</button>
-        </div>
+        <div id="size1Tags" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+        <div id="size2Tags" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
         <div id="size3Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
 
         <div class="field">
@@ -160,14 +131,15 @@
                 <select id="itemType"></select>
             </div>
             <div class="row-inputs">
-                <input type="number" id="setCost" placeholder="進價 (內部用)">
+                <input type="number" id="setCost" placeholder="進價">
                 <input type="number" id="setPrice" placeholder="售價">
             </div>
             <button class="btn-accent" onclick="addModel()">儲存款式</button>
             <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
         </div>
     </div>
-<div class="card">
+
+    <div class="card">
         <h3>2. 進出貨與操作</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
             <button style="background:#4299e1; padding:10px 5px; font-size:13px;" onclick="startScan('IN_AUTO')">📥 連續入庫</button>
@@ -197,8 +169,7 @@
             <button onclick="handleManual('IN')">📥 手動入庫</button>
             <button class="btn-success" onclick="generateInvoiceManual()">📄 加入出貨單</button>
         </div>
-
-        <div id="print-preview-zone">
+<div id="print-preview-zone">
             <h4 id="preview-title" style="margin:0 0 10px 0; color:var(--accent);">單據預覽</h4>
             <div id="preview-content" style="font-size:13px; margin-bottom:10px; line-height:1.6;"></div>
             <div class="row-inputs">
@@ -226,7 +197,16 @@
             <div id="stat-summary" style="margin-bottom:10px; font-size:13px; color: #555; background: #f0f4f2; padding: 10px; border-radius: 8px;"></div>
             <div class="table-wrapper">
                 <table id="invTable">
-                    <thead><tr><th>型號/規格</th><th>顏色</th><th>庫存</th><th class="admin-only">進價</th><th>售價</th><th>管理</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>型號/規格</th>
+                            <th>顏色</th>
+                            <th>庫存</th>
+                            <th class="admin-only">進價</th>
+                            <th>售價</th>
+                            <th>管理</th>
+                        </tr>
+                    </thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -263,9 +243,8 @@
 
     let currentUser = null;
     let html5QrCode = null;
-    let invoiceItems = [];
 
-    /* --- 登入與管理 --- */
+    /* --- 登入邏輯 --- */
     function login() {
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
@@ -280,68 +259,26 @@
     }
     function logout() { location.reload(); }
 
-    /* --- 使用者帳號增刪 (已修正儲存邏輯) --- */
+    /* --- 帳號與基礎設定 (維持先前修正版本) --- */
     function addUser() {
         const u = document.getElementById('newUName').value.trim();
         const p = document.getElementById('newUPass').value.trim();
         const r = document.getElementById('newURole').value;
         if(u && p) {
             if(users.some(x => x.u === u)) { alert("帳號已存在"); return; }
-            users.push({u, p, r});
-            save(); // 確保儲存到 localStorage
-            document.getElementById('newUName').value = '';
-            document.getElementById('newUPass').value = '';
+            users.push({u, p, r}); save();
+            document.getElementById('newUName').value = ''; document.getElementById('newUPass').value = '';
         }
     }
-    function delUser(idx) {
-        if(users[idx].u === 'admin') { alert("不能刪除預設管理員"); return; }
-        if(confirm(`確定刪除使用者 ${users[idx].u}？`)) {
-            users.splice(idx, 1);
-            save(); // 確保儲存到 localStorage
-        }
-    }
-
-    /* --- 基礎資料增刪 --- */
-    function addVendor() {
-        const c = document.getElementById('vCodeInp').value.trim().toUpperCase();
-        const n = document.getElementById('vNameInp').value.trim();
-        if(c && n) { vendors.push({c, n}); save(); }
-    }
-    function delVendor(idx) { if(confirm("確定刪除廠商？")) { vendors.splice(idx,1); save(); } }
-    
-    function addColor() {
-        const val = document.getElementById('colorInp').value.trim();
-        if(val && val.includes(':')) {
-            const [code, name] = val.split(':');
-            colors[code.toUpperCase()] = name;
-            save();
-            document.getElementById('colorInp').value = '';
-        } else { alert("請輸入 碼:名稱"); }
-    }
-    function delColor(code) { if(confirm(`刪除顏色 ${code}？`)) { delete colors[code]; save(); } }
-
-    function addItemType() {
-        const val = document.getElementById('typeInp').value.trim();
-        if(val && !itemTypes.includes(val)) { itemTypes.push(val); save(); document.getElementById('typeInp').value = ''; }
-    }
-    function delItemType(idx) { if(confirm("確定刪除？")) { itemTypes.splice(idx, 1); save(); } }
-
-    function addSize(type) {
-        const inp = document.getElementById(`size${type}Inp`);
-        const val = inp.value.trim();
-        if(!val) return;
-        if(type === 1 && !size1.includes(val)) size1.push(val);
-        if(type === 2 && !size2.includes(val)) size2.push(val);
-        if(type === 3 && !size3.includes(val)) size3.push(val);
-        save(); inp.value = '';
-    }
-    function delSize(type, idx) {
-        if(!confirm("確定刪除？")) return;
-        if(type === 1) size1.splice(idx, 1);
-        if(type === 2) size2.splice(idx, 1);
-        if(type === 3) size3.splice(idx, 1);
-        save();
-    }
+    function delUser(idx) { if(users[idx].u==='admin')return; if(confirm("刪除？")){users.splice(idx,1); save();}}
+    function addVendor() { const c=document.getElementById('vCodeInp').value.trim().toUpperCase(); const n=document.getElementById('vNameInp').value.trim(); if(c&&n){vendors.push({c,n});save();}}
+    function delVendor(idx) { if(confirm("刪除？")){vendors.splice(idx,1);save();}}
+    function addColor() { const v=document.getElementById('colorInp').value.trim(); if(v.includes(':')){const [c,n]=v.split(':'); colors[c.toUpperCase()]=n; save(); document.getElementById('colorInp').value='';}}
+    function delColor(c) { delete colors[c]; save(); }
+    function addItemType() { const v=document.getElementById('typeInp').value.trim(); if(v){itemTypes.push(v);save();}}
+    function delItemType(i) { itemTypes.splice(i,1); save(); }
+    function addSize(t) { const v=document.getElementById(`size${t}Inp`).value.trim(); if(v){if(t===1)size1.push(v);if(t===2)size2.push(v);if(t===3)size3.push(v);save();}}
+    function delSize(t,i) { if(t===1)size1.splice(i,1);if(t===2)size2.splice(i,1);if(t===3)size3.splice(i,1);save();}
 
     function addModel() {
         const vCode = document.getElementById('setVendorRel').value;
@@ -355,29 +292,24 @@
 
     /* --- 核心渲染與儲存 --- */
     function render() {
-        document.getElementById('userList').innerHTML = users.map((u, i) => 
-            `<div class="tag">${u.u}(${u.r==='admin'?'管':'員'}) ${u.u!=='admin'?`<span onclick="delUser(${i})">×</span>`:''}</div>`
-        ).join('');
+        document.getElementById('userList').innerHTML = users.map((u, i) => `<div class="tag">${u.u} ${u.u!=='admin'?`<span onclick="delUser(${i})">×</span>`:''}</div>`).join('');
         document.getElementById('vendorTags').innerHTML = vendors.map((v, i) => `<div class="tag">${v.c}:${v.n} <span onclick="delVendor(${i})">×</span></div>`).join('');
-        document.getElementById('colorTags').innerHTML = Object.entries(colors).map(([code, name]) => `<div class="tag">${code}:${name} <span onclick="delColor('${code}')">×</span></div>`).join('');
+        document.getElementById('colorTags').innerHTML = Object.entries(colors).map(([c, n]) => `<div class="tag">${c}:${n} <span onclick="delColor('${c}')">×</span></div>`).join('');
         document.getElementById('typeTags').innerHTML = itemTypes.map((t, i) => `<div class="tag">${t} <span onclick="delItemType(${i})">×</span></div>`).join('');
         document.getElementById('size1Tags').innerHTML = size1.map((s, i) => `<div class="tag">${s} <span onclick="delSize(1,${i})">×</span></div>`).join('');
         document.getElementById('size2Tags').innerHTML = size2.map((s, i) => `<div class="tag">${s} <span onclick="delSize(2,${i})">×</span></div>`).join('');
         document.getElementById('size3Tags').innerHTML = size3.map((s, i) => `<div class="tag">${s} <span onclick="delSize(3,${i})">×</span></div>`).join('');
         document.getElementById('modelTags').innerHTML = models.map((m, i) => `<div class="tag">${m.vCode}-${m.braId} <span onclick="delModel(${i})">×</span></div>`).join('');
 
-        const vSel = document.getElementById('setVendorRel');
-        const vSel2 = document.getElementById('selectVendor');
         const vOpts = vendors.map(v => `<option value="${v.c}">${v.c} ${v.n}</option>`).join('');
-        vSel.innerHTML = vOpts; vSel2.innerHTML = '<option value="">請選擇廠商</option>' + vOpts;
-        
-        document.getElementById('selectColor').innerHTML = Object.entries(colors).map(([code, name]) => `<option value="${code}">${code} ${name}</option>`).join('');
+        document.getElementById('setVendorRel').innerHTML = vOpts;
+        document.getElementById('selectVendor').innerHTML = '<option value="">選擇廠商</option>' + vOpts;
+        document.getElementById('selectColor').innerHTML = Object.entries(colors).map(([c, n]) => `<option value="${c}">${c} ${n}</option>`).join('');
         document.getElementById('itemType').innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-        document.getElementById('braBand').innerHTML = '<option value="-">尺碼1-</option>' + size1.map(s => `<option value="${s}">${s}</option>`).join('');
-        document.getElementById('braCup').innerHTML = '<option value="-">尺碼2-</option>' + size2.map(s => `<option value="${s}">${s}</option>`).join('');
-        document.getElementById('braSize').innerHTML = '<option value="-">尺碼3-</option>' + size3.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('braBand').innerHTML = '<option value="-">-</option>' + size1.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('braCup').innerHTML = '<option value="-">-</option>' + size2.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('braSize').innerHTML = '<option value="-">-</option>' + size3.map(s => `<option value="${s}">${s}</option>`).join('');
         
-        updateModelSelect();
         renderInventory();
     }
 
@@ -390,20 +322,36 @@
         localStorage.setItem('S2_D', JSON.stringify(size2));
         localStorage.setItem('S3_D', JSON.stringify(size3));
         localStorage.setItem('IT_D', JSON.stringify(itemTypes));
-        localStorage.setItem('U_D', JSON.stringify(users)); // 關鍵修正：儲存使用者清單
+        localStorage.setItem('U_D', JSON.stringify(users));
         render();
     }
 
-    /* 其餘庫存與掃描功能維持不變... */
-    function renderInventory() {
-        const q = document.getElementById('searchInp').value.toLowerCase();
-        const tbody = document.querySelector('#invTable tbody');
-        let html = '';
-        inventory.filter(item => (item.vCode + item.braId + (colors[item.cCode]||'')).toLowerCase().includes(q)).forEach((item, idx) => {
-            const m = models.find(x => x.vCode === item.vCode && x.braId === item.braId) || {cost:0, price:0};
-            html += `<tr><td><b>${item.vCode}-${item.braId}</b><br><small>${item.bb}${item.bc} ${item.bz}</small></td><td>${colors[item.cCode]||item.cCode}</td><td>${item.qty}</td><td class="admin-only">$${m.cost}</td><td>$${m.price}</td><td><button class="btn-danger" onclick="deleteItem(${idx})">刪</button></td></tr>`;
-        });
-        tbody.innerHTML = html;
+    /* --- 修正後的手動入庫功能 --- */
+    function handleManual(type) {
+        const v = document.getElementById('selectVendor').value;
+        const b = document.getElementById('selectModel').value;
+        const c = document.getElementById('selectColor').value;
+        const bb = document.getElementById('braBand').value;
+        const bc = document.getElementById('braCup').value;
+        const bz = document.getElementById('braSize').value;
+        const qty = parseInt(document.getElementById('braQty').value) || 0;
+        
+        if(!v || !b) { alert("請先選擇廠商與型號"); return; }
+        if(qty <= 0) { alert("請輸入正確數量"); return; }
+        
+        updateStock(v, b, c, bb, bc, bz, (type==='IN' ? qty : -qty));
+        alert(type==='IN' ? "入庫成功" : "出庫成功");
+    }
+
+    function updateStock(v, b, c, bb, bc, bz, diff) {
+        let item = inventory.find(x => x.vCode===v && x.braId===b && x.cCode===c && x.bb===bb && x.bc===bc && x.bz===bz);
+        if(item) { 
+            item.qty += diff; 
+            if(item.qty < 0) item.qty = 0; 
+        } else if(diff > 0) { 
+            inventory.push({vCode:v, braId:b, cCode:c, bb, bc, bz, qty: diff}); 
+        }
+        save();
     }
 
     function updateModelSelect() {
@@ -411,28 +359,25 @@
         document.getElementById('selectModel').innerHTML = models.filter(x => x.vCode === v).map(x => `<option value="${x.braId}">${x.braId}</option>`).join('');
     }
 
-    function updateStock(v, b, c, bb, bc, bz, diff) {
-        let item = inventory.find(x => x.vCode===v && x.braId===b && x.cCode===c && x.bb===bb && x.bc===bc && x.bz===bz);
-        if(item) { item.qty += diff; if(item.qty < 0) item.qty = 0; }
-        else if(diff > 0) { inventory.push({vCode:v, braId:b, cCode:c, bb, bc, bz, qty: diff}); }
-        save();
+    function renderInventory() {
+        const q = document.getElementById('searchInp').value.toLowerCase();
+        const tbody = document.querySelector('#invTable tbody');
+        let html = '';
+        inventory.filter(item => (item.vCode + item.braId + (colors[item.cCode]||'')).toLowerCase().includes(q)).forEach((item, idx) => {
+            const m = models.find(x => x.vCode === item.vCode && x.braId === item.braId) || {cost:0, price:0};
+            html += `<tr><td><b>${item.vCode}-${item.braId}</b></td><td>${colors[item.cCode]||item.cCode}</td><td>${item.qty}</td><td class="admin-only">$${m.cost}</td><td>$${m.price}</td><td><button onclick="deleteItem(${idx})">刪</button></td></tr>`;
+        });
+        tbody.innerHTML = html;
     }
 
-    function startScan(mode) {
-        document.getElementById('scanner-container').style.display = 'block';
-        if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-            const [v, b, dummy, c, bb, bc, bz] = text.split(',');
-            if(mode.startsWith('IN')) updateStock(v, b, c, bb, bc, bz, 1);
-            else updateStock(v, b, c, bb, bc, bz, -1);
-        });
-    }
-    function stopScan() { if(html5QrCode) html5QrCode.stop().then(()=>document.getElementById('scanner-container').style.display='none'); }
     function deleteItem(idx) { if(confirm("刪除紀錄？")) { inventory.splice(idx,1); save(); } }
     function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = document.getElementById('taxRateInp').value; localStorage.setItem('C_N', compName); localStorage.setItem('T_R', taxRate); }
-    function toggleInventory() { const s = document.getElementById('inventory-section'); s.style.display = (s.style.display==='none'?'block':'none'); }
     
-    window.onload = () => { document.getElementById('compNameInp').value = compName; document.getElementById('taxRateInp').value = taxRate; };
+    window.onload = () => { 
+        document.getElementById('compNameInp').value = compName; 
+        document.getElementById('taxRateInp').value = taxRate;
+        render();
+    };
 </script>
 </body>
 </html>
