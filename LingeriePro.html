@@ -8,16 +8,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         :root {
-            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
+            --primary: #8da399;
+            --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
             --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
             --s-mt: 0mm; --s-ml: 0mm;
         }
-        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif;
+            background: var(--bg); margin: 0; padding: 10px; color: #444; }
         .container { max-width: 600px; margin: auto; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px;
+            border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .admin-only { display: none; }
         body.is-admin .admin-only { display: block; }
         body.is-admin .admin-inline { display: inline-block; }
@@ -27,28 +32,34 @@
         .config-group { margin-bottom: 12px; }
         .config-group label { display: block; font-size: 11px; font-weight: bold; color: #6b7e75; margin-bottom: 5px; }
         .config-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-        .config-input-grid input { height: 40px !important; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 14px !important; width: 100% !important; box-sizing: border-box !important; }
+        .config-input-grid input { height: 40px !important; border: 1px solid #ccc; border-radius: 6px;
+            text-align: center; font-size: 14px !important; width: 100% !important; box-sizing: border-box !important; }
         .dir-hint { font-size: 10px; color: #888; text-align: center; margin-top: 3px; line-height: 1.2; }
         .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
         .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-        input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
-        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px;
+            border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
+        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px;
+            background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
         .btn-accent { background: var(--accent); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
-        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
+        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
         #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
+        .tag span { margin-left: 5px; cursor: pointer; color: var(--danger); font-weight: bold; }
         #print-label-page, #print-invoice-page { display: none; }
         .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
         @media print {
             .no-print { display: none !important; }
             body { background: white; margin: 0; padding: 0; }
-            body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; box-sizing: border-box; page-break-after: always; }
+            body.print-mode-a4 #print-label-page { display: grid !important;
+                grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; box-sizing: border-box; page-break-after: always; }
             body.print-mode-a4 .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
             body.print-mode-a4 .label-item canvas { width: 22mm !important; height: 22mm !important; }
             body.print-mode-a4 .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
@@ -74,11 +85,11 @@
         <button onclick="login()">登入系統</button>
     </div>
 </div>
-
 <div class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span id="userStatus" style="font-size: 14px; color: #666;"></span>
-        <button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
+        <button onclick="logout()" 
+        style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
     </div>
 
     <div class="card admin-only">
@@ -101,7 +112,8 @@
             <div id="userList" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
         </div>
     </div>
-<div class="card admin-only">
+
+    <div class="card admin-only">
         <h3>1. 基礎設定</h3>
         <div class="row-inputs">
             <input type="text" id="vCodeInp" placeholder="廠商代碼">
@@ -240,20 +252,16 @@
     let taxRate = parseFloat(localStorage.getItem('T_R')) || 5;
     let salesHistory = JSON.parse(localStorage.getItem('S_H')) || [];
     
-    // 尺碼初始化 [cite: 96]
     let size1 = JSON.parse(localStorage.getItem('S1_D')) || ["70", "75", "80", "85"];
     let size2 = JSON.parse(localStorage.getItem('S2_D')) || ["A", "B", "C", "D"];
     let size3 = JSON.parse(localStorage.getItem('S3_D')) || ["S", "M", "L", "XL"];
-
-    // 商品類別初始化 (新增功能)
     let itemTypes = JSON.parse(localStorage.getItem('IT_D')) || ["內衣內褲套組", "單內衣", "單內褲", "連身塑身衣", "半身塑身衣", "塑身褲", "保暖衣", "保暖褲", "睡衣", "睡褲", "情趣內衣", "情趣內褲", "男內衣", "男內褲", "男保暖衣", "男保暖褲"];
 
     let currentUser = null;
     let html5QrCode = null;
     let invoiceItems = [];
-    let currentPrintMode = 'A4';
 
-    /* --- 登入與使用者管理 --- */
+    /* --- 登入與管理 --- */
     function login() {
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
@@ -263,23 +271,12 @@
             document.getElementById('login-overlay').style.display = 'none';
             if(found.r === 'admin') document.body.classList.add('is-admin');
             document.getElementById('userStatus').innerText = `目前使用者：${u} (${found.r==='admin'?'管理員':'員工'})`;
-            initPrintCfg();
             render();
         } else { alert("帳號或密碼錯誤"); }
     }
     function logout() { location.reload(); }
-    function addUser() {
-        const u = document.getElementById('newUName').value.trim();
-        const p = document.getElementById('newUPass').value.trim();
-        const r = document.getElementById('newURole').value;
-        if(!u || !p) return;
-        users.push({u, p, r});
-        localStorage.setItem('U_D', JSON.stringify(users));
-        render();
-    }
-    function delUser(idx) { if(confirm("刪除此帳號？")) { users.splice(idx,1); localStorage.setItem('U_D', JSON.stringify(users)); render(); } }
 
-    /* --- 基礎資料增刪 (含類別自定義) --- */
+    /* --- 基礎資料增刪 --- */
     function addVendor() {
         const c = document.getElementById('vCodeInp').value.trim().toUpperCase();
         const n = document.getElementById('vNameInp').value.trim();
@@ -298,21 +295,11 @@
     }
     function delColor(code) { if(confirm(`刪除顏色 ${code}？`)) { delete colors[code]; save(); } }
 
-    // 新增商品類別功能
     function addItemType() {
         const val = document.getElementById('typeInp').value.trim();
-        if(val && !itemTypes.includes(val)) {
-            itemTypes.push(val);
-            save();
-            document.getElementById('typeInp').value = '';
-        }
+        if(val && !itemTypes.includes(val)) { itemTypes.push(val); save(); document.getElementById('typeInp').value = ''; }
     }
-    function delItemType(idx) {
-        if(confirm("確定刪除此類別？")) {
-            itemTypes.splice(idx, 1);
-            save();
-        }
-    }
+    function delItemType(idx) { if(confirm("確定刪除此類別？")) { itemTypes.splice(idx, 1); save(); } }
 
     function addSize(type) {
         const inp = document.getElementById(`size${type}Inp`);
@@ -321,8 +308,7 @@
         if(type === 1 && !size1.includes(val)) size1.push(val);
         if(type === 2 && !size2.includes(val)) size2.push(val);
         if(type === 3 && !size3.includes(val)) size3.push(val);
-        save();
-        inp.value = '';
+        save(); inp.value = '';
     }
     function delSize(type, idx) {
         if(!confirm("確定刪除此規格？")) return;
@@ -332,86 +318,7 @@
         save();
     }
 
-    /* --- 核心渲染邏輯 --- */
-    function render() {
-        document.getElementById('userList').innerHTML = users.map((u, i) => `<div class="tag">${u.u}(${u.r==='admin'?'管':'員'}) ${u.u!=='admin'?`<span onclick="delUser(${i})">×</span>`:''}</div>`).join('');
-        document.getElementById('vendorTags').innerHTML = vendors.map((v, i) => `<div class="tag">${v.c}:${v.n} <span onclick="delVendor(${i})">×</span></div>`).join('');
-        document.getElementById('colorTags').innerHTML = Object.entries(colors).map(([code, name]) => `<div class="tag">${code}:${name} <span onclick="delColor('${code}')">×</span></div>`).join('');
-        
-        // 渲染商品類別標籤 (新)
-        document.getElementById('typeTags').innerHTML = itemTypes.map((t, i) => `<div class="tag">${t} <span onclick="delItemType(${i})">×</span></div>`).join('');
-        
-        document.getElementById('size1Tags').innerHTML = size1.map((s, i) => `<div class="tag">${s} <span onclick="delSize(1,${i})">×</span></div>`).join('');
-        document.getElementById('size2Tags').innerHTML = size2.map((s, i) => `<div class="tag">${s} <span onclick="delSize(2,${i})">×</span></div>`).join('');
-        document.getElementById('size3Tags').innerHTML = size3.map((s, i) => `<div class="tag">${s} <span onclick="delSize(3,${i})">×</span></div>`).join('');
-
-        const vSel = document.getElementById('setVendorRel');
-        const vSel2 = document.getElementById('selectVendor');
-        const vOpts = vendors.map(v => `<option value="${v.c}">${v.c} ${v.n}</option>`).join('');
-        vSel.innerHTML = vOpts; vSel2.innerHTML = '<option value="">請選擇廠商</option>' + vOpts;
-
-        const cSel = document.getElementById('selectColor');
-        cSel.innerHTML = Object.entries(colors).map(([code, name]) => `<option value="${code}">${code} ${name}</option>`).join('');
-
-        // 動態渲染商品類別下拉選單 (新)
-        document.getElementById('itemType').innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-
-        document.getElementById('braBand').innerHTML = '<option value="-">尺碼1-</option>' + size1.map(s => `<option value="${s}">${s}</option>`).join('');
-        document.getElementById('braCup').innerHTML = '<option value="-">尺碼2-</option>' + size2.map(s => `<option value="${s}">${s}</option>`).join('');
-        document.getElementById('braSize').innerHTML = '<option value="-">尺碼3-</option>' + size3.map(s => `<option value="${s}">${s}</option>`).join('');
-        document.getElementById('modelTags').innerHTML = models.map(m => `<div class="tag">${m.vCode}-${m.braId}</div>`).join('');
-        
-        renderInventory();
-    }
-
-    function renderInventory() {
-        const q = document.getElementById('searchInp').value.toLowerCase();
-        const tbody = document.querySelector('#invTable tbody');
-        let html = '';
-        let totalQty = 0;
-        let totalCost = 0;
-        let totalPrice = 0;
-
-        inventory.filter(item => {
-            const colorName = colors[item.cCode] || item.cCode;
-            const searchStr = `${item.vCode} ${item.braId} ${colorName} ${item.bb} ${item.bc} ${item.bz}`.toLowerCase();
-            return searchStr.includes(q);
-        }).forEach((item, idx) => {
-            const m = models.find(x => x.vCode === item.vCode && x.braId === item.braId) || {cost:0, price:0};
-            totalQty += item.qty;
-            totalCost += (m.cost * item.qty);
-            totalPrice += (m.price * item.qty);
-            html += `<tr>
-                <td><b>${item.vCode}-${item.braId}</b><br><small>${item.bb}${item.bc} ${item.bz}</small></td>
-                <td>${colors[item.cCode] || item.cCode}</td>
-                <td>
-                    <button class="qty-btn" onclick="adjQty(${idx},-1)">-</button>
-                    <span style="display:inline-block; width:30px; text-align:center;">${item.qty}</span>
-                    <button class="qty-btn" onclick="adjQty(${idx},1)">+</button>
-                </td>
-                <td class="admin-only">$${m.cost}</td>
-                <td>$${m.price}</td>
-                <td><button class="btn-danger" style="padding:5px; font-size:11px;" onclick="deleteItem(${idx})">刪</button></td>
-            </tr>`;
-        });
-        tbody.innerHTML = html;
-        document.getElementById('stat-summary').innerHTML = `總庫存：<b>${totalQty}</b> 件 | ${currentUser.r==='admin'?`總成本：<b>$${totalCost}</b> | `:''}預估總售價：<b>$${totalPrice}</b>`;
-    }
-
-    function save() {
-        localStorage.setItem('V_D', JSON.stringify(vendors));
-        localStorage.setItem('M_D', JSON.stringify(models));
-        localStorage.setItem('I_D', JSON.stringify(inventory));
-        localStorage.setItem('C_D', JSON.stringify(colors));
-        localStorage.setItem('S_H', JSON.stringify(salesHistory));
-        localStorage.setItem('S1_D', JSON.stringify(size1));
-        localStorage.setItem('S2_D', JSON.stringify(size2));
-        localStorage.setItem('S3_D', JSON.stringify(size3));
-        localStorage.setItem('IT_D', JSON.stringify(itemTypes)); // 儲存類別
-        render();
-    }
-
-    /* --- 其餘邏輯維持原樣 --- */
+    /* --- 款式管理 (新增刪除功能) --- */
     function addModel() {
         const vCode = document.getElementById('setVendorRel').value;
         const braId = document.getElementById('setBraId').value.trim().toUpperCase();
@@ -420,66 +327,127 @@
         const type = document.getElementById('itemType').value;
         if(vCode && braId) { models.push({vCode, braId, cost, price, type}); save(); }
     }
+    // 您要求的刪除功能
+    function delModel(idx) { if(confirm("刪除此款式？")) { models.splice(idx, 1); save(); } }
+
+    /* --- 核心渲染 --- */
+    function render() {
+        document.getElementById('userList').innerHTML = users.map((u, i) => `<div class="tag">${u.u}(${u.r==='admin'?'管':'員'}) ${u.u!=='admin'?`<span onclick="delUser(${i})">×</span>`:''}</div>`).join('');
+        document.getElementById('vendorTags').innerHTML = vendors.map((v, i) => `<div class="tag">${v.c}:${v.n} <span onclick="delVendor(${i})">×</span></div>`).join('');
+        document.getElementById('colorTags').innerHTML = Object.entries(colors).map(([code, name]) => `<div class="tag">${code}:${name} <span onclick="delColor('${code}')">×</span></div>`).join('');
+        document.getElementById('typeTags').innerHTML = itemTypes.map((t, i) => `<div class="tag">${t} <span onclick="delItemType(${i})">×</span></div>`).join('');
+        document.getElementById('size1Tags').innerHTML = size1.map((s, i) => `<div class="tag">${s} <span onclick="delSize(1,${i})">×</span></div>`).join('');
+        document.getElementById('size2Tags').innerHTML = size2.map((s, i) => `<div class="tag">${s} <span onclick="delSize(2,${i})">×</span></div>`).join('');
+        document.getElementById('size3Tags').innerHTML = size3.map((s, i) => `<div class="tag">${s} <span onclick="delSize(3,${i})">×</span></div>`).join('');
+        
+        // 款式標籤加入刪除按鈕
+        document.getElementById('modelTags').innerHTML = models.map((m, i) => `<div class="tag">${m.vCode}-${m.braId} <span onclick="delModel(${i})">×</span></div>`).join('');
+
+        const vSel = document.getElementById('setVendorRel');
+        const vSel2 = document.getElementById('selectVendor');
+        const vOpts = vendors.map(v => `<option value="${v.c}">${v.c} ${v.n}</option>`).join('');
+        vSel.innerHTML = vOpts; vSel2.innerHTML = '<option value="">請選擇廠商</option>' + vOpts;
+        
+        document.getElementById('selectColor').innerHTML = Object.entries(colors).map(([code, name]) => `<option value="${code}">${code} ${name}</option>`).join('');
+        document.getElementById('itemType').innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        document.getElementById('braBand').innerHTML = '<option value="-">尺碼1-</option>' + size1.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('braCup').innerHTML = '<option value="-">尺碼2-</option>' + size2.map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('braSize').innerHTML = '<option value="-">尺碼3-</option>' + size3.map(s => `<option value="${s}">${s}</option>`).join('');
+        
+        updateModelSelect();
+        renderInventory();
+    }
+
+    function renderInventory() {
+        const q = document.getElementById('searchInp').value.toLowerCase();
+        const tbody = document.querySelector('#invTable tbody');
+        let html = '';
+        let tQ = 0, tC = 0, tP = 0;
+
+        inventory.filter(item => {
+            const cn = colors[item.cCode] || item.cCode;
+            return `${item.vCode} ${item.braId} ${cn} ${item.bb} ${item.bc} ${item.bz}`.toLowerCase().includes(q);
+        }).forEach((item, idx) => {
+            const m = models.find(x => x.vCode === item.vCode && x.braId === item.braId) || {cost:0, price:0};
+            tQ += item.qty; tC += (m.cost * item.qty); tP += (m.price * item.qty);
+            html += `<tr><td><b>${item.vCode}-${item.braId}</b><br><small>${item.bb}${item.bc} ${item.bz}</small></td><td>${colors[item.cCode]||item.cCode}</td><td><button class="qty-btn" onclick="adjQty(${idx},-1)">-</button> ${item.qty} <button class="qty-btn" onclick="adjQty(${idx},1)">+</button></td><td class="admin-only">$${m.cost}</td><td>$${m.price}</td><td><button class="btn-danger" style="padding:5px; font-size:11px;" onclick="deleteItem(${idx})">刪</button></td></tr>`;
+        });
+        tbody.innerHTML = html;
+        document.getElementById('stat-summary').innerHTML = `總庫存：<b>${tQ}</b> | ${currentUser.r==='admin'?`總成本：<b>$${tC}</b> | `:''}預估總售價：<b>$${tP}</b>`;
+    }
+
+    function save() {
+        localStorage.setItem('V_D', JSON.stringify(vendors));
+        localStorage.setItem('M_D', JSON.stringify(models));
+        localStorage.setItem('I_D', JSON.stringify(inventory));
+        localStorage.setItem('C_D', JSON.stringify(colors));
+        localStorage.setItem('S1_D', JSON.stringify(size1));
+        localStorage.setItem('S2_D', JSON.stringify(size2));
+        localStorage.setItem('S3_D', JSON.stringify(size3));
+        localStorage.setItem('IT_D', JSON.stringify(itemTypes));
+        render();
+    }
+
     function updateModelSelect() {
         const v = document.getElementById('selectVendor').value;
-        const mSel = document.getElementById('selectModel');
-        mSel.innerHTML = models.filter(x => x.vCode === v).map(x => `<option value="${x.braId}">${x.braId} (${x.type})</option>`).join('');
+        document.getElementById('selectModel').innerHTML = models.filter(x => x.vCode === v).map(x => `<option value="${x.braId}">${x.braId} (${x.type})</option>`).join('');
     }
+
+    function updateStock(v, b, c, bb, bc, bz, diff) {
+        let item = inventory.find(x => x.vCode===v && x.braId===b && x.cCode===c && x.bb===bb && x.bc===bc && x.bz===bz);
+        if(item) { item.qty += diff; if(item.qty < 0) item.qty = 0; }
+        else if(diff > 0) { inventory.push({vCode:v, braId:b, cCode:c, bb, bc, bz, qty: diff}); }
+        save();
+    }
+
     function handleManual(type) {
-        const vCode = document.getElementById('selectVendor').value;
-        const braId = document.getElementById('selectModel').value;
-        const cCode = document.getElementById('selectColor').value;
+        const v = document.getElementById('selectVendor').value;
+        const b = document.getElementById('selectModel').value;
+        const c = document.getElementById('selectColor').value;
         const bb = document.getElementById('braBand').value;
         const bc = document.getElementById('braCup').value;
         const bz = document.getElementById('braSize').value;
         const qty = parseInt(document.getElementById('braQty').value) || 0;
-        if(!vCode || !braId) { alert("請先選擇廠商與型號"); return; }
-        updateStock(vCode, braId, cCode, bb, bc, bz, (type==='IN'?qty:-qty));
+        if(!v || !b) { alert("請先選擇廠商與型號"); return; }
+        updateStock(v, b, c, bb, bc, bz, (type==='IN'?qty:-qty));
     }
-    function updateStock(vCode, braId, cCode, bb, bc, bz, diff) {
-        let item = inventory.find(x => x.vCode===vCode && x.braId===braId && x.cCode===cCode && x.bb===bb && x.bc===bc && x.bz===bz);
-        if(item) { item.qty += diff; if(item.qty < 0) item.qty = 0; }
-        else if(diff > 0) { inventory.push({vCode, braId, cCode, bb, bc, bz, qty: diff}); }
-        save();
-    }
+
     function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
         if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
             const [v, b, dummy, c, bb, bc, bz] = text.split(',');
-            if(mode === 'IN_AUTO') { updateStock(v, b, c, bb, bc, bz, 1); showFeedback(); }
-            else if(mode === 'OUT_AUTO') { updateStock(v, b, c, bb, bc, bz, -1); showFeedback(); }
-            else if(mode === 'IN_MANUAL') { 
+            if(mode === 'IN_AUTO') updateStock(v, b, c, bb, bc, bz, 1);
+            else if(mode === 'OUT_AUTO') updateStock(v, b, c, bb, bc, bz, -1);
+            else if(mode === 'IN_MANUAL') {
                 document.getElementById('selectVendor').value = v; updateModelSelect();
-                document.getElementById('selectModel').value = b;
-                document.getElementById('selectColor').value = c;
-                document.getElementById('braBand').value = bb;
-                document.getElementById('braCup').value = bc;
-                document.getElementById('braSize').value = bz;
+                document.getElementById('selectModel').value = b; document.getElementById('selectColor').value = c;
+                document.getElementById('braBand').value = bb; document.getElementById('braCup').value = bc; document.getElementById('braSize').value = bz;
                 stopScan();
             }
         });
     }
     function stopScan() { if(html5QrCode) html5QrCode.stop().then(()=>document.getElementById('scanner-container').style.display='none'); }
-    function showFeedback() { const fb = document.getElementById('scan-feedback'); fb.style.display='block'; setTimeout(()=>fb.style.display='none', 1000); }
     function adjQty(i, d) { inventory[i].qty += d; if(inventory[i].qty<0) inventory[i].qty=0; save(); }
     function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
-    function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = document.getElementById('taxRateInp').value; save(); }
-    function toggleInventory() { const s = document.getElementById('inventory-section'); const icon = document.getElementById('toggleIcon'); if(s.style.display==='none'){s.style.display='block'; icon.innerText='▼';} else {s.style.display='none'; icon.innerText='▶';} }
-    function exportData() { 
-        const today = new Date().toISOString().split('T')[0];
-        const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName, tr:taxRate, sh:salesHistory, s1:size1, s2:size2, s3:size3, it:itemTypes})], {type:"application/json"}); 
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup_${today}.json`; a.click(); 
+    function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = document.getElementById('taxRateInp').value; localStorage.setItem('C_N', compName); localStorage.setItem('T_R', taxRate); }
+    function toggleInventory() { const s = document.getElementById('inventory-section'); s.style.display = (s.style.display==='none'?'block':'none'); }
+    
+    function exportData() {
+        const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, cn:compName, tr:taxRate, s1:size1, s2:size2, s3:size3, it:itemTypes})], {type:"application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
     }
     function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) { 
-        const f = e.target.files[0]; if(!f) return; const r = new FileReader();
-        r.onload = (ev) => { 
-            try { 
-                const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; taxRate=d.tr; size1=d.s1||[]; size2=d.s2||[]; size3=d.s3||[]; itemTypes=d.it||itemTypes;
-                save(); alert("還原成功"); 
-            } catch(e){alert("失敗");} 
-        }; r.readAsText(f); 
+    function importData(e) {
+        const f = e.target.files[0]; if(!f) return;
+        const r = new FileReader();
+        r.onload = (ev) => {
+            try {
+                const d = JSON.parse(ev.target.result);
+                vendors=d.v; models=d.m; inventory=d.i; colors=d.c; compName=d.cn; taxRate=d.tr; size1=d.s1||[]; size2=d.s2||[]; size3=d.s3||[]; itemTypes=d.it||itemTypes;
+                save(); alert("還原成功");
+            } catch(err){alert("失敗");}
+        }; r.readAsText(f);
     }
     window.onload = () => { document.getElementById('compNameInp').value = compName; document.getElementById('taxRateInp').value = taxRate; };
 </script>
