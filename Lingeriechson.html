@@ -277,7 +277,7 @@
         loadPrintConfigs();
         showLoading(true);
         // 如果有 URL，嘗試從雲端抓取初始化資料
-        if (GAS_URL !== '您的_GOOGLE_APPS_SCRIPT_網址') {
+        if (GAS_URL !== 'https://script.google.com/macros/s/AKfycby1N4MJ-Mn0Ctn_K7ZDKMShntspL24UkiRZN7f1DE0Fd6Dgydp_6YwS1DCsOhZ8Fpw8/exec') {
             await syncFromCloud();
         } else {
             console.warn("尚未設定 GAS_URL，目前為單機模式測試");
