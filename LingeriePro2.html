@@ -8,64 +8,168 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         :root {
-            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
-            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm; --s-mt: 0mm; --s-ml: 0mm;
+            --primary: #8da399;
+            --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
+            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
+            --s-mt: 0mm; --s-ml: 0mm;
         }
-        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif;
+        background: var(--bg); margin: 0; padding: 10px; color: #444; }
         .container { max-width: 600px; margin: auto; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px;
+        border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
+        
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
         .admin-only { display: none; }
         body.is-admin .admin-only { display: block; }
+        body.is-admin .admin-inline { display: inline-block; }
+        .staff-hidden { display: none; }
+        body.is-admin .staff-hidden { display: block; }
+
         .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin: 10px 0; }
+        .config-group { margin-bottom: 12px; }
+        .config-group label { display: block; font-size: 11px; font-weight: bold; color: #6b7e75; margin-bottom: 5px; }
+        .config-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+        .config-input-grid input { height: 40px !important; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 14px !important; width: 100% !important; box-sizing: border-box !important; }
+        .dir-hint { font-size: 10px; color: #888; text-align: center; margin-top: 3px; line-height: 1.2; }
+        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
         .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
         button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
         .btn-accent { background: var(--accent); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
-        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
+        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
+        #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
-        @media print { .no-print { display: none !important; } #print-label-page { display: grid !important; } }
+        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
+        #print-label-page, #print-invoice-page { display: none; }
+        .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; margin: 0; padding: 0; }
+            body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; box-sizing: border-box; page-break-after: always; }
+            body.print-mode-a4 .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+            body.print-mode-a4 .label-item canvas { width: 22mm !important; height: 22mm !important; }
+            body.print-mode-a4 .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
+            body.print-mode-single #print-label-page { display: flex !important; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding-top: var(--s-mt) !important; padding-left: var(--s-ml) !important; }
+            body.print-mode-single .label-item { width: 50mm; height: 30mm; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5mm; }
+            body.print-mode-single .label-item canvas { width: 25mm !important; height: 25mm !important; }
+            body.print-mode-single .label-item .txt { font-size: 9pt; font-weight: bold; }
+            #print-invoice-page { display: block !important; padding: 10mm; }
+            .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; font-size: 10pt; }
+            .total-area { margin-top: 10px; text-align: right; font-size: 10pt; line-height: 1.6; }
+            .total-area .grand-total { font-size: 13pt; font-weight: bold; border-top: 1px double #000; display: inline-block; padding-top: 5px; }
+        }
     </style>
 </head>
 <body>
+
 <div id="login-overlay">
     <div class="login-card">
-        <h2 style="text-align:center; color:var(--primary); margin-top:0;">系統登入</h2>
-        <div class="field"><label>帳號</label><input type="text" id="loginUser"></div>
-        <div class="field"><label>密碼</label><input type="password" id="loginPass"></div>
-        <button onclick="login()">登入系統</button>
+        [cite_start]<h2 style="text-align:center; color:var(--primary); margin-top:0;">系統登入 [cite: 1, 9]</h2>
+        [cite_start]<div class="field"><label>帳號</label><input type="text" id="loginUser"></div> [cite: 107]
+        [cite_start]<div class="field"><label>密碼</label><input type="password" id="loginPass"></div> [cite: 108]
+        [cite_start]<button onclick="login()">登入系統</button> [cite: 107]
     </div>
 </div>
+
 <div class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span id="userStatus" style="font-size: 14px; color: #666;"></span>
-        <button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
+        [cite_start]<span id="userStatus" style="font-size: 14px; color: #666;"></span> [cite: 64, 110]
+        [cite_start]<button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button> [cite: 64, 112]
     </div>
 
     <div class="card admin-only">
-        <h3>1. 基礎與尺碼設定</h3>
+        <h3>0. [cite_start]系統環境設定 [cite: 65]</h3>
         <div class="row-inputs">
-            <input type="text" id="vCodeInp" placeholder="廠商代碼">
-            <input type="text" id="vNameInp" placeholder="廠商名稱">
-            <button onclick="addVendor()" style="flex:0.5">+ 廠商</button>
+            [cite_start]<div class="field" style="flex:2;"><label>公司名稱</label><input type="text" id="compNameInp" onchange="updateSysConfig()"></div> [cite: 65, 100]
+            [cite_start]<div class="field" style="flex:1;"><label>稅率 (%)</label><input type="number" id="taxRateInp" value="5" onchange="updateSysConfig()"></div> [cite: 65, 101]
         </div>
-        <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+        <div class="config-card">
+            [cite_start]<label style="font-size: 11px; font-weight: bold; color: #6b7e75;">👥 使用者帳號管理 [cite: 66]</label>
+            <div class="row-inputs" style="margin-top:5px;">
+                [cite_start]<input type="text" id="newUName" placeholder="帳號" style="height:35px; font-size:13px;"> [cite: 66]
+                [cite_start]<input type="text" id="newUPass" placeholder="密碼" style="height:35px; font-size:13px;"> [cite: 66]
+                [cite_start]<select id="newURole" style="height:35px; font-size:13px; flex:0.6"> [cite: 66]
+                    [cite_start]<option value="staff">員工</option> [cite: 67]
+                    [cite_start]<option value="admin">管理員</option> [cite: 67]
+                </select>
+            </div>
+            [cite_start]<button onclick="addUser()" class="btn-success" style="padding: 8px; font-size: 13px;">新增使用者</button> [cite: 68]
+            [cite_start]<div id="userList" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 5px;"></div> [cite: 69]
+        </div>
+    </div>
+
+    <div class="card admin-only">
+        <h3>1. [cite_start]基礎設定 [cite: 70]</h3>
+        <div class="row-inputs">
+            [cite_start]<input type="text" id="vCodeInp" placeholder="廠商代碼"> [cite: 70, 158]
+            [cite_start]<input type="text" id="vNameInp" placeholder="廠商名稱"> [cite: 70, 158]
+        </div>
+        [cite_start]<button onclick="addVendor()">+ 新增廠商</button> [cite: 70, 159]
+        [cite_start]<div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div> [cite: 70, 129]
+        
+        [cite_start]<hr style="border:0; border-top:1px solid #eee; margin:15px 0;"> [cite: 71]
+
+        <div class="row-inputs">
+            [cite_start]<input type="text" id="colorInp" placeholder="代碼:顏色 (如 BLK:黑色)"> [cite: 72, 117]
+            [cite_start]<button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增顏色</button> [cite: 72, 117]
+        </div>
+        [cite_start]<div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div> [cite: 72, 128]
+
+        <div class="row-inputs">
+            [cite_start]<input type="text" id="typeInp" placeholder="代碼:類別 (如 BRA:內衣)"> [cite: 73, 113]
+            [cite_start]<button class="btn-accent" style="flex:0.5; background:#6b7e75;" onclick="addItemType()">+ 新增類別</button> [cite: 73, 113]
+        </div>
+        [cite_start]<div id="typeTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div> [cite: 74, 126]
+        
+        [cite_start]<hr style="border:0; border-top:1px solid #eee; margin:15px 0;"> [cite: 75]
 
         <div class="config-card">
-            <label style="font-size: 11px; font-weight: bold; color: #6b7e75;">📏 尺碼選單管理</label>
-            <div class="row-inputs"><input type="text" id="sz1Inp" placeholder="新增尺碼1"><button onclick="addSizeSetting(1)" style="padding:5px; flex:0.3">+</button></div>
-            <div id="sz1Tags" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;"></div>
-            <div class="row-inputs"><input type="text" id="sz2Inp" placeholder="新增尺碼2"><button onclick="addSizeSetting(2)" style="padding:5px; flex:0.3">+</button></div>
-            <div id="sz2Tags" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;"></div>
-            <div class="row-inputs"><input type="text" id="sz3Inp" placeholder="新增尺碼3"><button onclick="addSizeSetting(3)" style="padding:5px; flex:0.3">+</button></div>
-            <div id="sz3Tags" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
+            <label style="font-size: 11px; font-weight: bold; color: #6b7e75;">📏 尺碼選單管理 (輸入後按新增)</label>
+            <div class="row-inputs" style="margin-top:5px;">
+                <input type="text" id="s1Inp" placeholder="尺碼1 (如 32)" style="height:35px; font-size:13px;">
+                <button class="btn-accent" style="flex:0.3; padding:5px;" onclick="addSize(1)">+1</button>
+            </div>
+            <div id="s1Tags" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
+
+            <div class="row-inputs">
+                <input type="text" id="s2Inp" placeholder="尺碼2 (如 B)" style="height:35px; font-size:13px;">
+                <button class="btn-accent" style="flex:0.3; padding:5px;" onclick="addSize(2)">+2</button>
+            </div>
+            <div id="s2Tags" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
+
+            <div class="row-inputs">
+                <input type="text" id="s3Inp" placeholder="尺碼3 (如 M)" style="height:35px; font-size:13px;">
+                <button class="btn-accent" style="flex:0.3; padding:5px;" onclick="addSize(3)">+3</button>
+            </div>
+            <div id="s3Tags" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
+        </div>
+
+        [cite_start]<hr style="border:0; border-top:1px solid #eee; margin:15px 0;"> [cite: 75]
+
+        <div class="field">
+            [cite_start]<label style="font-size: 11px; font-weight: bold; color: #6b7e75;">儲存款式定義</label> [cite: 76]
+            [cite_start]<select id="setVendorRel"></select> [cite: 76, 124]
+            <div class="row-inputs" style="margin-top:5px;">
+                [cite_start]<input type="text" id="setBraId" placeholder="型號 (如: A001)"> [cite: 77, 121]
+                [cite_start]<select id="setItemTypeSelect"></select> [cite: 77, 127]
+            </div>
+            <div class="row-inputs">
+                [cite_start]<input type="number" id="setCost" placeholder="進價 (內部用)"> [cite: 78, 121]
+                [cite_start]<input type="number" id="setPrice" placeholder="售價"> [cite: 78, 121]
+            </div>
+            [cite_start]<button class="btn-accent" onclick="addModel()">儲存款式定義</button> [cite: 78, 121]
+            [cite_start]<div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div> [cite: 78, 130]
         </div>
     </div>
 <div class="card">
@@ -108,8 +212,37 @@
             </select>
             <button class="btn-accent" onclick="prepareTags()">🖨️ 產生標籤</button>
         </div>
+
+        <div class="config-card admin-only">
+            <div class="config-group">
+                <label>📄 A4 標籤版面微調 (mm)</label>
+                <div class="config-input-grid">
+                    <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">上(大往下)</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">左(大往右)</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gx" onchange="savePrintConfigs()"><span class="dir-hint">左右間距</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()"><span class="dir-hint">上下間距</span></div>
+                </div>
+            </div>
+            <div class="config-group" style="margin-bottom:0;">
+                <label>🏷️ 單張標籤機內容微調 (mm)</label>
+                <div class="config-input-grid">
+                    <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">垂直位移</span></div>
+                    <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">水平位移</span></div>
+                </div>
+            </div>
+        </div>
     </div>
-<div class="card">
+
+    <div id="print-preview-zone">
+        <h4 style="margin:0 0 10px 0; color:var(--accent);">🔍 列印預覽 (僅顯示)</h4>
+        <div id="preview-list" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px;"></div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-success" onclick="executePrint()">確認列印</button>
+            <button class="btn-danger" onclick="closePreview()">取消</button>
+        </div>
+    </div>
+
+    <div class="card">
         <h3>3. 庫存統計與管理</h3>
         <div class="row-inputs">
             <input type="text" id="searchInp" placeholder="搜尋型號/尺碼..." oninput="renderInventory()">
@@ -131,189 +264,364 @@
             </table>
         </div>
     </div>
+<div class="card staff-hidden">
+        <h3>4. 出貨紀錄統計</h3>
+        <div id="salesSummary" style="font-size:0.9rem; margin-bottom:10px; font-weight:bold;"></div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>時間</th><th>內容</th><th>金額</th></tr>
+                </thead>
+                <tbody id="salesBody"></tbody>
+            </table>
+        </div>
+        <button style="margin-top:10px; background:#666;" onclick="clearSales()">清空紀錄</button>
+    </div>
 
     <div class="card admin-only">
-        <h3>4. 資料備份與恢復</h3>
+        <h3>5. 資料備份與恢復</h3>
         <div class="row-inputs">
             <button onclick="exportData()">💾 匯出資料備份</button>
             <button class="btn-accent" onclick="triggerImport()">📂 匯入備份資料</button>
         </div>
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
     </div>
-</div> <div id="print-label-page"></div>
-<div id="print-invoice-page"></div>
-<div id="print-preview-zone">
-    <div id="preview-list"></div>
-    <button onclick="executePrint()">列印</button>
-    <button onclick="closePreview()">取消</button>
 </div>
+
+<div id="print-label-page"></div>
+<div id="print-invoice-page"></div>
+
+<div style="height: 60px;"></div>
+
 <script>
-    // 核心資料變數
-    let vendors = [], models = [], inventory = [], colors = {}, itemTypes = {}, users = [];
-    let salesHistory = [], invoiceItems = [], currentUser = null, scanMode = '';
-    let compName = "我的公司", taxRate = 5;
-    
-    // 自定義尺碼設定變數
-    let sizeSettings = { sz1: [], sz2: [], sz3: [] };
+    // 變數初始化：新增 sz1, sz2, sz3 儲存自定義尺碼
+    let vendors = [], models = [], inventory = [], colors = {}, itemTypes = {}, users = []; [cite: 100]
+    let sizes1 = [], sizes2 = [], sizes3 = []; 
+    let salesHistory = [], invoiceItems = [], currentUser = null, scanMode = ''; [cite: 100]
+    let compName = "我的公司", taxRate = 5; [cite: 100]
 
-    // 系統初始化與登入保護機制
     window.onload = () => {
-        const d = JSON.parse(localStorage.getItem('lingerieData') || '{}');
-        vendors = d.v || []; 
-        models = d.m || []; 
-        inventory = d.i || [];
-        colors = d.c || { "BLK": "黑色", "WHT": "白色" };
-        itemTypes = d.t || { "BRA": "內衣", "PAN": "內褲" };
+        const d = JSON.parse(localStorage.getItem('lingerieData') || '{}'); [cite: 101]
+        vendors = d.v || []; models = d.m || []; inventory = d.i || []; [cite: 102]
+        colors = d.c || { "BLK": "黑色", "WHT": "白色" }; [cite: 103]
+        itemTypes = d.t || { "BRA": "內衣", "PAN": "內褲" }; [cite: 103, 104]
+        users = d.u || [{ n: "admin", p: "1234", r: "admin" }]; [cite: 104, 105]
         
-        // 強制確保管理員帳號存在，防止無法登入 [cite: 105]
-        users = (d.u && d.u.length > 0) ? d.u : [{ n: "admin", p: "1234", r: "admin" }];
+        // 載入自定義尺碼，若無則預設空陣列
+        sizes1 = d.sz1 || []; 
+        sizes2 = d.sz2 || [];
+        sizes3 = d.sz3 || [];
         
-        salesHistory = d.sh || [];
-        compName = d.cn || "我的公司";
-        taxRate = d.tr || 5;
-
-        // 初始化自定義尺碼選單 (若無備份則給予預設值)
-        sizeSettings = d.ss || { 
-            sz1: ["32","34","36","38","40"], 
-            sz2: ["A","B","C","D","E"], 
-            sz3: ["S","M","L","XL","FREE"] 
-        };
-
-        loadPrintConfigs(); 
-        renderAll();
+        salesHistory = d.sh || []; [cite: 105]
+        compName = d.cn || "我的公司"; [cite: 105]
+        taxRate = d.tr || 5; [cite: 106]
+        
+        loadPrintConfigs(); [cite: 106]
+        renderAll(); [cite: 106]
     };
 
-    // 儲存資料到本地空間 [cite: 107]
     function save() {
         const data = { 
             v: vendors, m: models, i: inventory, c: colors, t: itemTypes, 
             u: users, sh: salesHistory, cn: compName, tr: taxRate,
-            ss: sizeSettings 
-        };
-        localStorage.setItem('lingerieData', JSON.stringify(data));
-        renderAll();
+            sz1: sizes1, sz2: sizes2, sz3: sizes3 // 儲存尺碼
+        }; [cite: 106]
+        localStorage.setItem('lingerieData', JSON.stringify(data)); [cite: 107]
+        renderAll(); [cite: 107]
     }
-
-    // 登入邏輯 [cite: 110]
+[cite_start]// 登入與基礎功能 [cite: 108, 109, 110]
     function login() {
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
         const user = users.find(x => x.n === u && x.p === p);
-        
         if (user) {
             currentUser = user;
             document.getElementById('login-overlay').style.display = 'none';
             document.body.classList.toggle('is-admin', user.r === 'admin');
-            document.getElementById('userStatus').innerText = `目前使用者：${u}`;
+            document.getElementById('userStatus').innerText = `目前使用者：${u} (${user.r === 'admin' ? '管理員' : '員工'})`;
             renderAll();
-        } else { 
-            alert("帳號或密碼錯誤！");
-        }
+        } else { alert("帳號或密碼錯誤"); }
     }
 
-    function logout() { 
-        if(confirm("確定要登出嗎？")) location.reload(); 
-    }
-</script>
-// --- 尺碼管理邏輯 ---
-    function addSizeSetting(type) {
-        const inp = document.getElementById(`sz${type}Inp`);
+    function logout() { location.reload(); }
+
+    // --- 新增：尺碼管理功能 ---
+    function addSize(type) {
+        const inp = document.getElementById(`s${type}Inp`);
         const val = inp.value.trim().toUpperCase();
         if (!val) return;
-        if (!sizeSettings[`sz${type}`].includes(val)) {
-            sizeSettings[`sz${type}`].push(val);
-            sizeSettings[`sz${type}`].sort(); 
-            inp.value = '';
-            save();
-        }
-    }
-    function delSizeSetting(type, val) {
-        if (confirm(`確定刪除尺碼 ${val}?`)) {
-            sizeSettings[`sz${type}`] = sizeSettings[`sz${type}`].filter(s => s !== val);
-            save();
-        }
-    }
-
-    // --- 基礎設定渲染 ---
-    function renderAll() {
-        // 渲染廠商
-        document.getElementById('vendorTags').innerHTML = vendors.map(v => `<span class="tag">${v.name}(${v.code}) <b onclick="delVendor('${v.code}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
-        document.getElementById('selectVendor').innerHTML = vendors.map(v => `<option value="${v.code}">${v.name}</option>`).join('');
         
-        // 渲染尺碼管理標籤與操作區下拉選單
-        for (let i = 1; i <= 3; i++) {
-            document.getElementById(`sz${i}Tags`).innerHTML = sizeSettings[`sz${i}`].map(s => 
-                `<span class="tag" style="font-size:10px; padding:2px 6px;">${s} <b onclick="delSizeSetting(${i},'${s}')" style="margin-left:3px;color:red;cursor:pointer">×</b></span>`
-            ).join('');
-            document.getElementById(`size${i}`).innerHTML = `<option value="-">-</option>` + sizeSettings[`sz${i}`].map(s => `<option value="${s}">${s}</option>`).join('');
-        }
+        let targetArr = (type === 1) ? sizes1 : (type === 2) ? sizes2 : sizes3;
+        if (targetArr.includes(val)) return alert("此尺碼已存在");
+        
+        targetArr.push(val);
+        targetArr.sort(); // 自動排序
+        inp.value = '';
+        save();
+    }
 
+    function delSize(type, val) {
+        if (!confirm(`確定刪除尺碼 ${val}?`)) return;
+        if (type === 1) sizes1 = sizes1.filter(s => s !== val);
+        else if (type === 2) sizes2 = sizes2.filter(s => s !== val);
+        else sizes3 = sizes3.filter(s => s !== val);
+        save();
+    }
+
+    [cite_start]// 渲染 UI [cite: 124, 125, 131]
+    function renderAll() {
+        [cite_start]// 廠商與類別渲染 [cite: 124, 126, 127, 130]
+        const vSels = ['setVendorRel', 'selectVendor'];
+        vSels.forEach(s => {
+            document.getElementById(s).innerHTML = vendors.map(v => `<option value="${v.code}">${v.name}</option>`).join('');
+        });
+        document.getElementById('typeTags').innerHTML = Object.entries(itemTypes).map(([c, n]) => `<span class="tag">${c}:${n} <b onclick="delType('${c}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        document.getElementById('setItemTypeSelect').innerHTML = Object.entries(itemTypes).map(([c, n]) => `<option value="${c}">${n}</option>`).join('');
+
+        [cite_start]// 顏色渲染 [cite: 128, 129]
+        document.getElementById('colorTags').innerHTML = Object.entries(colors).map(([c, n]) => `<span class="tag">${c}:${n} <b onclick="delColor('${c}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        document.getElementById('selectColor').innerHTML = Object.entries(colors).map(([c, n]) => `<option value="${c}">${n}(${c})</option>`).join('');
+
+        // --- 尺碼標籤管理區渲染 ---
+        document.getElementById('s1Tags').innerHTML = sizes1.map(s => `<span class="tag">${s} <b onclick="delSize(1,'${s}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        document.getElementById('s2Tags').innerHTML = sizes2.map(s => `<span class="tag">${s} <b onclick="delSize(2,'${s}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        document.getElementById('s3Tags').innerHTML = sizes3.map(s => `<span class="tag">${s} <b onclick="delSize(3,'${s}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+
+        // --- 操作區尺碼下拉選單渲染 ---
+        const renderSizeOpt = (arr) => {
+            return `<option value="-">-</option>` + arr.map(s => `<option value="${s}">${s}</option>`).join('');
+        };
+        document.getElementById('size1').innerHTML = renderSizeOpt(sizes1);
+        document.getElementById('size2').innerHTML = renderSizeOpt(sizes2);
+        document.getElementById('size3').innerHTML = renderSizeOpt(sizes3);
+
+        document.getElementById('vendorTags').innerHTML = vendors.map(v => `<span class="tag">${v.name}(${v.code}) <b onclick="delVendor('${v.code}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        document.getElementById('modelTags').innerHTML = models.map(m => `<span class="tag">${m.vCode}/${m.braId} <b onclick="delModel('${m.vCode}','${m.braId}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        
         updateModelSelect();
         renderInventory();
+        renderSales();
+    }
+// 基礎定義功能
+    function addVendor() {
+        const c = document.getElementById('vCodeInp').value.toUpperCase().trim();
+        const n = document.getElementById('vNameInp').value.trim();
+        if (c && n) { vendors.push({ code: c, name: n }); save(); }
+    }
+    function delVendor(c) { vendors = vendors.filter(v => v.code !== c); save(); }
+    function addColor() {
+        const v = document.getElementById('colorInp').value.trim();
+        if (v.includes(':')) { const [c, n] = v.split(':'); colors[c.toUpperCase()] = n; save(); }
+    }
+    function delColor(c) { delete colors[c]; save(); }
+    function addItemType() {
+        const v = document.getElementById('typeInp').value.trim();
+        if (v.includes(':')) { const [c, n] = v.split(':'); itemTypes[c.toUpperCase()] = n; save(); }
+    }
+    function delType(c) { delete itemTypes[c]; save(); }
+    function addModel() {
+        const v = document.getElementById('setVendorRel').value;
+        const b = document.getElementById('setBraId').value.toUpperCase().trim();
+        const t = document.getElementById('setItemTypeSelect').value;
+        const cost = parseInt(document.getElementById('setCost').value) || 0;
+        const price = parseInt(document.getElementById('setPrice').value) || 0;
+        if (v && b) { models.push({ vCode: v, braId: b, type: t, cost, price }); save(); }
+    }
+    function delModel(v, b) { models = models.filter(m => !(m.vCode === v && m.braId === b)); save(); }
+
+    function updateModelSelect() {
+        const v = document.getElementById('selectVendor').value;
+        const filtered = models.filter(m => m.vCode === v);
+        document.getElementById('selectModel').innerHTML = filtered.map(m => `<option value="${m.braId}">${m.braId} (${itemTypes[m.type] || m.type})</option>`).join('');
     }
 
-    // --- 庫存與掃描邏輯 (簡化版，確保運作) ---
-    function handleManual(dir) {
+    // 進出貨核心
+    function handleManual(mode) {
         const v = document.getElementById('selectVendor').value;
         const b = document.getElementById('selectModel').value;
-        const c = document.getElementById('selectColor').value || 'NA';
+        const c = document.getElementById('selectColor').value;
         const s1 = document.getElementById('size1').value;
         const s2 = document.getElementById('size2').value;
         const s3 = document.getElementById('size3').value;
-        const qty = parseInt(document.getElementById('braQty').value) || 0;
-        if (!b || qty <= 0) return alert("請確認型號與數量");
-        processInventory(v, b, c, s1, s2, s3, dir === 'IN' ? qty : -qty);
+        const q = parseInt(document.getElementById('braQty').value) || 0;
+        if (q <= 0) return;
+        updateInv(v, b, c, s1, s2, s3, mode === 'IN' ? q : -q);
     }
 
-    function processInventory(v, b, c, s1, s2, s3, q) {
-        const item = inventory.find(i => i.v===v && i.b===b && i.c===c && i.s1===s1 && i.s2===s2 && i.s3===s3);
+    function updateInv(v, b, c, s1, s2, s3, q) {
+        const item = inventory.find(x => x.v === v && x.b === b && x.c === c && x.s1 === s1 && x.s2 === s2 && x.s3 === s3);
         if (item) { item.q += q; if (item.q < 0) item.q = 0; }
         else if (q > 0) { inventory.push({ v, b, c, s1, s2, s3, q }); }
         save();
     }
 
-    function renderInventory() {
-        const kw = document.getElementById('searchInp').value.toUpperCase();
-        const tbody = document.getElementById('inventoryBody');
-        tbody.innerHTML = inventory.filter(i => `${i.v}${i.b}`.toUpperCase().includes(kw)).map((item, idx) => `
-            <tr>
-                <td>${item.v}/<b>${item.b}</b></td>
-                <td>-</td>
-                <td>${item.c}/${item.s1}-${item.s2}-${item.s3}</td>
-                <td>${item.q}</td>
-                <td class="admin-only">-</td>
-                <td>-</td>
-                <td><button onclick="deleteItem(${idx})" style="background:red; color:white; border:none; border-radius:4px;">刪</button></td>
-            </tr>
-        `).join('');
-    }
-
-    function deleteItem(idx) { if(confirm("刪除此庫存？")) { inventory.splice(idx,1); save(); } }
-    
-    // 廠商與型號關聯
-    function addVendor() {
-        const c = document.getElementById('vCodeInp').value.trim().toUpperCase();
-        const n = document.getElementById('vNameInp').value.trim();
-        if(c && n) { vendors.push({code:c, name:n}); save(); }
-    }
-    function delVendor(c) { vendors = vendors.filter(v=>v.code!==c); save(); }
-    function updateModelSelect() { 
+    // 標籤產生邏輯 (包含三個尺碼)
+    function prepareTags() {
         const v = document.getElementById('selectVendor').value;
-        // 這裡可加入型號過濾邏輯
+        const b = document.getElementById('selectModel').value;
+        const c = document.getElementById('selectColor').value;
+        const s1 = document.getElementById('size1').value;
+        const s2 = document.getElementById('size2').value;
+        const s3 = document.getElementById('size3').value;
+        const q = parseInt(document.getElementById('braQty').value) || 1;
+        const m = models.find(x => x.vCode === v && x.braId === b);
+        if (!m) return;
+        
+        const preview = document.getElementById('preview-list');
+        preview.innerHTML = '';
+        // 條碼格式: 廠商|型號|顏色|尺碼1|尺碼2|尺碼3
+        const codeText = `${v}|${b}|${c}|${s1}|${s2}|${s3}`;
+        for(let i=0; i<q; i++) {
+            const div = document.createElement('div');
+            div.className = 'label-item';
+            div.innerHTML = `<canvas class="qr"></canvas><div class="txt">${b}<br>${colors[c]||c} ${s1}${s2}${s3}<br>$${m.price}</div>`;
+            preview.appendChild(div);
+            new QRious({ element: div.querySelector('canvas'), value: codeText, size: 100 });
+        }
+        document.getElementById('print-preview-zone').style.display = 'block';
     }
 
-    // 資料匯出匯入
+    function executePrint() {
+        const mode = document.getElementById('printType').value;
+        document.body.className = (mode === 'A4') ? 'print-mode-a4' : 'print-mode-single';
+        document.getElementById('print-label-page').innerHTML = document.getElementById('preview-list').innerHTML;
+        window.print();
+        closePreview();
+    }
+    function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
+
+    // 掃描器與解析
+    let html5QrCode;
+    function startScan(mode) {
+        scanMode = mode;
+        document.getElementById('scanner-container').style.display = 'block';
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
+    }
+    function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
+    
+    function onScanSuccess(text) {
+        const parts = text.split('|');
+        if (parts.length < 6) return;
+        const [v, b, c, s1, s2, s3] = parts;
+        const feedback = document.getElementById('scan-feedback');
+        feedback.innerText = `掃描: ${b} ${s1}${s2}${s3}`;
+        feedback.style.display = 'block';
+        setTimeout(() => feedback.style.display = 'none', 1000);
+
+        if (scanMode === 'IN_AUTO') updateInv(v, b, c, s1, s2, s3, 1);
+        else if (scanMode === 'OUT_AUTO') { addToInvoice(v, b, c, s1, s2, s3, 1); updateInv(v, b, c, s1, s2, s3, -1); }
+        else if (scanMode === 'IN_MANUAL') {
+            const q = parseInt(prompt(`輸入 ${b} 入庫數量:`, "1"));
+            if (q > 0) updateInv(v, b, c, s1, s2, s3, q);
+        }
+    }
+
+    // 庫存與出貨單其餘 JS 邏輯 (略，與原版一致但包含 s1,s2,s3 顯示)
+    function renderInventory() {
+        const filter = document.getElementById('searchInp').value.toUpperCase();
+        const body = document.getElementById('inventoryBody');
+        body.innerHTML = '';
+        inventory.forEach((item, idx) => {
+            const m = models.find(x => x.vCode === item.v && x.braId === item.b);
+            const text = `${item.v}${item.b}${item.c}${item.s1}${item.s2}${item.s3}`.toUpperCase();
+            if (text.includes(filter)) {
+                body.innerHTML += `<tr>
+                    <td>${item.v}<br><b>${item.b}</b></td>
+                    <td>${m ? (itemTypes[m.type] || m.type) : ''}</td>
+                    <td>${colors[item.c] || item.c}<br>${item.s1} / ${item.s2} / ${item.s3}</td>
+                    <td><button class="qty-btn" onclick="adjQty(${idx},-1)">-</button> ${item.q} <button class="qty-btn" onclick="adjQty(${idx},1)">+</button></td>
+                    <td class="admin-only">${m ? m.cost : 0}</td>
+                    <td>${m ? m.price : 0}</td>
+                    <td><button class="btn-danger" style="padding:5px;font-size:11px;" onclick="delInv(${idx})">刪除</button></td>
+                </tr>`;
+            }
+        });
+    }
+
+    function adjQty(i, n) { inventory[i].q += n; if(inventory[i].q<0) inventory[i].q=0; save(); }
+    function delInv(i) { if(confirm("確定刪除此項庫存？")) { inventory.splice(i, 1); save(); } }
+
+    function generateInvoiceManual() {
+        const v = document.getElementById('selectVendor').value;
+        const b = document.getElementById('selectModel').value;
+        const c = document.getElementById('selectColor').value;
+        const s1 = document.getElementById('size1').value;
+        const s2 = document.getElementById('size2').value;
+        const s3 = document.getElementById('size3').value;
+        const q = parseInt(document.getElementById('braQty').value) || 0;
+        if (q > 0) {
+            addToInvoice(v, b, c, s1, s2, s3, q);
+            updateInv(v, b, c, s1, s2, s3, -q);
+            alert("已加入出貨單並扣除庫存");
+        }
+    }
+
+    function addToInvoice(v, b, c, s1, s2, s3, q) {
+        const m = models.find(x => x.vCode === v && x.braId === b);
+        const price = m ? m.price : 0;
+        invoiceItems.push({ b, c, s1, s2, s3, q, p: price });
+        renderSales(); // 此處簡化為直接入紀錄
+        salesHistory.unshift({ t: new Date().toLocaleString(), d: `${b}(${s1}/${s2}/${s3}) x${q}`, a: price * q });
+        save();
+    }
+
+    function renderSales() {
+        const body = document.getElementById('salesBody');
+        body.innerHTML = salesHistory.map(s => `<tr><td>${s.t}</td><td>${s.d}</td><td>${s.a}</td></tr>`).join('');
+        const total = salesHistory.reduce((sum, s) => sum + s.a, 0);
+        document.getElementById('salesSummary').innerText = `今日累積銷售額：$${total}`;
+    }
+
+    function clearSales() { if(confirm("確定清空銷售紀錄？")) { salesHistory = []; save(); } }
+
     function exportData() {
-        const blob = new Blob([localStorage.getItem('lingerieData')], {type:'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup.json`; a.click();
+        const blob = new Blob([localStorage.getItem('lingerieData')], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
     }
     function triggerImport() { document.getElementById('importFile').click(); }
     function importData(e) {
+        const file = e.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
-        reader.onload = (ev) => { localStorage.setItem('lingerieData', ev.target.result); location.reload(); };
-        reader.readAsText(e.target.files[0]);
+        reader.onload = (e) => { localStorage.setItem('lingerieData', e.target.result); location.reload(); };
+        reader.readAsText(file);
     }
-    function loadPrintConfigs() {} // 保持空函式避免錯誤
+
+    function savePrintConfigs() {
+        const cfg = {
+            amt: document.getElementById('cfg-a4-mt').value,
+            aml: document.getElementById('cfg-a4-ml').value,
+            agx: document.getElementById('cfg-a4-gx').value,
+            agy: document.getElementById('cfg-a4-gy').value,
+            smt: document.getElementById('cfg-s-mt').value,
+            sml: document.getElementById('cfg-s-ml').value
+        };
+        localStorage.setItem('printConfigs', JSON.stringify(cfg));
+        applyPrintStyles(cfg);
+    }
+    function loadPrintConfigs() {
+        const cfg = JSON.parse(localStorage.getItem('printConfigs') || '{"amt":15.5,"aml":6.5,"agx":2.5,"agy":0,"smt":0,"sml":0}');
+        document.getElementById('cfg-a4-mt').value = cfg.amt;
+        document.getElementById('cfg-a4-ml').value = cfg.aml;
+        document.getElementById('cfg-a4-gx').value = cfg.agx;
+        document.getElementById('cfg-a4-gy').value = cfg.agy;
+        document.getElementById('cfg-s-mt').value = cfg.smt;
+        document.getElementById('cfg-s-ml').value = cfg.sml;
+        applyPrintStyles(cfg);
+    }
+    function applyPrintStyles(c) {
+        const root = document.documentElement.style;
+        root.setProperty('--a4-mt', c.amt + 'mm');
+        root.setProperty('--a4-ml', c.aml + 'mm');
+        root.setProperty('--a4-gx', c.agx + 'mm');
+        root.setProperty('--a4-gy', c.agy + 'mm');
+        root.setProperty('--s-mt', c.smt + 'mm');
+        root.setProperty('--s-ml', c.sml + 'mm');
+    }
 </script>
 </body>
 </html>
