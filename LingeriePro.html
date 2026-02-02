@@ -164,22 +164,22 @@
             <button onclick="addUser()" class="btn-success" style="padding: 8px; font-size: 13px;">新增使用者</button>
             <div id="userList" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
         </div>
-    </div>
-<div class="config-card">
+
+        <div class="config-card">
             <div class="config-group">
-                <label>🏷️ A4 標籤邊距微調 (3.8x3.8cm - 5x7 格式)</label>
+                <label>🏷️ A4 標籤邊距微調 (mm)</label>
                 <div class="config-input-grid">
-                    <div><input type="number" id="a4mt" step="0.1" onchange="updateA4Config()"><div class="dir-hint">上邊距(mm)</div></div>
-                    <div><input type="number" id="a4ml" step="0.1" onchange="updateA4Config()"><div class="dir-hint">左邊距(mm)</div></div>
-                    <div><input type="number" id="a4gx" step="0.1" onchange="updateA4Config()"><div class="dir-hint">左右間距(mm)</div></div>
-                    <div><input type="number" id="a4gy" step="0.1" onchange="updateA4Config()"><div class="dir-hint">上下間距(mm)</div></div>
+                    <div><input type="number" id="a4mt" step="0.1" onchange="updateA4Config()"><div class="dir-hint">上(大往下)</div></div>
+                    <div><input type="number" id="a4ml" step="0.1" onchange="updateA4Config()"><div class="dir-hint">左(大往右)</div></div>
+                    <div><input type="number" id="a4gx" step="0.1" onchange="updateA4Config()"><div class="dir-hint">左右間距</div></div>
+                    <div><input type="number" id="a4gy" step="0.1" onchange="updateA4Config()"><div class="dir-hint">上下間距</div></div>
                 </div>
             </div>
             <div class="config-group" style="margin-top:10px; border-top:1px solid #ddd; pt:10px;">
-                <label>🏷️ 單張捲軸邊距微調 (5x3cm 格式)</label>
+                <label>🏷️ 單張標籤內容微調 (mm)</label>
                 <div class="config-input-grid">
-                    <div><input type="number" id="smt" step="0.1" onchange="updateSConfig()"><div class="dir-hint">上邊距(mm)</div></div>
-                    <div><input type="number" id="sml" step="0.1" onchange="updateSConfig()"><div class="dir-hint">左邊距(mm)</div></div>
+                    <div><input type="number" id="smt" step="0.1" onchange="updateSConfig()"><div class="dir-hint">垂直(正下/負上)</div></div>
+                    <div><input type="number" id="sml" step="0.1" onchange="updateSConfig()"><div class="dir-hint">水平(正右/負左)</div></div>
                 </div>
             </div>
         </div>
@@ -199,27 +199,41 @@
     </div>
 
     <div class="card">
-        <h3>2. 進出貨操作</h3>
+        <h3>2. 進出貨與操作</h3>
         <div style="margin-bottom: 10px; display: flex; gap: 10px;">
-            <button onclick="startScan()" style="background:#4a5568; flex:1;">📷 開啟相機掃描</button>
-            <button onclick="stopScan()" id="stopBtn" style="background:#a0aec0; flex:1; display:none;">關閉相機</button>
+            <button onclick="startScan('in')" style="background:#3182ce; flex:1;">📥 連續輸入</button>
+            <button onclick="startScan('out')" style="background:#48bb78; flex:1;">📤 出貨掃描</button>
+            <button onclick="startScan('direct')" style="background:#3182ce; flex:1;">📥 入庫(填量)</button>
         </div>
         <div id="scanner-container">
             <div id="scan-feedback">掃描成功！</div>
             <div id="reader"></div>
+            <button onclick="stopScan()" id="stopBtn" style="background:#a0aec0; margin-top:10px;">關閉相機</button>
         </div>
-        
-        <div class="field"><label>商品條碼</label><input type="text" id="opCode" placeholder="手動輸入或掃描" oninput="autoFillByCode()"></div>
-        <div id="auto-info" style="font-size:12px; color:#666; margin-bottom:10px; display:none;"></div>
-        
+<div class="row-inputs">
+            <select id="opVendor" onchange="updateModelOpt()"><option value="">選擇廠商</option></select>
+            <select id="opModel" onchange="updateColorOpt()"><option value="">型號</option></select>
+        </div>
         <div class="row-inputs">
-            <div class="field"><label>數量</label><input type="number" id="opQty" value="1"></div>
-            <div class="field"><label>單價</label><input type="number" id="opPrice" placeholder="銷售時填寫"></div>
+            <select id="opColor"><option value="">選擇顏色</option></select>
+            <select id="opSize1"><option value="">尺碼1--</option></select>
+            <select id="opSize2"><option value="">尺碼2--</option></select>
+            <select id="opSize3"><option value="">尺碼3--</option></select>
         </div>
         
-        <div style="display:flex; gap:10px;">
-            <button onclick="processOp('in')" class="btn-success">進貨</button>
-            <button onclick="processOp('out')">加入出貨清單</button>
+        <div class="field"><label>數量</label><input type="number" id="opQty" value="1"></div>
+        
+        <div style="display:flex; gap:10px; flex-direction: column;">
+            <button onclick="processManual('in')" style="background:#a0aec0;">📥 手動入庫</button>
+            <button onclick="processManual('out')" style="background:#48bb78;">📄 加入出貨單</button>
+        </div>
+
+        <div class="field" style="margin-top:15px;">
+            <select id="labelType">
+                <option value="A4">A4 (35張)</option>
+                <option value="S">單張標籤</option>
+            </select>
+            <button onclick="printFromOp()" style="background:#d4a373; margin-top:5px;">🖨️ 產生標籤</button>
         </div>
     </div>
 
@@ -239,7 +253,8 @@
             <button onclick="checkout('only')" style="flex:1; background:#718096;">僅結帳不列印</button>
         </div>
     </div>
-<div class="card">
+
+    <div class="card">
         <h3>4. 庫存查詢與條碼標籤</h3>
         <div class="row-inputs">
             <input type="text" id="qVendor" placeholder="廠商" oninput="renderInv()">
@@ -251,17 +266,8 @@
                 <tbody id="invBody"></tbody>
             </table>
         </div>
-        <div id="print-preview-zone" class="no-print">
-            <p style="margin-top:0; font-weight:bold; color:var(--accent);">已選取待列印條碼 (<span id="queueCount">0</span>)</p>
-            <div style="display:flex; gap:10px;">
-                <button onclick="printLabels('a4')" class="btn-accent" style="font-size:13px; padding:8px;">A4 標籤列印</button>
-                <button onclick="printLabels('single')" style="font-size:13px; padding:8px; background:#6b7280;">單張捲軸列印</button>
-                <button onclick="clearQueue()" style="font-size:13px; padding:8px; background:#e5e7eb; color:#444;">清空</button>
-            </div>
-        </div>
     </div>
-
-    <div class="card admin-only">
+<div class="card admin-only">
         <h3>5. 銷售日報表</h3>
         <input type="date" id="reportDate" onchange="renderReport()" style="margin-bottom:10px;">
         <div id="reportSummary" style="font-size:14px; margin-bottom:10px; line-height:1.6; color:#444;"></div>
@@ -289,7 +295,7 @@
 
 <script>
     let vendors = [], models = [], inventory = [], colors = [], itemTypes = ["內衣", "塑身衣", "內褲"];
-    let salesHistory = [], printQueue = [], currentUser = null, users = [];
+    let salesHistory = [], currentUser = null, users = [], cart = [];
     let compName = "內衣店", taxRate = 5;
     let a4Config = { mt: 15.5, ml: 6.5, gx: 2.5, gy: 0 };
     let sConfig = { mt: 0, ml: 0 };
@@ -320,11 +326,10 @@
         document.getElementById('smt').value = sConfig.mt;
         document.getElementById('sml').value = sConfig.ml;
         
-        updateStyles();
-        renderTypeSelect();
-        renderUserList();
+        updateStyles(); renderTypeSelect(); renderUserList(); updateVendorOpt();
     }
-function updateA4Config() {
+
+    function updateA4Config() {
         a4Config.mt = parseFloat(document.getElementById('a4mt').value) || 0;
         a4Config.ml = parseFloat(document.getElementById('a4ml').value) || 0;
         a4Config.gx = parseFloat(document.getElementById('a4gx').value) || 0;
@@ -357,15 +362,14 @@ function updateA4Config() {
         if(currentUser) {
             document.getElementById('login-overlay').style.display = 'none';
             document.body.className = currentUser.r === 'admin' ? 'is-admin' : '';
-            document.getElementById('userStatus').innerText = `登入中: ${currentUser.n} (${currentUser.r})`;
+            document.getElementById('userStatus').innerText = `登入中: ${currentUser.n}`;
             renderInv(); renderReport();
         } else alert("帳號或密碼錯誤");
     }
     function logout() { location.reload(); }
 
     function renderTypeSelect() {
-        const s = document.getElementById('iType');
-        s.innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        document.getElementById('iType').innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
     function addBaseData() {
@@ -373,91 +377,61 @@ function updateA4Config() {
         const m = document.getElementById('mName').value.trim();
         const t = document.getElementById('iType').value;
         const cs = document.getElementById('cNames').value.split(',').map(x=>x.trim()).filter(x=>x);
-        if(!v || !m || cs.length===0) return alert("請填寫完整資訊");
+        const sizes = ["70B","75B","80B","85B","70C","75C","80C","85C","90C","70D","75D","80D","85D","90D","70E","75E","80E","85E","90E","70F","75F","80F","85F","M","L","XL","XXL","XXXL"];
+        if(!v || !m || cs.length===0) return alert("請填寫完整");
+        if(!vendors.includes(v)) vendors.push(v);
+        if(!models.find(x=>x.v===v && x.m===m)) models.push({v, m, t});
         cs.forEach(c => {
-            const code = `${v}-${m}-${c}`;
-            if(!inventory.find(x => x.code === code)) {
-                inventory.push({ v, m, t, c, code, q: 0 });
-            }
+            sizes.forEach(s => {
+                const code = `${v}-${m}-${c}-${s}`;
+                if(!inventory.find(x => x.code === code)) inventory.push({ v, m, t, c, s, code, q: 0 });
+            });
         });
-        save(); renderInv(); alert("品項已建立");
+        save(); updateVendorOpt(); renderInv(); alert("品項已建立");
     }
 
-    function renderInv() {
-        const qV = document.getElementById('qVendor').value.toLowerCase();
-        const qM = document.getElementById('qModel').value.toLowerCase();
-        const b = document.getElementById('invBody');
-        b.innerHTML = inventory.filter(x => x.v.toLowerCase().includes(qV) && x.m.toLowerCase().includes(qM))
-            .map(x => `<tr>
-                <td>${x.v}<br><small>${x.m} (${x.t})</small></td>
-                <td><span class="tag">${x.c}</span><div style="font-size:10px; color:#999; margin-top:4px;">${x.code}</div></td>
-                <td><b style="color:var(--primary)">${x.q}</b></td>
-                <td><button onclick="addToQueue('${x.code}')" class="qty-btn" style="background:var(--accent); color:white; border:none;">+ 標籤</button></td>
-            </tr>`).join('');
+    function updateVendorOpt() {
+        const s = document.getElementById('opVendor');
+        s.innerHTML = '<option value="">選擇廠商</option>' + vendors.map(v => `<option value="${v}">${v}</option>`).join('');
+    }
+    function updateModelOpt() {
+        const v = document.getElementById('opVendor').value;
+        const s = document.getElementById('opModel');
+        const ms = models.filter(x => x.v === v);
+        s.innerHTML = '<option value="">型號</option>' + ms.map(x => `<option value="${x.m}">${x.m}</option>`).join('');
+    }
+    function updateColorOpt() {
+        const v = document.getElementById('opVendor').value;
+        const m = document.getElementById('opModel').value;
+        const cs = [...new Set(inventory.filter(x => x.v === v && x.m === m).map(x => x.c))];
+        document.getElementById('opColor').innerHTML = '<option value="">選擇顏色</option>' + cs.map(c => `<option value="${c}">${c}</option>`).join('');
+        const szs = inventory.filter(x => x.v === v && x.m === m).map(x => x.s);
+        const szOpt = '<option value="">--</option>' + [...new Set(szs)].map(s => `<option value="${s}">${s}</option>`).join('');
+        document.getElementById('opSize1').innerHTML = szOpt;
+        document.getElementById('opSize2').innerHTML = szOpt;
+        document.getElementById('opSize3').innerHTML = szOpt;
     }
 
-    let html5QrCode = null;
-    function startScan() {
-        document.getElementById('scanner-container').style.display = 'block';
-        document.getElementById('stopBtn').style.display = 'inline-block';
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
-            document.getElementById('opCode').value = txt;
-            document.getElementById('scan-feedback').style.display = 'block';
-            autoFillByCode();
-            setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; }, 1000);
+    function processManual(type) {
+        const v = document.getElementById('opVendor').value;
+        const m = document.getElementById('opModel').value;
+        const c = document.getElementById('opColor').value;
+        const q = parseInt(document.getElementById('opQty').value) || 0;
+        const ss = [document.getElementById('opSize1').value, document.getElementById('opSize2').value, document.getElementById('opSize3').value].filter(x=>x);
+        if(!v || !m || !c || ss.length===0 || q<=0) return alert("請完整選取商品與數量");
+        ss.forEach(s => {
+            const item = inventory.find(x => x.v===v && x.m===m && x.c===c && x.s===s);
+            if(type === 'in') { item.q += q; salesHistory.push({ t: new Date().toLocaleString(), type: '進貨', code: item.code, q, p: 0 }); }
+            else { if(item.q < q) alert(`${s} 庫存不足`); else cart.push({ ...item, qty: q, price: 0 }); }
         });
-    }
-    function stopScan() {
-        if(html5QrCode) html5QrCode.stop().then(() => {
-            document.getElementById('scanner-container').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'none';
-        });
-    }
-
-    function autoFillByCode() {
-        const code = document.getElementById('opCode').value.trim();
-        const item = inventory.find(x => x.code === code);
-        const info = document.getElementById('auto-info');
-        if(item) {
-            info.style.display = 'block';
-            info.innerText = `目前商品：${item.v} / ${item.m} / ${item.c} (現存: ${item.q})`;
-        } else info.style.display = 'none';
-    }
-
-    let cart = [];
-    function processOp(type) {
-        const code = document.getElementById('opCode').value.trim();
-        const qty = parseInt(document.getElementById('opQty').value);
-        const price = parseInt(document.getElementById('opPrice').value) || 0;
-        const item = inventory.find(x => x.code === code);
-        if(!item || !qty) return alert("查無此商品條碼或數量錯誤");
-
-        if(type === 'in') {
-            item.q += qty;
-            salesHistory.push({ t: new Date().toLocaleString(), type: '進貨', code: item.code, q: qty, p: 0, user: currentUser.n });
-            alert("進貨成功");
-            save(); renderInv(); renderReport();
-        } else {
-            if(item.q < qty) return alert("庫存不足");
-            cart.push({ ...item, qty, price });
-            renderCart();
-        }
-        document.getElementById('opCode').value = '';
-        document.getElementById('auto-info').style.display = 'none';
+        if(type==='out') renderCart(); else { save(); renderInv(); alert("入庫成功"); }
     }
 
     function renderCart() {
-        const b = document.getElementById('cartBody');
         let total = 0;
-        b.innerHTML = cart.map((x, i) => {
+        document.getElementById('cartBody').innerHTML = cart.map((x, i) => {
             total += x.qty * x.price;
-            return `<tr>
-                <td>${x.m}-${x.c}</td>
-                <td>${x.qty}</td>
-                <td>$${x.price}</td>
-                <td><button onclick="cart.splice(${i},1);renderCart()" class="qty-btn">刪除</button></td>
-            </tr>`;
+            return `<tr><td>${x.m}-${x.c}-${x.s}</td><td>${x.qty}</td><td><input type="number" value="${x.price}" onchange="cart[${i}].price=parseInt(this.value);renderCart()" style="width:60px;height:30px;"></td><td><button onclick="cart.splice(${i},1);renderCart()" class="qty-btn">刪</button></td></tr>`;
         }).join('');
         document.getElementById('cartTotal').innerText = total;
     }
@@ -468,98 +442,48 @@ function updateA4Config() {
         cart.forEach(c => {
             const item = inventory.find(x => x.code === c.code);
             item.q -= c.qty;
-            salesHistory.push({ t: new Date().toLocaleString(), type: '銷售', code: c.code, q: c.qty, p: c.price, user: currentUser.n });
+            salesHistory.push({ t: new Date().toLocaleString(), type: '銷售', code: c.code, q: c.qty, p: c.price });
         });
         if(mode === 'print') {
-            const invPage = document.getElementById('print-invoice-page');
-            const sub = Math.round(total / (1 + taxRate/100));
-            const tax = total - sub;
-            invPage.innerHTML = `
-                <div style="text-align:center;"><h2>${compName} 銷貨單</h2></div>
-                <p>日期: ${new Date().toLocaleString()} | 經手人: ${currentUser.n}</p>
-                <table class="inv-table">
-                    <thead><tr><th>品名規格</th><th>數量</th><th>單價</th><th>小計</th></tr></thead>
-                    <tbody>${cart.map(x=>`<tr><td>${x.v} ${x.m}-${x.c}</td><td>${x.qty}</td><td>${x.price}</td><td>${x.qty*x.price}</td></tr>`).join('')}</tbody>
-                </table>
-                <div class="total-area">
-                    銷售額(未稅): $${sub}<br>稅額(${taxRate}%): $${tax}<br>
-                    <div class="grand-total">總計金額: $${total}</div>
-                </div>`;
+            const sub = Math.round(total / (1 + taxRate/100)), tax = total - sub;
+            document.getElementById('print-invoice-page').innerHTML = `<div style="text-align:center;"><h2>${compName} 銷貨單</h2></div><p>日期: ${new Date().toLocaleString()}</p><table class="inv-table"><thead><tr><th>品名規格</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody>${cart.map(x=>`<tr><td>${x.m}-${x.c}-${x.s}</td><td>${x.qty}</td><td>${x.price}</td><td>${x.qty*x.price}</td></tr>`).join('')}</tbody></table><div class="total-area">未稅: $${sub}<br>稅額: $${tax}<br><div class="grand-total">總計: $${total}</div></div>`;
             window.print();
         }
         cart = []; renderCart(); renderInv(); renderReport(); save();
-        alert("結帳完成");
     }
 
-    function addToQueue(code) {
-        printQueue.push(code);
-        document.getElementById('print-preview-zone').style.display = 'block';
-        document.getElementById('queueCount').innerText = printQueue.length;
-    }
-    function clearQueue() {
-        printQueue = [];
-        document.getElementById('print-preview-zone').style.display = 'none';
+    function renderInv() {
+        const qV = document.getElementById('qVendor').value.toLowerCase();
+        const qM = document.getElementById('qModel').value.toLowerCase();
+        document.getElementById('invBody').innerHTML = inventory.filter(x => x.v.toLowerCase().includes(qV) && x.m.toLowerCase().includes(qM) && x.q > 0)
+            .map(x => `<tr><td>${x.v}<br><small>${x.m}</small></td><td>${x.c} / ${x.s}</td><td>${x.q}</td><td><button onclick="printSingle('${x.code}')" class="qty-btn">印</button></td></tr>`).join('');
     }
 
-    function printLabels(mode) {
+    function printSingle(code) {
+        const item = inventory.find(x => x.code === code);
         const container = document.getElementById('print-label-page');
-        container.innerHTML = '';
-        document.body.classList.remove('print-mode-a4', 'print-mode-single');
-        document.body.classList.add('print-mode-' + mode);
-        
-        printQueue.forEach(code => {
-            const item = inventory.find(x => x.code === code);
-            const div = document.createElement('div');
-            div.className = 'label-item';
-            div.innerHTML = `<canvas id="q-${Math.random().toString(36).substr(2,9)}"></canvas>
-                             <div class="txt">${item.m}<br>${item.c}</div>`;
-            container.appendChild(div);
-            new QRious({ element: div.querySelector('canvas'), value: code, size: 150 });
-        });
-        setTimeout(() => { window.print(); clearQueue(); }, 500);
+        container.innerHTML = `<div class="label-item"><canvas id="c"></canvas><div class="txt">${item.m} ${item.c} ${item.s}</div></div>`;
+        document.body.className = 'print-mode-single';
+        new QRious({ element: document.getElementById('c'), value: code, size: 200 });
+        setTimeout(() => { window.print(); container.innerHTML = ''; }, 500);
     }
 
     function renderReport() {
         const d = document.getElementById('reportDate').value || new Date().toISOString().split('T')[0];
         const rows = salesHistory.filter(x => x.t.includes(d));
-        const b = document.getElementById('reportBody');
-        let totalVal = 0;
-        b.innerHTML = rows.map((x, i) => {
-            if(x.type === '銷售') totalVal += (x.q * x.p);
-            return `<tr>
-                <td>${x.t.split(' ')[1]}</td>
-                <td>${x.code}<br><small>${x.type} ${x.q}pcs @$${x.p}</small></td>
-                <td><button onclick="delHistory(${i})" class="qty-btn admin-only">刪</button></td>
-            </tr>`;
+        let total = 0;
+        document.getElementById('reportBody').innerHTML = rows.map(x => {
+            if(x.type==='銷售') total += (x.q * x.p);
+            return `<tr><td>${x.t.split(' ')[1]}</td><td>${x.code}<br><small>${x.type} ${x.q} @${x.p}</small></td><td>-</td></tr>`;
         }).join('');
-        document.getElementById('reportSummary').innerHTML = `本日銷售總額：<b style="color:var(--danger)">$${totalVal}</b>`;
-    }
-    function delHistory(idx) {
-        if(confirm("確定刪除此紀錄？庫存不會自動回補")) {
-            salesHistory.splice(idx, 1); save(); renderReport();
-        }
-    }
-
-    function renderUserList() {
-        const l = document.getElementById('userList');
-        l.innerHTML = users.map((u, i) => `<span class="tag">${u.n}(${u.r}) <span onclick="users.splice(${i},1);save();renderUserList()" style="cursor:pointer;margin-left:5px;color:red">×</span></span>`).join('');
-    }
-    function addUser() {
-        const n = document.getElementById('newUName').value;
-        const p = document.getElementById('newUPass').value;
-        const r = document.getElementById('newURole').value;
-        if(n && p) {
-            users.push({n, p, r}); save(); renderUserList();
-            document.getElementById('newUName').value=''; document.getElementById('newUPass').value='';
-        }
+        document.getElementById('reportSummary').innerHTML = `本日銷售：$${total}`;
     }
 
     function exportData() {
         const blob = new Blob([localStorage.getItem('lingerie_db')], {type:'application/json'});
         const a = document.createElement('a');
-        const today = new Date().toISOString().split('T')[0];
         a.href = URL.createObjectURL(blob);
-        a.download = `Lingerie_Backup_${today}.json`;
+        a.download = `Lingerie_Backup_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
     }
     function triggerImport() { document.getElementById('importFile').click(); }
@@ -567,15 +491,7 @@ function updateA4Config() {
         const f = e.target.files[0];
         if(!f) return;
         const r = new FileReader();
-        r.onload = (ev) => {
-            try {
-                const d = JSON.parse(ev.target.result);
-                vendors=d.v||[]; models=d.m||[]; inventory=d.i||[]; colors=d.c||[];
-                itemTypes=d.t||["內衣","塑身衣","內褲"]; salesHistory=d.sh||[]; users=d.u||[];
-                compName=d.cn||"內衣店"; taxRate=d.tr||5;
-                save(); alert("匯入成功！"); location.reload();
-            } catch(err) { alert("檔案格式錯誤"); }
-        };
+        r.onload = (ev) => { try { localStorage.setItem('lingerie_db', ev.target.result); location.reload(); } catch(err) { alert("錯誤"); } };
         r.readAsText(f);
     }
     function updateSysConfig() {
@@ -583,12 +499,14 @@ function updateA4Config() {
         taxRate = parseFloat(document.getElementById('taxRateInp').value);
         save();
     }
-    function clearAllData() {
-        if(confirm("確定要清除所有資料嗎？此動作無法復原！")) {
-            localStorage.removeItem('lingerie_db');
-            location.reload();
-        }
+    function renderUserList() {
+        document.getElementById('userList').innerHTML = users.map((u, i) => `<span class="tag">${u.n} <span onclick="users.splice(${i},1);save();renderUserList()" style="color:red;margin-left:5px">×</span></span>`).join('');
     }
+    function addUser() {
+        const n = document.getElementById('newUName').value, p = document.getElementById('newUPass').value, r = document.getElementById('newURole').value;
+        if(n && p) { users.push({n,p,r}); save(); renderUserList(); }
+    }
+    function clearAllData() { if(confirm("確定刪除所有？")) { localStorage.removeItem('lingerie_db'); location.reload(); } }
 
     window.onload = load;
 </script>
