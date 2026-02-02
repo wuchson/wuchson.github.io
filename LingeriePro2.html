@@ -1,369 +1,260 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 智慧庫存管理系統</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <style>
-        :root {
-            --primary: #8da399;
-            --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
-            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
-            --s-mt: 0mm; --s-ml: 0mm;
-        }
-        body { font-family: -apple-system, "Noto Sans TC", sans-serif;
-            background: var(--bg); margin: 0; padding: 10px; color: #444; }
-        .container { max-width: 600px; margin: auto; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px;
-            border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
-        
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        
-        .admin-only { display: none; }
-        body.is-admin .admin-only { display: block; }
-        .staff-hidden { display: none; }
-        body.is-admin .staff-hidden { display: block; }
-
-        .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin: 10px 0; }
-        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
-        .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-        input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
-        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-        .btn-accent { background: var(--accent); }
-        .btn-success { background: var(--success); }
-        .btn-danger { background: var(--danger); }
-        
-        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
-        .tag b { margin-left: 8px; color: var(--danger); cursor: pointer; }
-        
-        #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
-        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
-        
-        .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
-        
-        @media print {
-            .no-print { display: none !important; }
-            body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; box-sizing: border-box; }
-            body.print-mode-single #print-label-page { display: flex !important; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding-top: var(--s-mt) !important; padding-left: var(--s-ml) !important; }
-            .label-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        }
-    </style>
-</head>
-<div id="login-overlay">
-    <div class="login-card">
-        <h2 style="text-align:center; color:var(--primary); margin-top:0;">系統登入</h2>
-        <div class="field"><label>帳號</label><input type="text" id="loginUser"></div>
-        <div class="field"><label>密碼</label><input type="password" id="loginPass"></div>
-        <button onclick="login()">登入系統</button>
+<div class="card admin-only">
+    <h3>1. 基礎設定</h3>
+    <div class="row-inputs">
+        <input type="text" id="vCodeInp" placeholder="廠商代碼">
+        <input type="text" id="vNameInp" placeholder="廠商名稱">
     </div>
-</div>
-
-<div class="container no-print">
-    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span id="userStatus" style="font-size: 14px; color: #666;"></span>
-        <button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
-    </div>
-
-    <div class="card admin-only">
-        <h3>1. 基礎模板設定</h3>
-        
-        <div class="row-inputs">
-            <input type="text" id="vCodeInp" placeholder="廠商代碼">
-            <input type="text" id="vNameInp" placeholder="廠商名稱">
-        </div>
-        <button onclick="addVendor()">+ 新增廠商</button>
-        <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
-        
-        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-
-        <div class="field">
-            <label style="font-weight:bold; font-size:12px;">🎨 顏色管理 (代碼:名稱)</label>
-            <div class="row-inputs">
-                <input type="text" id="colorInp" placeholder="BLK:黑色">
-                <button class="btn-accent" style="flex:0.4" onclick="addTemplate('color')">+ 新增</button>
-            </div>
-            <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-        </div>
-
-        <div class="field">
-            <label style="font-weight:bold; font-size:12px;">📦 商品類別管理 (代碼:名稱)</label>
-            <div class="row-inputs">
-                <input type="text" id="typeInp" placeholder="BRA:內衣">
-                <button class="btn-accent" style="flex:0.4" onclick="addTemplate('type')">+ 新增</button>
-            </div>
-            <div id="typeTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-        </div>
-
-        <div class="field">
-            <label style="font-weight:bold; font-size:12px;">📏 尺碼 1 管理 (如:下圍)</label>
-            <div class="row-inputs">
-                <input type="text" id="s1Inp" placeholder="直接輸入名稱">
-                <button class="btn-accent" style="flex:0.4" onclick="addTemplate('s1')">+ 新增</button>
-            </div>
-            <div id="s1Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-        </div>
-
-        <div class="field">
-            <label style="font-weight:bold; font-size:12px;">📏 尺碼 2 管理 (如:罩杯)</label>
-            <div class="row-inputs">
-                <input type="text" id="s2Inp" placeholder="直接輸入名稱">
-                <button class="btn-accent" style="flex:0.4" onclick="addTemplate('s2')">+ 新增</button>
-            </div>
-            <div id="s2Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-        </div>
-
-        <div class="field">
-            <label style="font-weight:bold; font-size:12px;">📏 尺碼 3 管理 (如:一般尺碼)</label>
-            <div class="row-inputs">
-                <input type="text" id="s3Inp" placeholder="直接輸入名稱">
-                <button class="btn-accent" style="flex:0.4" onclick="addTemplate('s3')">+ 新增</button>
-            </div>
-            <div id="s3Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
-        </div>
-    </div>
-<div class="field">
-            <label style="font-size: 11px; font-weight: bold; color: #6b7e75;">儲存款式定義</label>
-            <select id="setVendorRel"></select>
-            <div class="row-inputs" style="margin-top:5px;">
-                <input type="text" id="setBraId" placeholder="型號 (如: A001)">
-                <select id="setItemTypeSelect"></select>
-            </div>
-            <div class="row-inputs">
-                <input type="number" id="setCost" placeholder="進價">
-                <input type="number" id="setPrice" placeholder="售價">
-            </div>
-            <button class="btn-accent" onclick="addModel()">儲存款式定義</button>
-            <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>2. 進出貨與操作</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-            <button style="background:#4299e1; padding:10px 5px; font-size:13px;" onclick="startScan('IN_AUTO')">📥 連續入庫</button>
-            <button style="background:#3182ce; padding:10px 5px; font-size:13px;" onclick="startScan('IN_MANUAL')">📥 入庫(填量)</button>
-            <button style="background:#48bb78; padding:10px 5px; font-size:13px;" onclick="startScan('OUT_AUTO')">📤 出貨掃描</button>
-        </div>
-        
-        <div id="scanner-container">
-            <div id="scan-feedback">掃描成功！</div>
-            <div id="reader"></div>
-            <button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button>
-        </div>
-
-        <div class="field">
-            <select id="selectVendor" onchange="updateModelSelect()"></select>
-            <select id="selectModel" style="margin-top:5px;"></select>
-        </div>
-
-        <div class="row-inputs">
-            <select id="selectColor"></select>
-            <select id="selectS1"></select>
-            <select id="selectS2"></select>
-            <select id="selectS3"></select>
-        </div>
-
-        <div class="field"><label>數量</label><input type="number" id="braQty" value="1"></div>
+    <button onclick="addVendor()">+ 新增廠商</button>
+    <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
     
+    <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+    <div class="row-inputs">
+        <input type="text" id="colorInp" placeholder="代碼:顏色 (如 BLK:黑色)">
+        <button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增顏色</button>
+    </div>
+    <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+
+    <div class="row-inputs">
+        <input type="text" id="typeInp" placeholder="代碼:類別 (如 BRA:內衣)">
+        <button class="btn-accent" style="flex:0.5; background:#6b7e75;" onclick="addItemType()">+ 新增類別</button>
+    </div>
+    <div id="typeTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+    
+    <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+    <div class="row-inputs">
+        <input type="text" id="size1Inp" placeholder="新增 尺碼1 (如: 32)">
+        <button class="btn-accent" style="flex:0.5; background:#8da399;" onclick="addSize(1)">+ 新增尺碼1</button>
+    </div>
+    <div id="size1Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+
+    <div class="row-inputs">
+        <input type="text" id="size2Inp" placeholder="新增 尺碼2 (如: B)">
+        <button class="btn-accent" style="flex:0.5; background:#8da399;" onclick="addSize(2)">+ 新增尺碼2</button>
+    </div>
+    <div id="size2Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+
+    <div class="row-inputs">
+        <input type="text" id="size3Inp" placeholder="新增 尺碼3 (如: M)">
+        <button class="btn-accent" style="flex:0.5; background:#8da399;" onclick="addSize(3)">+ 新增尺碼3</button>
+    </div>
+    <div id="size3Tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+
+    <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+    <div class="field">
+        <label style="font-size: 11px; font-weight: bold; color: #6b7e75;">儲存款式定義</label>
+        <select id="setVendorRel"></select>
+        <div class="row-inputs" style="margin-top:5px;">
+            <input type="text" id="setBraId" placeholder="型號 (如: A001)">
+            <select id="setItemTypeSelect"></select>
+        </div>
         <div class="row-inputs">
-            <button onclick="handleManual('IN')">📥 手動入庫</button>
-            <button class="btn-success" onclick="generateInvoiceManual()">📄 加入出貨單</button>
+             <input type="number" id="setCost" placeholder="進價 (內部用)">
+             <input type="number" id="setPrice" placeholder="售價">
         </div>
-
-        <div class="row-inputs admin-only" style="margin-top:10px;">
-            <select id="printType" style="flex:0.4">
-                <option value="A4">A4 (35張)</option>
-                <option value="SINGLE">單張 (條碼機)</option>
-            </select>
-            <button class="btn-accent" onclick="prepareTags()">🖨️ 產生標籤</button>
-        </div>
-    </div>
-<div id="print-preview-zone">
-        <h4 style="margin:0 0 10px 0; color:var(--accent);">🔍 列印預覽 (僅顯示)</h4>
-        <div id="preview-list" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px;"></div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn-success" onclick="executePrint()">確認列印</button>
-            <button class="btn-danger" onclick="closePreview()">取消</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>3. 庫存統計與管理</h3>
-        <div class="row-inputs">
-            <input type="text" id="searchInp" placeholder="搜尋型號/尺碼..." oninput="renderInventory()">
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead style="background:#f4f6f5;">
-                    <tr>
-                        <th>廠商/型號</th>
-                        <th>類別</th>
-                        <th>顏色/尺碼(1/2/3)</th>
-                        <th>數量</th>
-                        <th class="admin-only">進價</th>
-                        <th>售價</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card staff-hidden">
-        <h3>4. 出貨紀錄統計</h3>
-        <div id="salesSummary" style="font-size:0.9rem; margin-bottom:10px; font-weight:bold;"></div>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>時間</th><th>內容</th><th>金額</th></tr>
-                </thead>
-                <tbody id="salesBody"></tbody>
-            </table>
-        </div>
-        <button style="margin-top:10px; background:#666;" onclick="clearSales()">清空紀錄</button>
-    </div>
-
-    <div class="card admin-only">
-        <h3>5. 資料備份與恢復</h3>
-        <div class="row-inputs">
-            <button onclick="exportData()">💾 匯出資料備份</button>
-            <button class="btn-accent" onclick="triggerImport()">📂 匯入備份資料</button>
-        </div>
-        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        <button class="btn-accent" onclick="addModel()">儲存款式定義</button>
+        <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
     </div>
 </div>
+<div class="card">
+    <h3>2. 進出貨與操作</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+        <button style="background:#4299e1; padding:10px 5px; font-size:13px;" onclick="startScan('IN_AUTO')">📥 連續入庫</button>
+        <button style="background:#3182ce; padding:10px 5px; font-size:13px;" onclick="startScan('IN_MANUAL')">📥 入庫(填量)</button>
+        <button style="background:#48bb78; padding:10px 5px; font-size:13px;" onclick="startScan('OUT_AUTO')">📤 出貨掃描</button>
+    </div>
+    
+    <div id="scanner-container">
+        <div id="scan-feedback">掃描成功！</div>
+        <div id="reader"></div>
+        <button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button>
+    </div>
 
-<div id="print-label-page"></div>
-<div id="print-invoice-page"></div>
+    <div class="field">
+        <select id="selectVendor" onchange="updateModelSelect()"></select>
+        <select id="selectModel" style="margin-top:5px;"></select>
+    </div>
 
-<div style="height: 60px;"></div>
+    <div class="row-inputs">
+        <select id="selectColor"></select>
+        <select id="size1" style="flex:1;"></select>
+        <select id="size2" style="flex:1;"></select>
+        <select id="size3" style="flex:1;"></select>
+    </div>
+
+    <div class="field">
+        <label>數量</label>
+        <input type="number" id="braQty" value="1">
+    </div>
+
+    <div class="row-inputs">
+        <button onclick="handleManual('IN')">📥 手動入庫</button>
+        <button class="btn-success" onclick="generateInvoiceManual()">📄 加入出貨單</button>
+    </div>
+
+    <div class="row-inputs admin-only" style="margin-top:10px;">
+        <select id="printType" style="flex:0.4">
+            <option value="A4">A4 (35張)</option>
+            <option value="SINGLE">單張 (條碼機)</option>
+        </select>
+        <button class="btn-accent" onclick="prepareTags()">🖨️ 產生標籤</button>
+    </div>
+
+    <div class="config-card admin-only">
+        </div>
+</div>
+// [部分 3/5] JavaScript 變數初始化與核心邏輯更新
 <script>
-    let vendors = [], models = [], inventory = [], users = [];
+    // 擴充變數，新增 sizes 物件來存放三個類別的尺碼陣列 [cite: 100]
+    let vendors = [], models = [], inventory = [], colors = {}, itemTypes = {}, users = [];
     let salesHistory = [], invoiceItems = [], currentUser = null, scanMode = '';
-    let colors = {}, itemTypes = {}, s1List = [], s2List = [], s3List = []; // 五大模板資料
     let compName = "我的公司", taxRate = 5;
-
-    window.onload = () => {
-        const d = JSON.parse(localStorage.getItem('lingerieData') || '{}');
-        vendors = d.v || []; models = d.m || []; inventory = d.i || [];
-        users = d.u || [{ n: "admin", p: "1234", r: "admin" }];
-        colors = d.c || { "BLK": "黑色" };
-        itemTypes = d.t || { "BRA": "內衣" };
-        s1List = d.s1 || ["32", "34", "36"]; // 預設尺碼1
-        s2List = d.s2 || ["A", "B", "C"];    // 預設尺碼2
-        s3List = d.s3 || ["S", "M", "L"];    // 預設尺碼3
-        salesHistory = d.sh || [];
-        compName = d.cn || "我的公司"; taxRate = d.tr || 5;
-        loadPrintConfigs(); renderAll();
+    
+    // 新增：自定義尺碼儲存 [cite: 104]
+    let sizes = {
+        s1: ["32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52"],
+        s2: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"],
+        s3: ["SS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "FREE"]
     };
 
+    // 修改初始化邏輯，讀取儲存的尺碼 [cite: 101, 102]
+    window.onload = () => {
+        const d = JSON.parse(localStorage.getItem('lingerieData') || '{}');
+        vendors = d.v || []; 
+        models = d.m || []; 
+        inventory = d.i || [];
+        colors = d.c || { "BLK": "黑色", "WHT": "白色" };
+        itemTypes = d.t || { "BRA": "內衣", "PAN": "內褲" };
+        users = d.u || [{ n: "admin", p: "1234", r: "admin" }];
+        salesHistory = d.sh || [];
+        compName = d.cn || "我的公司";
+        taxRate = d.tr || 5;
+        
+        // 如果儲存資料中有尺碼設定則覆蓋預設值 [cite: 102]
+        if (d.sz) sizes = d.sz; 
+
+        loadPrintConfigs(); 
+        renderAll();
+    };
+
+    // 修改儲存函數，納入 sizes [cite: 107]
     function save() {
-        const data = { v: vendors, m: models, i: inventory, u: users, c: colors, t: itemTypes, s1: s1List, s2: s2List, s3: s3List, sh: salesHistory, cn: compName, tr: taxRate };
+        const data = { 
+            v: vendors, m: models, i: inventory, c: colors, 
+            t: itemTypes, u: users, sh: salesHistory, 
+            cn: compName, tr: taxRate,
+            sz: sizes // 新增儲存項
+        };
         localStorage.setItem('lingerieData', JSON.stringify(data));
         renderAll();
     }
-
-    // 通用模板新增功能
-    function addTemplate(type) {
-        const inp = document.getElementById(type + 'Inp');
-        const val = inp.value.trim();
-        if (!val) return;
-
-        if (type === 'color' || type === 'type') {
-            if (val.includes(':')) {
-                const [code, name] = val.split(':');
-                if (type === 'color') colors[code.toUpperCase()] = name;
-                else itemTypes[code.toUpperCase()] = name;
-            } else { alert("格式錯誤，請輸入 代碼:名稱"); return; }
-        } else {
-            // 尺碼 1, 2, 3 直接存入陣列
-            if (type === 's1' && !s1List.includes(val)) s1List.push(val);
-            else if (type === 's2' && !s2List.includes(val)) s2List.push(val);
-            else if (type === 's3' && !s3List.includes(val)) s3List.push(val);
-        }
-        inp.value = ''; save();
-    }
-
-    // 通用模板刪除功能
-    function delTemplate(type, key) {
-        if (!confirm(`確定刪除 ${key}?`)) return;
-        if (type === 'color') delete colors[key];
-        else if (type === 'type') delete itemTypes[key];
-        else if (type === 's1') s1List = s1List.filter(x => x !== key);
-        else if (type === 's2') s2List = s2List.filter(x => x !== key);
-        else if (type === 's3') s3List = s3List.filter(x => x !== key);
+// [部分 4/5] 尺碼管理功能與動態渲染
+    
+    // 新增尺碼的功能
+    function addSize(typeNum) {
+        const inpId = `size${typeNum}Inp`;
+        const val = document.getElementById(inpId).value.trim().toUpperCase();
+        
+        if (!val) return alert("請輸入尺碼內容");
+        if (sizes[`s${typeNum}`].includes(val)) return alert("此尺碼已存在");
+        
+        sizes[`s${typeNum}`].push(val);
+        // 排序（選用，讓尺碼看起來整齊）
+        sizes[`s${typeNum}`].sort((a, b) => isNaN(a) || isNaN(b) ? a.localeCompare(b) : a - b);
+        
+        document.getElementById(inpId).value = '';
         save();
     }
 
-    function renderAll() {
-        // 渲染 顏色與類別標籤
-        document.getElementById('colorTags').innerHTML = Object.entries(colors).map(([k,v]) => `<span class="tag">${k}:${v}<b onclick="delTemplate('color','${k}')">×</b></span>`).join('');
-        document.getElementById('typeTags').innerHTML = Object.entries(itemTypes).map(([k,v]) => `<span class="tag">${k}:${v}<b onclick="delTemplate('type','${k}')">×</b></span>`).join('');
-        
-        // 渲染 尺碼1, 2, 3 標籤
-        document.getElementById('s1Tags').innerHTML = s1List.map(x => `<span class="tag">${x}<b onclick="delTemplate('s1','${x}')">×</b></span>`).join('');
-        document.getElementById('s2Tags').innerHTML = s2List.map(x => `<span class="tag">${x}<b onclick="delTemplate('s2','${x}')">×</b></span>`).join('');
-        document.getElementById('s3Tags').innerHTML = s3List.map(x => `<span class="tag">${x}<b onclick="delTemplate('s3','${x}')">×</b></span>`).join('');
-
-        // 更新所有下拉選單
-        updateSelects();
-        renderInventory();
+    // 刪除尺碼的功能
+    function delSize(typeNum, val) {
+        if (confirm(`確定要刪除尺碼 ${val} 嗎？`)) {
+            sizes[`s${typeNum}`] = sizes[`s${typeNum}`].filter(s => s !== val);
+            save();
+        }
     }
 
-    function updateSelects() {
-        const fill = (id, list, isObj) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (isObj) el.innerHTML = Object.entries(list).map(([k,v]) => `<option value="${k}">${v}(${k})</option>`).join('');
-            else el.innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join('');
-        };
-        fill('selectColor', colors, true);
-        fill('setItemTypeSelect', itemTypes, true);
-        fill('selectS1', s1List, false);
-        fill('selectS2', s2List, false);
-        fill('selectS3', s3List, false);
-        
-        // 廠商與型號聯動
+    // 擴充 renderAll 函數，納入尺碼標籤的更新
+    function renderSizeTags() {
+        for (let i = 1; i <= 3; i++) {
+            const container = document.getElementById(`size${i}Tags`);
+            container.innerHTML = sizes[`s${i}`].map(s => 
+                `<span class="tag">${s} <b onclick="delSize(${i},'${s}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`
+            ).join('');
+            
+            [cite_start]// 同時更新進出貨區塊的 select 下拉選單 [cite: 84]
+            const selectEl = document.getElementById(`size${i}`);
+            [cite_start]// 加入一個空選項或預設值 "-" [cite: 135]
+            let options = '<option value="-">-</option>'; 
+            options += sizes[`s${i}`].map(s => `<option value="${s}">${s}</option>`).join('');
+            selectEl.innerHTML = options;
+        }
+    }
+
+    [cite_start]// 注意：需在原本的 renderAll() 函數內加入對 renderSizeTags() 的呼叫 [cite: 124, 131]
+// [部分 5/5] 整合渲染函數與掃描填入邏輯
+
+    // 重新整合後的渲染函數
+    function renderAll() {
+        // 1. 廠商下拉選單 [cite: 124]
         const vSels = ['setVendorRel', 'selectVendor'];
         vSels.forEach(s => {
             const el = document.getElementById(s);
             el.innerHTML = vendors.map(v => `<option value="${v.code}">${v.name}</option>`).join('');
         });
-        updateModelSelect();
+
+        // 2. 類別標籤與下拉 [cite: 126, 127]
+        const tTags = document.getElementById('typeTags');
+        tTags.innerHTML = Object.entries(itemTypes).map(([c, n]) => `<span class="tag">${c}:${n} <b onclick="delType('${c}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        const tSel = document.getElementById('setItemTypeSelect');
+        tSel.innerHTML = Object.entries(itemTypes).map(([c, n]) => `<option value="${c}">${n}</option>`).join('');
+
+        // 3. 顏色標籤與下拉 [cite: 128, 129]
+        const cTags = document.getElementById('colorTags');
+        cTags.innerHTML = Object.entries(colors).map(([c, n]) => `<span class="tag">${c}:${n} <b onclick="delColor('${c}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        const cSel = document.getElementById('selectColor');
+        cSel.innerHTML = Object.entries(colors).map(([c, n]) => `<option value="${c}">${n}(${c})</option>`).join('');
+
+        // 4. 廠商與款式標籤 [cite: 129, 130]
+        document.getElementById('vendorTags').innerHTML = vendors.map(v => `<span class="tag">${v.name}(${v.code}) <b onclick="delVendor('${v.code}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        document.getElementById('modelTags').innerHTML = models.map(m => `<span class="tag">${m.vCode}/${m.braId} <b onclick="delModel('${m.vCode}','${m.braId}')" style="margin-left:5px;color:red;cursor:pointer">×</b></span>`).join('');
+        
+        // 5. 呼叫第四部分新增的尺碼渲染
+        renderSizeTags();
+        
+        updateModelSelect(); // [cite: 132]
+        renderInventory(); // [cite: 141]
+        renderSales(); // [cite: 131]
     }
 
-    function handleManual(dir) {
-        const v = document.getElementById('selectVendor').value;
-        const b = document.getElementById('selectModel').value;
-        const c = document.getElementById('selectColor').value;
-        const s1 = document.getElementById('selectS1').value;
-        const s2 = document.getElementById('selectS2').value;
-        const s3 = document.getElementById('selectS3').value;
-        const q = parseInt(document.getElementById('braQty').value) || 0;
-        if (!b) return alert("請先定義型號");
-        processInventory(v, b, c, s1, s2, s3, dir==='IN'?q:-q);
-    }
+    // 微調掃描填入邏輯：改為填入 select 的值 [cite: 151]
+    function onScanSuccess(decodedText) {
+        const p = decodedText.split(',');
+        if (p.length < 7) return;
+        const [v, b, t, c, s1, s2, s3] = p; // [cite: 148]
+        
+        const feedback = document.getElementById('scan-feedback');
+        feedback.style.display = 'block'; // [cite: 149]
+        setTimeout(() => feedback.style.display = 'none', 1000);
 
-    function processInventory(v, b, c, s1, s2, s3, q) {
-        let item = inventory.find(i => i.v===v && i.b===b && i.c===c && i.s1===s1 && i.s2===s2 && i.s3===s3);
-        if (item) { item.q += q; if(item.q<0) item.q=0; }
-        else if (q>0) { inventory.push({ v, b, c, s1, s2, s3, q }); }
-        save();
+        if (scanMode === 'IN_AUTO') {
+            processInventory(v, b, c, s1, s2, s3, 1); // [cite: 150]
+        } else if (scanMode === 'IN_MANUAL') {
+            stopScan(); // [cite: 151]
+            document.getElementById('selectVendor').value = v;
+            updateModelSelect();
+            document.getElementById('selectModel').value = b;
+            document.getElementById('selectColor').value = c;
+            // 改為選取下拉選單的值
+            document.getElementById('size1').value = s1;
+            document.getElementById('size2').value = s2;
+            document.getElementById('size3').value = s3;
+        } else if (scanMode === 'OUT_AUTO') {
+            addToInvoice(v, b, c, s1, s2, s3, 1); // [cite: 153]
+        }
     }
-
-    // 登入、廠商、標籤產生等其餘功能與 2026-0202-本地通用版-4-HTML 一致，僅變數名對應 s1, s2, s3
-    // ... (此處省略部分重複的工具函數以節省篇幅)
-    
-    function login() { /* ... 同前版 ... */ }
-    function startScan(m) { /* ... 同前版 ... */ }
-    function exportData() { /* ... 包含新的 s1,s2,s3 列表 ... */ }
 </script>
 </body>
 </html>
