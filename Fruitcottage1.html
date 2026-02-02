@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>專業果樹管理系統 v3.4</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2d6a4f;
+            --primary-dark: #1b4332;
+            --accent: #d4a373;
+            --bg: #f4f6f5;
+            --white: #ffffff;
+            --text-dark: #1b4332;
+            --radius: 16px;
+            --danger: #e63946;
+            --warning: #ffb703;
+            --money: #2a9d8f;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; background: #222; display: flex; justify-content: center; align-items: center; font-family: -apple-system, sans-serif; overflow: hidden; }
+        
+        .container { width: 100vw; max-width: 500px; height: 100vh; height: -webkit-fill-available; background: var(--bg); display: flex; flex-direction: column; position: relative; }
+
+        #backup-banner { background: var(--warning); padding: 10px 15px; display: none; align-items: center; justify-content: space-between; font-size: 14px; font-weight: bold; z-index: 10001; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .banner-content { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+        header { background: var(--primary); padding: 15px 20px 25px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; position: relative; }
+        header * { color: var(--white) !important; }
+        .logout-text-btn { position: absolute; right: 15px; top: 12px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+        .content-view { display: none; }
+        .active-view { display: block; }
+
+        .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
+        
+        input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
+        textarea { resize: none; font-family: inherit; }
+
+        #header-area-filter option { color: #1b4332 !important; background-color: #ffffff !important; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        label { font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block; }
+
+        .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white !important; }
+        .btn-warning { background: var(--warning); color: #000 !important; }
+        .btn-outline { background: #e0e0e0; color: #333 !important; }
+        .btn-danger { background: var(--danger); color: white !important; }
+
+        .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
+        
+        .trend-container { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px; }
+        .trend-bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; min-height: 2px; transition: height 0.5s ease; }
+        .trend-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; white-space: nowrap; color: white !important; }
+
+        nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+        .nav-item div { color: #888; margin-top: 4px; }
+        .nav-item.active div { color: var(--primary); font-weight: bold; }
+        .nav-add-btn { background: var(--primary); color: white !important; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+
+        .admin-only { display: none; }
+        .sub-field { display: none; margin-top: 5px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
+
+        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 5px; min-height: 50px; }
+        .check-container label { margin: 0; flex: 1; }
+        .check-container input[type="checkbox"] { width: 20px; height: 20px; margin: 0 0 0 10px; cursor: pointer; flex-shrink: 0; }
+        
+        .user-tag { display: inline-flex; align-items: center; background: #e8f5e9; padding: 5px 12px; border-radius: 20px; margin: 5px; font-size: 14px; border: 1px solid var(--primary); }
+        .user-tag span { margin-left: 8px; color: var(--danger); cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="backup-banner">
+        <div class="banner-content" onclick="handleBackupNow()">⚠️ 距離上次備份已超過 7 天，請立即匯出。</div>
+        <div onclick="closeBackupBanner()" style="padding: 5px; cursor: pointer; opacity: 0.7;">✕</div>
+    </div>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color: var(--primary); margin-top: 0;">果樹管理系統</h2>
+            <p style="font-size: 12px; color: #666;">請輸入人員姓名或管理員密碼</p>
+            <input type="text" id="login-pass" placeholder="人員姓名或密碼" style="text-align: center;">
+            <button class="btn btn-primary" onclick="checkAuth()">登入系統</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="logout-text-btn" onclick="logout()">登出</div>
+        <div style="font-size: 13px; opacity: 0.9;"><span id="user-icon">👤</span> <span id="user-role-display"></span> | <span id="display-today"></span></div>
+        <div style="margin: 10px 0;">
+            <select id="header-area-filter" onchange="renderHome()" style="width: auto; padding: 5px 15px; border-radius: 20px; font-size: 14px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white; cursor: pointer;">
+                <option value="全部">全場數據加總</option>
+                <option value="A區">A區</option>
+                <option value="B區">B區</option>
+                <option value="C區">C區</option>
+            </select>
+        </div>
+        <div style="display: flex; justify-content: space-around; gap: 5px;">
+            <div>今日採收<br><b id="today-qty" style="font-size:20px;">0</b> <small>粒</small></div>
+            <div>今日重量<br><b id="today-weight" style="font-size:20px;">0.0</b> <small>KG</small></div>
+            <div>今日收入<br><b id="today-income" style="font-size:20px; color:#ffb703 !important;">0</b> <small>元</small></div>
+        </div>
+    </header>
+
+    <div class="content-area">
+        <div id="view-home" class="content-view active-view">
+            <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white; margin-bottom: 10px;">
+                <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4>
+                <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div>
+            </div>
+
+            <div class="card" style="background: #2d6a4f; color: white;">
+                <h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢 (近7日)</h4>
+                <div id="weekly-trend-chart" class="trend-container"></div>
+                <div style="margin-top: 22px; font-size: 12px; text-align: center; opacity: 0.9; color: white !important;">
+                    本週累計: <span id="weekly-total-qty" style="font-weight: bold; color: #d4a373 !important;">0</span> 粒 / 
+                    收入: <span id="weekly-total-income" style="font-weight: bold; color: #ffb703 !important;">0</span> 元
+                </div>
+            </div>
+
+            <input type="text" id="search" placeholder="🔍 搜尋編號或名稱..." oninput="renderHome()" style="margin-top: 10px;">
+            <div id="tree-list-container"></div>
+        </div>
+
+        <div id="view-edit" class="content-view">
+            <div class="card">
+                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
+                <div class="grid-2">
+                    <div><label>📅 日期</label><input type="date" id="f-date"></div>
+                    <div><label>👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
+                </div>
+                
+                <div class="section-title">📍 基本資訊</div>
+                <select id="f-area"><option value="A區">A區</option><option value="B區">B區</option><option value="C區">C區</option></select>
+                <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
+
+                <div class="check-container"><label>🌸 處於花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
+                <div id="f-bloomStatus-box" class="sub-field"><select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select></div>
+
+                <div class="check-container"><label>🛍️ 已套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
+                <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
+
+                <div class="section-title">🛠️ 養護與健康</div>
+                <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥劑量">
+                <div class="grid-2">
+                    <div class="check-container" style="font-size:13px;"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
+                    <div class="check-container" style="font-size:13px;"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
+                </div>
+                <select id="f-health"><option value="良好">健康良好</option><option value="需關注">需關注</option><option value="患病中">患病中</option></select>
+                <textarea id="f-healthDesc" rows="2" placeholder="病情或異常描述..."></textarea>
+                <input type="text" id="f-medDose" placeholder="使用藥劑與劑量">
+
+                <div class="section-title">💰 採收與銷售</div>
+                <label>正常果採收 (粒/總重)</label>
+                <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量"></div>
+                
+                <label>💰 銷售數據</label>
+                <div class="grid-2">
+                    <input type="number" id="f-sellWeight" step="0.1" placeholder="賣出重量" oninput="calcIncome()">
+                    <select id="f-unit" onchange="calcIncome()">
+                        <option value="公斤">公斤 (KG)</option>
+                        <option value="台斤">台斤</option>
+                    </select>
+                </div>
+                <div class="grid-2">
+                    <input type="number" id="f-price" placeholder="單價 (元)" oninput="calcIncome()">
+                    <input type="number" id="f-income" placeholder="總收入 (自動)" style="background:#f9f9f9 !important; font-weight:bold; color:var(--money) !important;">
+                </div>
+
+                <label style="color: var(--danger);">爛果 (⚠️)</label>
+                <div class="grid-2"><input type="number" id="f-badQty" placeholder="粒數"><input type="number" id="f-badWeight" step="0.1" placeholder="重量(KG)"></div>
+                
+                <div class="admin-only" id="admin-rank-panel">
+                    <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員)</div>
+                    
+                    <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#FF9000; font-weight:bold; margin-bottom:8px;">🥇 第一名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r1-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r1-b" step="0.1"></div>
+                        </div>
+                    </div>
+
+                    <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#FF9000; font-weight:bold; margin-bottom:8px;">🥈 第二名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r2-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r2-b" step="0.1"></div>
+                        </div>
+                    </div>
+
+                    <div class="rank-card" style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#FF9000; font-weight:bold; margin-bottom:8px;">🥉 第三名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r3-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r3-b" step="0.1"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-warning" onclick="saveRanking()" style="margin-bottom:20px;">更新今日排行</button>
+                </div>
+
+                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
+                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除</button>
+                <button class="btn btn-outline" onclick="showView('home')">取消</button>
+            </div>
+        </div>
+
+        <div id="view-tools" class="content-view admin-only">
+            <div class="card">
+                <h3>👥 使用者名單管理</h3>
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                    <input type="text" id="new-user-name" placeholder="輸入新人員姓名" style="margin-bottom: 0;">
+                    <button class="btn btn-primary" onclick="addUser()" style="margin-top: 0; width: 80px; padding: 0;">新增</button>
+                </div>
+                <div id="user-list-tags" style="min-height: 50px; border: 1px solid #eee; border-radius: 12px; padding: 10px; margin-bottom: 15px;">
+                    </div>
+            </div>
+
+            <div class="card">
+                <h3>📂 資料安全管理</h3>
+                <div style="background: #fff9f0; padding: 12px; border-radius: 10px; border: 1px solid #ffe8cc; margin-bottom: 15px;">
+                    <small>上次備份時間：</small><br><b id="last-backup-display">尚未有備份紀錄</b>
+                </div>
+                <button class="btn btn-warning" onclick="exportExcel()">📤 匯出備份 (Excel)</button>
+                <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📥 匯入資料 (Excel)</button>
+                <input type="file" id="import-file" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
+                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                <button class="btn btn-danger" onclick="clearAllData()">🧨 清空所有資料</button>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-item active" id="n-home" onclick="showView('home')"><span>📋</span><div>清單</div></div>
+        <div class="nav-item" onclick="prepareAdd()"><div class="nav-add-btn">＋</div></div>
+        <div class="nav-item admin-only" id="n-tools" onclick="showView('tools')"><span>⚙️</span><div>設定</div></div>
+    </nav>
+</div>
+
+<script>
+    // 資料初始化
+    let db = JSON.parse(localStorage.getItem('farm_v31')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v31')) || {};
+    let userList = JSON.parse(localStorage.getItem('user_list_v31')) || [];
+    let lastBackup = localStorage.getItem('last_backup_time') || "";
+    let currentUser = "";
+    let isAdmin = false;
+
+    const ADMIN_PASS = "admin123";
+    const getToday = () => new Date().toISOString().split('T')[0];
+
+    // 初始化備份檢查
+    window.onload = function() {
+        checkBackupStatus();
+    };
+
+    function checkAuth() {
+        const input = document.getElementById('login-pass').value.trim();
+        if (!input) return alert("請輸入姓名或密碼");
+        
+        if (input === ADMIN_PASS) { 
+            isAdmin = true; 
+            currentUser = "管理員"; 
+        } else if (userList.includes(input)) { 
+            isAdmin = false; 
+            currentUser = input; 
+        } else {
+            return alert("姓名不在授權名單中，請聯繫管理員");
+        }
+
+        if(isAdmin) {
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = (el.classList.contains('nav-item') ? 'flex' : 'block');
+            });
+        }
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('user-role-display').innerText = currentUser;
+        document.getElementById('display-today').innerText = getToday();
+        renderHome();
+        renderUserList();
+    }
+
+    // --- 使用者管理 ---
+    function addUser() {
+        const name = document.getElementById('new-user-name').value.trim();
+        if (!name) return alert("請輸入人員姓名");
+        if (userList.includes(name)) return alert("該人員已在名單中");
+        userList.push(name);
+        saveUserList();
+        document.getElementById('new-user-name').value = '';
+        renderUserList();
+    }
+
+    function removeUser(name) {
+        if (confirm(`確定要移除人員「${name}」的登入權限嗎？`)) {
+            userList = userList.filter(u => u !== name);
+            saveUserList();
+            renderUserList();
+        }
+    }
+
+    function renderUserList() {
+        const container = document.getElementById('user-list-tags');
+        if (!container) return;
+        if (userList.length === 0) {
+            container.innerHTML = '<span style="color:#888; font-size:13px;">目前無授權使用者</span>';
+            return;
+        }
+        container.innerHTML = userList.map(name => `
+            <div class="user-tag">
+                ${name} <span onclick="removeUser('${name}')">×</span>
+            </div>
+        `).join('');
+    }
+
+    function saveUserList() { 
+        localStorage.setItem('user_list_v31', JSON.stringify(userList)); 
+    }
+
+    // --- 計算與排行 ---
+    function calcIncome() {
+        const w = parseFloat(document.getElementById('f-sellWeight').value) || 0;
+        const p = parseFloat(document.getElementById('f-price').value) || 0;
+        document.getElementById('f-income').value = Math.round(w * p);
+    }
+
+    function saveRanking() {
+        const today = getToday();
+        rankStore[today] = {
+            r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value,
+            r2w: document.getElementById('r2-w').value, r2b: document.getElementById('r2-b').value,
+            r3w: document.getElementById('r3-w').value, r3b: document.getElementById('r3-b').value
+        };
+        localStorage.setItem('rank_v31', JSON.stringify(rankStore));
+        alert("今日品質排行已更新！");
+        renderHome();
+    }
+
+    // --- 渲染畫面 ---
+    function renderHome() {
+        const today = getToday(), area = document.getElementById('header-area-filter').value;
+        let filtered = area === "全部" ? db : db.filter(t => t.area === area);
+        
+        const todayData = filtered.filter(t => t.date === today);
+        document.getElementById('today-qty').innerText = todayData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
+        document.getElementById('today-weight').innerText = todayData.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
+        document.getElementById('today-income').innerText = todayData.reduce((s,t)=>s+(parseInt(t.income)||0), 0).toLocaleString();
+
+        const r = rankStore[today];
+        document.getElementById('display-rank-list').innerHTML = r ? 
+            `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. ${r.r2w||'-'}g (${r.r2b||'-'}°) | 3. ${r.r3w||'-'}g (${r.r3b||'-'}°)` : "尚未排行";
+
+        const chartContainer = document.getElementById('weekly-trend-chart');
+        let daysData = [], weeklyQty = 0, weeklyIncome = 0;
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const ds = d.toISOString().split('T')[0];
+            const dayRecords = filtered.filter(t => t.date === ds);
+            const dq = dayRecords.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
+            const di = dayRecords.reduce((s, t) => s + (parseInt(t.income) || 0), 0);
+            daysData.push({ date: ds.slice(5), qty: dq });
+            weeklyQty += dq; weeklyIncome += di;
+        }
+        document.getElementById('weekly-total-qty').innerText = weeklyQty;
+        document.getElementById('weekly-total-income').innerText = weeklyIncome.toLocaleString();
+
+        const maxQty = Math.max(...daysData.map(d => d.qty), 1);
+        chartContainer.innerHTML = daysData.map(d => `<div class="trend-bar" style="height: ${(d.qty / maxQty) * 100}%"><div style="position:absolute; top:-15px; width:30px; left:50%; transform:translateX(-50%); text-align:center; font-size:9px; color:white !important;">${d.qty > 0 ? d.qty : ''}</div><div class="trend-label">${d.date}</div></div>`).join('');
+
+        const q = document.getElementById('search').value.toLowerCase();
+        document.getElementById('tree-list-container').innerHTML = filtered.filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q))
+            .reverse().map(t => `<div class="card" onclick="editTree('${t.code}', '${t.date}')"><div style="display:flex; justify-content:space-between; align-items:center;"><div><b>${t.name}</b> <small>#${t.code}</small><br><span style="font-size:11px; color:#888;">採收:${t.harvestQty||0} | 收入:${t.income||0}元</span></div><div style="text-align:right;"><b>${t.weightVal||0} KG</b><br><small>${t.health}</small></div></div></div>`).join('');
+    }
+
+    // --- 儲存與編輯 ---
+    function handleSave() {
+        const code = document.getElementById('f-code').value, date = document.getElementById('f-date').value;
+        if(!code || !date) return alert("編號與日期必填");
+        const data = {
+            area: document.getElementById('f-area').value, 
+            name: document.getElementById('f-name').value, 
+            code, date,
+            harvestQty: document.getElementById('f-harvestQty').value, 
+            weightVal: document.getElementById('f-weightVal').value,
+            sellWeight: document.getElementById('f-sellWeight').value, 
+            unit: document.getElementById('f-unit').value,
+            price: document.getElementById('f-price').value, 
+            income: document.getElementById('f-income').value,
+            badQty: document.getElementById('f-badQty').value, 
+            badWeight: document.getElementById('f-badWeight').value,
+            lastUser: currentUser, 
+            isBlooming: document.getElementById('f-isBlooming').checked,
+            isBagged: document.getElementById('f-isBagged').checked, 
+            health: document.getElementById('f-health').value,
+            healthDesc: document.getElementById('f-healthDesc').value
+        };
+        const idx = db.findIndex(x => x.code === code && x.date === date);
+        if(idx > -1) db[idx] = Object.assign(db[idx], data); else db.push(data);
+        localStorage.setItem('farm_v31', JSON.stringify(db));
+        alert("儲存成功");
+        showView('home');
+    }
+
+    function editTree(code, date) {
+        const t = db.find(x => x.code === code && x.date === date); 
+        if(!t) return;
+        document.getElementById('f-area').value = t.area; 
+        document.getElementById('f-date').value = t.date;
+        document.getElementById('f-name').value = t.name; 
+        document.getElementById('f-code').value = t.code;
+        document.getElementById('f-harvestQty').value = t.harvestQty || ''; 
+        document.getElementById('f-weightVal').value = t.weightVal || '';
+        document.getElementById('f-sellWeight').value = t.sellWeight || '';
+        document.getElementById('f-unit').value = t.unit || '公斤';
+        document.getElementById('f-price').value = t.price || '';
+        document.getElementById('f-income').value = t.income || '';
+        document.getElementById('f-health').value = t.health || '良好';
+        document.getElementById('f-healthDesc').value = t.healthDesc || '';
+        document.getElementById('f-isBlooming').checked = t.isBlooming || false;
+        document.getElementById('f-isBagged').checked = t.isBagged || false;
+        showView('edit');
+    }
+
+    function deleteCurrentRecord() {
+        const code = document.getElementById('f-code').value;
+        const date = document.getElementById('f-date').value;
+        if(confirm("確定要刪除這筆紀錄嗎？")) {
+            db = db.filter(x => !(x.code === code && x.date === date));
+            localStorage.setItem('farm_v31', JSON.stringify(db));
+            showView('home');
+        }
+    }
+
+    function prepareAdd() {
+        document.querySelectorAll('#view-edit input:not([type=date]):not([readonly]), #view-edit select, #view-edit textarea').forEach(e => { 
+            if(e.type==='checkbox') e.checked = false; else e.value = ''; 
+        });
+        document.getElementById('f-date').value = getToday(); 
+        document.getElementById('f-user-static').value = currentUser;
+        document.getElementById('f-unit').value = '公斤';
+        showView('edit');
+    }
+
+    function showView(vId) {
+        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
+        document.getElementById('view-'+vId).classList.add('active-view');
+        
+        // 更新 Nav 樣式
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(document.getElementById('n-'+vId)) document.getElementById('n-'+vId).classList.add('active');
+
+        if(vId === 'home') renderHome();
+        if(vId === 'tools') {
+            renderUserList();
+            updateBackupDisplay();
+        }
+    }
+
+    // --- Excel 匯出與匯入 ---
+    function exportExcel() { 
+        if(db.length === 0) return alert("目前沒有資料可以匯出");
+        const ws = XLSX.utils.json_to_sheet(db); 
+        const wb = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(wb, ws, "Data"); 
+        XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`); 
+        
+        // 更新備份時間
+        const now = new Date().toLocaleString();
+        localStorage.setItem('last_backup_time', now);
+        updateBackupDisplay();
+        closeBackupBanner();
+    }
+
+    function importExcel(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const importedData = XLSX.utils.sheet_to_json(worksheet);
+                
+                if (importedData.length === 0) return alert("檔案內沒有資料");
+
+                if (confirm(`讀取到 ${importedData.length} 筆資料。要覆蓋現有資料嗎？\n(按取消則為「新增」至現有資料後方)`)) {
+                    db = importedData;
+                } else {
+                    db = db.concat(importedData);
+                }
+
+                localStorage.setItem('farm_v31', JSON.stringify(db));
+                alert("匯入成功！");
+                renderHome();
+                input.value = '';
+            } catch (err) {
+                alert("匯入失敗，請檢查 Excel 格式是否正確。");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // --- 資料安全與其他功能 ---
+    function clearAllData() {
+        if(confirm("⚠️ 警告：這將永久刪除「所有」紀錄且無法還原！\n確定要繼續嗎？")) {
+            if(confirm("最後一次確認：真的要清空嗎？")) {
+                db = [];
+                rankStore = {};
+                localStorage.removeItem('farm_v31');
+                localStorage.removeItem('rank_v31');
+                alert("資料已清空");
+                renderHome();
+            }
+        }
+    }
+
+    function checkBackupStatus() {
+        const last = localStorage.getItem('last_backup_time');
+        if (!last) {
+            document.getElementById('backup-banner').style.display = 'flex';
+            return;
+        }
+        const lastDate = new Date(last);
+        const diffDays = (new Date() - lastDate) / (1000 * 60 * 60 * 24);
+        if (diffDays > 7) {
+            document.getElementById('backup-banner').style.display = 'flex';
+        }
+    }
+
+    function handleBackupNow() {
+        exportExcel();
+    }
+
+    function closeBackupBanner() {
+        document.getElementById('backup-banner').style.display = 'none';
+    }
+
+    function updateBackupDisplay() {
+        const last = localStorage.getItem('last_backup_time');
+        document.getElementById('last-backup-display').innerText = last || "尚未有備份紀錄";
+    }
+
+    function toggleSubField(c, b) { 
+        document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; 
+    }
+    
+    function logout() { location.reload(); }
+</script>
+</body>
+</html>
