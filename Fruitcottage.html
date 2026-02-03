@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v3.5</title>
+    <title>專業果樹管理系統 v3.5.1-Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -40,14 +40,12 @@
         .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
         .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
-        
-        .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white !important; }
         .btn-warning { background: var(--warning); color: #000 !important; }
         .btn-outline { background: #e0e0e0; color: #333 !important; }
         .btn-danger { background: var(--danger); color: white !important; }
 
-        /* 修正導覽列位置問題：使用 flex:1 確保按鈕均分空間，不因隱藏而跑掉 */
         nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; min-width: 0; }
         .nav-item div { color: #888; margin-top: 4px; white-space: nowrap; }
@@ -60,6 +58,14 @@
         .check-container input[type="checkbox"] { width: 20px; height: 20px; margin: 0; cursor: pointer; }
 
         .admin-only { display: none; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stats-card { background: #fff; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #eee; }
+        .stats-label { display: block; font-size: 12px; color: #666; }
+        .stats-val { display: block; font-size: 20px; font-weight: bold; color: var(--primary); }
+        .report-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .report-table th { background: #f8f9f8; padding: 10px; text-align: left; color: #666; }
+        .report-table td { padding: 10px; border-bottom: 1px solid #eee; }
+        .row-total { background: #f0f4f2; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -98,7 +104,7 @@
     </header>
 
     <div class="content-area">
-        <div id="view-home" class="content-view active-view">
+     <div id="view-home" class="content-view active-view">
             <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white; margin-bottom: 10px;">
                 <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4>
                 <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div>
@@ -116,7 +122,8 @@
             <input type="text" id="search" placeholder="🔍 搜尋編號或名稱..." oninput="renderHome()" style="margin-top: 10px;">
             <div id="tree-list-container"></div>
         </div>
-<div id="view-edit" class="content-view">
+
+        <div id="view-edit" class="content-view">
             <div class="card">
                 <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -163,7 +170,6 @@
                     <div><label style="font-size: 12px;">正常採收(粒)</label><input type="number" id="f-harvestQty"></div>
                     <div><label style="font-size: 12px;">重量(KG)</label><input type="number" id="f-weightVal" step="0.1"></div>
                 </div>
-              
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
                     <div><label style="font-size: 12px;">銷售重量</label><input type="number" id="f-sellWeight" step="0.1" oninput="calcIncome()"></div>
                     <div><label style="font-size: 12px;">單位</label><select id="f-unit" onchange="calcIncome()"><option value="公斤">公斤</option><option value="台斤">台斤</option></select></div>
@@ -191,7 +197,7 @@
                 </div>
 
                 <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
-                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除</button>
+                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除紀錄</button>
                 <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
@@ -211,7 +217,6 @@
                     <table class="report-table">
                         <thead><tr><th>月份</th><th>採收(粒)</th><th>重量(KG)</th><th>收入(元)</th></tr></thead>
                         <tbody id="stats-tbody"></tbody>
-                        <tfoot><tr id="stats-tfoot" class="row-total"></tr></tfoot>
                     </table>
                 </div>
             </div>
@@ -229,6 +234,7 @@
                     <div id="user-list-tags" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:15px;"></div>
                 </div>
                 <div class="section-title">📂 資料備份</div>
+                <p style="font-size:12px; color:#666;">最後備份：<span id="last-backup-display">無紀錄</span></p>
                 <button class="btn btn-warning" onclick="exportExcel()">📤 匯出 Excel 備份</button>
                 <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📥 匯入資料</button>
                 <input type="file" id="import-file" style="display:none" onchange="importExcel(this)">
@@ -280,13 +286,11 @@
         
         if (pass === "admin123") {
             currentUser = "管理員";
-            // 顯示管理員專屬元素
             document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = (el.tagName === 'DIV' && el.classList.contains('nav-item')) ? 'flex' : 'block';
+                el.style.display = (el.classList.contains('nav-item')) ? 'flex' : 'block';
             });
         } else if (users.includes(pass) || pass === "測試") {
             currentUser = pass;
-            // 確保非管理員時隱藏
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
         } else {
             return alert("無此人員權限，請聯繫管理員");
@@ -301,14 +305,11 @@
     function showView(viewId) {
         document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
         document.getElementById('view-' + viewId).classList.add('active-view');
-        
-        // 更新選單狀態
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         const navIdx = { 'home': 0, 'stats': 1, 'edit': 2, 'tools': 3 };
         if (navIdx[viewId] !== undefined) {
             document.querySelectorAll('.nav-item')[navIdx[viewId]].classList.add('active');
         }
-        
         if(viewId === 'home') renderHome();
         if(viewId === 'stats') renderStats();
     }
@@ -320,11 +321,9 @@
         const search = document.getElementById('search').value.toLowerCase();
         const container = document.getElementById('tree-list-container');
         container.innerHTML = "";
-
         let tQty = 0, tW = 0, tIn = 0;
-        const todayData = db.filter(r => r.date === getToday());
         
-        todayData.forEach(r => {
+        db.filter(r => r.date === getToday()).forEach(r => {
             if (areaFilter === "全部" || r.area === areaFilter) {
                 tQty += (r.harvestQty || 0);
                 tW += (r.weightVal || 0);
@@ -337,15 +336,12 @@
         document.getElementById('today-income').innerText = tIn.toLocaleString();
 
         const rank = rankings[getToday()];
-        document.getElementById('display-rank-list').innerHTML = rank ? 
+        document.getElementById('display-rank-list').innerHTML = rank ?
             `🏆 今日第一名：${rank.weight}g / ${rank.brix}°` : "今日暫無排行紀錄";
 
-        const filtered = db.filter(r => 
-            (areaFilter === "全部" || r.area === areaFilter) &&
+        db.filter(r => (areaFilter === "全部" || r.area === areaFilter) &&
             (r.name.toLowerCase().includes(search) || r.code.toLowerCase().includes(search))
-        ).reverse().slice(0, 30);
-
-        filtered.forEach(r => {
+        ).reverse().slice(0, 30).forEach(r => {
             container.innerHTML += `
                 <div class="card" style="padding:12px;" onclick="editRecord(${r.id})">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -429,7 +425,6 @@
         const r = db.find(item => item.id === id);
         if(!r) return;
         editingId = id;
-        // 載入資料至表單 (代碼同上，略...)
         document.getElementById('f-date').value = r.date;
         document.getElementById('f-area').value = r.area;
         document.getElementById('f-name').value = r.name;
@@ -453,7 +448,6 @@
         document.getElementById('f-income').value = r.income;
         document.getElementById('f-badQty').value = r.badQty;
         document.getElementById('f-badWeight').value = r.badWeight;
-
         toggleSubField('f-isBlooming', 'f-bloomStatus-box');
         toggleSubField('f-isBagged', 'f-bagQty-box');
         showView('edit');
@@ -478,17 +472,12 @@
     function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; }
 
     function renderStats() {
-        // 統計邏輯完整保留 (代碼同上...)
-        const year = document.getElementById('stats-year');
-        if(year.options.length === 0) {
+        const yearSelect = document.getElementById('stats-year');
+        if(yearSelect.options.length === 0) {
             const cy = new Date().getFullYear();
-            for(let i=0; i<3; i++) year.add(new Option(cy-i, cy-i));
+            for(let i=0; i<3; i++) yearSelect.add(new Option(cy-i, cy-i));
         }
-        renderStatsTable();
-    }
-
-    function renderStatsTable() {
-        const selYear = document.getElementById('stats-year').value;
+        const selYear = yearSelect.value;
         const selArea = document.getElementById('stats-area').value;
         const tbody = document.getElementById('stats-tbody');
         tbody.innerHTML = "";
@@ -505,6 +494,53 @@
         document.getElementById('stat-total-income').innerText = gIn.toLocaleString();
     }
 
+    function addUser() {
+        const nameInput = document.getElementById('new-user-name');
+        const name = nameInput.value.trim();
+        if(name && !users.includes(name)) {
+            users.push(name);
+            localStorage.setItem('orchard_users', JSON.stringify(users));
+            nameInput.value = "";
+            renderUserList();
+        } else { alert("請輸入姓名或姓名已存在"); }
+    }
+
+    function deleteUser(name) {
+        if(confirm(`確定要刪除人員：${name} 嗎？`)) {
+            users = users.filter(u => u !== name);
+            localStorage.setItem('orchard_users', JSON.stringify(users));
+            renderUserList();
+        }
+    }
+
+    function renderUserList() {
+        const container = document.getElementById('user-list-tags');
+        if(!container) return;
+        container.innerHTML = "";
+        users.forEach(u => {
+            container.innerHTML += `<span style="background:#e0ede4; padding:5px 10px; border-radius:15px; font-size:13px; display:inline-flex; align-items:center; gap:5px;">${u} <span onclick="deleteUser('${u}')" style="color:red; font-weight:bold; cursor:pointer;">×</span></span>`;
+        });
+    }
+
+    function saveRanking() {
+        const w = document.getElementById('r1-w').value;
+        const b = document.getElementById('r1-b').value;
+        if(!w || !b) return alert("請輸入完整數據");
+        rankings[getToday()] = { weight: w, brix: b };
+        localStorage.setItem('orchard_ranks', JSON.stringify(rankings));
+        alert("排行已更新");
+        renderHome();
+    }
+
+    function deleteCurrentRecord() {
+        if(!editingId) return;
+        if(confirm("確定要刪除此筆紀錄嗎？")) {
+            db = db.filter(r => r.id !== editingId);
+            localStorage.setItem('orchard_db_v35', JSON.stringify(db));
+            showView('home');
+        }
+    }
+
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new();
@@ -512,6 +548,23 @@
         XLSX.writeFile(wb, `果園備份_${getToday()}.xlsx`);
         localStorage.setItem('last_backup_time', new Date().toLocaleString());
         updateBackupDisplay();
+    }
+
+    function importExcel(input) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(firstSheet);
+            if(confirm(`即將匯入 ${json.length} 筆資料，這將與現有資料合併，確定嗎？`)) {
+                db = [...db, ...json];
+                localStorage.setItem('orchard_db_v35', JSON.stringify(db));
+                location.reload();
+            }
+        };
+        reader.readAsArrayBuffer(file);
     }
 
     function checkBackupStatus() {
@@ -523,22 +576,10 @@
         document.getElementById('last-backup-display').innerText = localStorage.getItem('last_backup_time') || "尚未有備份紀錄";
     }
 
-    function renderUserList() {
-        const container = document.getElementById('user-list-tags');
-        if(!container) return;
-        container.innerHTML = "";
-        users.forEach(u => {
-            container.innerHTML += `<span style="background:#e0ede4; padding:5px 10px; border-radius:15px; font-size:13px;">${u} <small onclick="deleteUser('${u}')" style="color:red; margin-left:5px;">x</small></span>`;
-        });
-    }
-
-    function addUser() {
-        const name = document.getElementById('new-user-name').value.trim();
-        if(name && !users.includes(name)) {
-            users.push(name);
-            localStorage.setItem('orchard_users', JSON.stringify(users));
-            document.getElementById('new-user-name').value = "";
-            renderUserList();
+    function clearAllData() {
+        if(confirm("⚠️ 注意！這將刪除所有採收紀錄且無法還原，確定嗎？")) {
+            localStorage.removeItem('orchard_db_v35');
+            location.reload();
         }
     }
 </script>
