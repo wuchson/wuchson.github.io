@@ -3,169 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v3.5 - 佈局修正</title>
+    <title>專業果樹管理系統 v3.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
     <style>
         :root {
-            --primary: #2d6a4f;
-            --primary-dark: #1b4332;
-            --accent: #d4a373;
-            --bg: #f4f6f5;
-            --white: #ffffff;
-            --text-dark: #1b4332;
-            --radius: 16px;
-            --danger: #e63946;
-            --warning: #ffb703;
-            --money: #2a9d8f;
+            --primary: #2d6a4f; --primary-dark: #1b4332; --accent: #d4a373;
+            --bg: #f4f6f5; --white: #ffffff; --text-dark: #1b4332;
+            --radius: 16px; --danger: #e63946; --warning: #ffb703; --money: #2a9d8f;
         }
-
-        /* 修正 1: 強制全螢幕佈局，避免位置跑掉 */
-        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
-        html, body { 
-            height: 100%; margin: 0; padding: 0;
-            background: #222; display: flex; justify-content: center; align-items: center; 
-            font-family: -apple-system, system-ui, sans-serif; 
-            overflow: hidden; 
-        }
-        
-        .container { 
-            width: 100vw; max-width: 500px; height: 100vh; 
-            background: var(--bg); display: flex; flex-direction: column; 
-            position: relative; overflow: hidden;
-        }
-
-        /* 修正 2: 頂部 Header 固定高度 */
-        header { 
-            background: var(--primary); padding: 15px 20px 20px 20px; 
-            text-align: center; border-radius: 0 0 30px 30px; 
-            flex-shrink: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; background: #222; display: flex; justify-content: center; align-items: center; font-family: -apple-system, sans-serif; overflow: hidden; }
+        .container { width: 100vw; max-width: 500px; height: 100vh; height: -webkit-fill-available; background: var(--bg); display: flex; flex-direction: column; position: relative; }
+        #backup-banner { background: var(--warning); padding: 10px 15px; display: none; align-items: center; justify-content: space-between; font-size: 14px; font-weight: bold; z-index: 10001; }
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; }
+        header { background: var(--primary); padding: 15px 20px 25px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; position: relative; }
         header * { color: var(--white) !important; }
-
-        /* 修正 3: 內容區自動填滿並可捲動 */
-        .content-area { 
-            flex: 1; overflow-y: auto; padding: 15px; 
-            -webkit-overflow-scrolling: touch; 
-            display: flex; flex-direction: column;
-        }
-        .content-view { display: none; width: 100%; }
+        .logout-text-btn { position: absolute; right: 15px; top: 12px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; }
+        .content-area { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+        .content-view { display: none; }
         .active-view { display: block; }
-
-        /* 修正 4: 底部導覽列固定在最下方 */
-        nav { 
-            flex-shrink: 0; width: 100%; height: 75px; 
-            background: var(--white); display: flex; 
-            border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom);
-            z-index: 100;
-        }
-
-        /* 通用元件樣式 */
-        .card { background: var(--white); border-radius: var(--radius); padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        input, select, textarea { 
-            width: 100%; padding: 12px; border: 1.5px solid #ddd; 
-            border-radius: 12px; font-size: 16px; margin-bottom: 8px;
-            background: #fff !important; color: var(--text-dark) !important;
-        }
-
-        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; }
+        .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
+        .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
+        .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white !important; }
+        .btn-warning { background: var(--warning); color: #000 !important; }
+        .btn-outline { background: #e0e0e0; color: #333 !important; }
+        .btn-danger { background: var(--danger); color: white !important; }
         
-        /* 導覽按鈕 */
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; }
-        .nav-item div { color: #888; margin-top: 2px; }
-        .nav-item.active div { color: var(--primary); font-weight: bold; }
-        .nav-add-btn { background: var(--primary); color: white !important; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(45,106,79,0.3); }
-
-        /* 統計專用 */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        .stats-card { background: #f0f7f4; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #e0ede4; }
-        .report-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .report-table th { background: #eee; padding: 8px; border-bottom: 2px solid var(--primary); }
+        /* 雙排文字控制 */
+        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 5px; min-height: 64px; }
+        .check-container label { line-height: 1.3; font-weight: 500; flex: 1; padding-right: 10px; }
+        
+        /* 統計與導覽樣式 */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stats-card { background: #f8fcf9; border: 1px solid #e0ede4; padding: 12px; border-radius: 12px; text-align: center; }
+        .stats-val { font-size: 18px; font-weight: bold; color: var(--primary); display: block; }
+        .stats-label { font-size: 12px; color: #666; }
+        .report-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        .report-table th { background: #eee; padding: 8px; text-align: left; border-bottom: 2px solid var(--primary); }
         .report-table td { padding: 8px; border-bottom: 1px solid #eee; }
-
-        #login-screen { position: absolute; inset: 0; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+        .nav-item div { color: #888; margin-top: 4px; }
+        .nav-item.active div { color: var(--primary); font-weight: bold; }
+        .nav-add-btn { background: var(--primary); color: white !important; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+        .sub-field { display: none; margin-top: 5px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
         .admin-only { display: none; }
     </style>
 </head>
 <body>
-
 <div class="container">
+    <div id="backup-banner">
+        <div onclick="exportExcel()">⚠️ 距離上次備份已超過 7 天，請點此匯出。</div>
+        <div onclick="this.parentElement.style.display='none'">✕</div>
+    </div>
     <div id="login-screen">
-        <div style="background: white; padding: 30px; border-radius: 25px; width: 85%; text-align: center;">
-            <h2 style="color: var(--primary);">果樹管理 v3.5</h2>
-            <input type="text" id="login-pass" placeholder="輸入人員姓名或管理員密碼" style="text-align: center;">
-            <button class="btn btn-primary" onclick="checkAuth()">進入系統</button>
+        <div class="login-box">
+            <h2 style="color: var(--primary); margin: 0;">果樹管理系統 v3.5</h2>
+            <p style="font-size: 12px; color: #666; margin-bottom: 20px;">請輸入人員姓名或管理員密碼</p>
+            <input type="text" id="login-pass" placeholder="人員姓名或密碼" style="text-align: center;">
+            <button class="btn btn-primary" onclick="checkAuth()">登入系統</button>
         </div>
     </div>
-
     <header>
-        <div style="display:flex; justify-content: space-between; font-size: 12px; margin-bottom: 10px;">
-            <span id="display-today"></span>
-            <span id="user-role-display"></span>
+        <div class="logout-text-btn" onclick="location.reload()">登出</div>
+        <div style="font-size: 13px; opacity: 0.9;">👤 <span id="user-role-display"></span> | <span id="display-today"></span></div>
+        <div style="margin: 10px 0;">
+            <select id="header-area-filter" onchange="renderHome()" style="width: auto; padding: 5px 15px; border-radius: 20px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white;">
+                <option value="全部">全場數據加總</option>
+                <option value="A區">A區</option><option value="B區">B區</option><option value="C區">C區</option>
+            </select>
         </div>
-        <select id="header-area-filter" onchange="renderHome()" style="width: 140px; height:32px; padding:0 10px; margin: 0 auto 10px; border-radius: 20px; background: rgba(255,255,255,0.2) !important;">
-            <option value="全部">全部區域</option>
-            <option value="A區">A區</option>
-            <option value="B區">B區</option>
-            <option value="C區">C區</option>
-        </select>
-        <div style="display: flex; justify-content: space-around;">
-            <div>今日採收<br><b id="today-qty">0</b></div>
-            <div>今日重量<br><b id="today-weight">0.0</b></div>
-            <div>今日收入<br><b id="today-income">0</b></div>
+        <div style="display: flex; justify-content: space-around; gap: 5px;">
+            <div>今日採收<br><b id="today-qty">0</b> <small>粒</small></div>
+            <div>今日重量<br><b id="today-weight">0.0</b> <small>KG</small></div>
+            <div>今日收入<br><b id="today-income" style="color:#ffb703 !important;">0</b> <small>元</small></div>
         </div>
     </header>
 <div class="content-area">
         <div id="view-home" class="content-view active-view">
-            <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white;">
+            <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white; margin-bottom: 10px;">
                 <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4>
-                <div id="display-rank-list" style="font-size:14px; line-height: 1.5;"></div>
+                <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div>
             </div>
 
-            <div class="card" style="background: #2d6a4f; color: white; margin-top: 12px;">
-                <h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢</h4>
-                <div id="weekly-trend-chart" style="display: flex; align-items: flex-end; gap: 6px; height: 60px; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 8px;"></div>
-                <div style="margin-top: 10px; font-size: 11px; text-align: center; opacity: 0.8;">
-                    本週累計: <span id="weekly-total-qty">0</span> 粒 / 
-                    收入: <span id="weekly-total-income">0</span> 元
+            <div class="card" style="background: #2d6a4f; color: white;">
+                <h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢 (近7日)</h4>
+                <div id="weekly-trend-chart" style="display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px;"></div>
+                <div style="margin-top: 22px; font-size: 12px; text-align: center; opacity: 0.9; color: white !important;">
+                    本週累計: <span id="weekly-total-qty" style="font-weight: bold; color: #d4a373 !important;">0</span> 粒 / 
+                    收入: <span id="weekly-total-income" style="font-weight: bold; color: #ffb703 !important;">0</span> 元
                 </div>
             </div>
 
-            <input type="text" id="search" placeholder="🔍 搜尋編號、名稱或區域..." oninput="renderHome()" style="margin-top: 15px;">
-            
-            <div id="tree-list-container" style="margin-top: 10px;"></div>
+            <input type="text" id="search" placeholder="🔍 搜尋編號或名稱..." oninput="renderHome()" style="margin-top: 10px;">
+            <div id="tree-list-container"></div>
         </div>
 
         <div id="view-edit" class="content-view">
             <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary); text-align:center;">📝 紀錄填報</h3>
-                
-                <div class="grid-2">
-                    <div><label style="font-size:12px;">📅 日期</label><input type="date" id="f-date"></div>
-                    <div><label style="font-size:12px;">👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#eee !important;"></div>
+                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div><label style="font-size: 13px;">📅 日期</label><input type="date" id="f-date"></div>
+                    <div><label style="font-size: 13px;">👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
                 </div>
-
+                
                 <div class="section-title">📍 基本資訊</div>
                 <select id="f-area">
                     <option value="A區">A區</option>
                     <option value="B區">B區</option>
                     <option value="C區">C區</option>
                 </select>
-                <div class="grid-2">
-                    <input type="text" id="f-name" placeholder="果樹名稱">
-                    <input type="text" id="f-code" placeholder="樹木編號">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="f-name" placeholder="名稱">
+                    <input type="text" id="f-code" placeholder="編號">
                 </div>
 
                 <div class="check-container">
-                    <label>🌸 處於花期</label>
+                    <label>🌸 處於<br>花期</label>
                     <input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')">
                 </div>
                 <div id="f-bloomStatus-box" class="sub-field">
                     <select id="f-bloomStatus">
-                        <option value="">-- 選擇花況 --</option>
+                        <option value="">選擇花況</option>
                         <option value="少量開花">少量開花</option>
                         <option value="盛開中">盛開中</option>
                         <option value="花期結束">花期結束</option>
@@ -173,423 +135,297 @@
                 </div>
 
                 <div class="check-container">
-                    <label>🛍️ 已套袋</label>
+                    <label>🛍️ 已套<br>袋</label>
                     <input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')">
                 </div>
-                <div id="f-bagQty-box" class="sub-field">
-                    <input type="number" id="f-bagQty" placeholder="輸入套袋數量">
-                </div>
+                <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
 
                 <div class="section-title">🛠️ 養護與健康</div>
-                <div class="grid-2">
-                    <input type="text" id="f-water" placeholder="澆水說明">
-                    <input type="text" id="f-fert" placeholder="施肥劑量">
-                </div>
-                <div class="grid-2">
-                    <div class="check-container" style="padding: 8px 12px;"><label style="font-size:13px;">大修剪</label><input type="checkbox" id="f-pruneBig"></div>
-                    <div class="check-container" style="padding: 8px 12px;"><label style="font-size:13px;">小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
-                </div>
-                <select id="f-health">
-                    <option value="良好">健康良好</option>
-                    <option value="需關注">需關注</option>
-                    <option value="患病中">患病中</option>
-                </select>
-                <textarea id="f-healthDesc" rows="2" placeholder="備註病情或異常..."></textarea>
-                <input type="text" id="f-medDose" placeholder="使用藥劑名稱與劑量">
-
-                <div class="section-title">💰 採收與銷售</div>
-                <div class="grid-2">
-                    <div><label style="font-size:12px;">採收(粒)</label><input type="number" id="f-harvestQty"></div>
-                    <div><label style="font-size:12px;">重量(KG)</label><input type="number" id="f-weightVal" step="0.1"></div>
-                </div>
-                <div class="grid-2">
-                    <div><label style="font-size:12px;">銷售重量</label><input type="number" id="f-sellWeight" step="0.1" oninput="calcIncome()"></div>
-                    <div><label style="font-size:12px;">單位</label>
-                        <select id="f-unit" onchange="calcIncome()">
-                            <option value="公斤">公斤</option>
-                            <option value="台斤">台斤</option>
-                        </select>
+                <input type="text" id="f-water" placeholder="澆水說明">
+                <input type="text" id="f-fert" placeholder="施肥劑量">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="check-container">
+                        <label>大修<br>剪</label>
+                        <input type="checkbox" id="f-pruneBig">
+                    </div>
+                    <div class="check-container">
+                        <label>小修<br>剪</label>
+                        <input type="checkbox" id="f-pruneSmall">
                     </div>
                 </div>
-                <div class="grid-2">
-                    <div><label style="font-size:12px;">單價(元)</label><input type="number" id="f-price" oninput="calcIncome()"></div>
-                    <div><label style="font-size:12px;">總收入</label><input type="number" id="f-income" readonly style="background:#f9f9f9 !important; font-weight:bold; color:var(--money) !important;"></div>
+<div class="check-container">
+                    <label>🐜 蟲害<br>發生</label>
+                    <input type="checkbox" id="f-isPest">
                 </div>
 
-                <div class="grid-2" style="margin-top:5px;">
-                    <div><label style="font-size:11px; color:var(--danger);">爛果粒數</label><input type="number" id="f-badQty"></div>
-                    <div><label style="font-size:11px; color:var(--danger);">爛果重量</label><input type="number" id="f-badWeight" step="0.1"></div>
+                <div class="section-title" style="color:var(--money);">💰 採收數據</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="number" id="f-harvestQty" placeholder="採收數量(粒)">
+                    <input type="number" id="f-sweet" step="0.1" placeholder="甜度(Brix)">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top:10px;">
+                    <input type="number" id="f-sellWeight" placeholder="重量" oninput="calcIncome()">
+                    <select id="f-unit" onchange="calcIncome()">
+                        <option value="KG">KG</option>
+                        <option value="台斤">台斤</option>
+                    </select>
+                    <input type="number" id="f-price" placeholder="單價" oninput="calcIncome()">
+                </div>
+                <div style="margin-top:10px; background:#f0f7f4; padding:10px; border-radius:12px;">
+                    <label style="font-size:12px; color:var(--money);">預估總收入 (元)</label>
+                    <input type="number" id="f-income" readonly style="border:none; background:transparent !important; font-size:24px; font-weight:bold; color:var(--money); margin:0;">
                 </div>
 
-                <div class="admin-only" id="admin-rank-panel" style="margin-top: 15px; padding: 10px; background: #fff5f5; border-radius: 12px; border: 1px solid #fed7d7;">
-                    <div style="font-weight:bold; color:var(--danger); margin-bottom:10px;">🎖️ 排行更新 (僅限管理員)</div>
-                    <div class="grid-2">
-                        <input type="number" id="r1-w" placeholder="第一名重量(g)">
-                        <input type="number" id="r1-b" step="0.1" placeholder="第一名甜度(°)">
-                    </div>
-                    <button class="btn btn-warning" onclick="saveRanking()" style="padding: 10px; font-size: 14px;">儲存今日品質排行</button>
+                <textarea id="f-note" placeholder="備註事項..." rows="3" style="margin-top:10px;"></textarea>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-outline" style="flex:1" onclick="showView('home')">取消</button>
+                    <button class="btn btn-primary" style="flex:2" onclick="saveData()">💾 儲存紀錄</button>
                 </div>
-
-                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 25px;">💾 儲存此筆紀錄</button>
-                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除紀錄</button>
-                <button class="btn btn-outline" onclick="showView('home')">取消返回</button>
+                <button id="del-btn" class="btn btn-danger admin-only" onclick="deleteData()">🗑️ 刪除此筆</button>
             </div>
         </div>
-<div id="view-stats" class="content-view">
-            <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary); text-align:center;">📊 產量與收入統計</h3>
-                
-                <div class="grid-2" style="margin-bottom: 15px;">
-                    <div>
-                        <label style="font-size: 13px; font-weight: bold;">📅 選擇年份</label>
-                        <select id="stats-year" onchange="renderStats()"></select>
-                    </div>
-                    <div>
-                        <label style="font-size: 13px; font-weight: bold;">📍 選擇區域</label>
-                        <select id="stats-area" onchange="renderStats()">
-                            <option value="全部">全部區域</option>
-                            <option value="A區">A區</option>
-                            <option value="B區">B區</option>
-                            <option value="C區">C區</option>
-                        </select>
-                    </div>
-                </div>
 
+        <div id="view-stats" class="content-view">
+            <div class="card">
+                <h3 style="margin:0 0 15px 0;">📊 數據統計</h3>
                 <div class="stats-grid">
-                    <div class="stats-card">
-                        <span class="stats-label">年度總採收</span>
-                        <span id="stat-total-qty" class="stats-val">0</span>
-                        <small>粒</small>
-                    </div>
-                    <div class="stats-card">
-                        <span class="stats-label">年度總收入</span>
-                        <span id="stat-total-income" class="stats-val" style="color:var(--money);">0</span>
-                        <small>元</small>
-                    </div>
-                    <div class="stats-card">
-                        <span class="stats-label">總重量 (KG)</span>
-                        <span id="stat-total-weight" class="stats-val">0.0</span>
-                    </div>
-                    <div class="stats-card">
-                        <span class="stats-label">均價 (元/KG)</span>
-                        <span id="stat-avg-price" class="stats-val" style="color:var(--accent);">0</span>
-                    </div>
+                    <div class="stats-card"><span class="stats-val" id="st-total-qty">0</span><span class="stats-label">總採收(粒)</span></div>
+                    <div class="stats-card"><span class="stats-val" id="st-total-weight">0</span><span class="stats-label">總重量(KG)</span></div>
+                    <div class="stats-card" style="grid-column: span 2; background:#fff7ed;"><span class="stats-val" id="st-total-income" style="color:#e67e22;">0</span><span class="stats-label">總收入 (TWD)</span></div>
                 </div>
-
-                <div class="section-title">📅 月份明細列表</div>
-                <div style="overflow-x: auto; background: #fff; border-radius: 8px;">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>月份</th>
-                                <th>採收(粒)</th>
-                                <th>重量(KG)</th>
-                                <th>收入(元)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stats-tbody">
-                            </tbody>
-                        <tfoot>
-                            <tr id="stats-tfoot" class="row-total" style="color: var(--primary);">
-                                </tr>
-                        </tfoot>
-                    </table>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn btn-outline" style="font-size:13px;" onclick="exportExcel()">📤 匯出 Excel</button>
+                    <button class="btn btn-danger admin-only" style="font-size:13px;" onclick="clearAllData()">🧹 清除資料</button>
                 </div>
             </div>
+            <div id="report-list"></div>
         </div>
+    </div>
 
-        <div id="view-tools" class="content-view admin-only">
-            <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary);">👥 使用者管理</h3>
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <input type="text" id="new-user-name" placeholder="輸入姓名" style="margin-bottom: 0;">
-                    <button class="btn btn-primary" onclick="addUser()" style="margin-top: 0; width: 80px; padding: 0;">新增</button>
-                </div>
-                <div id="user-list-tags" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background: #f9f9f9; border-radius: 12px; min-height: 40px;">
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary);">📂 資料維護</h3>
-                <div style="background: #fff9f0; padding: 12px; border-radius: 10px; border: 1px solid #ffe8cc; margin-bottom: 15px;">
-                    <small>上次備份：</small><br>
-                    <b id="last-backup-display" style="font-size: 14px;">尚未紀錄</b>
-                </div>
-                <button class="btn btn-warning" onclick="exportExcel()">📤 匯出 Excel 備份</button>
-                
-                <div style="margin-top: 10px;">
-                    <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📥 匯入資料 (Excel)</button>
-                    <input type="file" id="import-file" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
-                </div>
-                
-                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-                
-                <button class="btn btn-danger" onclick="clearAllData()">🧨 清空所有資料</button>
-                <p style="font-size: 11px; color: #999; text-align: center; margin-top: 10px;">
-                    系統版本: v3.5 Final | 修正位置偏移
-                </p>
-            </div>
-        </div>
-    </div> <nav>
-        <div class="nav-item active" id="n-home" onclick="showView('home')">
-            <span>📋</span><div>清單</div>
-        </div>
-        <div class="nav-item" id="n-stats" onclick="showView('stats')">
-            <span>📊</span><div>統計</div>
+    <nav>
+        <div class="nav-item active" onclick="showView('home')">
+            <span style="font-size:20px;">🏡</span>
+            <div>首頁</div>
         </div>
         <div class="nav-item" onclick="prepareAdd()">
-            <div class="nav-add-btn">＋</div>
+            <div class="nav-add-btn">+</div>
         </div>
-        <div class="nav-item admin-only" id="n-tools" onclick="showView('tools')">
-            <span>⚙️</span><div>設定</div>
+        <div class="nav-item" onclick="showView('stats')">
+            <span style="font-size:20px;">📊</span>
+            <div>統計</div>
         </div>
     </nav>
 </div>
 <script>
-    // --- 核心資料變數 ---
-    let db = JSON.parse(localStorage.getItem('farm_v31')) || [];
-    let rankStore = JSON.parse(localStorage.getItem('rank_v31')) || {};
-    let userList = JSON.parse(localStorage.getItem('user_list_v31')) || [];
+    let db = JSON.parse(localStorage.getItem('orchard_db_v3')) || [];
     let currentUser = "";
     let isAdmin = false;
-    let editingKey = null; 
+    let editIndex = -1;
 
-    const ADMIN_PASS = "admin123";
-    const getToday = () => new Date().toISOString().split('T')[0];
+    function getToday() { return new Date().toISOString().split('T')[0]; }
 
-    window.onload = function() {
-        initStatsYearSelector();
-        updateBackupDisplay();
-        checkBackupStatus();
-    };
-
-    // --- 權限驗證 ---
     function checkAuth() {
-        const input = document.getElementById('login-pass').value.trim();
-        if (!input) return alert("請輸入姓名或密碼");
-        
-        if (input === ADMIN_PASS) { 
-            isAdmin = true; currentUser = "管理員";
-        } else if (userList.includes(input)) { 
-            isAdmin = false; currentUser = input;
-        } else {
-            return alert("姓名不在授權名單中");
-        }
-
-        if(isAdmin) {
-            document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = (el.tagName === 'DIV' && el.classList.contains('nav-item')) ? 'flex' : 'block';
-            });
-        }
+        const pass = document.getElementById('login-pass').value.trim();
+        if (!pass) return alert("請輸入姓名或密碼");
+        currentUser = pass;
+        isAdmin = (pass === "0921");
         document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('user-role-display').innerText = currentUser;
+        document.getElementById('user-role-display').innerText = isAdmin ? "管理員" : currentUser;
+        if (isAdmin) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        initApp();
+    }
+
+    function initApp() {
         document.getElementById('display-today').innerText = getToday();
+        checkBackupStatus();
         renderHome();
     }
 
-    // --- 頁面切換與清單渲染 ---
-    function showView(vId) {
+    function showView(view) {
         document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
-        document.getElementById('view-' + vId).classList.add('active-view');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(document.getElementById('n-' + vId)) document.getElementById('n-' + vId).classList.add('active');
-
-        if(vId === 'home') renderHome();
-        if(vId === 'stats') renderStats();
-        if(vId === 'tools') renderUserList();
-        
-        // 切換頁面時自動回到頂部
-        document.querySelector('.content-area').scrollTop = 0;
+        document.getElementById('view-' + view).classList.add('active-view');
+        document.querySelectorAll('.nav-item').forEach((n, i) => {
+            n.classList.toggle('active', (view === 'home' && i === 0) || (view === 'stats' && i === 2));
+        });
+        if (view === 'home') renderHome();
+        if (view === 'stats') renderStats();
     }
 
-    function renderHome() {
-        const area = document.getElementById('header-area-filter').value;
-        const today = getToday();
-        let filtered = (area === "全部") ? db : db.filter(t => t.area === area);
-        
-        // 更新 Header 今日統計
-        const todayData = filtered.filter(t => t.date === today);
-        document.getElementById('today-qty').innerText = todayData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
-        document.getElementById('today-weight').innerText = todayData.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
-        document.getElementById('today-income').innerText = todayData.reduce((s,t)=>s+(parseInt(t.income)||0), 0).toLocaleString();
-
-        // 排行與趨勢圖
-        const r = rankStore[today];
-        document.getElementById('display-rank-list').innerHTML = r ? 
-            `🥇 ${r.r1w||0}g (${r.r1b||0}°) - 品質優良` : "今日尚未錄入品質排行數據";
-        renderTrend(filtered);
-
-        // 清單渲染
-        const q = document.getElementById('search').value.toLowerCase();
-        const listHTML = filtered.filter(t => (t.name||'').includes(q) || (t.code||'').includes(q) || (t.area||'').includes(q))
-            .reverse().slice(0, 50).map(t => `
-                <div class="card" onclick="editRecord('${t.code}', '${t.date}')">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <b style="font-size:16px;">${t.name}</b> <small>#${t.code}</small><br>
-                            <span style="font-size:12px; color:#666;">${t.date} · ${t.area} · ${t.lastUser||''}</span>
-                        </div>
-                        <div style="text-align:right;">
-                            <b style="color:var(--primary); font-size:16px;">${t.weightVal||0} KG</b><br>
-                            <small style="color:${t.health==='良好'?'#2d6a4f':'#e63946'}">${t.health}</small>
-                        </div>
-                    </div>
-                </div>`).join('');
-        document.getElementById('tree-list-container').innerHTML = listHTML || '<p style="text-align:center; color:#999; margin-top:20px;">無符合條件的紀錄</p>';
-    }
-
-    function renderTrend(data) {
-        const chart = document.getElementById('weekly-trend-chart');
-        let bars = "", tQ = 0, tI = 0;
-        for(let i=6; i>=0; i--) {
-            const d = new Date(); d.setDate(d.getDate()-i);
-            const ds = d.toISOString().split('T')[0];
-            const dayData = data.filter(t => t.date === ds);
-            const q = dayData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
-            const inc = dayData.reduce((s,t)=>s+(parseInt(t.income)||0), 0);
-            tQ += q; tI += inc;
-            const h = Math.min(q * 1.5, 100);
-            bars += `<div style="flex:1; background:var(--accent); height:${h}%; border-radius:3px 3px 0 0; min-height:2px;"></div>`;
-        }
-        chart.innerHTML = bars;
-        document.getElementById('weekly-total-qty').innerText = tQ;
-        document.getElementById('weekly-total-income').innerText = tI.toLocaleString();
-    }
-
-    // --- (核心修正) 新增與編輯功能 ---
     function prepareAdd() {
-        editingKey = null;
-        // 1. 重置所有文字與數字輸入
-        const inputs = ['f-name','f-code','f-harvestQty','f-weightVal','f-sellWeight','f-price','f-income','f-badQty','f-badWeight','f-healthDesc','f-water','f-fert','f-medDose','f-bagQty'];
-        inputs.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
-        
-        // 2. 重置 Checkbox 與子區塊
-        ['f-isBlooming','f-isBagged','f-pruneBig','f-pruneSmall'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = false; });
-        document.getElementById('f-bloomStatus-box').style.display = 'none';
-        document.getElementById('f-bagQty-box').style.display = 'none';
-
-        // 3. 預設值設定
+        editIndex = -1;
         document.getElementById('f-date').value = getToday();
-        document.getElementById('f-area').value = "A區";
-        document.getElementById('f-health').value = "良好";
         document.getElementById('f-user-static').value = currentUser;
-        document.getElementById('f-code').readOnly = false;
-        document.getElementById('delete-btn').style.display = 'none';
-        
+        document.getElementById('f-area').value = "A區";
+        document.getElementById('f-name').value = "";
+        document.getElementById('f-code').value = "";
+        document.getElementById('f-isBlooming').checked = false;
+        document.getElementById('f-isBagged').checked = false;
+        document.getElementById('f-isPest').checked = false;
+        document.getElementById('f-pruneBig').checked = false;
+        document.getElementById('f-pruneSmall').checked = false;
+        document.getElementById('f-harvestQty').value = "";
+        document.getElementById('f-sweet').value = "";
+        document.getElementById('f-sellWeight').value = "";
+        document.getElementById('f-price').value = "";
+        document.getElementById('f-income').value = 0;
+        document.getElementById('f-note').value = "";
+        toggleSubField('f-isBlooming', 'f-bloomStatus-box');
+        toggleSubField('f-isBagged', 'f-bagQty-box');
+        document.getElementById('del-btn').style.display = 'none';
         showView('edit');
     }
 
-    function editRecord(code, date) {
-        const t = db.find(x => x.code === code && x.date === date);
-        if(!t) return;
-        editingKey = {code, date};
-        
-        // 載入基本資料
-        document.getElementById('f-date').value = t.date;
-        document.getElementById('f-area').value = t.area;
-        document.getElementById('f-name').value = t.name || "";
-        document.getElementById('f-code').value = t.code;
-        document.getElementById('f-code').readOnly = true;
-        document.getElementById('f-harvestQty').value = t.harvestQty || "";
-        document.getElementById('f-weightVal').value = t.weightVal || "";
-        document.getElementById('f-income').value = t.income || "";
-        document.getElementById('f-health').value = t.health || "良好";
-        document.getElementById('f-user-static').value = t.lastUser || "";
-
-        if(isAdmin) document.getElementById('delete-btn').style.display = 'block';
-        showView('edit');
-    }
-
-    function handleSave() {
-        const code = document.getElementById('f-code').value.trim();
-        const date = document.getElementById('f-date').value;
-        if(!code || !date) return alert("編號與日期為必填項");
-
+    function saveData() {
         const data = {
-            date, code,
+            date: document.getElementById('f-date').value,
+            user: currentUser,
             area: document.getElementById('f-area').value,
             name: document.getElementById('f-name').value,
-            harvestQty: document.getElementById('f-harvestQty').value,
-            weightVal: document.getElementById('f-weightVal').value,
-            income: document.getElementById('f-income').value,
-            health: document.getElementById('f-health').value,
-            lastUser: currentUser,
-            timestamp: new Date().getTime()
+            code: document.getElementById('f-code').value,
+            isBlooming: document.getElementById('f-isBlooming').checked,
+            bloomStatus: document.getElementById('f-bloomStatus').value,
+            isBagged: document.getElementById('f-isBagged').checked,
+            bagQty: document.getElementById('f-bagQty').value,
+            isPest: document.getElementById('f-isPest').checked,
+            pruneBig: document.getElementById('f-pruneBig').checked,
+            pruneSmall: document.getElementById('f-pruneSmall').checked,
+            harvestQty: parseFloat(document.getElementById('f-harvestQty').value) || 0,
+            sweet: parseFloat(document.getElementById('f-sweet').value) || 0,
+            sellWeight: parseFloat(document.getElementById('f-sellWeight').value) || 0,
+            unit: document.getElementById('f-unit').value,
+            price: parseFloat(document.getElementById('f-price').value) || 0,
+            income: parseFloat(document.getElementById('f-income').value) || 0,
+            note: document.getElementById('f-note').value,
+            lastUpdate: new Date().getTime()
         };
 
-        if(editingKey) {
-            const idx = db.findIndex(x => x.code === editingKey.code && x.date === editingKey.date);
-            if(idx > -1) db[idx] = data;
-        } else {
-            db.push(data);
-        }
-
-        localStorage.setItem('farm_v31', JSON.stringify(db));
-        alert("資料儲存成功");
+        if (editIndex > -1) db[editIndex] = data;
+        else db.push(data);
+        
+        localStorage.setItem('orchard_db_v3', JSON.stringify(db));
+        alert("儲存成功！");
         showView('home');
     }
 
-    // --- 統計分析核心 ---
-    function initStatsYearSelector() {
-        const s = document.getElementById('stats-year');
-        const y = new Date().getFullYear();
-        for(let i=0; i<5; i++) s.options.add(new Option((y-i)+" 年", y-i));
+    function renderHome() {
+        const areaFilter = document.getElementById('header-area-filter').value;
+        const search = document.getElementById('search').value.toLowerCase();
+        const today = getToday();
+        
+        // 更新今日統計
+        let tQty = 0, tW = 0, tInc = 0;
+        db.filter(r => r.date === today && (areaFilter === "全部" || r.area === areaFilter)).forEach(r => {
+            tQty += r.harvestQty; tW += r.sellWeight; tInc += r.income;
+        });
+        document.getElementById('today-qty').innerText = tQty;
+        document.getElementById('today-weight').innerText = tW.toFixed(1);
+        document.getElementById('today-income').innerText = tInc.toLocaleString();
+
+        // 渲染列表
+        const list = document.getElementById('tree-list-container');
+        list.innerHTML = "";
+        
+        const filtered = db.filter(r => (areaFilter === "全部" || r.area === areaFilter) && 
+                        (r.name.toLowerCase().includes(search) || r.code.toLowerCase().includes(search)))
+                        .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        filtered.forEach((r, idx) => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.style.padding = '12px';
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:var(--primary)">${r.area}-${r.code} ${r.name}</b>
+                    <small style="color:#888">${r.date}</small>
+                </div>
+                <div style="font-size:13px; margin-top:5px; color:#555;">
+                    ${r.harvestQty > 0 ? `🍎 採收: ${r.harvestQty}粒 / ${r.sweet}度` : '🌿 日常維護'}
+                    <span style="float:right; color:var(--money); font-weight:bold;">$${r.income}</span>
+                </div>
+            `;
+            div.onclick = () => {
+                editIndex = db.indexOf(r);
+                loadEditForm(r);
+            };
+            list.appendChild(div);
+        });
+        renderRankings();
+        renderWeeklyChart();
+    }
+
+    function loadEditForm(r) {
+        showView('edit');
+        document.getElementById('f-date').value = r.date;
+        document.getElementById('f-area').value = r.area;
+        document.getElementById('f-name').value = r.name;
+        document.getElementById('f-code').value = r.code;
+        document.getElementById('f-isBlooming').checked = r.isBlooming;
+        document.getElementById('f-bloomStatus').value = r.bloomStatus || "";
+        document.getElementById('f-isBagged').checked = r.isBagged;
+        document.getElementById('f-bagQty').value = r.bagQty || "";
+        document.getElementById('f-isPest').checked = r.isPest;
+        document.getElementById('f-pruneBig').checked = r.pruneBig;
+        document.getElementById('f-pruneSmall').checked = r.pruneSmall;
+        document.getElementById('f-harvestQty').value = r.harvestQty;
+        document.getElementById('f-sweet').value = r.sweet;
+        document.getElementById('f-sellWeight').value = r.sellWeight;
+        document.getElementById('f-unit').value = r.unit || "KG";
+        document.getElementById('f-price').value = r.price;
+        document.getElementById('f-income').value = r.income;
+        document.getElementById('f-note').value = r.note;
+        toggleSubField('f-isBlooming', 'f-bloomStatus-box');
+        toggleSubField('f-isBagged', 'f-bagQty-box');
+        if(isAdmin) document.getElementById('del-btn').style.display = 'block';
+    }
+
+    function renderRankings() {
+        const top = [...db].filter(r => r.sweet > 0).sort((a,b) => b.sweet - a.sweet).slice(0, 3);
+        document.getElementById('display-rank-list').innerHTML = top.length ? 
+            top.map((r, i) => `${['🥇','🥈','🥉'][i]} ${r.name}(${r.code}): ${r.sweet}Brix`).join('<br>') : "暫無甜度數據";
+    }
+
+    function renderWeeklyChart() {
+        const chart = document.getElementById('weekly-trend-chart');
+        chart.innerHTML = "";
+        let weekQty = 0, weekInc = 0;
+        const days = Array.from({length: 7}, (_, i) => {
+            const d = new Date(); d.setDate(d.getDate() - (6 - i));
+            return d.toISOString().split('T')[0];
+        });
+        
+        const maxVal = Math.max(...days.map(d => db.filter(r => r.date === d).reduce((s, r) => s + r.harvestQty, 0)), 10);
+        
+        days.forEach(d => {
+            const dayData = db.filter(r => r.date === d);
+            const q = dayData.reduce((s, r) => s + r.harvestQty, 0);
+            const inc = dayData.reduce((s, r) => s + r.income, 0);
+            weekQty += q; weekInc += inc;
+            const h = (q / maxVal) * 100;
+            const bar = document.createElement('div');
+            bar.style.cssText = `flex:1; background:var(--accent); height:${Math.max(h, 5)}%; border-radius:4px 4px 0 0; position:relative;`;
+            bar.innerHTML = `<span style="position:absolute; top:-18px; width:100%; text-align:center; font-size:9px; color:white;">${q>0?q:''}</span>`;
+            chart.appendChild(bar);
+        });
+        document.getElementById('weekly-total-qty').innerText = weekQty;
+        document.getElementById('weekly-total-income').innerText = weekInc.toLocaleString();
     }
 
     function renderStats() {
-        const year = document.getElementById('stats-year').value;
-        const area = document.getElementById('stats-area').value;
-        let filtered = db.filter(t => t.date.startsWith(year));
-        if(area !== "全部") filtered = filtered.filter(t => t.area === area);
+        let q = 0, w = 0, inc = 0;
+        db.forEach(r => { q += r.harvestQty; w += r.sellWeight; inc += r.income; });
+        document.getElementById('st-total-qty').innerText = q;
+        document.getElementById('st-total-weight').innerText = w.toFixed(1);
+        document.getElementById('st-total-income').innerText = inc.toLocaleString();
 
-        let monthly = Array(12).fill(0).map(()=>({q:0, w:0, i:0}));
-        filtered.forEach(t => {
-            const m = parseInt(t.date.split('-')[1]) - 1;
-            if(m >= 0 && m < 12) {
-                monthly[m].q += (parseInt(t.harvestQty)||0);
-                monthly[m].w += (parseFloat(t.weightVal)||0);
-                monthly[m].i += (parseInt(t.income)||0);
-            }
-        });
-
-        let rows = "", sQ=0, sW=0, sI=0;
-        monthly.forEach((m, i) => {
-            sQ+=m.q; sW+=m.w; sI+=m.i;
-            rows += `<tr style="${m.q>0?'':'opacity:0.5'}"><td>${i+1}月</td><td>${m.q}</td><td>${m.w.toFixed(1)}</td><td>${m.i.toLocaleString()}</td></tr>`;
-        });
-        document.getElementById('stats-tbody').innerHTML = rows;
-        document.getElementById('stats-tfoot').innerHTML = `<td>總計</td><td>${sQ}</td><td>${sW.toFixed(1)}</td><td>$${sI.toLocaleString()}</td>`;
-        
-        document.getElementById('stat-total-qty').innerText = sQ.toLocaleString();
-        document.getElementById('stat-total-income').innerText = sI.toLocaleString();
-        document.getElementById('stat-total-weight').innerText = sW.toFixed(1);
-        document.getElementById('stat-avg-price').innerText = sW > 0 ? Math.round(sI/sW) : 0;
-    }
-
-    // --- 使用者與工具 ---
-    function addUser() {
-        const name = document.getElementById('new-user-name').value.trim();
-        if(!name || userList.includes(name)) return alert("姓名無效或已存在");
-        userList.push(name);
-        localStorage.setItem('user_list_v31', JSON.stringify(userList));
-        document.getElementById('new-user-name').value = "";
-        renderUserList();
-    }
-
-    function renderUserList() {
-        document.getElementById('user-list-tags').innerHTML = userList.map(u => 
-            `<div style="background:#e8f5e9; padding:6px 12px; border-radius:20px; font-size:13px; display:flex; align-items:center;">
-                ${u} <span onclick="deleteUser('${u}')" style="color:red; margin-left:8px; font-weight:bold; cursor:pointer;">×</span>
-            </div>`
-        ).join('');
-    }
-
-    function deleteUser(name) {
-        if(confirm(`確定要刪除「${name}」的存取權限嗎？`)) {
-            userList = userList.filter(u => u !== name);
-            localStorage.setItem('user_list_v31', JSON.stringify(userList));
-            renderUserList();
-        }
+        const report = document.getElementById('report-list');
+        report.innerHTML = `<div class="section-title">歷史明細</div><table class="report-table">
+            <thead><tr><th>日期</th><th>品項</th><th>量/重</th><th>收入</th></tr></thead>
+            <tbody>${db.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(r => `
+                <tr><td>${r.date.slice(5)}</td><td>${r.name}</td><td>${r.harvestQty} / ${r.sellWeight}</td><td>${r.income}</td></tr>
+            `).join('')}</tbody></table>`;
     }
 
     function calcIncome() {
@@ -601,41 +437,22 @@
 
     function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; }
 
-    function saveRanking() {
-        const date = getToday();
-        rankStore[date] = { r1w: document.getElementById('r1-w').value, r1b: document.getElementById('r1-b').value };
-        localStorage.setItem('rank_v31', JSON.stringify(rankStore));
-        alert("今日品質排行已更新！");
-        renderHome();
-    }
-
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "果園紀錄");
+        XLSX.utils.book_append_sheet(wb, ws, "果園數據");
         XLSX.writeFile(wb, `果園備份_${getToday()}.xlsx`);
-        localStorage.setItem('last_backup_time', new Date().toLocaleString());
-        updateBackupDisplay();
-    }
-
-    function updateBackupDisplay() {
-        document.getElementById('last-backup-display').innerText = localStorage.getItem('last_backup_time') || "無備份紀錄";
+        localStorage.setItem('last_backup_time', new Date().getTime());
+        document.getElementById('backup-banner').style.display='none';
     }
 
     function checkBackupStatus() {
         const last = localStorage.getItem('last_backup_time');
-        if(!last) return;
-        const diff = (new Date() - new Date(last)) / (1000*60*60*24);
-        if(diff > 7) alert("提醒：您已超過 7 天未進行資料備份，建議立即匯出 Excel。");
+        if(!last || (new Date().getTime() - last) > 7*24*60*60*1000) document.getElementById('backup-banner').style.display='flex';
     }
 
-    function clearAllData() {
-        if(confirm("警告：此操作將刪除手機內所有果樹紀錄，請確認已完成備份！")) {
-            if(confirm("再次確認：真的要清空所有數據嗎？")) {
-                db = []; localStorage.removeItem('farm_v31'); renderHome();
-            }
-        }
-    }
+    function deleteData() { if(confirm("確定刪除？")) { db.splice(editIndex, 1); localStorage.setItem('orchard_db_v3', JSON.stringify(db)); showView('home'); } }
+    function clearAllData() { if(confirm("危險操作！確定清除所有資料？")) { db = []; localStorage.setItem('orchard_db_v3', JSON.stringify(db)); renderStats(); } }
 </script>
 </body>
 </html>
