@@ -72,50 +72,50 @@
 
 <div class="container">
     <div id="backup-banner">
-        <div onclick="exportExcel()">⚠️ 距離上次備份已超過 7 天，請點此匯出 [cite: 7, 173]。</div>
+        <div onclick="exportExcel()">⚠️ 距離上次備份已超過 7 天，請點此匯出。</div>
         <div onclick="this.parentElement.style.display='none'">✕</div>
     </div>
 
     <div id="login-screen">
         <div class="login-box">
             <h2 style="color: var(--primary); margin: 0;">果樹管理系統 v3.5</h2>
-            <p style="font-size: 12px; color: #666; margin-bottom: 20px;">請輸入人員姓名或管理員密碼 [cite: 51]</p>
+            <p style="font-size: 12px; color: #666; margin-bottom: 20px;">請輸入人員姓名或管理員密碼</p>
             <input type="text" id="login-pass" placeholder="人員姓名或密碼" style="text-align: center;">
-            <button class="btn btn-primary" onclick="checkAuth()">登入系統 [cite: 102]</button>
+            <button class="btn btn-primary" onclick="checkAuth()">登入系統</button>
         </div>
     </div>
 
     <header>
-        <div class="logout-text-btn" onclick="location.reload()">登出 [cite: 15]</div>
-        <div style="font-size: 13px; opacity: 0.9;">👤 <span id="user-role-display"></span> | <span id="display-today"></span> [cite: 52]</div>
+        <div class="logout-text-btn" onclick="location.reload()">登出</div>
+        <div style="font-size: 13px; opacity: 0.9;">👤 <span id="user-role-display"></span> | <span id="display-today"></span></div>
         <div style="margin: 10px 0;">
             <select id="header-area-filter" onchange="renderHome()" style="width: auto; padding: 5px 15px; border-radius: 20px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white;">
                 <option value="全部">全場數據加總</option>
                 <option value="A區">A區</option>
                 <option value="B區">B區</option>
                 <option value="C區">C區</option>
-            </select> [cite: 53]
+            </select>
         </div>
         <div style="display: flex; justify-content: space-around; gap: 5px;">
             <div>今日採收<br><b id="today-qty">0</b> <small>粒</small></div>
             <div>今日重量<br><b id="today-weight">0.0</b> <small>KG</small></div>
             <div>今日收入<br><b id="today-income" style="color:#ffb703 !important;">0</b> <small>元</small></div>
-        </div> [cite: 54]
+        </div>
     </header>
 
     <div class="content-area">
         <div id="view-home" class="content-view active-view">
             <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white; margin-bottom: 10px;">
-                <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度) [cite: 56]</h4>
-                <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div> [cite: 57]
+                <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4>
+                <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div>
             </div>
 
             <div class="card" style="background: #2d6a4f; color: white;">
-                <h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢 (近7日) [cite: 59]</h4>
-                <div id="weekly-trend-chart" style="display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px;"></div> [cite: 60, 61]
+                <h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢 (近7日)</h4>
+                <div id="weekly-trend-chart" style="display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px;"></div>
                 <div style="margin-top: 22px; font-size: 12px; text-align: center; opacity: 0.9; color: white !important;">
                     本週累計: <span id="weekly-total-qty" style="font-weight: bold; color: #d4a373 !important;">0</span> 粒 / 
-                    收入: <span id="weekly-total-income" style="font-weight: bold; color: #ffb703 !important;">0</span> 元 [cite: 63, 64]
+                    收入: <span id="weekly-total-income" style="font-weight: bold; color: #ffb703 !important;">0</span> 元
                 </div>
             </div>
 
@@ -125,80 +125,80 @@
 
         <div id="view-edit" class="content-view">
             <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報 [cite: 66]</h3>
+                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div><label style="font-size: 13px;">📅 日期</label><input type="date" id="f-date"></div>
                     <div><label style="font-size: 13px;">👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
-                </div> 
+                </div>
                 
-                <div class="section-title">📍 基本資訊 [cite: 68]</div>
+                <div class="section-title">📍 基本資訊</div>
                 <select id="f-area">
                     <option value="A區">A區</option>
                     <option value="B區">B區</option>
                     <option value="C區">C區</option>
-                </select> [cite: 69]
+                </select>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <input type="text" id="f-name" placeholder="名稱">
                     <input type="text" id="f-code" placeholder="編號">
-                </div> [cite: 70]
+                </div>
 
                 <div class="check-container"><label>🌸 處於花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
                 <div id="f-bloomStatus-box" class="sub-field">
                     <select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select>
-                </div> [cite: 71]
+                </div>
 
                 <div class="check-container"><label>🛍️ 已套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
-                <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div> [cite: 71]
+                <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
 
-                <div class="section-title">🛠️ 養護與健康 [cite: 72]</div>
+                <div class="section-title">🛠️ 養護與健康</div>
                 <input type="text" id="f-water" placeholder="澆水說明">
                 <input type="text" id="f-fert" placeholder="施肥劑量">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div class="check-container" style="font-size:13px;"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
                     <div class="check-container" style="font-size:13px;"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
-                </div> [cite: 73]
+                </div>
                 <select id="f-health">
                     <option value="良好">健康良好</option>
                     <option value="需關注">需關注</option>
                     <option value="患病中">患病中</option>
-                </select> [cite: 74]
+                </select>
                 <textarea id="f-healthDesc" rows="2" placeholder="病情或異常描述..."></textarea>
-                <input type="text" id="f-medDose" placeholder="使用藥劑與劑量"> [cite: 75]
+                <input type="text" id="f-medDose" placeholder="使用藥劑與劑量">
 
-                <div class="section-title">💰 採收與銷售 [cite: 75]</div>
+                <div class="section-title">💰 採收與銷售</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div><label style="font-size: 12px;">正常採收(粒)</label><input type="number" id="f-harvestQty"></div>
                     <div><label style="font-size: 12px;">重量(KG)</label><input type="number" id="f-weightVal" step="0.1"></div>
-                </div> [cite: 76]
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
                     <div><label style="font-size: 12px;">銷售重量</label><input type="number" id="f-sellWeight" step="0.1" oninput="calcIncome()"></div>
                     <div><label style="font-size: 12px;">單位</label><select id="f-unit" onchange="calcIncome()"><option value="公斤">公斤</option><option value="台斤">台斤</option></select></div>
-                </div> [cite: 77]
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div><label style="font-size: 12px;">單價(元)</label><input type="number" id="f-price" oninput="calcIncome()"></div>
                     <div><label style="font-size: 12px;">總收入</label><input type="number" id="f-income" readonly style="background:#f9f9f9 !important; font-weight:bold; color:var(--money) !important;"></div>
-                </div> [cite: 78, 79]
+                </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
                     <div><label style="font-size: 12px; color: var(--danger);">爛果(粒)</label><input type="number" id="f-badQty"></div>
                     <div><label style="font-size: 12px; color: var(--danger);">爛果重(KG)</label><input type="number" id="f-badWeight" step="0.1"></div>
-                </div> [cite: 81, 82]
+                </div>
                 
                 <div class="admin-only" id="admin-rank-panel">
-                    <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員) [cite: 82]</div>
+                    <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員)</div>
                     <div style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
                         <div style="color:#FF9000; font-weight:bold; margin-bottom:8px;">🥇 第一名</div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <input type="number" id="r1-w" placeholder="重量(g)">
                             <input type="number" id="r1-b" step="0.1" placeholder="甜度(°)">
-                        </div> [cite: 85]
+                        </div>
                     </div>
-                    <button class="btn btn-warning" onclick="saveRanking()" style="margin-bottom:20px;">更新今日排行 [cite: 86]</button>
+                    <button class="btn btn-warning" onclick="saveRanking()" style="margin-bottom:20px;">更新今日排行</button>
                 </div>
 
-                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄 [cite: 86]</button>
-                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除紀錄 [cite: 86]</button>
-                <button class="btn btn-outline" onclick="showView('home')">取消 [cite: 87]</button>
+                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
+                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除紀錄</button>
+                <button class="btn btn-outline" onclick="showView('home')">取消</button>
             </div>
         </div>
 <div id="view-stats" class="content-view">
@@ -279,7 +279,7 @@
         renderUserList();
     };
 
-    // 修正：登入時同步設定使用者姓名
+    // 修正：登入時同步設定使用者姓名，並確保欄位顯示
     function checkAuth() {
         const pass = document.getElementById('login-pass').value.trim();
         if (!pass) return alert("請輸入姓名或密碼");
@@ -297,7 +297,7 @@
         }
         
         document.getElementById('user-role-display').innerText = currentUser;
-        // 立即同步到表單隱藏/唯讀欄位
+        // 同步到表單唯讀欄位
         document.getElementById('f-user-static').value = currentUser; 
         document.getElementById('login-screen').style.display = 'none';
         renderHome();
@@ -386,7 +386,7 @@
         const data = {
             id: editingId || Date.now(),
             date: document.getElementById('f-date').value,
-            user: currentUser, // 確保儲存時帶入正確的使用者
+            user: currentUser, 
             area: document.getElementById('f-area').value,
             name: document.getElementById('f-name').value,
             code: document.getElementById('f-code').value,
@@ -427,7 +427,7 @@
         if(!r) return;
         editingId = id;
         document.getElementById('f-date').value = r.date;
-        document.getElementById('f-user-static').value = r.user; // 編輯時顯示原紀錄者
+        document.getElementById('f-user-static').value = r.user; 
         document.getElementById('f-area').value = r.area;
         document.getElementById('f-name').value = r.name;
         document.getElementById('f-code').value = r.code;
@@ -458,7 +458,7 @@
     function resetForm() {
         editingId = null;
         document.getElementById('f-date').value = getToday();
-        document.getElementById('f-user-static').value = currentUser; // 關鍵：新增時自動帶入登入者姓名
+        document.getElementById('f-user-static').value = currentUser; // 確保新增時自動填入名字
         document.querySelectorAll('#view-edit input[type="text"], #view-edit input[type="number"], #view-edit textarea').forEach(i => {
             if(i.id !== 'f-user-static') i.value = "";
         });
@@ -475,7 +475,8 @@
     }
 
     function toggleSubField(c, b) { 
-        document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none';
+        const el = document.getElementById(b);
+        if(el) el.style.display = document.getElementById(c).checked ? 'block' : 'none';
     }
 
     function renderStats() {
@@ -580,11 +581,12 @@
     }
 
     function updateBackupDisplay() {
-        document.getElementById('last-backup-display').innerText = localStorage.getItem('last_backup_time') || "尚未有備份紀錄";
+        const el = document.getElementById('last-backup-display');
+        if(el) el.innerText = localStorage.getItem('last_backup_time') || "尚未有備份紀錄";
     }
 
     function clearAllData() {
-        if(confirm("⚠️ 注意！這將刪除所有採收紀錄且無法還原，確定嗎？")) {
+        if(confirm("⚠️ 注意！這將刪除所有紀錄，確定嗎？")) {
             localStorage.removeItem('orchard_db_v35');
             location.reload();
         }
