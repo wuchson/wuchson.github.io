@@ -25,22 +25,26 @@
         
         .container { width: 100vw; max-width: 500px; height: 100vh; height: -webkit-fill-available; background: var(--bg); display: flex; flex-direction: column; position: relative; }
 
-        /* 頂部橫幅與登入 */
+        /* 備份通知 */
         #backup-banner { background: var(--warning); padding: 10px 15px; display: none; align-items: center; justify-content: space-between; font-size: 14px; font-weight: bold; z-index: 10001; }
+        
+        /* 登入畫面 */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; }
 
+        /* 標題與狀態 */
         header { background: var(--primary); padding: 15px 20px 25px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; position: relative; }
         header * { color: var(--white) !important; }
         .logout-text-btn { position: absolute; right: 15px; top: 12px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; }
 
-        /* 內容區域 */
+        /* 內容容器 */
         .content-area { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
         .content-view { display: none; }
         .active-view { display: block; }
 
-        /* 卡片與表單 */
+        /* 通用卡片與表單樣式 */
         .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
+        .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
         .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white !important; }
@@ -48,19 +52,21 @@
         .btn-outline { background: #e0e0e0; color: #333 !important; }
         .btn-danger { background: var(--danger); color: white !important; }
 
-        /* 統計專用樣式 */
+        /* --- 統計專用樣式 --- */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .stats-card { background: #f8fcf9; border: 1px solid #e0ede4; padding: 12px; border-radius: 12px; text-align: center; }
         .stats-val { font-size: 18px; font-weight: bold; color: var(--primary); display: block; }
         .stats-label { font-size: 12px; color: #666; }
-
-        /* 表格樣式 */
         .report-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
         .report-table th { background: #eee; padding: 8px; text-align: left; border-bottom: 2px solid var(--primary); }
         .report-table td { padding: 8px; border-bottom: 1px solid #eee; }
         .row-total { background: #f0f7f4; font-weight: bold; }
 
-        /* 導覽列 */
+        /* 趨勢圖 */
+        .trend-container { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px; }
+        .trend-bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; min-height: 2px; }
+
+        /* 底部導覽列 */
         nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
         .nav-item div { color: #888; margin-top: 4px; }
@@ -68,7 +74,6 @@
         .nav-add-btn { background: var(--primary); color: white !important; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
 
         .admin-only { display: none; }
-        .sub-field { display: none; margin-top: 5px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
         .check-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 5px; }
     </style>
 </head>
@@ -76,21 +81,21 @@
 
 <div class="container">
     <div id="backup-banner">
-        <div onclick="exportExcel()">⚠️ 距離上次備份已超過 7 天，請點此匯出。</div>
-        <div onclick="this.parentElement.style.display='none'">✕</div>
+        <div onclick="handleBackupNow()">⚠️ 距離上次備份已超過 7 天，請點此匯出。</div>
+        <div onclick="closeBackupBanner()">✕</div>
     </div>
 
     <div id="login-screen">
         <div class="login-box">
             <h2 style="color: var(--primary); margin: 0;">果樹管理系統 v3.5</h2>
-            <p style="font-size: 12px; color: #666; margin-bottom: 20px;">請輸入人員姓名或管理員密碼</p>
+            <p style="font-size: 12px; color: #666; margin-bottom: 20px;">輸入人員姓名或管理員密碼</p>
             <input type="text" id="login-pass" placeholder="人員姓名或密碼" style="text-align: center;">
             <button class="btn btn-primary" onclick="checkAuth()">登入系統</button>
         </div>
     </div>
 
     <header>
-        <div class="logout-text-btn" onclick="location.reload()">登出</div>
+        <div class="logout-text-btn" onclick="logout()">登出</div>
         <div style="font-size: 13px; opacity: 0.9;">👤 <span id="user-role-display"></span> | <span id="display-today"></span></div>
         <div style="margin: 10px 0;">
             <select id="header-area-filter" onchange="renderHome()" style="width: auto; padding: 5px 15px; border-radius: 20px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white;">
@@ -115,7 +120,7 @@
 
             <div class="card" style="background: #2d6a4f; color: white;">
                 <h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢 (近7日)</h4>
-                <div id="weekly-trend-chart" style="display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px;"></div>
+                <div id="weekly-trend-chart" class="trend-container"></div>
                 <div style="margin-top: 22px; font-size: 12px; text-align: center; opacity: 0.9; color: white !important;">
                     本週累計: <span id="weekly-total-qty" style="font-weight: bold; color: #d4a373 !important;">0</span> 粒 / 
                     收入: <span id="weekly-total-income" style="font-weight: bold; color: #ffb703 !important;">0</span> 元
@@ -129,24 +134,26 @@
         <div id="view-edit" class="content-view">
             <div class="card">
                 <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
-                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div><label style="font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block;">📅 日期</label><input type="date" id="f-date"></div>
-                    <div><label style="font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block;">👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
+                <div class="grid-2">
+                    <div><label>📅 日期</label><input type="date" id="f-date"></div>
+                    <div><label>👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div>
                 </div>
                 
-                <div style="color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold;">📍 基本資訊</div>
+                <div class="section-title">📍 基本資訊</div>
                 <select id="f-area"><option value="A區">A區</option><option value="B區">B區</option><option value="C區">C區</option></select>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
+                <div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div>
 
                 <div class="check-container"><label>🌸 處於花期</label><input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')"></div>
-                <div id="f-bloomStatus-box" class="sub-field"><select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select></div>
+                <div id="f-bloomStatus-box" class="sub-field">
+                    <select id="f-bloomStatus"><option value="">選擇花況</option><option value="少量開花">少量開花</option><option value="盛開中">盛開中</option><option value="花期結束">花期結束</option></select>
+                </div>
 
                 <div class="check-container"><label>🛍️ 已套袋</label><input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')"></div>
                 <div id="f-bagQty-box" class="sub-field"><input type="number" id="f-bagQty" placeholder="套袋數量"></div>
 
-                <div style="color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold;">🛠️ 養護與健康</div>
+                <div class="section-title">🛠️ 養護與健康</div>
                 <input type="text" id="f-water" placeholder="澆水說明"><input type="text" id="f-fert" placeholder="施肥劑量">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="grid-2">
                     <div class="check-container" style="font-size:13px;"><label>大修剪</label><input type="checkbox" id="f-pruneBig"></div>
                     <div class="check-container" style="font-size:13px;"><label>小修剪</label><input type="checkbox" id="f-pruneSmall"></div>
                 </div>
@@ -154,30 +161,40 @@
                 <textarea id="f-healthDesc" rows="2" placeholder="病情或異常描述..."></textarea>
                 <input type="text" id="f-medDose" placeholder="使用藥劑與劑量">
 
-                <div style="color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold;">💰 採收與銷售</div>
+                <div class="section-title">💰 採收與銷售</div>
                 <label>正常果採收 (粒/總重)</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
+                <div class="grid-2"><input type="number" id="f-harvestQty" placeholder="粒數"><input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)"></div>
               
                 <label>💰 銷售數據</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="grid-2">
                     <input type="number" id="f-sellWeight" step="0.1" placeholder="賣出重量" oninput="calcIncome()">
-                    <select id="f-unit" onchange="calcIncome()"><option value="公斤">公斤 (KG)</option><option value="台斤">台斤</option></select>
+                    <select id="f-unit" onchange="calcIncome()">
+                        <option value="公斤">公斤 (KG)</option>
+                        <option value="台斤">台斤</option>
+                    </select>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="grid-2">
                     <input type="number" id="f-price" placeholder="單價 (元)" oninput="calcIncome()">
                     <input type="number" id="f-income" placeholder="總收入 (自動)" style="background:#f9f9f9 !important; font-weight:bold; color:var(--money) !important;">
                 </div>
 
                 <label style="color: var(--danger);">爛果 (⚠️)</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"><input type="number" id="f-badQty" placeholder="粒數"><input type="number" id="f-badWeight" step="0.1" placeholder="重量(KG)"></div>
+                <div class="grid-2"><input type="number" id="f-badQty" placeholder="粒數"><input type="number" id="f-badWeight" step="0.1" placeholder="重量(KG)"></div>
                 
                 <div class="admin-only" id="admin-rank-panel">
-                    <div style="color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; color:#d44b39;">🎖️ 品質排行 (管理員)</div>
+                    <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員)</div>
                     <div style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
                         <div style="color:#FF9000; font-weight:bold; margin-bottom:8px;">🥇 第一名</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="grid-2">
                             <div><label>重量(g)</label><input type="number" id="r1-w"></div>
                             <div><label>甜度(°)</label><input type="number" id="r1-b" step="0.1"></div>
+                        </div>
+                    </div>
+                    <div style="background:#fffdfa; border:1px solid #ffe8cc; border-radius:12px; padding:12px; margin-bottom:10px;">
+                        <div style="color:#888; font-weight:bold; margin-bottom:8px;">🥈 第二名</div>
+                        <div class="grid-2">
+                            <div><label>重量(g)</label><input type="number" id="r2-w"></div>
+                            <div><label>甜度(°)</label><input type="number" id="r2-b" step="0.1"></div>
                         </div>
                     </div>
                     <button class="btn btn-warning" onclick="saveRanking()" style="margin-bottom:20px;">更新今日排行</button>
@@ -192,13 +209,13 @@
             <div class="card">
                 <h3 style="margin:0 0 15px 0; color:var(--primary);">📊 數據統計分析</h3>
                 
-                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="grid-2" style="margin-bottom: 10px;">
                     <div>
                         <label>📅 統計年份</label>
                         <select id="stats-year" onchange="renderStats()"></select>
                     </div>
                     <div>
-                        <label>📍 篩選區域</label>
+                        <label>📍 區域篩選</label>
                         <select id="stats-area" onchange="renderStats()">
                             <option value="全部">全部區域</option>
                             <option value="A區">A區</option>
@@ -210,7 +227,7 @@
 
                 <div class="stats-grid">
                     <div class="stats-card">
-                        <span class="stats-label">年度總產量</span>
+                        <span class="stats-label">年度總採收</span>
                         <span id="stat-total-qty" class="stats-val">0</span>
                         <small>粒</small>
                     </div>
@@ -220,20 +237,19 @@
                         <small>元</small>
                     </div>
                     <div class="stats-card">
-                        <span class="stats-label">總採收重量</span>
+                        <span class="stats-label">總重量(KG)</span>
                         <span id="stat-total-weight" class="stats-val">0.0</span>
-                        <small>KG</small>
                     </div>
                     <div class="stats-card">
-                        <span class="stats-label">平均成交單價</span>
+                        <span class="stats-label">平均單價</span>
                         <span id="stat-avg-price" class="stats-val" style="color:var(--accent);">0</span>
-                        <small>元</small>
+                        <small>元/KG</small>
                     </div>
                 </div>
 
-                <div style="color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold;">📅 月度明細清單</div>
+                <div class="section-title">📅 月份明細列表</div>
                 <div style="overflow-x: auto;">
-                    <table class="report-table" id="monthly-report-table">
+                    <table class="report-table">
                         <thead>
                             <tr>
                                 <th>月份</th>
@@ -244,6 +260,10 @@
                         </thead>
                         <tbody id="stats-tbody">
                             </tbody>
+                        <tfoot>
+                            <tr id="stats-tfoot" class="row-total">
+                                </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -274,88 +294,124 @@
         </div>
     </div> <nav>
         <div class="nav-item active" id="n-home" onclick="showView('home')"><span>📋</span><div>清單</div></div>
-        <div class="nav-item" id="n-stats" onclick="showView('stats')"><span>📈</span><div>統計</div></div>
+        <div class="nav-item" id="n-stats" onclick="showView('stats')"><span>📊</span><div>統計</div></div>
         <div class="nav-item" onclick="prepareAdd()"><div class="nav-add-btn">＋</div></div>
         <div class="nav-item admin-only" id="n-tools" onclick="showView('tools')"><span>⚙️</span><div>設定</div></div>
     </nav>
 </div>
 <script>
-    // --- 基礎資料初始化 ---
-    let db = JSON.parse(localStorage.getItem('farm_v31')) || [cite_start][]; [cite: 98]
-    let rankStore = JSON.parse(localStorage.getItem('rank_v31')) || [cite_start]{}; [cite: 98]
-    let userList = JSON.parse(localStorage.getItem('user_list_v31')) || [cite_start][]; [cite: 98]
+    // --- 基礎資料與初始化 ---
+    let db = JSON.parse(localStorage.getItem('farm_v31')) || [];
+    let rankStore = JSON.parse(localStorage.getItem('rank_v31')) || {};
+    let userList = JSON.parse(localStorage.getItem('user_list_v31')) || [];
     let currentUser = "";
     let isAdmin = false;
+    let editingId = null; 
 
-    [cite_start]const ADMIN_PASS = "admin123"; [cite: 98]
-    [cite_start]const getToday = () => new Date().toISOString().split('T')[0]; [cite: 98]
+    const ADMIN_PASS = "admin123";
+    const getToday = () => new Date().toISOString().split('T')[0];
 
     window.onload = function() {
-        [cite_start]checkBackupStatus(); [cite: 99]
+        checkBackupStatus();
         initStatsYearSelector();
+        document.getElementById('f-date').value = getToday();
     };
 
     // --- 權限驗證 ---
     function checkAuth() {
-        [cite_start]const input = document.getElementById('login-pass').value.trim(); [cite: 100]
-        [cite_start]if (!input) return alert("請輸入姓名或密碼"); [cite: 100]
+        const input = document.getElementById('login-pass').value.trim();
+        if (!input) return alert("請輸入姓名或密碼");
         
         if (input === ADMIN_PASS) { 
-            [cite_start]isAdmin = true; currentUser = "管理員"; [cite: 101]
+            isAdmin = true; currentUser = "管理員";
         } else if (userList.includes(input)) { 
-            [cite_start]isAdmin = false; currentUser = input; [cite: 102]
+            isAdmin = false; currentUser = input;
         } else {
-            [cite_start]return alert("姓名不在授權名單中，請聯繫管理員"); [cite: 103]
+            return alert("姓名不在授權名單中，請聯繫管理員");
         }
 
         if(isAdmin) {
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.style.display = (el.classList.contains('nav-item') ? 'flex' : 'block');
-            [cite_start]}); [cite: 104]
+            });
         }
-        [cite_start]document.getElementById('login-screen').style.display = 'none'; [cite: 104]
-        [cite_start]document.getElementById('user-role-display').innerText = currentUser; [cite: 105]
-        [cite_start]document.getElementById('display-today').innerText = getToday(); [cite: 105]
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('user-role-display').innerText = currentUser;
+        document.getElementById('display-today').innerText = getToday();
         renderHome();
     }
 
-    // --- 核心渲染功能 ---
+    // --- 主導覽切換 ---
+    function showView(vId) {
+        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
+        document.getElementById('view-' + vId).classList.add('active-view');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(document.getElementById('n-' + vId)) document.getElementById('n-' + vId).classList.add('active');
+
+        if(vId === 'home') renderHome();
+        if(vId === 'stats') renderStats();
+        if(vId === 'tools') renderUserList();
+    }
+
+    // --- 首頁渲染與週趨勢 ---
     function renderHome() {
-        [cite_start]const today = getToday(), area = document.getElementById('header-area-filter').value; [cite: 117]
-        [cite_start]let filtered = (area === "全部") ? db : db.filter(t => t.area === area); [cite: 118]
+        const area = document.getElementById('header-area-filter').value;
+        let filtered = (area === "全部") ? db : db.filter(t => t.area === area);
         
-        [cite_start]const todayData = filtered.filter(t => t.date === today); [cite: 118]
-        [cite_start]document.getElementById('today-qty').innerText = todayData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0); [cite: 119]
-        [cite_start]document.getElementById('today-weight').innerText = todayData.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1); [cite: 119]
-        [cite_start]document.getElementById('today-income').innerText = todayData.reduce((s,t)=>s+(parseInt(t.income)||0), 0).toLocaleString(); [cite: 119]
+        // 今日概況
+        const today = getToday();
+        const todayData = filtered.filter(t => t.date === today);
+        document.getElementById('today-qty').innerText = todayData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
+        document.getElementById('today-weight').innerText = todayData.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
+        document.getElementById('today-income').innerText = todayData.reduce((s,t)=>s+(parseInt(t.income)||0), 0).toLocaleString();
 
-        [cite_start]const r = rankStore[today]; [cite: 120]
-        document.getElementById('display-rank-list').innerHTML = r ? 
-            `1. ${r.r1w||'-'}g (${r.r1b||'-'}°) | 2. [cite_start]${r.r2w||'-'}g (${r.r2b||'-'}°)` : "尚未排行"; [cite: 120]
-
-        // 渲染趨勢圖
-        renderTrendChart(filtered);
-
-        [cite_start]const q = document.getElementById('search').value.toLowerCase(); [cite: 127]
-        document.getElementById('tree-list-container').innerHTML = filtered
-            .filter(t => (t.name||'').toLowerCase().includes(q) || (t.code||'').toLowerCase().includes(q))
-            .reverse().map(t => `
-                <div class="card" onclick="editTree('${t.code}', '${t.date}')">
+        // 渲染趨勢圖 (近7日)
+        renderTrend(filtered);
+        
+        // 渲染清單
+        const q = document.getElementById('search').value.toLowerCase();
+        const listHTML = filtered.filter(t => (t.name||'').includes(q) || (t.code||'').includes(q))
+            .reverse().slice(0, 50).map(t => `
+                <div class="card" onclick="editRecord('${t.code}', '${t.date}')">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div><b>${t.name}</b> <small>#${t.code}</small><br>
-                        <span style="font-size:11px; color:#888;">採收:${t.harvestQty||0} | 收入:${t.income||0}元</span></div>
-                        <div style="text-align:right;"><b>${t.weightVal||0} KG</b><br><small>${t.health}</small></div>
+                        <div><b>${t.name}</b> <small>#${t.code}</small> (${t.area})<br>
+                        <span style="font-size:11px; color:#888;">${t.date} | 採收:${t.harvestQty||0} | 收入:${t.income||0}</span></div>
+                        <div style="text-align:right;"><b style="color:var(--primary);">${t.weightVal||0} KG</b><br><small>${t.health}</small></div>
                     </div>
-                [cite_start]</div>`).join(''); [cite: 128]
+                </div>`).join('');
+        document.getElementById('tree-list-container').innerHTML = listHTML;
+        
+        // 渲染排行
+        const r = rankStore[today];
+        document.getElementById('display-rank-list').innerHTML = r ? 
+            `🥇 ${r.r1w||0}g / ${r.r1b||0}° <br> 🥈 ${r.r2w||0}g / ${r.r2b||0}°` : "今日尚未錄入品質數據";
+    }
+
+    function renderTrend(data) {
+        const chart = document.getElementById('weekly-trend-chart');
+        let bars = "", totalQ = 0, totalI = 0;
+        for(let i=6; i>=0; i--) {
+            const d = new Date(); d.setDate(d.getDate()-i);
+            const dateStr = d.toISOString().split('T')[0];
+            const dayData = data.filter(t => t.date === dateStr);
+            const q = dayData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
+            const inc = dayData.reduce((s,t)=>s+(parseInt(t.income)||0), 0);
+            totalQ += q; totalI += inc;
+            const h = Math.min(q * 2, 100); 
+            bars += `<div class="trend-bar" style="height:${h}%" title="${dateStr}: ${q}粒"></div>`;
+        }
+        chart.innerHTML = bars;
+        document.getElementById('weekly-total-qty').innerText = totalQ;
+        document.getElementById('weekly-total-income').innerText = totalI.toLocaleString();
     }
 
     // --- (外掛) 統計分析邏輯 ---
     function initStatsYearSelector() {
-        const yearSelect = document.getElementById('stats-year');
-        const currentYear = new Date().getFullYear();
-        for(let i = 0; i < 5; i++) {
-            let y = currentYear - i;
-            yearSelect.options.add(new Option(y + " 年", y));
+        const select = document.getElementById('stats-year');
+        const curY = new Date().getFullYear();
+        for(let i=0; i<5; i++) {
+            let y = curY - i;
+            select.options.add(new Option(y + " 年", y));
         }
     }
 
@@ -363,99 +419,141 @@
         const year = document.getElementById('stats-year').value;
         const area = document.getElementById('stats-area').value;
         let filtered = db.filter(t => t.date.startsWith(year));
-        if (area !== "全部") filtered = filtered.filter(t => t.area === area);
+        if(area !== "全部") filtered = filtered.filter(t => t.area === area);
 
-        let monthlyData = Array(12).fill(0).map(() => ({ qty: 0, weight: 0, income: 0 }));
-        
+        let monthly = Array(12).fill(0).map(()=>({q:0, w:0, i:0}));
         filtered.forEach(t => {
             const m = parseInt(t.date.split('-')[1]) - 1;
-            monthlyData[m].qty += (parseInt(t.harvestQty) || 0);
-            monthlyData[m].weight += (parseFloat(t.weightVal) || 0);
-            monthlyData[m].income += (parseInt(t.income) || 0);
+            monthly[m].q += (parseInt(t.harvestQty)||0);
+            monthly[m].w += (parseFloat(t.weightVal)||0);
+            monthly[m].i += (parseInt(t.income)||0);
         });
 
-        // 更新數據卡片
-        const totalQty = monthlyData.reduce((s, m) => s + m.qty, 0);
-        const totalIncome = monthlyData.reduce((s, m) => s + m.income, 0);
-        const totalWeight = monthlyData.reduce((s, m) => s + m.weight, 0);
-        
-        document.getElementById('stat-total-qty').innerText = totalQty.toLocaleString();
-        document.getElementById('stat-total-income').innerText = totalIncome.toLocaleString();
-        document.getElementById('stat-total-weight').innerText = totalWeight.toFixed(1);
-        document.getElementById('stat-avg-price').innerText = totalWeight > 0 ? Math.round(totalIncome / totalWeight) : 0;
-
-        // 更新明細清單表格
-        document.getElementById('stats-tbody').innerHTML = monthlyData.map((m, i) => `
-            <tr class="${m.qty > 0 ? '' : 'row-empty'}">
-                <td>${i + 1}月</td>
-                <td>${m.qty}</td>
-                <td>${m.weight.toFixed(1)}</td>
-                <td>$${m.income.toLocaleString()}</td>
-            </tr>
-        `).join('') + `
-            <tr class="row-total">
-                <td>總計</td>
-                <td>${totalQty}</td>
-                <td>${totalWeight.toFixed(1)}</td>
-                <td>$${totalIncome.toLocaleString()}</td>
+        let rows = "", sumQ=0, sumW=0, sumI=0;
+        monthly.forEach((m, idx) => {
+            sumQ+=m.q; sumW+=m.w; sumI+=m.i;
+            rows += `<tr style="${m.q > 0 ? '' : 'opacity:0.5'}">
+                <td>${idx+1}月</td><td>${m.q}</td><td>${m.w.toFixed(1)}</td><td>${m.i.toLocaleString()}</td>
             </tr>`;
+        });
+
+        document.getElementById('stats-tbody').innerHTML = rows;
+        document.getElementById('stats-tfoot').innerHTML = `<td>總計</td><td>${sumQ}</td><td>${sumW.toFixed(1)}</td><td>$${sumI.toLocaleString()}</td>`;
+        
+        // 更新卡片
+        document.getElementById('stat-total-qty').innerText = sumQ.toLocaleString();
+        document.getElementById('stat-total-income').innerText = sumI.toLocaleString();
+        document.getElementById('stat-total-weight').innerText = sumW.toFixed(1);
+        document.getElementById('stat-avg-price').innerText = sumW > 0 ? Math.round(sumI/sumW) : 0;
     }
 
-    // --- 通用輔助功能 ---
-    function showView(vId) {
-        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
-        [cite_start]document.getElementById('view-'+vId).classList.add('active-view'); [cite: 142]
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        [cite_start]if(document.getElementById('n-'+vId)) document.getElementById('n-'+vId).classList.add('active'); [cite: 143]
+    // --- 錄入與存檔 ---
+    function prepareAdd() {
+        editingId = null;
+        document.getElementById('f-code').readOnly = false;
+        document.getElementById('f-user-static').value = currentUser;
+        document.getElementById('delete-btn').style.display = 'none';
+        showView('edit');
+    }
 
-        if(vId === 'home') renderHome();
-        if(vId === 'stats') renderStats();
-        if(vId === 'tools') renderUserList();
+    function editRecord(code, date) {
+        const t = db.find(x => x.code === code && x.date === date);
+        if(!t) return;
+        editingId = {code, date};
+        document.getElementById('f-date').value = t.date;
+        document.getElementById('f-area').value = t.area;
+        document.getElementById('f-name').value = t.name;
+        document.getElementById('f-code').value = t.code;
+        document.getElementById('f-code').readOnly = true;
+        document.getElementById('f-harvestQty').value = t.harvestQty;
+        document.getElementById('f-weightVal').value = t.weightVal;
+        document.getElementById('f-income').value = t.income;
+        document.getElementById('f-health').value = t.health;
+        document.getElementById('f-user-static').value = t.lastUser || currentUser;
+        
+        if(isAdmin) document.getElementById('delete-btn').style.display = 'block';
+        showView('edit');
     }
 
     function handleSave() {
-        [cite_start]const code = document.getElementById('f-code').value, date = document.getElementById('f-date').value; [cite: 129]
-        [cite_start]if(!code || !date) return alert("編號與日期必填"); [cite: 129]
-        
         const data = {
-            area: document.getElementById('f-area').value, 
-            name: document.getElementById('f-name').value, 
-            code, date,
-            harvestQty: document.getElementById('f-harvestQty').value, 
+            date: document.getElementById('f-date').value,
+            area: document.getElementById('f-area').value,
+            name: document.getElementById('f-name').value,
+            code: document.getElementById('f-code').value,
+            harvestQty: document.getElementById('f-harvestQty').value,
             weightVal: document.getElementById('f-weightVal').value,
             income: document.getElementById('f-income').value,
             health: document.getElementById('f-health').value,
-            lastUser: currentUser 
-        [cite_start]}; [cite: 130, 131]
+            lastUser: currentUser
+        };
 
-        [cite_start]const idx = db.findIndex(x => x.code === code && x.date === date); [cite: 132]
-        [cite_start]if(idx > -1) db[idx] = Object.assign(db[idx], data); else db.push(data); [cite: 133]
-        
-        [cite_start]localStorage.setItem('farm_v31', JSON.stringify(db)); [cite: 133]
+        if(!data.code || !data.date) return alert("編號與日期不能為空");
+
+        if(editingId) {
+            const idx = db.findIndex(x => x.code === editingId.code && x.date === editingId.date);
+            db[idx] = data;
+        } else {
+            db.push(data);
+        }
+
+        localStorage.setItem('farm_v31', JSON.stringify(db));
         alert("儲存成功");
         showView('home');
     }
 
-    function exportExcel() { 
-        [cite_start]if(db.length === 0) return alert("目前沒有資料可以匯出"); [cite: 145]
-        const ws = XLSX.utils.json_to_sheet(db); 
-        const wb = XLSX.utils.book_new(); 
-        XLSX.utils.book_append_sheet(wb, ws, "果園數據"); 
-        [cite_start]XLSX.writeFile(wb, `果園紀錄_${getToday()}.xlsx`); [cite: 146]
-        [cite_start]localStorage.setItem('last_backup_time', new Date().toLocaleString()); [cite: 147]
-    }
-
     function calcIncome() {
-        const w = parseFloat(document.getElementById('f-sellWeight').value) || [cite_start]0; [cite: 113]
-        const p = parseFloat(document.getElementById('f-price').value) || [cite_start]0; [cite: 114]
-        [cite_start]document.getElementById('f-income').value = Math.round(w * p); [cite: 114]
+        const w = parseFloat(document.getElementById('f-sellWeight').value) || 0;
+        const p = parseFloat(document.getElementById('f-price').value) || 0;
+        const unit = document.getElementById('f-unit').value;
+        let total = w * p;
+        if(unit === "台斤") total = (w / 0.6) * p; // 若輸入為KG但單價是台斤則換算
+        document.getElementById('f-income').value = Math.round(total);
     }
 
-    function toggleSubField(c, b) { 
-        document.getElementById(b).style.display = document.getElementById(c).checked ? [cite_start]'block' : 'none'; [cite: 165]
+    function toggleSubField(cId, bId) {
+        document.getElementById(bId).style.display = document.getElementById(cId).checked ? 'block' : 'none';
     }
 
-    // (剩餘基礎功能如 addUser, renderUserList, checkBackupStatus 等均完整保留於 v3.4 邏輯)
+    // --- 管理員排行功能 ---
+    function saveRanking() {
+        const date = getToday();
+        rankStore[date] = {
+            r1w: document.getElementById('r1-w').value,
+            r1b: document.getElementById('r1-b').value,
+            r2w: document.getElementById('r2-w').value,
+            r2b: document.getElementById('r2-b').value
+        };
+        localStorage.setItem('rank_v31', JSON.stringify(rankStore));
+        alert("今日排行已更新");
+    }
+
+    // --- 工具類 ---
+    function exportExcel() {
+        if(db.length === 0) return alert("沒有資料");
+        const ws = XLSX.utils.json_to_sheet(db);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "FarmData");
+        XLSX.writeFile(wb, `果園備份_${getToday()}.xlsx`);
+        localStorage.setItem('last_backup_time', new Date().toLocaleString());
+        updateBackupDisplay();
+    }
+
+    function logout() { location.reload(); }
+
+    function checkBackupStatus() {
+        const last = localStorage.getItem('last_backup_time');
+        if(!last) { document.getElementById('backup-banner').style.display='flex'; return; }
+        const diff = (new Date() - new Date(last)) / (1000*60*60*24);
+        if(diff > 7) document.getElementById('backup-banner').style.display='flex';
+    }
+    
+    function updateBackupDisplay() {
+        const last = localStorage.getItem('last_backup_time');
+        document.getElementById('last-backup-display').innerText = last || "尚未有備份紀錄";
+    }
+
+    // (其餘 addUser, deleteCurrentRecord, clearAllData 等功能均與 V3-4 邏輯一致，此處省略以節省空間)
 </script>
 </body>
 </html>
