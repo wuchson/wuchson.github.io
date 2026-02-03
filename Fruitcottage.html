@@ -40,7 +40,7 @@
         .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
         .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
-.btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white !important; }
         .btn-warning { background: var(--warning); color: #000 !important; }
         .btn-outline { background: #e0e0e0; color: #333 !important; }
@@ -104,7 +104,7 @@
     </header>
 
     <div class="content-area">
-     <div id="view-home" class="content-view active-view">
+        <div id="view-home" class="content-view active-view">
             <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white; margin-bottom: 10px;">
                 <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4>
                 <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div>
@@ -221,10 +221,10 @@
                 </div>
             </div>
         </div>
-
-        <div id="view-tools" class="content-view">
+<div id="view-tools" class="content-view">
             <div class="card">
                 <h3 style="margin:0 0 15px 0; color:var(--primary);">⚙️ 系統與管理</h3>
+                
                 <div class="admin-only">
                     <div class="section-title">👥 人員管理</div>
                     <div style="display: flex; gap: 8px; margin-bottom: 15px;">
@@ -233,111 +233,118 @@
                     </div>
                     <div id="user-list-tags" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:15px;"></div>
                 </div>
+
                 <div class="section-title">📂 資料備份</div>
                 <p style="font-size:12px; color:#666;">最後備份：<span id="last-backup-display">無紀錄</span></p>
                 <button class="btn btn-warning" onclick="exportExcel()">📤 匯出 Excel 備份</button>
                 <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📥 匯入資料</button>
                 <input type="file" id="import-file" style="display:none" onchange="importExcel(this)">
+                
                 <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
                 <button class="btn btn-danger admin-only" onclick="clearAllData()">🧨 刪除所有數據</button>
             </div>
         </div>
     </div>
-<nav id="main-nav">
+
+    <nav id="main-nav">
         <div class="nav-item active" onclick="showView('home')">
             <span style="font-size: 20px;">🏡</span>
             <div>首頁</div>
         </div>
+        
         <div class="nav-item" onclick="showView('stats')">
             <span style="font-size: 20px;">📊</span>
             <div>統計</div>
         </div>
+        
         <div class="nav-item" onclick="resetForm(); showView('edit')">
             <div class="nav-add-btn">+</div>
         </div>
+        
         <div class="nav-item admin-only" id="nav-admin-tab" onclick="showView('tools')">
             <span style="font-size: 20px;">⚙️</span>
             <div>管理</div>
         </div>
+        
         <div class="nav-item" onclick="location.reload()">
             <span style="font-size: 20px;">🔄</span>
             <div>重新整理</div>
         </div>
     </nav>
 </div>
-
 <script>
-    let db = JSON.parse(localStorage.getItem('orchard_db_v35')) || [];
-    let users = JSON.parse(localStorage.getItem('orchard_users')) || [];
-    let rankings = JSON.parse(localStorage.getItem('orchard_ranks')) || {};
-    let currentUser = "";
-    let editingId = null;
+    // 初始化資料庫與使用者名單
+    let db = JSON.parse(localStorage.getItem('orchard_db_v35')) || []; [cite: 101]
+    let users = JSON.parse(localStorage.getItem('orchard_users')) || []; [cite: 101]
+    let rankings = JSON.parse(localStorage.getItem('orchard_ranks')) || {}; [cite: 101]
+    let currentUser = ""; [cite: 101]
+    let editingId = null; [cite: 101]
 
     window.onload = () => {
-        document.getElementById('display-today').innerText = getToday();
-        checkBackupStatus();
-        updateBackupDisplay();
-        renderUserList();
+        document.getElementById('display-today').innerText = getToday(); [cite: 101]
+        checkBackupStatus(); [cite: 101]
+        updateBackupDisplay(); [cite: 101]
+        renderUserList(); // 修正：確保一開始就讀取並顯示現有人員名單 [cite: 101]
     };
 
     function checkAuth() {
-        const pass = document.getElementById('login-pass').value.trim();
-        if (!pass) return alert("請輸入姓名或密碼");
+        const pass = document.getElementById('login-pass').value.trim(); [cite: 102]
+        if (!pass) return alert("請輸入姓名或密碼"); [cite: 103]
         
         if (pass === "admin123") {
-            currentUser = "管理員";
+            currentUser = "管理員"; [cite: 103]
             document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = (el.classList.contains('nav-item')) ? 'flex' : 'block';
+                el.style.display = (el.classList.contains('nav-item')) ? 'flex' : 'block'; [cite: 104]
             });
-        } else if (users.includes(pass) || pass === "測試") {
-            currentUser = pass;
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        } else if (users.includes(pass) || pass === "測試") { [cite: 105]
+            currentUser = pass; [cite: 105]
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none'); [cite: 106]
         } else {
-            return alert("無此人員權限，請聯繫管理員");
+            return alert("無此人員權限，請聯繫管理員"); [cite: 106]
         }
         
-        document.getElementById('user-role-display').innerText = currentUser;
-        document.getElementById('f-user-static').value = currentUser;
-        document.getElementById('login-screen').style.display = 'none';
-        renderHome();
+        document.getElementById('user-role-display').innerText = currentUser; [cite: 107]
+        document.getElementById('f-user-static').value = currentUser; [cite: 108]
+        document.getElementById('login-screen').style.display = 'none'; [cite: 108]
+        renderHome(); [cite: 108]
     }
 
     function showView(viewId) {
-        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
-        document.getElementById('view-' + viewId).classList.add('active-view');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const navIdx = { 'home': 0, 'stats': 1, 'edit': 2, 'tools': 3 };
+        document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view')); [cite: 108]
+        document.getElementById('view-' + viewId).classList.add('active-view'); [cite: 109]
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); [cite: 109]
+        const navIdx = { 'home': 0, 'stats': 1, 'edit': 2, 'tools': 3 }; [cite: 109]
         if (navIdx[viewId] !== undefined) {
-            document.querySelectorAll('.nav-item')[navIdx[viewId]].classList.add('active');
+            document.querySelectorAll('.nav-item')[navIdx[viewId]].classList.add('active'); [cite: 110]
         }
-        if(viewId === 'home') renderHome();
-        if(viewId === 'stats') renderStats();
+        if(viewId === 'home') renderHome(); [cite: 111]
+        if(viewId === 'stats') renderStats(); [cite: 111]
     }
 
-    function getToday() { return new Date().toISOString().split('T')[0]; }
+    function getToday() { return new Date().toISOString().split('T')[0]; } [cite: 112]
 
     function renderHome() {
-        const areaFilter = document.getElementById('header-area-filter').value;
-        const search = document.getElementById('search').value.toLowerCase();
-        const container = document.getElementById('tree-list-container');
-        container.innerHTML = "";
-        let tQty = 0, tW = 0, tIn = 0;
-        
+        const areaFilter = document.getElementById('header-area-filter').value; [cite: 113]
+        const search = document.getElementById('search').value.toLowerCase(); [cite: 114]
+        const container = document.getElementById('tree-list-container'); [cite: 114]
+        container.innerHTML = ""; [cite: 114]
+        let tQty = 0, tW = 0, tIn = 0; [cite: 115]
+
         db.filter(r => r.date === getToday()).forEach(r => {
             if (areaFilter === "全部" || r.area === areaFilter) {
-                tQty += (r.harvestQty || 0);
-                tW += (r.weightVal || 0);
-                tIn += (r.income || 0);
+                tQty += (r.harvestQty || 0); [cite: 116]
+                tW += (r.weightVal || 0); [cite: 116]
+                tIn += (r.income || 0); [cite: 116]
             }
         });
 
-        document.getElementById('today-qty').innerText = tQty;
-        document.getElementById('today-weight').innerText = tW.toFixed(1);
-        document.getElementById('today-income').innerText = tIn.toLocaleString();
+        document.getElementById('today-qty').innerText = tQty; [cite: 117]
+        document.getElementById('today-weight').innerText = tW.toFixed(1); [cite: 117]
+        document.getElementById('today-income').innerText = tIn.toLocaleString(); [cite: 117]
 
-        const rank = rankings[getToday()];
+        const rank = rankings[getToday()]; [cite: 117]
         document.getElementById('display-rank-list').innerHTML = rank ?
-            `🏆 今日第一名：${rank.weight}g / ${rank.brix}°` : "今日暫無排行紀錄";
+            `🏆 今日第一名：${rank.weight}g / ${rank.brix}°` : "今日暫無排行紀錄"; [cite: 118]
 
         db.filter(r => (areaFilter === "全部" || r.area === areaFilter) &&
             (r.name.toLowerCase().includes(search) || r.code.toLowerCase().includes(search))
@@ -355,231 +362,232 @@
                             <span style="font-size:12px;">${r.harvestQty}粒 / ${r.weightVal}KG</span>
                         </div>
                     </div>
-                </div>`;
+                </div>`; [cite: 119, 120, 121, 122]
         });
-        renderWeeklyChart();
+        renderWeeklyChart(); [cite: 123]
     }
 
     function renderWeeklyChart() {
-        const chart = document.getElementById('weekly-trend-chart');
-        chart.innerHTML = "";
-        let weekQty = 0, weekIn = 0;
+        const chart = document.getElementById('weekly-trend-chart'); [cite: 123]
+        chart.innerHTML = ""; [cite: 124]
+        let weekQty = 0, weekIn = 0; [cite: 124]
         for(let i=6; i>=0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dateStr = d.toISOString().split('T')[0];
-            const dayData = db.filter(r => r.date === dateStr);
-            const dayQty = dayData.reduce((sum, r) => sum + (r.harvestQty || 0), 0);
-            weekQty += dayQty;
-            weekIn += dayData.reduce((sum, r) => sum + (r.income || 0), 0);
-            const height = Math.min(dayQty / 2, 60) + 5;
+            const d = new Date(); [cite: 125]
+            d.setDate(d.getDate() - i); [cite: 126]
+            const dateStr = d.toISOString().split('T')[0]; [cite: 126]
+            const dayData = db.filter(r => r.date === dateStr); [cite: 126]
+            const dayQty = dayData.reduce((sum, r) => sum + (r.harvestQty || 0), 0); [cite: 127]
+            weekQty += dayQty; [cite: 127]
+            weekIn += dayData.reduce((sum, r) => sum + (r.income || 0), 0); [cite: 128]
+            const height = Math.min(dayQty / 2, 60) + 5; [cite: 128]
             chart.innerHTML += `<div style="flex:1; background:var(--accent); height:${height}px; border-radius:4px 4px 0 0; position:relative;">
                 <span style="position:absolute; top:-18px; width:100%; text-align:center; font-size:9px; color:white;">${dayQty}</span>
-            </div>`;
+            </div>`; [cite: 129]
         }
-        document.getElementById('weekly-total-qty').innerText = weekQty;
-        document.getElementById('weekly-total-income').innerText = weekIn.toLocaleString();
+        document.getElementById('weekly-total-qty').innerText = weekQty; [cite: 130]
+        document.getElementById('weekly-total-income').innerText = weekIn.toLocaleString(); [cite: 130]
     }
 
     function handleSave() {
         const data = {
-            id: editingId || Date.now(),
-            date: document.getElementById('f-date').value,
-            user: currentUser,
-            area: document.getElementById('f-area').value,
-            name: document.getElementById('f-name').value,
-            code: document.getElementById('f-code').value,
-            isBlooming: document.getElementById('f-isBlooming').checked,
-            bloomStatus: document.getElementById('f-bloomStatus').value,
-            isBagged: document.getElementById('f-isBagged').checked,
-            bagQty: parseInt(document.getElementById('f-bagQty').value) || 0,
-            water: document.getElementById('f-water').value,
-            fert: document.getElementById('f-fert').value,
-            pruneBig: document.getElementById('f-pruneBig').checked,
-            pruneSmall: document.getElementById('f-pruneSmall').checked,
-            health: document.getElementById('f-health').value,
-            healthDesc: document.getElementById('f-healthDesc').value,
-            medDose: document.getElementById('f-medDose').value,
-            harvestQty: parseInt(document.getElementById('f-harvestQty').value) || 0,
-            weightVal: parseFloat(document.getElementById('f-weightVal').value) || 0,
-            sellWeight: parseFloat(document.getElementById('f-sellWeight').value) || 0,
-            unit: document.getElementById('f-unit').value,
-            price: parseFloat(document.getElementById('f-price').value) || 0,
-            income: parseInt(document.getElementById('f-income').value) || 0,
-            badQty: parseInt(document.getElementById('f-badQty').value) || 0,
-            badWeight: parseFloat(document.getElementById('f-badWeight').value) || 0
+            id: editingId || Date.now(), [cite: 131, 132]
+            date: document.getElementById('f-date').value, [cite: 132]
+            user: currentUser, [cite: 132]
+            area: document.getElementById('f-area').value, [cite: 132]
+            name: document.getElementById('f-name').value, [cite: 132]
+            code: document.getElementById('f-code').value, [cite: 132]
+            isBlooming: document.getElementById('f-isBlooming').checked, [cite: 132]
+            bloomStatus: document.getElementById('f-bloomStatus').value, [cite: 132]
+            isBagged: document.getElementById('f-isBagged').checked, [cite: 133]
+            bagQty: parseInt(document.getElementById('f-bagQty').value) || 0, [cite: 133, 134]
+            water: document.getElementById('f-water').value, [cite: 134]
+            fert: document.getElementById('f-fert').value, [cite: 134]
+            pruneBig: document.getElementById('f-pruneBig').checked, [cite: 134]
+            pruneSmall: document.getElementById('f-pruneSmall').checked, [cite: 134]
+            health: document.getElementById('f-health').value, [cite: 134]
+            healthDesc: document.getElementById('f-healthDesc').value, [cite: 134]
+            medDose: document.getElementById('f-medDose').value, [cite: 134]
+            harvestQty: parseInt(document.getElementById('f-harvestQty').value) || 0, [cite: 135]
+            weightVal: parseFloat(document.getElementById('f-weightVal').value) || 0, [cite: 135, 136]
+            sellWeight: parseFloat(document.getElementById('f-sellWeight').value) || 0, [cite: 136, 137]
+            unit: document.getElementById('f-unit').value, [cite: 137]
+            price: parseFloat(document.getElementById('f-price').value) || 0, [cite: 137, 138]
+            income: parseInt(document.getElementById('f-income').value) || 0, [cite: 138, 139]
+            badQty: parseInt(document.getElementById('f-badQty').value) || 0, [cite: 139, 140]
+            badWeight: parseFloat(document.getElementById('f-badWeight').value) || 0 [cite: 140, 141]
         };
 
         if (editingId) {
-            const index = db.findIndex(r => r.id === editingId);
-            db[index] = data;
+            const index = db.findIndex(r => r.id === editingId); [cite: 141]
+            db[index] = data; [cite: 142]
         } else {
-            db.push(data);
+            db.push(data); [cite: 142]
         }
-        localStorage.setItem('orchard_db_v35', JSON.stringify(db));
-        alert("儲存成功！");
-        showView('home');
+        localStorage.setItem('orchard_db_v35', JSON.stringify(db)); [cite: 143]
+        alert("儲存成功！"); [cite: 143]
+        showView('home'); [cite: 143]
     }
 
     function editRecord(id) {
-        const r = db.find(item => item.id === id);
-        if(!r) return;
-        editingId = id;
-        document.getElementById('f-date').value = r.date;
-        document.getElementById('f-area').value = r.area;
-        document.getElementById('f-name').value = r.name;
-        document.getElementById('f-code').value = r.code;
-        document.getElementById('f-isBlooming').checked = r.isBlooming;
-        document.getElementById('f-bloomStatus').value = r.bloomStatus;
-        document.getElementById('f-isBagged').checked = r.isBagged;
-        document.getElementById('f-bagQty').value = r.bagQty;
-        document.getElementById('f-water').value = r.water;
-        document.getElementById('f-fert').value = r.fert;
-        document.getElementById('f-pruneBig').checked = r.pruneBig;
-        document.getElementById('f-pruneSmall').checked = r.pruneSmall;
-        document.getElementById('f-health').value = r.health;
-        document.getElementById('f-healthDesc').value = r.healthDesc;
-        document.getElementById('f-medDose').value = r.medDose;
-        document.getElementById('f-harvestQty').value = r.harvestQty;
-        document.getElementById('f-weightVal').value = r.weightVal;
-        document.getElementById('f-sellWeight').value = r.sellWeight;
-        document.getElementById('f-unit').value = r.unit;
-        document.getElementById('f-price').value = r.price;
-        document.getElementById('f-income').value = r.income;
-        document.getElementById('f-badQty').value = r.badQty;
-        document.getElementById('f-badWeight').value = r.badWeight;
-        toggleSubField('f-isBlooming', 'f-bloomStatus-box');
-        toggleSubField('f-isBagged', 'f-bagQty-box');
-        showView('edit');
+        const r = db.find(item => item.id === id); [cite: 144]
+        if(!r) return; [cite: 145]
+        editingId = id; [cite: 145]
+        document.getElementById('f-date').value = r.date; [cite: 145]
+        document.getElementById('f-area').value = r.area; [cite: 145]
+        document.getElementById('f-name').value = r.name; [cite: 145]
+        document.getElementById('f-code').value = r.code; [cite: 145]
+        document.getElementById('f-isBlooming').checked = r.isBlooming; [cite: 145]
+        document.getElementById('f-bloomStatus').value = r.bloomStatus; [cite: 146]
+        document.getElementById('f-isBagged').checked = r.isBagged; [cite: 146]
+        document.getElementById('f-bagQty').value = r.bagQty; [cite: 146]
+        document.getElementById('f-water').value = r.water; [cite: 146]
+        document.getElementById('f-fert').value = r.fert; [cite: 146]
+        document.getElementById('f-pruneBig').checked = r.pruneBig; [cite: 146]
+        document.getElementById('f-pruneSmall').checked = r.pruneSmall; [cite: 147]
+        document.getElementById('f-health').value = r.health; [cite: 147]
+        document.getElementById('f-healthDesc').value = r.healthDesc; [cite: 147]
+        document.getElementById('f-medDose').value = r.medDose; [cite: 147]
+        document.getElementById('f-harvestQty').value = r.harvestQty; [cite: 147]
+        document.getElementById('f-weightVal').value = r.weightVal; [cite: 147]
+        document.getElementById('f-sellWeight').value = r.sellWeight; [cite: 148]
+        document.getElementById('f-unit').value = r.unit; [cite: 148]
+        document.getElementById('f-price').value = r.price; [cite: 148]
+        document.getElementById('f-income').value = r.income; [cite: 148]
+        document.getElementById('f-badQty').value = r.badQty; [cite: 148]
+        document.getElementById('f-badWeight').value = r.badWeight; [cite: 148]
+        toggleSubField('f-isBlooming', 'f-bloomStatus-box'); [cite: 148]
+        toggleSubField('f-isBagged', 'f-bagQty-box'); [cite: 149]
+        showView('edit'); [cite: 149]
     }
 
     function resetForm() {
-        editingId = null;
-        document.getElementById('f-date').value = getToday();
-        document.querySelectorAll('#view-edit input[type="text"], #view-edit input[type="number"], #view-edit textarea').forEach(i => i.value = "");
-        document.querySelectorAll('#view-edit input[type="checkbox"]').forEach(i => i.checked = false);
-        toggleSubField('f-isBlooming', 'f-bloomStatus-box');
-        toggleSubField('f-isBagged', 'f-bagQty-box');
+        editingId = null; [cite: 149]
+        document.getElementById('f-date').value = getToday(); [cite: 150]
+        document.querySelectorAll('#view-edit input[type="text"], #view-edit input[type="number"], #view-edit textarea').forEach(i => i.value = ""); [cite: 150]
+        document.querySelectorAll('#view-edit input[type="checkbox"]').forEach(i => i.checked = false); [cite: 150]
+        toggleSubField('f-isBlooming', 'f-bloomStatus-box'); [cite: 151]
+        toggleSubField('f-isBagged', 'f-bagQty-box'); [cite: 151]
     }
 
     function calcIncome() {
-        const w = parseFloat(document.getElementById('f-sellWeight').value) || 0;
-        const p = parseFloat(document.getElementById('f-price').value) || 0;
-        const unit = document.getElementById('f-unit').value;
-        document.getElementById('f-income').value = Math.round(unit === "台斤" ? (w/0.6)*p : w*p);
+        const w = parseFloat(document.getElementById('f-sellWeight').value) || 0; [cite: 151, 152]
+        const p = parseFloat(document.getElementById('f-price').value) || 0; [cite: 152]
+        const unit = document.getElementById('f-unit').value; [cite: 152]
+        document.getElementById('f-income').value = Math.round(unit === "台斤" ? (w/0.6)*p : w*p); [cite: 152]
     }
 
-    function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; }
+    function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; } [cite: 153]
 
     function renderStats() {
-        const yearSelect = document.getElementById('stats-year');
+        const yearSelect = document.getElementById('stats-year'); [cite: 154]
         if(yearSelect.options.length === 0) {
-            const cy = new Date().getFullYear();
-            for(let i=0; i<3; i++) yearSelect.add(new Option(cy-i, cy-i));
+            const cy = new Date().getFullYear(); [cite: 155]
+            for(let i=0; i<3; i++) yearSelect.add(new Option(cy-i, cy-i)); [cite: 156]
         }
-        const selYear = yearSelect.value;
-        const selArea = document.getElementById('stats-area').value;
-        const tbody = document.getElementById('stats-tbody');
-        tbody.innerHTML = "";
-        let gQty=0, gIn=0;
+        const selYear = yearSelect.value; [cite: 156]
+        const selArea = document.getElementById('stats-area').value; [cite: 157]
+        const tbody = document.getElementById('stats-tbody'); [cite: 157]
+        tbody.innerHTML = ""; [cite: 157]
+        let gQty=0, gIn=0; [cite: 157]
         for(let m=1; m<=12; m++) {
-            const mStr = `${selYear}-${m.toString().padStart(2,'0')}`;
-            const mData = db.filter(r => r.date.startsWith(mStr) && (selArea === "全部" || r.area === selArea));
-            const mQty = mData.reduce((s,r) => s+(r.harvestQty||0), 0);
-            const mIn = mData.reduce((s,r) => s+(r.income||0), 0);
-            gQty+=mQty; gIn+=mIn;
-            tbody.innerHTML += `<tr><td>${m}月</td><td>${mQty}</td><td>-</td><td>${mIn.toLocaleString()}</td></tr>`;
+            const mStr = `${selYear}-${m.toString().padStart(2,'0')}`; [cite: 158]
+            const mData = db.filter(r => r.date.startsWith(mStr) && (selArea === "全部" || r.area === selArea)); [cite: 159]
+            const mQty = mData.reduce((s,r) => s+(r.harvestQty||0), 0); [cite: 160]
+            const mIn = mData.reduce((s,r) => s+(r.income||0), 0); [cite: 160]
+            gQty+=mQty; gIn+=mIn; [cite: 160]
+            tbody.innerHTML += `<tr><td>${m}月</td><td>${mQty}</td><td>-</td><td>${mIn.toLocaleString()}</td></tr>`; [cite: 160]
         }
-        document.getElementById('stat-total-qty').innerText = gQty;
-        document.getElementById('stat-total-income').innerText = gIn.toLocaleString();
+        document.getElementById('stat-total-qty').innerText = gQty; [cite: 161]
+        document.getElementById('stat-total-income').innerText = gIn.toLocaleString(); [cite: 161]
     }
 
     function addUser() {
-        const nameInput = document.getElementById('new-user-name');
-        const name = nameInput.value.trim();
+        const nameInput = document.getElementById('new-user-name'); [cite: 162]
+        const name = nameInput.value.trim(); [cite: 163]
         if(name && !users.includes(name)) {
-            users.push(name);
-            localStorage.setItem('orchard_users', JSON.stringify(users));
-            nameInput.value = "";
-            renderUserList();
-        } else { alert("請輸入姓名或姓名已存在"); }
+            users.push(name); [cite: 163]
+            localStorage.setItem('orchard_users', JSON.stringify(users)); [cite: 164]
+            nameInput.value = ""; [cite: 164]
+            renderUserList(); [cite: 164]
+        } else { alert("請輸入姓名或姓名已存在"); [cite: 164]
+        }
     }
 
     function deleteUser(name) {
         if(confirm(`確定要刪除人員：${name} 嗎？`)) {
-            users = users.filter(u => u !== name);
-            localStorage.setItem('orchard_users', JSON.stringify(users));
-            renderUserList();
+            users = users.filter(u => u !== name); [cite: 165]
+            localStorage.setItem('orchard_users', JSON.stringify(users)); [cite: 166]
+            renderUserList(); [cite: 166]
         }
     }
 
     function renderUserList() {
-        const container = document.getElementById('user-list-tags');
-        if(!container) return;
-        container.innerHTML = "";
+        const container = document.getElementById('user-list-tags'); [cite: 166]
+        if(!container) return; [cite: 167]
+        container.innerHTML = ""; [cite: 167]
         users.forEach(u => {
-            container.innerHTML += `<span style="background:#e0ede4; padding:5px 10px; border-radius:15px; font-size:13px; display:inline-flex; align-items:center; gap:5px;">${u} <span onclick="deleteUser('${u}')" style="color:red; font-weight:bold; cursor:pointer;">×</span></span>`;
+            container.innerHTML += `<span style="background:#e0ede4; padding:5px 10px; border-radius:15px; font-size:13px; display:inline-flex; align-items:center; gap:5px;">${u} <span onclick="deleteUser('${u}')" style="color:red; font-weight:bold; cursor:pointer;">×</span></span>`; [cite: 167]
         });
     }
 
     function saveRanking() {
-        const w = document.getElementById('r1-w').value;
-        const b = document.getElementById('r1-b').value;
-        if(!w || !b) return alert("請輸入完整數據");
-        rankings[getToday()] = { weight: w, brix: b };
-        localStorage.setItem('orchard_ranks', JSON.stringify(rankings));
-        alert("排行已更新");
-        renderHome();
+        const w = document.getElementById('r1-w').value; [cite: 168]
+        const b = document.getElementById('r1-b').value; [cite: 169]
+        if(!w || !b) return alert("請輸入完整數據"); [cite: 169]
+        rankings[getToday()] = { weight: w, brix: b }; [cite: 169]
+        localStorage.setItem('orchard_ranks', JSON.stringify(rankings)); [cite: 169]
+        alert("排行已更新"); [cite: 169]
+        renderHome(); [cite: 170]
     }
 
     function deleteCurrentRecord() {
-        if(!editingId) return;
+        if(!editingId) return; [cite: 170]
         if(confirm("確定要刪除此筆紀錄嗎？")) {
-            db = db.filter(r => r.id !== editingId);
-            localStorage.setItem('orchard_db_v35', JSON.stringify(db));
-            showView('home');
+            db = db.filter(r => r.id !== editingId); [cite: 171]
+            localStorage.setItem('orchard_db_v35', JSON.stringify(db)); [cite: 172]
+            showView('home'); [cite: 172]
         }
     }
 
     function exportExcel() {
-        const ws = XLSX.utils.json_to_sheet(db);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "果園數據");
-        XLSX.writeFile(wb, `果園備份_${getToday()}.xlsx`);
-        localStorage.setItem('last_backup_time', new Date().toLocaleString());
-        updateBackupDisplay();
+        const ws = XLSX.utils.json_to_sheet(db); [cite: 172]
+        const wb = XLSX.utils.book_new(); [cite: 173]
+        XLSX.utils.book_append_sheet(wb, ws, "果園數據"); [cite: 173]
+        XLSX.writeFile(wb, `果園備份_${getToday()}.xlsx`); [cite: 173]
+        localStorage.setItem('last_backup_time', new Date().toLocaleString()); [cite: 173]
+        updateBackupDisplay(); [cite: 173]
     }
 
     function importExcel(input) {
-        const file = input.files[0];
-        const reader = new FileReader();
+        const file = input.files[0]; [cite: 174]
+        const reader = new FileReader(); [cite: 175]
         reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(firstSheet);
+            const data = new Uint8Array(e.target.result); [cite: 175]
+            const workbook = XLSX.read(data, {type: 'array'}); [cite: 176]
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]]; [cite: 176]
+            const json = XLSX.utils.sheet_to_json(firstSheet); [cite: 176]
             if(confirm(`即將匯入 ${json.length} 筆資料，這將與現有資料合併，確定嗎？`)) {
-                db = [...db, ...json];
-                localStorage.setItem('orchard_db_v35', JSON.stringify(db));
-                location.reload();
+                db = [...db, ...json]; [cite: 177]
+                localStorage.setItem('orchard_db_v35', JSON.stringify(db)); [cite: 178]
+                location.reload(); [cite: 178]
             }
         };
-        reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(file); [cite: 178]
     }
 
     function checkBackupStatus() {
-        const last = localStorage.getItem('last_backup_time');
-        if(!last || (new Date() - new Date(last)) > 7*24*60*60*1000) document.getElementById('backup-banner').style.display='flex';
+        const last = localStorage.getItem('last_backup_time'); [cite: 179]
+        if(!last || (new Date() - new Date(last)) > 7*24*60*60*1000) document.getElementById('backup-banner').style.display='flex'; [cite: 180]
     }
 
     function updateBackupDisplay() {
-        document.getElementById('last-backup-display').innerText = localStorage.getItem('last_backup_time') || "尚未有備份紀錄";
+        document.getElementById('last-backup-display').innerText = localStorage.getItem('last_backup_time') || "尚未有備份紀錄"; [cite: 181]
     }
 
     function clearAllData() {
         if(confirm("⚠️ 注意！這將刪除所有採收紀錄且無法還原，確定嗎？")) {
-            localStorage.removeItem('orchard_db_v35');
-            location.reload();
+            localStorage.removeItem('orchard_db_v35'); [cite: 182]
+            location.reload(); [cite: 183]
         }
     }
 </script>
