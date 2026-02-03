@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>專業果樹管理系統 v3.5-統計增強版</title>
+    <title>專業果樹管理系統 v3.5 統計增強版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -18,6 +18,7 @@
             --danger: #e63946;
             --warning: #ffb703;
             --money: #2a9d8f;
+            --info: #457b9d;
         }
 
         * { -webkit-tap-highlight-color: transparent; outline: none; color: var(--text-dark); box-sizing: border-box; }
@@ -25,52 +26,44 @@
         
         .container { width: 100vw; max-width: 500px; height: 100vh; height: -webkit-fill-available; background: var(--bg); display: flex; flex-direction: column; position: relative; }
 
-        /* 備份通知樣式 (原始 V3.4) */
-        #backup-banner { background: var(--warning); padding: 10px 15px; display: none; align-items: center; justify-content: space-between; font-size: 14px; font-weight: bold; z-index: 10001; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* 頂部橫幅 */
+        #backup-banner { background: var(--warning); padding: 10px 15px; display: none; align-items: center; justify-content: space-between; font-size: 14px; font-weight: bold; z-index: 10001; }
         
-        /* 登入畫面樣式 (原始 V3.4) */
+        /* 登入畫面 */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .login-box { background: var(--white); padding: 40px 30px; border-radius: 30px; width: 85%; text-align: center; }
 
-        header { background: var(--primary); padding: 15px 20px 25px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; position: relative; }
+        header { background: var(--primary); padding: 15px 20px 20px 20px; text-align: center; border-radius: 0 0 35px 35px; flex-shrink: 0; z-index: 10; position: relative; }
         header * { color: var(--white) !important; }
-        
-        /* ✨ 關鍵修復：電腦版下拉選單文字顏色 */
-        header select option { color: #333 !important; background-color: white !important; }
+        .logout-text-btn { position: absolute; right: 15px; top: 12px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; }
 
-        .logout-text-btn { position: absolute; right: 15px; top: 12px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; }
-
+        /* 內容區域 */
         .content-area { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
         .content-view { display: none; }
         .active-view { display: block; }
 
-        /* 原始 V3.4 卡片與輸入框樣式 */
-        .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0ee; }
+        .card { background: var(--white); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* 表單元素 */
         input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #dcdcdc; border-radius: 12px; font-size: 16px; margin-bottom: 5px; background: #fff !important; }
         
-        /* 📈 新增：統計中心專用樣式 */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-box { background: #f8f9f8; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #eee; }
-        .stat-box b { font-size: 18px; color: var(--primary); }
-        .month-item { border-bottom: 1px solid #eee; padding: 12px 5px; display: flex; justify-content: space-between; align-items: center; }
-        .month-item:last-child { border-bottom: none; }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        label { font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 12px 0 6px 0; display: block; }
-
+        /* 統計表格專用樣式 */
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .stats-table th { background: #f8f9f8; padding: 10px; text-align: left; border-bottom: 2px solid var(--primary); }
+        .stats-table td { padding: 10px; border-bottom: 1px solid #eee; }
+        .stats-row-month { font-weight: bold; background: #f0f7f4; }
+        
+        /* 按鈕樣式 */
         .btn { border: none; padding: 16px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white !important; }
+        .btn-info { background: var(--info); color: white !important; }
         .btn-warning { background: var(--warning); color: #000 !important; }
-        .btn-outline { background: #e0e0e0; }
         .btn-danger { background: var(--danger); color: white !important; }
+        .btn-outline { background: #e0e0e0; color: #333 !important; }
 
         .section-title { color: var(--primary); border-left: 4px solid var(--primary); padding-left: 8px; margin: 20px 0 10px 0; font-weight: bold; }
-
-        /* 趨勢圖樣式 (原始 V3.4) */
-        .trend-container { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px; padding: 10px 5px; background: rgba(255,255,255,0.1); border-radius: 12px; }
-        .trend-bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; min-height: 2px; }
-        .trend-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; white-space: nowrap; color: white !important; }
-
+        
+        /* 導覽列 */
         nav { flex-shrink: 0; width: 100%; height: 80px; background: var(--white); display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
         .nav-item div { color: #888; margin-top: 4px; }
@@ -79,520 +72,385 @@
 
         .admin-only { display: none; }
         .sub-field { display: none; margin-top: 5px; padding: 10px; background: #f8f9f8; border-radius: 12px; border: 1px dashed #ccc; }
-        .check-container { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #fff; border-radius: 12px; border: 1.5px solid #dcdcdc; margin-top: 5px; }
-        
         .user-tag { display: inline-flex; align-items: center; background: #e8f5e9; padding: 5px 12px; border-radius: 20px; margin: 5px; font-size: 14px; border: 1px solid var(--primary); }
-        .user-tag span { margin-left: 8px; color: var(--danger); cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="backup-banner">
-        <div class="banner-content" onclick="handleBackupNow()">⚠️ 距離上次備份已超過 7 天，請立即匯出。</div>
-        <div onclick="closeBackupBanner()" style="padding: 5px; cursor: pointer; opacity: 0.7;">✕</div>
+        [cite_start]<div class="banner-content" onclick="handleBackupNow()">⚠️ 建議立即進行 Excel 備份匯出 [cite: 161, 162]</div>
+        [cite_start]<div onclick="closeBackupBanner()" style="padding: 5px; cursor: pointer; opacity: 0.7;">✕ [cite: 163]</div>
     </div>
 
     <div id="login-screen">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-top: 0;">果樹管理系統 v3.5</h2>
-            <p style="font-size: 12px; color: #666;">請輸入人員姓名或管理員密碼</p>
-            <input type="text" id="login-pass" placeholder="人員姓名或密碼" style="text-align: center;">
-            <button class="btn btn-primary" onclick="checkAuth()">進入系統</button>
+            [cite_start]<p style="font-size: 12px; color: #666;">請輸入人員姓名或管理員密碼 [cite: 58]</p>
+            [cite_start]<input type="text" id="login-pass" placeholder="人員姓名或密碼" style="text-align: center;"> [cite: 58]
+            [cite_start]<button class="btn btn-primary" onclick="checkAuth()">登入系統</button> [cite: 58]
         </div>
     </div>
 
     <header>
-        <div class="logout-text-btn" onclick="logout()">登出</div>
-        <div style="font-size: 13px; opacity: 0.9;">👤 <span id="user-role-display"></span> | <span id="display-today"></span></div>
-        
+        [cite_start]<div class="logout-text-btn" onclick="logout()">登出</div> [cite: 16, 17]
+        <div style="font-size: 13px; opacity: 0.9;">
+            [cite_start]<span id="user-icon">👤</span> <span id="user-role-display"></span> | [cite: 59]
+            [cite_start]<span id="display-today"></span> [cite: 59]
+        </div>
         <div style="margin: 10px 0;">
-            <select id="header-area-filter" onchange="refreshAllViews()" style="width: auto; padding: 5px 15px; border-radius: 20px; font-size: 14px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white; cursor: pointer;">
-                <option value="全部">全場數據加總</option>
-                <option value="A區">A區</option>
-                <option value="B區">B區</option>
-                <option value="C區">C區</option>
+            <select id="header-area-filter" onchange="renderHome(); refreshStats();" style="width: auto; padding: 5px 15px; border-radius: 20px; font-size: 14px; background: rgba(255,255,255,0.2) !important; color: white !important; border: 1px solid white; cursor: pointer;">
+                [cite_start]<option value="全部">全場數據加總</option> [cite: 60]
+                [cite_start]<option value="A區">A區</option> [cite: 60]
+                [cite_start]<option value="B區">B區</option> [cite: 60]
+                [cite_start]<option value="C區">C區</option> [cite: 60]
             </select>
         </div>
-
         <div style="display: flex; justify-content: space-around; gap: 5px;">
-            <div>今日採收<br><b id="today-qty" style="font-size:20px;">0</b> <small>粒</small></div>
-            <div>今日重量<br><b id="today-weight" style="font-size:20px;">0.0</b> <small>KG</small></div>
-            <div>今日收入<br><b id="today-income" style="font-size:20px; color:#ffb703 !important;">0</b> <small>元</small></div>
+            [cite_start]<div>今日採收<br><b id="today-qty" style="font-size:20px;">0</b> <small>粒</small></div> [cite: 60]
+            [cite_start]<div>今日重量<br><b id="today-weight" style="font-size:20px;">0.0</b> <small>KG</small></div> [cite: 60]
+            [cite_start]<div>今日收入<br><b id="today-income" style="font-size:20px; color:#ffb703 !important;">0</b> <small>元</small></div> [cite: 61]
         </div>
     </header>
 
     <div class="content-area">
         <div id="view-home" class="content-view active-view">
-            
-            <div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white; margin-bottom: 10px;">
-                <h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4>
-                <div id="display-rank-list" style="font-size:14px; color: white !important; line-height: 1.6;"></div>
+            [cite_start]<div class="card" style="background: linear-gradient(135deg, #2d6a4f, #1b4332); color: white; margin-bottom: 10px;"> [cite: 61, 62]
+                [cite_start]<h4 style="margin:0 0 8px 0; color: #d4a373;">🏆 今日品質排行 (甜度)</h4> [cite: 63]
+                [cite_start]<div id="display-rank-list" style="font-size:14px; color: white !important;"></div> [cite: 63, 64]
             </div>
 
-            <div class="card" style="background: #2d6a4f; color: white;">
-                <h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢 (近7日)</h4>
-                <div id="weekly-trend-chart" class="trend-container"></div>
-                <div style="margin-top: 22px; font-size: 12px; text-align: center; opacity: 0.9; color: white !important;">
+            [cite_start]<div class="card" style="background: #2d6a4f; color: white;"> [cite: 64, 65]
+                [cite_start]<h4 style="margin:0 0 5px 0; color: #d4a373;">📈 本週採收趨勢 (近7日)</h4> [cite: 66]
+                [cite_start]<div id="weekly-trend-chart" class="trend-container" style="display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 20px;"></div> [cite: 37, 66]
+                <div style="margin-top: 22px; font-size: 12px; text-align: center; opacity: 0.9;">
                     本週累計: <span id="weekly-total-qty" style="font-weight: bold; color: #d4a373 !important;">0</span> 粒 / 
-                    收入: <span id="weekly-total-income" style="font-weight: bold; color: #ffb703 !important;">0</span> 元
+                    [cite_start]收入: <span id="weekly-total-income" style="font-weight: bold; color: #ffb703 !important;">0</span> 元 [cite: 67, 68, 69]
                 </div>
             </div>
 
-            <input type="text" id="search" placeholder="🔍 搜尋編號或名稱..." oninput="renderHome()" style="margin-top: 10px;">
-            <div id="tree-list-container"></div>
+            [cite_start]<input type="text" id="search" placeholder="🔍 搜尋編號或名稱..." oninput="renderHome()" style="margin-top: 10px;"> [cite: 69]
+            [cite_start]<div id="tree-list-container"></div> [cite: 69]
         </div>
 
         <div id="view-stats" class="content-view">
             <div class="card">
-                <h3 style="margin-top:0; color:var(--primary);">📊 數據統計中心</h3>
-                <div class="grid-2">
-                    <select id="stat-year-select" onchange="renderStats()"></select>
-                    <select id="stat-area-filter" onchange="renderStats()">
-                        <option value="全部">所有區域</option>
-                        <option value="A區">A區</option>
-                        <option value="B區">B區</option>
-                        <option value="C區">C區</option>
-                    </select>
-                </div>
+                <h3 style="color:var(--primary); margin:0 0 15px 0;">📊 數據統計中心</h3>
+                <label>選擇年度</label>
+                <select id="stats-year-select" onchange="renderStats()"></select>
                 
-                <div class="section-title">✨ 年度累計摘要</div>
-                <div class="stat-grid">
-                    <div class="stat-box">年度總產量<br><b id="year-total-qty">0</b> <small>粒</small></div>
-                    <div class="stat-box">年度總重量<br><b id="year-total-weight">0</b> <small>KG</small></div>
-                    <div class="stat-box" style="grid-column: span 2; background: #fffdf0;">
-                        年度總收入：<b id="year-total-income" style="color:var(--money);">0</b> 元
-                    </div>
+                <div class="section-title">年度總計</div>
+                <div class="grid-3" style="text-align:center; background:#f9f9f9; padding:15px; border-radius:12px;">
+                    <div><small>總採收</small><br><b id="stat-year-qty">0</b></div>
+                    <div><small>總重量</small><br><b id="stat-year-weight">0</b></div>
+                    <div><small>總收入</small><br><b id="stat-year-income" style="color:var(--money)">0</b></div>
                 </div>
 
-                <div class="section-title">📅 月度生產明細列表</div>
-                <div id="month-list-container">
-                    </div>
+                <div class="section-title">各月明細摘要</div>
+                <div style="overflow-x: auto;">
+                    <table class="stats-table" id="month-stats-table">
+                        <thead>
+                            <tr>
+                                <th>月份</th>
+                                <th>數量</th>
+                                <th>重量</th>
+                                <th>收入</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="month-stats-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="month-detail-card" class="card" style="display:none;">
+                <h4 id="month-detail-title" style="color:var(--info);"></h4>
+                <div id="month-detail-list" style="font-size: 13px;"></div>
+                <button class="btn btn-outline" onclick="document.getElementById('month-detail-card').style.display='none'">關閉明細</button>
             </div>
         </div>
-<div id="view-edit" class="content-view">
+
+        <div id="view-edit" class="content-view">
             <div class="card">
-                <h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3>
+                [cite_start]<h3 style="margin:0 0 15px 0; color:var(--primary);">📝 紀錄填報</h3> [cite: 71]
+                <div class="grid-2">
+                    [cite_start]<div><label>📅 日期</label><input type="date" id="f-date"></div> [cite: 71]
+                    [cite_start]<div><label>👤 填寫人</label><input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;"></div> [cite: 71]
+                </div>
+                [cite_start]<div class="section-title">📍 基本資訊</div> [cite: 72]
+                [cite_start]<select id="f-area"><option value="A區">A區</option><option value="B區">B區</option><option value="C區">C區</option></select> [cite: 72]
+                [cite_start]<div class="grid-2"><input type="text" id="f-name" placeholder="名稱"><input type="text" id="f-code" placeholder="編號"></div> [cite: 72]
                 
-                <div class="grid-2">
-                    <div>
-                        <label>📅 日期</label>
-                        <input type="date" id="f-date">
-                    </div>
-                    <div>
-                        <label>👤 填寫人</label>
-                        <input type="text" id="f-user-static" readonly style="background:#f0f0f0 !important;">
-                    </div>
-                </div>
-                
-                <div class="section-title">📍 基本資訊</div>
-                <select id="f-area">
-                    <option value="A區">A區</option>
-                    <option value="B區">B區</option>
-                    <option value="C區">C區</option>
-                </select>
-                <div class="grid-2">
-                    <input type="text" id="f-name" placeholder="名稱 (例如: 珍珠芭樂)">
-                    <input type="text" id="f-code" placeholder="編號 (例如: A01)">
-                </div>
-
-                <div class="check-container">
-                    <label>🌸 處於花期</label>
-                    <input type="checkbox" id="f-isBlooming" onchange="toggleSubField('f-isBlooming', 'f-bloomStatus-box')">
-                </div>
-                <div id="f-bloomStatus-box" class="sub-field">
-                    <select id="f-bloomStatus">
-                        <option value="">選擇花況</option>
-                        <option value="少量開花">少量開花</option>
-                        <option value="盛開中">盛開中</option>
-                        <option value="花期結束">花期結束</option>
-                    </select>
-                </div>
-
-                <div class="check-container">
-                    <label>🛍️ 已套袋</label>
-                    <input type="checkbox" id="f-isBagged" onchange="toggleSubField('f-isBagged', 'f-bagQty-box')">
-                </div>
-                <div id="f-bagQty-box" class="sub-field">
-                    <input type="number" id="f-bagQty" placeholder="套袋數量">
-                </div>
-
-                <div class="section-title">🛠️ 養護與健康</div>
-                <input type="text" id="f-water" placeholder="澆水說明">
-                <input type="text" id="f-fert" placeholder="施肥劑量">
-                
-                <div class="grid-2">
-                    <div class="check-container" style="font-size:13px;">
-                        <label>大修剪</label>
-                        <input type="checkbox" id="f-pruneBig">
-                    </div>
-                    <div class="check-container" style="font-size:13px;">
-                        <label>小修剪</label>
-                        <input type="checkbox" id="f-pruneSmall">
-                    </div>
-                </div>
-
-                <select id="f-health">
-                    <option value="良好">健康良好</option>
-                    <option value="需關注">需關注</option>
-                    <option value="患病中">患病中</option>
-                </select>
-                <textarea id="f-healthDesc" rows="2" placeholder="病情或異常描述..."></textarea>
-                <input type="text" id="f-medDose" placeholder="使用藥劑與劑量">
-
-                <div class="section-title">💰 採收與銷售</div>
-                <label>正常果採收 (粒 / 總重)</label>
-                <div class="grid-2">
-                    <input type="number" id="f-harvestQty" placeholder="粒數">
-                    <input type="number" id="f-weightVal" step="0.1" placeholder="重量(KG)">
-                </div>
-              
-                <label>💰 銷售數據</label>
-                <div class="grid-2">
-                    <input type="number" id="f-sellWeight" step="0.1" placeholder="賣出重量" oninput="calcIncome()">
-                    <select id="f-unit" onchange="calcIncome()">
-                        <option value="公斤">公斤 (KG)</option>
-                        <option value="台斤">台斤</option>
-                    </select>
-                </div>
-                <div class="grid-2">
-                    <input type="number" id="f-price" placeholder="單價 (元)" oninput="calcIncome()">
-                    <input type="number" id="f-income" placeholder="總收入" readonly style="background:#f9f9f9 !important; font-weight:bold; color:var(--money) !important;">
-                </div>
-
-                <label style="color: var(--danger);">爛果統計 (⚠️)</label>
-                <div class="grid-2">
-                    <input type="number" id="f-badQty" placeholder="粒數">
-                    <input type="number" id="f-badWeight" step="0.1" placeholder="重量(KG)">
-                </div>
-                
-                <div class="admin-only" id="admin-rank-panel">
-                    <div class="section-title" style="color:#d44b39;">🎖️ 品質排行 (管理員)</div>
-                    <div class="card" style="background:#fffdfa; border:1px solid #ffe8cc; padding:12px;">
-                        <div class="grid-2">
-                            <div><label>🥇 重量(g)</label><input type="number" id="r1-w"></div>
-                            <div><label>甜度(°)</label><input type="number" id="r1-b" step="0.1"></div>
-                        </div>
-                        <div class="grid-2">
-                            <div><label>🥈 甜度(°)</label><input type="number" id="r2-b" step="0.1"></div>
-                            <div><label>🥉 甜度(°)</label><input type="number" id="r3-b" step="0.1"></div>
-                        </div>
-                    </div>
-                    <button class="btn btn-warning" onclick="saveRanking()" style="margin-bottom:20px;">更新今日排行</button>
-                </div>
-
-                <button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button>
-                <button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除紀錄</button>
-                <button class="btn btn-outline" onclick="showView('home')">取消返回</button>
+                [cite_start]<button class="btn btn-primary" onclick="handleSave()" style="margin-top: 20px;">💾 儲存紀錄</button> [cite: 89]
+                [cite_start]<button id="delete-btn" class="btn btn-danger admin-only" onclick="deleteCurrentRecord()">🗑️ 刪除</button> [cite: 90]
+                [cite_start]<button class="btn btn-outline" onclick="showView('home')">取消</button> [cite: 90]
             </div>
         </div>
 
         <div id="view-tools" class="content-view admin-only">
-            <div class="card">
-                <h3>👥 使用者名單管理</h3>
-                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                    <input type="text" id="new-user-name" placeholder="輸入姓名" style="margin-bottom: 0;">
-                    <button class="btn btn-primary" onclick="addUser()" style="margin-top: 0; width: 80px;">新增</button>
-                </div>
-                <div id="user-list-tags" style="min-height: 50px; border: 1px solid #eee; border-radius: 12px; padding: 10px; margin-bottom: 15px;"></div>
             </div>
-
-            <div class="card">
-                <h3>📂 資料安全管理</h3>
-                <div style="background: #fff9f0; padding: 12px; border-radius: 10px; border: 1px solid #ffe8cc; margin-bottom: 15px;">
-                    <small>上次備份時間：</small><br><b id="last-backup-display">尚未有備份紀錄</b>
-                </div>
-                <button class="btn btn-warning" onclick="exportExcel()">📤 匯出備份 (Excel)</button>
-                <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📥 匯入資料 (Excel)</button>
-                <input type="file" id="import-file" style="display:none" accept=".xlsx, .xls" onchange="importExcel(this)">
-                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-                <button class="btn btn-danger" onclick="clearAllData()">🧨 清空所有資料</button>
-            </div>
-        </div>
     </div>
 
     <nav>
-        <div class="nav-item active" id="n-home" onclick="showView('home')"><span>📋</span><div>清單</div></div>
+        [cite_start]<div class="nav-item active" id="n-home" onclick="showView('home')"><span>📋</span><div>清單</div></div> [cite: 97]
         <div class="nav-item" id="n-stats" onclick="showView('stats')"><span>📊</span><div>統計</div></div>
-        <div class="nav-item" onclick="prepareAdd()"><div class="nav-add-btn">＋</div></div>
-        <div class="nav-item admin-only" id="n-tools" onclick="showView('tools')"><span>⚙️</span><div>設定</div></div>
+        [cite_start]<div class="nav-item" onclick="prepareAdd()"><div class="nav-add-btn">＋</div></div> [cite: 97]
+        [cite_start]<div class="nav-item admin-only" id="n-tools" onclick="showView('tools')"><span>⚙️</span><div>設定</div></div> [cite: 97]
     </nav>
 </div>
 <script>
-    // --- 1. 核心資料初始化 ---
+    // --- 基礎資料初始化 ---
     let db = JSON.parse(localStorage.getItem('farm_v31')) || [];
     let rankStore = JSON.parse(localStorage.getItem('rank_v31')) || {};
     let userList = JSON.parse(localStorage.getItem('user_list_v31')) || [];
+    let lastBackup = localStorage.getItem('last_backup_time') || "";
     let currentUser = "";
     let isAdmin = false;
+
     const ADMIN_PASS = "admin123";
     const getToday = () => new Date().toISOString().split('T')[0];
 
-    window.onload = () => {
+    window.onload = function() {
         checkBackupStatus();
-        initYearSelect();
-        updateBackupDisplay();
+        initYearSelector();
     };
 
-    // --- 2. 嚴格權限驗證系統 (恢復 v3.4 邏輯) ---
+    // --- 統計核心功能 ---
+
+    // 初始化年份下拉選單
+    function initYearSelector() {
+        const yearSelect = document.getElementById('stats-year-select');
+        if (!yearSelect) return;
+        
+        const years = [...new Set(db.map(item => item.date.split('-')[0]))];
+        const currentYear = new Date().getFullYear().toString();
+        if (!years.includes(currentYear)) years.push(currentYear);
+        
+        years.sort((a, b) => b - a);
+        yearSelect.innerHTML = years.map(y => `<option value="${y}">${y} 年</option>`).join('');
+    }
+
+    // 渲染統計頁面
+    function renderStats() {
+        const targetYear = document.getElementById('stats-year-select').value;
+        const area = document.getElementById('header-area-filter').value;
+        
+        // 1. 篩選資料 (年份 + 區域)
+        let filtered = db.filter(t => t.date.startsWith(targetYear));
+        if (area !== "全部") {
+            filtered = filtered.filter(t => t.area === area);
+        }
+
+        // 2. 計算年度總計
+        const yQty = filtered.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
+        const yWeight = filtered.reduce((s, t) => s + (parseFloat(t.weightVal) || 0), 0).toFixed(1);
+        const yIncome = filtered.reduce((s, t) => s + (parseInt(t.income) || 0), 0);
+
+        document.getElementById('stat-year-qty').innerText = yQty.toLocaleString();
+        document.getElementById('stat-year-weight').innerText = yWeight;
+        document.getElementById('stat-year-income').innerText = yIncome.toLocaleString();
+
+        // 3. 計算各月摘要
+        const monthBody = document.getElementById('month-stats-body');
+        monthBody.innerHTML = "";
+
+        for (let m = 1; m <= 12; m++) {
+            const monthStr = `${targetYear}-${m.toString().padStart(2, '0')}`;
+            const mData = filtered.filter(t => t.date.startsWith(monthStr));
+            
+            if (mData.length > 0) {
+                const mQty = mData.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
+                const mWeight = mData.reduce((s, t) => s + (parseFloat(t.weightVal) || 0), 0).toFixed(1);
+                const mIncome = mData.reduce((s, t) => s + (parseInt(t.income) || 0), 0);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${m}月</td>
+                    <td>${mQty}</td>
+                    <td>${mWeight}</td>
+                    <td style="color:var(--money)">$${mIncome.toLocaleString()}</td>
+                    <td><button class="btn-info" style="padding:4px 8px; font-size:12px; margin:0;" onclick="showMonthDetail('${monthStr}')">明細</button></td>
+                `;
+                monthBody.appendChild(row);
+            }
+        }
+    }
+
+    // 顯示月份明細列表
+    function showMonthDetail(monthStr) {
+        const area = document.getElementById('header-area-filter').value;
+        let mData = db.filter(t => t.date.startsWith(monthStr));
+        if (area !== "全部") mData = mData.filter(t => t.area === area);
+
+        const container = document.getElementById('month-detail-list');
+        const card = document.getElementById('month-detail-card');
+        document.getElementById('month-detail-title').innerText = `📅 ${monthStr} 明細列表`;
+
+        if (mData.length === 0) {
+            container.innerHTML = "無紀錄";
+        } else {
+            // 按日期排序
+            mData.sort((a, b) => b.date.localeCompare(a.date));
+            container.innerHTML = mData.map(t => `
+                <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <b>${t.date.slice(8)}日</b> | ${t.name} <small>(#${t.code})</small><br>
+                        <span style="color:#666;">${t.harvestQty || 0}粒 / ${t.weightVal || 0}kg</span>
+                    </div>
+                    <div style="text-align:right; color:var(--money); font-weight:bold;">
+                        $${(parseInt(t.income) || 0).toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+        card.style.display = 'block';
+        card.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 切換視圖時重新整理統計資料
+    function refreshStats() {
+        if (document.getElementById('view-stats').classList.contains('active-view')) {
+            renderStats();
+        }
+    }
+
+    // --- 登入驗證 (延用並增強) ---
     function checkAuth() {
         const input = document.getElementById('login-pass').value.trim();
-        if (input === ADMIN_PASS) {
+        if (!input) return alert("請輸入姓名或密碼");
+        
+        if (input === ADMIN_PASS) { 
             isAdmin = true;
-            currentUser = "管理員";
-        } else if (userList.includes(input)) {
+            currentUser = "管理員"; 
+        } else if (userList.includes(input)) { 
             isAdmin = false;
-            currentUser = input;
+            currentUser = input; 
         } else {
-            return alert("❌ 登入失敗：姓名不在名單內，或密碼錯誤。");
+            return alert("姓名不在授權名單中，請聯繫管理員");
         }
 
         if(isAdmin) {
             document.querySelectorAll('.admin-only').forEach(el => {
-                if(el.classList.contains('nav-item')) {
-                    el.style.display = 'flex';
-                } else {
-                    el.style.display = 'block';
-                }
+                el.style.display = (el.classList.contains('nav-item') ? 'flex' : 'block');
             });
         }
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('user-role-display').innerText = currentUser;
         document.getElementById('display-today').innerText = getToday();
-        refreshAllViews();
-    }
-
-    function logout() { location.reload(); }
-
-    function refreshAllViews() {
         renderHome();
-        renderStats();
-        renderUserList();
+        initYearSelector();
     }
-
-    // --- 3. 統計中心邏輯 (連動區域與年度) ---
-    function initYearSelect() {
-        const select = document.getElementById('stat-year-select');
-        const years = [...new Set(db.map(t => t.date.split('-')[0]))];
-        const thisYear = new Date().getFullYear().toString();
-        if (!years.includes(thisYear)) years.push(thisYear);
-        select.innerHTML = years.sort().reverse().map(y => `<option value="${y}">${y}年</option>`).join('');
-    }
-
-    function renderStats() {
-        const year = document.getElementById('stat-year-select').value;
-        const area = document.getElementById('stat-area-filter').value;
-        let filtered = db.filter(t => t.date.startsWith(year));
-        if (area !== "全部") filtered = filtered.filter(t => t.area === area);
-
-        const tQty = filtered.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
-        const tWeight = filtered.reduce((s, t) => s + (parseFloat(t.weightVal) || 0), 0);
-        const tIncome = filtered.reduce((s, t) => s + (parseInt(t.income) || 0), 0);
-
-        document.getElementById('year-total-qty').innerText = tQty;
-        document.getElementById('year-total-weight').innerText = tWeight.toFixed(1);
-        document.getElementById('year-total-income').innerText = tIncome.toLocaleString();
-
-        const mContainer = document.getElementById('month-list-container');
-        mContainer.innerHTML = "";
-        for (let i = 12; i >= 1; i--) {
-            const m = i.toString().padStart(2, '0');
-            const mRecords = filtered.filter(t => t.date.split('-')[1] === m);
-            if (mRecords.length > 0) {
-                const mq = mRecords.reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
-                const mi = mRecords.reduce((s, t) => s + (parseInt(t.income) || 0), 0);
-                const mw = mRecords.reduce((s, t) => s + (parseFloat(t.weightVal) || 0), 0);
-                mContainer.innerHTML += `
-                    <div class="month-item">
-                        <div style="font-weight:bold;">${i}月 生產明細 (${area})</div>
-                        <div style="text-align:right; font-size:13px;">
-                            ${mq} 粒 / ${mw.toFixed(1)} KG<br>
-                            <span style="color:var(--money); font-weight:bold;">$${mi.toLocaleString()}</span>
-                        </div>
-                    </div>`;
-            }
-        }
-    }
-
-    // --- 4. 主頁與圖表邏輯 (原始 v3.4 增強) ---
-    function renderHome() {
-        const today = getToday(), area = document.getElementById('header-area-filter').value;
-        let filtered = area === "全部" ? db : db.filter(t => t.area === area);
-        
-        const tData = filtered.filter(t => t.date === today);
-        document.getElementById('today-qty').innerText = tData.reduce((s,t)=>s+(parseInt(t.harvestQty)||0), 0);
-        document.getElementById('today-weight').innerText = tData.reduce((s,t)=>s+(parseFloat(t.weightVal)||0), 0).toFixed(1);
-        document.getElementById('today-income').innerText = tData.reduce((s,t)=>s+(parseInt(t.income)||0), 0).toLocaleString();
-
-        const r = rankStore[today];
-        document.getElementById('display-rank-list').innerHTML = r ? 
-            `🥇 ${r.r1b||'-'}° (${r.r1w||'-'}g) | 🥈 ${r.r2b||'-'}° | 🥉 ${r.r3b||'-'}°` : "今日尚未更新品質測量數據";
-
-        const chart = document.getElementById('weekly-trend-chart');
-        let daysData = [], wQty = 0, wInc = 0;
-        for (let i = 6; i >= 0; i--) {
-            const d = new Date(); d.setDate(d.getDate() - i);
-            const ds = d.toISOString().split('T')[0];
-            const dq = filtered.filter(t => t.date === ds).reduce((s, t) => s + (parseInt(t.harvestQty) || 0), 0);
-            const di = filtered.filter(t => t.date === ds).reduce((s, t) => s + (parseInt(t.income) || 0), 0);
-            daysData.push({ date: ds.slice(5), qty: dq });
-            wQty += dq; wInc += di;
-        }
-        document.getElementById('weekly-total-qty').innerText = wQty;
-        document.getElementById('weekly-total-income').innerText = wInc.toLocaleString();
-        const maxQ = Math.max(...daysData.map(d => d.qty), 1);
-        chart.innerHTML = daysData.map(d => `<div class="trend-bar" style="height:${(d.qty/maxQ)*100}%"><div class="trend-label">${d.date}</div></div>`).join('');
-
-        const q = document.getElementById('search').value.toLowerCase();
-        document.getElementById('tree-list-container').innerHTML = filtered.filter(t => (t.name||'').includes(q) || (t.code||'').includes(q))
-            .reverse().map(t => `
-                <div class="card" onclick="editTree('${t.code}', '${t.date}')">
-                    <div style="display:flex; justify-content:space-between;">
-                        <b>${t.name} <small>#${t.code}</small></b>
-                        <b style="color:var(--money);">$${t.income||0}</b>
-                    </div>
-                    <div style="font-size:12px; color:#888;">${t.area} | ${t.date} | ${t.lastUser||'無'}</div>
-                </div>`).join('');
-    }
-
-    // --- 5. 核心保存與 Excel 邏輯 (完全保留 v3.4) ---
-    function handleSave() {
-        const code = document.getElementById('f-code').value;
-        const date = document.getElementById('f-date').value;
-        if(!code || !date) return alert("編號與日期必填");
-
-        const data = {
-            date, code,
-            area: document.getElementById('f-area').value,
-            name: document.getElementById('f-name').value,
-            isBlooming: document.getElementById('f-isBlooming').checked,
-            bloomStatus: document.getElementById('f-bloomStatus').value,
-            isBagged: document.getElementById('f-isBagged').checked,
-            bagQty: document.getElementById('f-bagQty').value,
-            water: document.getElementById('f-water').value,
-            fert: document.getElementById('f-fert').value,
-            pruneBig: document.getElementById('f-pruneBig').checked,
-            pruneSmall: document.getElementById('f-pruneSmall').checked,
-            health: document.getElementById('f-health').value,
-            healthDesc: document.getElementById('f-healthDesc').value,
-            medDose: document.getElementById('f-medDose').value,
-            harvestQty: document.getElementById('f-harvestQty').value,
-            weightVal: document.getElementById('f-weightVal').value,
-            sellWeight: document.getElementById('f-sellWeight').value,
-            unit: document.getElementById('f-unit').value,
-            price: document.getElementById('f-price').value,
-            income: document.getElementById('f-income').value,
-            badQty: document.getElementById('f-badQty').value,
-            badWeight: document.getElementById('f-badWeight').value,
-            lastUser: currentUser
-        };
-
-        const idx = db.findIndex(x => x.code === code && x.date === date);
-        if(idx > -1) db[idx] = data; else db.push(data);
-        localStorage.setItem('farm_v31', JSON.stringify(db));
-        alert("💾 紀錄已儲存");
-        refreshAllViews(); showView('home');
-    }
-
-    function editTree(code, date) {
-        const t = db.find(x => x.code === code && x.date === date);
-        if(!t) return;
-        prepareAdd(); 
-        // 載入所有欄位內容...
-        document.getElementById('f-date').value = t.date;
-        document.getElementById('f-code').value = t.code;
-        document.getElementById('f-name').value = t.name;
-        document.getElementById('f-area').value = t.area;
-        document.getElementById('f-isBlooming').checked = t.isBlooming;
-        toggleSubField('f-isBlooming', 'f-bloomStatus-box');
-        document.getElementById('f-bloomStatus').value = t.bloomStatus;
-        document.getElementById('f-isBagged').checked = t.isBagged;
-        toggleSubField('f-isBagged', 'f-bagQty-box');
-        document.getElementById('f-bagQty').value = t.bagQty;
-        document.getElementById('f-water').value = t.water;
-        document.getElementById('f-fert').value = t.fert;
-        document.getElementById('f-pruneBig').checked = t.pruneBig;
-        document.getElementById('f-pruneSmall').checked = t.pruneSmall;
-        document.getElementById('f-health').value = t.health;
-        document.getElementById('f-healthDesc').value = t.healthDesc;
-        document.getElementById('f-medDose').value = t.medDose;
-        document.getElementById('f-harvestQty').value = t.harvestQty;
-        document.getElementById('f-weightVal').value = t.weightVal;
-        document.getElementById('f-sellWeight').value = t.sellWeight;
-        document.getElementById('f-unit').value = t.unit;
-        document.getElementById('f-price').value = t.price;
-        document.getElementById('f-income').value = t.income;
-        document.getElementById('f-badQty').value = t.badQty;
-        document.getElementById('f-badWeight').value = t.badWeight;
-        
-        document.getElementById('delete-btn').style.display = isAdmin ? 'block' : 'none';
-        document.getElementById('admin-rank-panel').style.display = isAdmin ? 'block' : 'none';
-        showView('edit');
-    }
-
-    function calcIncome() {
-        let w = parseFloat(document.getElementById('f-sellWeight').value) || 0;
-        const u = document.getElementById('f-unit').value;
-        const p = parseFloat(document.getElementById('f-price').value) || 0;
-        if(u === "台斤") w = w * 0.6; 
-        document.getElementById('f-income').value = Math.round(w * p);
-    }
-
-    function addUser() {
-        const n = document.getElementById('new-user-name').value.trim();
-        if(n && !userList.includes(n)) { userList.push(n); localStorage.setItem('user_list_v31', JSON.stringify(userList)); renderUserList(); document.getElementById('new-user-name').value=''; }
-    }
-    function renderUserList() {
-        document.getElementById('user-list-tags').innerHTML = userList.map(u => `<div class="user-tag">${u}<span onclick="removeUser('${u}')">✕</span></div>`).join('');
-    }
-    function removeUser(u) { userList = userList.filter(x=>x!==u); localStorage.setItem('user_list_v31', JSON.stringify(userList)); renderUserList(); }
-
-    function exportExcel() {
-        const ws = XLSX.utils.json_to_sheet(db);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "果園紀錄");
-        XLSX.writeFile(wb, `果園備份_${getToday()}.xlsx`);
-        localStorage.setItem('last_backup_time', new Date().toLocaleString());
-        updateBackupDisplay();
-    }
-
-    function importExcel(input) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            db = XLSX.utils.sheet_to_json(firstSheet);
-            localStorage.setItem('farm_v31', JSON.stringify(db));
-            alert("匯入成功！");
-            location.reload();
-        };
-        reader.readAsArrayBuffer(input.files[0]);
-    }
-
+</script>
+// --- 介面切換與 UI 邏輯 ---
     function showView(vId) {
+        // 隱藏所有視圖並移除導覽列啟用狀態
         document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active-view'));
-        document.getElementById('view-' + vId).classList.add('active-view');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(document.getElementById('n-' + vId)) document.getElementById('n-' + vId).classList.add('active');
+
+        // 顯示目標視圖
+        const targetView = document.getElementById('view-' + vId);
+        if (targetView) targetView.classList.add('active-view');
+
+        [cite_start]// 設定導覽列圖示啟用狀態 [cite: 142]
+        const navItem = document.getElementById('n-' + vId);
+        if (navItem) navItem.classList.add('active');
+
+        // 根據視圖執行特定渲染
+        if (vId === 'home') renderHome();
+        if (vId === 'stats') {
+            initYearSelector();
+            renderStats();
+        }
+        if (vId === 'tools') {
+            [cite_start]renderUserList(); [cite: 144]
+            [cite_start]updateBackupDisplay(); [cite: 144]
+        }
     }
 
-    function prepareAdd() {
-        document.querySelectorAll('#view-edit input:not([readonly]), #view-edit select, #view-edit textarea').forEach(e => {
-            if(e.type==='checkbox') e.checked = false; else e.value = '';
-        });
-        document.getElementById('f-date').value = getToday();
-        document.getElementById('f-user-static').value = currentUser;
-        document.getElementById('f-unit').value = "公斤";
-        document.getElementById('delete-btn').style.display = 'none';
-        document.getElementById('admin-rank-panel').style.display = isAdmin ? 'block' : 'none';
-        showView('edit');
+    [cite_start]// 表單子欄位切換邏輯 [cite: 165]
+    function toggleSubField(checkboxId, boxId) {
+        const box = document.getElementById(boxId);
+        const isChecked = document.getElementById(checkboxId).checked;
+        box.style.display = isChecked ? 'block' : 'none';
     }
 
-    function toggleSubField(c, b) { document.getElementById(b).style.display = document.getElementById(c).checked ? 'block' : 'none'; }
-    function checkBackupStatus() { /* 原始檢查邏輯 */ }
-    function updateBackupDisplay() { document.getElementById('last-backup-display').innerText = localStorage.getItem('last_backup_time') || "尚未有備份紀錄"; }
-    function clearAllData() { if(confirm("確定永久刪除所有資料？")) { localStorage.clear(); location.reload(); } }
+    // --- 資料管理功能 ---
+
+    [cite_start]// 匯出 Excel 並更新備份時間 [cite: 145, 146]
+    function exportExcel() {
+        if (db.length === 0) return alert("目前沒有資料可以匯出");
+        
+        [cite_start]const ws = XLSX.utils.json_to_sheet(db); [cite: 145]
+        [cite_start]const wb = XLSX.utils.book_new(); [cite: 145]
+        [cite_start]XLSX.utils.book_append_sheet(wb, ws, "果園紀錄"); [cite: 145]
+        
+        [cite_start]const fileName = `果園管理紀錄_${getToday()}.xlsx`; [cite: 145]
+        [cite_start]XLSX.writeFile(wb, fileName); [cite: 145]
+
+        [cite_start]const now = new Date().toLocaleString(); [cite: 146]
+        [cite_start]localStorage.setItem('last_backup_time', now); [cite: 146]
+        [cite_start]updateBackupDisplay(); [cite: 146]
+        [cite_start]closeBackupBanner(); [cite: 146]
+    }
+
+    [cite_start]// 匯入 Excel 邏輯 [cite: 148-154]
+    function importExcel(input) {
+        [cite_start]const file = input.files[0]; [cite: 148]
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                [cite_start]const data = new Uint8Array(e.target.result); [cite: 149]
+                [cite_start]const workbook = XLSX.read(data, { type: 'array' }); [cite: 149]
+                [cite_start]const worksheet = workbook.Sheets[workbook.SheetNames[0]]; [cite: 149]
+                [cite_start]const importedData = XLSX.utils.sheet_to_json(worksheet); [cite: 149]
+
+                [cite_start]if (importedData.length === 0) return alert("檔案內沒有資料"); [cite: 150]
+
+                if (confirm(`讀取到 ${importedData.length} 筆資料。要覆蓋現有資料嗎？\n(按取消則為「新增」至現有資料後方)`)) {
+                    [cite_start]db = importedData; [cite: 151]
+                } else {
+                    [cite_start]db = db.concat(importedData); [cite: 152]
+                }
+
+                [cite_start]localStorage.setItem('farm_v31', JSON.stringify(db)); [cite: 152]
+                alert("匯入成功！");
+                renderHome();
+                [cite_start]input.value = ''; [cite: 153]
+            } catch (err) {
+                [cite_start]alert("匯入失敗，請檢查 Excel 格式。"); [cite: 154]
+            }
+        };
+        [cite_start]reader.readAsArrayBuffer(file); [cite: 155]
+    }
+
+    [cite_start]// 備份檢查機制 [cite: 157-161]
+    function checkBackupStatus() {
+        [cite_start]const last = localStorage.getItem('last_backup_time'); [cite: 157]
+        if (!last) {
+            [cite_start]document.getElementById('backup-banner').style.display = 'flex'; [cite: 157]
+            return;
+        }
+        [cite_start]const diffDays = (new Date() - new Date(last)) / (1000 * 60 * 60 * 24); [cite: 159, 160]
+        if (diffDays > 7) {
+            [cite_start]document.getElementById('backup-banner').style.display = 'flex'; [cite: 160]
+        }
+    }
+
+    function handleBackupNow() { exportExcel(); [cite_start]} [cite: 162]
+    function closeBackupBanner() { document.getElementById('backup-banner').style.display = 'none'; [cite_start]} [cite: 163]
+    function updateBackupDisplay() {
+        [cite_start]const last = localStorage.getItem('last_backup_time'); [cite: 164]
+        document.getElementById('last-backup-display').innerText = last || [cite_start]"尚未有備份紀錄"; [cite: 164]
+    }
+
+    [cite_start]// 登出功能 [cite: 165]
+    function logout() { 
+        if(confirm("確定要登出並重新載入系統嗎？")) {
+            location.reload(); 
+        }
+    }
 </script>
 </body>
 </html>
