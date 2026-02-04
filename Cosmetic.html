@@ -3,39 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro 化妝品管家 - 搜尋提醒版</title>
+    <title>Pro 化妝品管家</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --accent: #E19898; --bg: #FDFBFB; --danger: #FF6B6B; }
-        body { font-family: 'PingFang TC', sans-serif; background: var(--bg); color: #444; margin: 0; padding: 20px; }
-        .wrapper { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
-        @media (max-width: 850px) { .wrapper { grid-template-columns: 1fr; } }
-        
-        .panel { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: fit-content; }
-        h2 { border-left: 5px solid var(--accent); padding-left: 12px; font-size: 1.25rem; margin-top: 0; }
+        :root { 
+            --accent: #E19898; 
+            --bg: #FDFBFB; 
+            --danger: #FF6B6B; 
+            --panel-bg: #FFFFFF;
+        }
 
-        /* 表單與搜尋 */
-        .form-group { display: flex; flex-direction: column; gap: 10px; }
-        input, select { padding: 12px; border: 1px solid #eee; border-radius: 10px; font-size: 14px; }
-        .search-bar { width: 100%; border: 2px solid var(--accent); margin-bottom: 15px; outline: none; }
+        /* 關鍵修正：確保所有元素計算寬度時包含 padding */
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            background: var(--bg); 
+            color: #444; 
+            margin: 0; 
+            padding: 20px; 
+            line-height: 1.5;
+        }
+
+        .wrapper { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: 320px 1fr; 
+            gap: 25px; 
+        }
+
+        @media (max-width: 850px) { 
+            .wrapper { grid-template-columns: 1fr; } 
+        }
         
-        .btn-main { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .btn-sub { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; flex: 1; }
+        .panel { 
+            background: var(--panel-bg); 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            height: fit-content;
+            width: 100%; /* 確保面板不超出 */
+        }
+
+        h2 { border-left: 5px solid var(--accent); padding-left: 12px; font-size: 1.2rem; margin-top: 0; margin-bottom: 20px; }
+
+        /* 表單區域 */
+        .form-group { display: flex; flex-direction: column; gap: 12px; }
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #eee; 
+            border-radius: 10px; 
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+
+        .search-bar { 
+            border: 2px solid var(--accent); 
+            margin-bottom: 20px; 
+            background: #fff;
+        }
+        
+        .btn-main { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-main:hover { filter: brightness(1.05); }
+
+        .btn-row { display: flex; gap: 8px; margin-top: 5px; }
+        .btn-sub { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; }
 
         /* 圖片預覽 */
-        #imgPreview { width: 100%; height: 140px; border: 2px dashed #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background: #fafafa; }
+        #imgPreview { 
+            width: 100%; 
+            height: 140px; 
+            border: 2px dashed #eee; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            cursor: pointer; 
+            background: #fafafa;
+        }
         #imgPreview img { width: 100%; height: 100%; object-fit: cover; }
 
         /* 清單項目 */
-        .item-list { list-style: none; padding: 0; }
-        .item-card { display: flex; gap: 12px; background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f0f0f0; position: relative; transition: 0.3s; align-items: center; }
-        .item-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: #f9f9f9; }
-        .item-info { flex: 1; }
-        .progress-bg { height: 6px; background: #f0f0f0; border-radius: 10px; margin-top: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; transition: 0.5s; }
+        .item-card { 
+            display: flex; 
+            gap: 15px; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 15px; 
+            margin-bottom: 12px; 
+            border: 1px solid #f0f0f0; 
+            align-items: center;
+        }
+        .item-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+        .item-info { flex-grow: 1; min-width: 0; } /* min-width 避免文字擠爆容器 */
+        .item-name { font-weight: bold; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .delete-btn { cursor: pointer; opacity: 0.3; border: none; background: none; font-size: 18px; }
-        .delete-btn:hover { opacity: 1; }
+        .progress-bg { height: 8px; background: #f0f0f0; border-radius: 10px; margin: 8px 0; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
+        
+        .delete-btn { border: none; background: none; cursor: pointer; font-size: 18px; color: #ccc; transition: 0.2s; }
+        .delete-btn:hover { color: var(--danger); }
     </style>
 </head>
 <body>
@@ -44,42 +115,50 @@
     <div class="panel">
         <h2>✨ 新增產品</h2>
         <div class="form-group">
-            <input type="text" id="pName" placeholder="產品名稱 (如：小棕瓶)">
+            <input type="text" id="pName" placeholder="產品名稱 (如：蘭蔻小黑瓶)">
             <select id="pType">
-                <option value="180" data-label="精華液">精華/化妝水 (6M)</option>
-                <option value="365" data-label="乳霜">乳霜/面霜 (12M)</option>
-                <option value="180" data-label="彩妝">睫毛膏 (6M)</option>
-                <option value="730" data-label="粉狀">眼影/蜜粉 (24M)</option>
+                <option value="180" data-label="精華液">精華/化妝水 (建議 6M)</option>
+                <option value="365" data-label="乳霜">乳霜/面霜 (建議 12M)</option>
+                <option value="180" data-label="彩妝">睫毛膏/眼線 (建議 6M)</option>
+                <option value="730" data-label="粉狀">眼影/蜜粉 (建議 24M)</option>
+                <option value="1095" data-label="香氛">香水 (建議 36M)</option>
             </select>
             <input type="date" id="pDate">
-            <div id="imgPreview" onclick="document.getElementById('pImg').click()">📸 上傳照片</div>
+            <div id="imgPreview" onclick="document.getElementById('pImg').click()">📸 點擊拍照或上傳</div>
             <input type="file" id="pImg" hidden accept="image/*">
-            <button class="btn-main" onclick="addItem()">加入清單</button>
-            <div style="display:flex; gap:5px;">
+            
+            <button class="btn-main" onclick="addItem()">加入化妝桌</button>
+            
+            <div class="btn-row">
                 <button class="btn-sub" onclick="requestNotification()">🔔 提醒</button>
                 <button class="btn-sub" onclick="exportData()">💾 備份</button>
                 <button class="btn-sub" onclick="document.getElementById('importFile').click()">📂 還原</button>
             </div>
             <input type="file" id="importFile" hidden accept=".json" onchange="importData(this)">
         </div>
-        <canvas id="typeChart" style="margin-top:20px"></canvas>
+        
+        <div style="margin-top: 30px;">
+            <h2>📊 類別統計</h2>
+            <canvas id="typeChart"></canvas>
+        </div>
     </div>
 
     <div class="panel">
         <h2>💄 我的化妝桌</h2>
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋名稱或類別..." onkeyup="render()">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋名稱或類別 (例如：精華)..." onkeyup="render()">
         <div id="itemList"></div>
     </div>
 </div>
 
 <script>
-    let items = JSON.parse(localStorage.getItem('finalCosmeticData')) || [];
+    let items = JSON.parse(localStorage.getItem('cosmetic_v3_data')) || [];
     let currentImgBase64 = "";
     let myChart = null;
 
+    // 預設日期為今天
     document.getElementById('pDate').valueAsDate = new Date();
 
-    // 圖片壓縮處理
+    // 圖片壓縮邏輯
     document.getElementById('pImg').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -88,7 +167,7 @@
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 250;
+                const MAX_WIDTH = 300;
                 const scale = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
                 canvas.height = img.height * scale;
@@ -103,33 +182,37 @@
 
     function addItem() {
         const name = document.getElementById('pName').value.trim();
-        if (!name) return alert("請輸入名稱");
-        
         const select = document.getElementById('pType');
+        const openDate = document.getElementById('pDate').value;
+
+        if (!name) return alert("請輸入產品名稱！");
+
         items.push({
             id: Date.now(),
-            name: name,
+            name,
             period: parseInt(select.value),
             label: select.options[select.selectedIndex].getAttribute('data-label'),
-            openDate: document.getElementById('pDate').value,
+            openDate,
             image: currentImgBase64
         });
-        
-        currentImgBase64 = "";
+
+        // 重置欄位
         document.getElementById('pName').value = "";
-        document.getElementById('imgPreview').innerHTML = "📸 上傳照片";
+        document.getElementById('imgPreview').innerHTML = "📸 點擊拍照或上傳";
+        currentImgBase64 = "";
+        
         saveAndRender();
     }
 
     function deleteItem(id) {
-        if(confirm("確定刪除？")) {
+        if(confirm("確定要移除這個產品嗎？")) {
             items = items.filter(i => i.id !== id);
             saveAndRender();
         }
     }
 
     function saveAndRender() {
-        localStorage.setItem('finalCosmeticData', JSON.stringify(items));
+        localStorage.setItem('cosmetic_v3_data', JSON.stringify(items));
         render();
     }
 
@@ -139,9 +222,9 @@
         list.innerHTML = "";
         const stats = {};
 
-        // 排序：剩餘天數少的排前面
+        // 排序：越快過期的排越前面
         const sortedItems = [...items].sort((a, b) => {
-            const getRemain = (item) => item.period - Math.floor((new Date() - new Date(item.openDate)) / 86400000);
+            const getRemain = (i) => i.period - Math.floor((new Date() - new Date(i.openDate)) / 86400000);
             return getRemain(a) - getRemain(b);
         });
 
@@ -149,17 +232,24 @@
             if (!item.name.toLowerCase().includes(searchTerm) && !item.label.toLowerCase().includes(searchTerm)) return;
 
             stats[item.label] = (stats[item.label] || 0) + 1;
-            const remain = item.period - Math.floor((new Date() - new Date(item.openDate)) / 86400000);
+            
+            const today = new Date();
+            const open = new Date(item.openDate);
+            const diffDays = Math.floor((today - open) / 86400000);
+            const remain = item.period - diffDays;
             const percent = Math.max(0, Math.min(100, (remain / item.period) * 100));
             const color = remain < 30 ? 'var(--danger)' : 'var(--accent)';
 
             list.innerHTML += `
                 <div class="item-card">
-                    <img class="item-thumb" src="${item.image || 'https://via.placeholder.com/60?text=No+Img'}">
+                    <img class="item-thumb" src="${item.image || 'https://via.placeholder.com/60?text=None'}">
                     <div class="item-info">
-                        <strong>${item.name}</strong> <small>(${item.label})</small>
+                        <span class="item-name">${item.name}</span>
                         <div class="progress-bg"><div class="progress-fill" style="width:${percent}%; background:${color}"></div></div>
-                        <span style="font-size:11px; color:#999">剩餘 ${remain > 0 ? remain : 0} 天</span>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#888;">
+                            <span>類別: ${item.label}</span>
+                            <span>${remain > 0 ? '剩餘 ' + remain + ' 天' : '已過期'}</span>
+                        </div>
                     </div>
                     <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
                 </div>
@@ -176,28 +266,41 @@
             type: 'doughnut',
             data: {
                 labels: Object.keys(stats),
-                datasets: [{ data: Object.values(stats), backgroundColor: ['#E19898', '#9A7E7E', '#D4E2D4', '#FFD8CC'] }]
+                datasets: [{ 
+                    data: Object.values(stats), 
+                    backgroundColor: ['#E19898', '#9A7E7E', '#D4E2D4', '#FFD8CC', '#A8E6CF'],
+                    borderWidth: 0
+                }]
             },
-            options: { plugins: { legend: { position: 'bottom' } }, cutout: '70%' }
+            options: { plugins: { legend: { position: 'bottom' } }, cutout: '75%' }
         });
     }
 
-    function requestNotification() {
-        Notification.requestPermission().then(p => { if(p==='granted') alert("提醒已開啟！"); });
-    }
-
+    // 備份與通知功能
     function exportData() {
         const blob = new Blob([JSON.stringify(items)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'makeup_backup.json';
+        a.href = url;
+        a.download = `makeup_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
     }
 
     function importData(input) {
         const reader = new FileReader();
-        reader.onload = e => { items = JSON.parse(e.target.result); saveAndRender(); };
+        reader.onload = e => {
+            try {
+                items = JSON.parse(e.target.result);
+                saveAndRender();
+                alert("還原成功！");
+            } catch(err) { alert("讀取失敗"); }
+        };
         reader.readAsText(input.files[0]);
+    }
+
+    function requestNotification() {
+        if (!("Notification" in window)) return alert("此瀏覽器不支持");
+        Notification.requestPermission().then(p => { if(p==='granted') alert("提醒功能已開啟！"); });
     }
 
     render();
