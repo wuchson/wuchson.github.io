@@ -3,22 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的數位化妝台</title>
+    <title>Pro 化妝品管家 - 搜尋提醒版</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --accent: #E19898; --bg: #FDFBFB; }
-        body { font-family: sans-serif; background: var(--bg); padding: 20px; display: flex; justify-content: center; }
-        .wrapper { width: 100%; max-width: 800px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 600px) { .wrapper { grid-template-columns: 1fr; } }
-        .panel { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); height: fit-content; }
+        :root { --accent: #E19898; --bg: #FDFBFB; --danger: #FF6B6B; }
+        body { font-family: 'PingFang TC', sans-serif; background: var(--bg); color: #444; margin: 0; padding: 20px; }
+        .wrapper { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+        @media (max-width: 850px) { .wrapper { grid-template-columns: 1fr; } }
+        
+        .panel { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: fit-content; }
+        h2 { border-left: 5px solid var(--accent); padding-left: 12px; font-size: 1.25rem; margin-top: 0; }
+
+        /* 表單與搜尋 */
         .form-group { display: flex; flex-direction: column; gap: 10px; }
-        input, select, button { padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
-        .btn-main { background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; }
-        #imgPreview { width: 100%; height: 120px; border: 2px dashed #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 12px; color: #999; }
+        input, select { padding: 12px; border: 1px solid #eee; border-radius: 10px; font-size: 14px; }
+        .search-bar { width: 100%; border: 2px solid var(--accent); margin-bottom: 15px; outline: none; }
+        
+        .btn-main { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn-sub { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; flex: 1; }
+
+        /* 圖片預覽 */
+        #imgPreview { width: 100%; height: 140px; border: 2px dashed #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background: #fafafa; }
         #imgPreview img { width: 100%; height: 100%; object-fit: cover; }
-        .item-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; position: relative; }
-        .item-thumb { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
-        .delete-btn { position: absolute; right: 5px; cursor: pointer; color: #ccc; }
+
+        /* 清單項目 */
+        .item-list { list-style: none; padding: 0; }
+        .item-card { display: flex; gap: 12px; background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f0f0f0; position: relative; transition: 0.3s; align-items: center; }
+        .item-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: #f9f9f9; }
+        .item-info { flex: 1; }
+        .progress-bg { height: 6px; background: #f0f0f0; border-radius: 10px; margin-top: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: 0.5s; }
+        
+        .delete-btn { cursor: pointer; opacity: 0.3; border: none; background: none; font-size: 18px; }
+        .delete-btn:hover { opacity: 1; }
     </style>
 </head>
 <body>
@@ -27,36 +44,42 @@
     <div class="panel">
         <h2>✨ 新增產品</h2>
         <div class="form-group">
-            <input type="text" id="pName" placeholder="產品名稱 (必填)">
+            <input type="text" id="pName" placeholder="產品名稱 (如：小棕瓶)">
             <select id="pType">
                 <option value="180" data-label="精華液">精華/化妝水 (6M)</option>
                 <option value="365" data-label="乳霜">乳霜/面霜 (12M)</option>
                 <option value="180" data-label="彩妝">睫毛膏 (6M)</option>
-                <option value="730" data-label="粉狀">眼影/粉餅 (24M)</option>
+                <option value="730" data-label="粉狀">眼影/蜜粉 (24M)</option>
             </select>
             <input type="date" id="pDate">
-            <div id="imgPreview" onclick="document.getElementById('pImg').click()">點擊上傳圖片 (選填)</div>
+            <div id="imgPreview" onclick="document.getElementById('pImg').click()">📸 上傳照片</div>
             <input type="file" id="pImg" hidden accept="image/*">
-            <button class="btn-main" onclick="addItem()">確認加入</button>
-            <button style="font-size: 12px; background: none; border: none; color: #999; cursor: pointer;" onclick="requestNotification()">🔔 開啟提醒權限</button>
+            <button class="btn-main" onclick="addItem()">加入清單</button>
+            <div style="display:flex; gap:5px;">
+                <button class="btn-sub" onclick="requestNotification()">🔔 提醒</button>
+                <button class="btn-sub" onclick="exportData()">💾 備份</button>
+                <button class="btn-sub" onclick="document.getElementById('importFile').click()">📂 還原</button>
+            </div>
+            <input type="file" id="importFile" hidden accept=".json" onchange="importData(this)">
         </div>
         <canvas id="typeChart" style="margin-top:20px"></canvas>
     </div>
 
     <div class="panel">
-        <h2>💄 清單</h2>
+        <h2>💄 我的化妝桌</h2>
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋名稱或類別..." onkeyup="render()">
         <div id="itemList"></div>
     </div>
 </div>
 
 <script>
-    let items = JSON.parse(localStorage.getItem('myCosmeticData')) || [];
+    let items = JSON.parse(localStorage.getItem('finalCosmeticData')) || [];
     let currentImgBase64 = "";
-    
-    // 初始化日期
+    let myChart = null;
+
     document.getElementById('pDate').valueAsDate = new Date();
 
-    // 圖片處理與壓縮 (避免 localStorage 爆掉)
+    // 圖片壓縮處理
     document.getElementById('pImg').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -65,12 +88,11 @@
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 200; // 縮小圖片節省空間
-                const scaleSize = MAX_WIDTH / img.width;
+                const MAX_WIDTH = 250;
+                const scale = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
-                canvas.height = img.height * scaleSize;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.height = img.height * scale;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                 currentImgBase64 = canvas.toDataURL('image/jpeg', 0.7);
                 document.getElementById('imgPreview').innerHTML = `<img src="${currentImgBase64}">`;
             };
@@ -80,72 +102,72 @@
     });
 
     function addItem() {
-        const nameInput = document.getElementById('pName');
+        const name = document.getElementById('pName').value.trim();
+        if (!name) return alert("請輸入名稱");
+        
         const select = document.getElementById('pType');
-        const dateInput = document.getElementById('pDate');
-
-        if (!nameInput.value.trim()) {
-            alert("請填寫產品名稱！");
-            return;
-        }
-
-        const newItem = {
+        items.push({
             id: Date.now(),
-            name: nameInput.value,
+            name: name,
             period: parseInt(select.value),
             label: select.options[select.selectedIndex].getAttribute('data-label'),
-            openDate: dateInput.value,
+            openDate: document.getElementById('pDate').value,
             image: currentImgBase64
-        };
-
-        try {
-            items.push(newItem);
-            localStorage.setItem('myCosmeticData', JSON.stringify(items));
-            
-            // 重置表單
-            nameInput.value = "";
-            currentImgBase64 = "";
-            document.getElementById('imgPreview').innerHTML = "點擊上傳圖片 (選填)";
-            
-            render();
-            console.log("成功加入項目");
-        } catch (e) {
-            alert("儲存失敗！可能是圖片太多了，請嘗試刪除一些舊項目。");
-            items.pop();
-        }
+        });
+        
+        currentImgBase64 = "";
+        document.getElementById('pName').value = "";
+        document.getElementById('imgPreview').innerHTML = "📸 上傳照片";
+        saveAndRender();
     }
 
     function deleteItem(id) {
-        items = items.filter(i => i.id !== id);
-        localStorage.setItem('myCosmeticData', JSON.stringify(items));
+        if(confirm("確定刪除？")) {
+            items = items.filter(i => i.id !== id);
+            saveAndRender();
+        }
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('finalCosmeticData', JSON.stringify(items));
         render();
     }
 
     function render() {
         const list = document.getElementById('itemList');
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         list.innerHTML = "";
         const stats = {};
 
-        items.forEach(item => {
+        // 排序：剩餘天數少的排前面
+        const sortedItems = [...items].sort((a, b) => {
+            const getRemain = (item) => item.period - Math.floor((new Date() - new Date(item.openDate)) / 86400000);
+            return getRemain(a) - getRemain(b);
+        });
+
+        sortedItems.forEach(item => {
+            if (!item.name.toLowerCase().includes(searchTerm) && !item.label.toLowerCase().includes(searchTerm)) return;
+
             stats[item.label] = (stats[item.label] || 0) + 1;
             const remain = item.period - Math.floor((new Date() - new Date(item.openDate)) / 86400000);
-            
+            const percent = Math.max(0, Math.min(100, (remain / item.period) * 100));
+            const color = remain < 30 ? 'var(--danger)' : 'var(--accent)';
+
             list.innerHTML += `
                 <div class="item-card">
-                    <img class="item-thumb" src="${item.image || 'https://via.placeholder.com/50'}">
-                    <div>
-                        <strong>${item.name}</strong><br>
-                        <small>剩餘: ${remain > 0 ? remain : 0} 天</small>
+                    <img class="item-thumb" src="${item.image || 'https://via.placeholder.com/60?text=No+Img'}">
+                    <div class="item-info">
+                        <strong>${item.name}</strong> <small>(${item.label})</small>
+                        <div class="progress-bg"><div class="progress-fill" style="width:${percent}%; background:${color}"></div></div>
+                        <span style="font-size:11px; color:#999">剩餘 ${remain > 0 ? remain : 0} 天</span>
                     </div>
-                    <span class="delete-btn" onclick="deleteItem(${item.id})">🗑️</span>
+                    <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
                 </div>
             `;
         });
         updateChart(stats);
     }
 
-    // Chart.js 與通知邏輯同前... (略，保持不變)
-    let myChart = null;
     function updateChart(stats) {
         const ctx = document.getElementById('typeChart').getContext('2d');
         if (myChart) myChart.destroy();
@@ -154,18 +176,31 @@
             type: 'doughnut',
             data: {
                 labels: Object.keys(stats),
-                datasets: [{ data: Object.values(stats), backgroundColor: ['#E19898','#D4E2D4','#FFD8CC'] }]
-            }
+                datasets: [{ data: Object.values(stats), backgroundColor: ['#E19898', '#9A7E7E', '#D4E2D4', '#FFD8CC'] }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } }, cutout: '70%' }
         });
     }
 
     function requestNotification() {
-        if (!("Notification" in window)) return alert("不支持通知");
-        Notification.requestPermission().then(p => { if(p==='granted') alert("提醒已開啟"); });
+        Notification.requestPermission().then(p => { if(p==='granted') alert("提醒已開啟！"); });
+    }
+
+    function exportData() {
+        const blob = new Blob([JSON.stringify(items)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'makeup_backup.json';
+        a.click();
+    }
+
+    function importData(input) {
+        const reader = new FileReader();
+        reader.onload = e => { items = JSON.parse(e.target.result); saveAndRender(); };
+        reader.readAsText(input.files[0]);
     }
 
     render();
 </script>
-
 </body>
 </html>
