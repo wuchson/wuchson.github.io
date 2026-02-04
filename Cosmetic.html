@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pro 化妝品管家</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,7 +13,7 @@
             --panel-bg: #FFFFFF;
         }
 
-        /* 關鍵修正：確保所有元素計算寬度時包含 padding */
+        /* 核心修正：所有元素寬度包含 padding，且全域置中 */
         * { box-sizing: border-box; }
 
         body { 
@@ -21,20 +21,26 @@
             background: var(--bg); 
             color: #444; 
             margin: 0; 
-            padding: 20px; 
-            line-height: 1.5;
+            padding: 15px; 
+            display: flex;
+            justify-content: center; /* 水平置中 */
+            min-height: 100vh;
         }
 
         .wrapper { 
+            width: 100%;
             max-width: 900px; 
-            margin: 0 auto; 
             display: grid; 
             grid-template-columns: 320px 1fr; 
-            gap: 25px; 
+            gap: 20px; 
         }
 
+        /* 手機版適配：強制置中並限制寬度 */
         @media (max-width: 850px) { 
-            .wrapper { grid-template-columns: 1fr; } 
+            .wrapper { 
+                grid-template-columns: 1fr; 
+                max-width: 480px; /* 讓手機畫面不會太散，看起來更精緻 */
+            }
         }
         
         .panel { 
@@ -43,20 +49,21 @@
             border-radius: 20px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
             height: fit-content;
-            width: 100%; /* 確保面板不超出 */
+            width: 100%; 
         }
 
-        h2 { border-left: 5px solid var(--accent); padding-left: 12px; font-size: 1.2rem; margin-top: 0; margin-bottom: 20px; }
+        h2 { border-left: 5px solid var(--accent); padding-left: 12px; font-size: 1.2rem; margin: 0 0 20px 0; }
 
-        /* 表單區域 */
+        /* 表單控制 */
         .form-group { display: flex; flex-direction: column; gap: 12px; }
         input, select { 
             width: 100%; 
             padding: 12px; 
             border: 1px solid #eee; 
             border-radius: 10px; 
-            font-size: 14px;
+            font-size: 16px; /* 16px 可防止 iOS 自動放大畫面 */
             outline: none;
+            -webkit-appearance: none; /* 移除行動裝置預設樣式 */
         }
         input:focus { border-color: var(--accent); }
 
@@ -66,13 +73,11 @@
             background: #fff;
         }
         
-        .btn-main { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-main:hover { filter: brightness(1.05); }
-
+        .btn-main { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .btn-row { display: flex; gap: 8px; margin-top: 5px; }
         .btn-sub { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; }
 
-        /* 圖片預覽 */
+        /* 圖片上傳區域 */
         #imgPreview { 
             width: 100%; 
             height: 140px; 
@@ -87,26 +92,25 @@
         }
         #imgPreview img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 清單項目 */
+        /* 清單樣式 */
         .item-card { 
             display: flex; 
-            gap: 15px; 
+            gap: 12px; 
             background: white; 
-            padding: 15px; 
+            padding: 12px; 
             border-radius: 15px; 
             margin-bottom: 12px; 
-            border: 1px solid #f0f0f0; 
+            border: 1px solid #f2f2f2; 
             align-items: center;
         }
-        .item-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
-        .item-info { flex-grow: 1; min-width: 0; } /* min-width 避免文字擠爆容器 */
-        .item-name { font-weight: bold; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-thumb { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #eee; }
+        .item-info { flex-grow: 1; min-width: 0; }
+        .item-name { font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
         
-        .progress-bg { height: 8px; background: #f0f0f0; border-radius: 10px; margin: 8px 0; overflow: hidden; }
+        .progress-bg { height: 6px; background: #f0f0f0; border-radius: 10px; margin: 6px 0; overflow: hidden; }
         .progress-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
         
-        .delete-btn { border: none; background: none; cursor: pointer; font-size: 18px; color: #ccc; transition: 0.2s; }
-        .delete-btn:hover { color: var(--danger); }
+        .delete-btn { border: none; background: none; cursor: pointer; font-size: 18px; color: #ddd; padding: 5px; }
     </style>
 </head>
 <body>
@@ -115,19 +119,19 @@
     <div class="panel">
         <h2>✨ 新增產品</h2>
         <div class="form-group">
-            <input type="text" id="pName" placeholder="產品名稱 (如：蘭蔻小黑瓶)">
+            <input type="text" id="pName" placeholder="產品名稱">
             <select id="pType">
-                <option value="180" data-label="精華液">精華/化妝水 (建議 6M)</option>
-                <option value="365" data-label="乳霜">乳霜/面霜 (建議 12M)</option>
-                <option value="180" data-label="彩妝">睫毛膏/眼線 (建議 6M)</option>
-                <option value="730" data-label="粉狀">眼影/蜜粉 (建議 24M)</option>
-                <option value="1095" data-label="香氛">香水 (建議 36M)</option>
+                <option value="180" data-label="精華液">精華/化妝水 (6個月)</option>
+                <option value="365" data-label="乳霜">乳霜/面霜 (12個月)</option>
+                <option value="180" data-label="彩妝">睫毛膏/眼線 (6個月)</option>
+                <option value="730" data-label="粉狀">眼影/蜜粉 (24個月)</option>
+                <option value="1095" data-label="香氛">香水 (36個月)</option>
             </select>
             <input type="date" id="pDate">
-            <div id="imgPreview" onclick="document.getElementById('pImg').click()">📸 點擊拍照或上傳</div>
+            <div id="imgPreview" onclick="document.getElementById('pImg').click()">📸 上傳/拍照</div>
             <input type="file" id="pImg" hidden accept="image/*">
             
-            <button class="btn-main" onclick="addItem()">加入化妝桌</button>
+            <button class="btn-main" onclick="addItem()">加入清單</button>
             
             <div class="btn-row">
                 <button class="btn-sub" onclick="requestNotification()">🔔 提醒</button>
@@ -145,20 +149,19 @@
 
     <div class="panel">
         <h2>💄 我的化妝桌</h2>
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋名稱或類別 (例如：精華)..." onkeyup="render()">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 搜尋名稱或類別..." onkeyup="render()">
         <div id="itemList"></div>
     </div>
 </div>
 
 <script>
-    let items = JSON.parse(localStorage.getItem('cosmetic_v3_data')) || [];
+    let items = JSON.parse(localStorage.getItem('cosmetic_final_v1')) || [];
     let currentImgBase64 = "";
     let myChart = null;
 
-    // 預設日期為今天
     document.getElementById('pDate').valueAsDate = new Date();
 
-    // 圖片壓縮邏輯
+    // 圖片處理
     document.getElementById('pImg').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -183,36 +186,32 @@
     function addItem() {
         const name = document.getElementById('pName').value.trim();
         const select = document.getElementById('pType');
-        const openDate = document.getElementById('pDate').value;
-
-        if (!name) return alert("請輸入產品名稱！");
+        if (!name) return alert("請輸入名稱");
 
         items.push({
             id: Date.now(),
             name,
             period: parseInt(select.value),
             label: select.options[select.selectedIndex].getAttribute('data-label'),
-            openDate,
+            openDate: document.getElementById('pDate').value,
             image: currentImgBase64
         });
 
-        // 重置欄位
         document.getElementById('pName').value = "";
-        document.getElementById('imgPreview').innerHTML = "📸 點擊拍照或上傳";
+        document.getElementById('imgPreview').innerHTML = "📸 上傳/拍照";
         currentImgBase64 = "";
-        
         saveAndRender();
     }
 
     function deleteItem(id) {
-        if(confirm("確定要移除這個產品嗎？")) {
+        if(confirm("確定刪除？")) {
             items = items.filter(i => i.id !== id);
             saveAndRender();
         }
     }
 
     function saveAndRender() {
-        localStorage.setItem('cosmetic_v3_data', JSON.stringify(items));
+        localStorage.setItem('cosmetic_final_v1', JSON.stringify(items));
         render();
     }
 
@@ -222,21 +221,16 @@
         list.innerHTML = "";
         const stats = {};
 
-        // 排序：越快過期的排越前面
-        const sortedItems = [...items].sort((a, b) => {
-            const getRemain = (i) => i.period - Math.floor((new Date() - new Date(i.openDate)) / 86400000);
-            return getRemain(a) - getRemain(b);
+        const sorted = [...items].sort((a, b) => {
+            const remain = (i) => i.period - Math.floor((new Date() - new Date(i.openDate)) / 86400000);
+            return remain(a) - remain(b);
         });
 
-        sortedItems.forEach(item => {
+        sorted.forEach(item => {
             if (!item.name.toLowerCase().includes(searchTerm) && !item.label.toLowerCase().includes(searchTerm)) return;
-
             stats[item.label] = (stats[item.label] || 0) + 1;
             
-            const today = new Date();
-            const open = new Date(item.openDate);
-            const diffDays = Math.floor((today - open) / 86400000);
-            const remain = item.period - diffDays;
+            const remain = item.period - Math.floor((new Date() - new Date(item.openDate)) / 86400000);
             const percent = Math.max(0, Math.min(100, (remain / item.period) * 100));
             const color = remain < 30 ? 'var(--danger)' : 'var(--accent)';
 
@@ -247,8 +241,8 @@
                         <span class="item-name">${item.name}</span>
                         <div class="progress-bg"><div class="progress-fill" style="width:${percent}%; background:${color}"></div></div>
                         <div style="display:flex; justify-content:space-between; font-size:11px; color:#888;">
-                            <span>類別: ${item.label}</span>
-                            <span>${remain > 0 ? '剩餘 ' + remain + ' 天' : '已過期'}</span>
+                            <span>${item.label}</span>
+                            <span>${remain > 0 ? remain + ' 天' : '已過期'}</span>
                         </div>
                     </div>
                     <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
@@ -266,41 +260,29 @@
             type: 'doughnut',
             data: {
                 labels: Object.keys(stats),
-                datasets: [{ 
-                    data: Object.values(stats), 
-                    backgroundColor: ['#E19898', '#9A7E7E', '#D4E2D4', '#FFD8CC', '#A8E6CF'],
-                    borderWidth: 0
-                }]
+                datasets: [{ data: Object.values(stats), backgroundColor: ['#E19898', '#9A7E7E', '#D4E2D4', '#FFD8CC', '#A8E6CF'], borderWidth: 0 }]
             },
-            options: { plugins: { legend: { position: 'bottom' } }, cutout: '75%' }
+            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }, cutout: '75%' }
         });
     }
 
-    // 備份與通知功能
     function exportData() {
         const blob = new Blob([JSON.stringify(items)], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `makeup_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.href = URL.createObjectURL(blob);
+        a.download = 'makeup_backup.json';
         a.click();
     }
 
     function importData(input) {
         const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                items = JSON.parse(e.target.result);
-                saveAndRender();
-                alert("還原成功！");
-            } catch(err) { alert("讀取失敗"); }
-        };
+        reader.onload = e => { items = JSON.parse(e.target.result); saveAndRender(); };
         reader.readAsText(input.files[0]);
     }
 
     function requestNotification() {
-        if (!("Notification" in window)) return alert("此瀏覽器不支持");
-        Notification.requestPermission().then(p => { if(p==='granted') alert("提醒功能已開啟！"); });
+        if (!("Notification" in window)) return alert("不支持通知");
+        Notification.requestPermission().then(p => { if(p==='granted') alert("提醒已開啟"); });
     }
 
     render();
