@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .msg-bubble { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        #display-area::-webkit-scrollbar { width: 4px; }
+        #display-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center h-screen font-sans">
+
+    <div class="w-full max-w-md bg-white shadow-2xl flex flex-col h-[90vh] md:h-[600px] rounded-3xl overflow-hidden border border-gray-200">
+        <div class="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md">
+            <div>
+                <h2 class="font-bold text-lg">即時交流區</h2>
+                <p class="text-[10px] text-indigo-200 uppercase">Live Chatroom</p>
+            </div>
+            <button onclick="adminLogin()" class="text-xs bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded-full transition">管理員</button>
+        </div>
+
+        <div id="display-area" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+            <div class="text-center text-gray-400 text-xs mt-20">正在連線至雲端資料庫...</div>
+        </div>
+
+        <div class="p-4 bg-white">
+            <input type="text" id="name" placeholder="你的暱稱" class="w-full mb-2 p-2 text-sm bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+            <div class="flex gap-2">
+                <input type="text" id="msg" placeholder="輸入訊息內容..." onkeypress="if(event.keyCode==13) send()" class="flex-1 p-2 text-sm bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <button onclick="send()" id="sendBtn" class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 active:scale-95 transition-all">傳送</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notif" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
+
+    <script>
+        // --- 設定區 ---
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxlqK9VgSnGl0ZyKUjHpQM-koq7b0vpoPgWlXKU7tt_TAnzuecpf_lL5YcV5aONIL4Alw/exec"; 
+        const BAD_WORDS = ["笨蛋", "垃圾", "白痴", "靠北", "死"]; // 髒話過濾清單
+        // --------------
+
+        let myUserId = localStorage.getItem('chat_uid') || ('u' + Date.now());
+        localStorage.setItem('chat_uid', myUserId);
+        let adminPwd = "";
+        let lastCount = 0;
+
+        function filterText(t) {
+            let s = t;
+            BAD_WORDS.forEach(w => { s = s.replace(new RegExp(w, "gi"), "❤️".repeat(w.length)); });
+            return s;
+        }
+
+        async function loadMessages(first = false) {
+            try {
+                const res = await fetch(`${GAS_URL}?action=read`);
+                const data = await res.json();
+                const area = document.getElementById('display-area');
+
+                if (!first && data.length > lastCount) {
+                    if (data[data.length-1].userId !== myUserId) document.getElementById('notif').play().catch(()=>{});
+                }
+                lastCount = data.length;
+
+                area.innerHTML = "";
+                data.forEach(item => {
+                    const isMe = item.userId === myUserId;
+                    const canDel = isMe || adminPwd === "chson123";
+                    const div = document.createElement('div');
+                    div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} msg-bubble`;
+                    div.innerHTML = `
+                        <span class="text-[10px] text-gray-400 mb-1 px-1">${filterText(item.name)}</span>
+                        <div class="relative group max-w-[85%] px-4 py-2 rounded-2xl shadow-sm text-sm ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-gray-700 border rounded-tl-none'}">
+                            ${filterText(item.message)}
+                            ${canDel ? `<button onclick="deleteMsg(${item.id})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 text-[8px] hidden group-hover:flex items-center justify-center">✕</button>` : ""}
+                        </div>
+                    `;
+                    area.appendChild(div);
+                });
+                area.scrollTop = area.scrollHeight;
+            } catch (e) {}
+        }
+
+        async function send() {
+            const n = document.getElementById('name'), m = document.getElementById('msg'), b = document.getElementById('sendBtn');
+            if(!n.value || !m.value) return;
+            b.disabled = true; b.innerText = "...";
+            await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "add", name: n.value, message: m.value, userId: myUserId })});
+            m.value = ""; b.disabled = false; b.innerText = "傳送";
+            loadMessages();
+        }
+
+        async function deleteMsg(id) {
+            if(!confirm("刪除留言？")) return;
+            await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", id: id, userId: myUserId, adminPwd: adminPwd })});
+            setTimeout(loadMessages, 500);
+        }
+
+        function adminLogin() { adminPwd = prompt("管理員密碼:"); loadMessages(); }
+
+        setInterval(loadMessages, 5000); // 每 5 秒檢查新訊息
+        loadMessages(true);
+    </script>
+</body>
+</html>
