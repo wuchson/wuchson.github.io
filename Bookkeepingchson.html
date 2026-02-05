@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>私人財務管理</title>
+  <title>私人財務管理-雲端版</title>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -91,9 +91,10 @@
     <div class="card"><h3>📋 當月明細</h3><div id="list"></div></div>
 
     <div style="text-align:center; padding-bottom: 40px;">
-      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
+      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
         <button class="btn-outline" onclick="window.open('你的試算表網址', '_blank')">📤 開啟試算表</button>
         <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 匯入舊檔</button>
+        <button class="btn-outline" onclick="exportToExcel()">💾 匯出 Excel</button>
       </div>
       <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importFromExcel(event)">
       <span style="font-size:12px; color:var(--text-sub); cursor:pointer; text-decoration: underline;" onclick="resetPassword()">🔒 重設解鎖密碼</span>
@@ -101,9 +102,7 @@
   </div>
 
   <script>
-    // --------------------------------------------------
     const API_URL = "https://script.google.com/macros/s/AKfycbyMU9hxCbZW6Citb7TpVZspsM6pak5NFE9LOv-W7N3Qk0CXx-LGeEWgBUV0UVK2gaDf/exec";
-    // --------------------------------------------------
 
     let db = [];
     const categories = {
@@ -111,20 +110,16 @@
       "收入": ["💰 薪資", "🧧 獎金", "💹 投資獲利", "🛠️ 兼職", "🪙 零用錢", "✨ 其他"]
     };
 
-    // 密碼邏輯
     function checkPassword() {
       const input = document.getElementById('password-input').value;
       const savedPwd = localStorage.getItem('money_pwd');
       const defaultPwd = "0000";
-
       if (input === defaultPwd || (savedPwd && btoa(input) === savedPwd)) {
         if (!savedPwd && input !== defaultPwd) localStorage.setItem('money_pwd', btoa(input));
         document.getElementById('auth-overlay').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
         initApp();
-      } else {
-        alert('密碼錯誤');
-      }
+      } else { alert('密碼錯誤'); }
     }
 
     function resetPassword() {
@@ -137,7 +132,6 @@
     async function initApp() {
       google.charts.load('current', {'packages':['corechart']});
       const now = new Date();
-      // 年份改為前後 10 年
       const ys = document.getElementById('viewYear');
       for(let i=now.getFullYear()-10; i<=now.getFullYear()+10; i++){
         let o=document.createElement('option'); o.value=i; o.text=i+'年'; if(i===now.getFullYear())o.selected=true; ys.add(o);
@@ -239,6 +233,21 @@
       toggleLoading(true, "刪除中...");
       await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', date: target.date, item: target.item, amount: target.amount }) });
       await refreshData();
+    }
+
+    // --- 匯出功能 ---
+    function exportToExcel() {
+      if (db.length === 0) return alert("目前無資料可匯出");
+      
+      const ws = XLSX.utils.json_to_sheet(db);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "帳目明細");
+      
+      const now = new Date();
+      const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+      
+      // 檔名修改為: 家庭收支 + 日期
+      XLSX.writeFile(wb, `家庭收支${dateStr}.xlsx`);
     }
 
     async function importFromExcel(e) {
