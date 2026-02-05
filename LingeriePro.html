@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lingerie Pro - 智慧庫存管理系統</title>
+    <title>智慧庫存管理系統-Pro</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
@@ -53,7 +53,7 @@
         }
         .dir-hint { font-size: 10px; color: #888; text-align: center; margin-top: 3px; line-height: 1.2;
         }
-.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%;
+        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%;
         }
         .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
         }
@@ -139,10 +139,12 @@
         <button onclick="login()">登入系統</button>
     </div>
 </div>
+
 <div class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span id="userStatus" style="font-size: 14px; color: #666;"></span>
-        <button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
+        <button onclick="logout()" 
+style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
     </div>
 
     <div class="card admin-only">
@@ -164,351 +166,452 @@
             <button onclick="addUser()" class="btn-success" style="padding: 8px; font-size: 13px;">新增使用者</button>
             <div id="userList" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
         </div>
-
-        <div class="config-card">
-            <div class="config-group">
-                <label>🏷️ A4 標籤邊距微調 (mm)</label>
-                <div class="config-input-grid">
-                    <div><input type="number" id="a4mt" step="0.1" onchange="updateA4Config()"><div class="dir-hint">上(大往下)</div></div>
-                    <div><input type="number" id="a4ml" step="0.1" onchange="updateA4Config()"><div class="dir-hint">左(大往右)</div></div>
-                    <div><input type="number" id="a4gx" step="0.1" onchange="updateA4Config()"><div class="dir-hint">左右間距</div></div>
-                    <div><input type="number" id="a4gy" step="0.1" onchange="updateA4Config()"><div class="dir-hint">上下間距</div></div>
-                </div>
-            </div>
-            <div class="config-group" style="margin-top:10px; border-top:1px solid #ddd; pt:10px;">
-                <label>🏷️ 單張標籤內容微調 (mm)</label>
-                <div class="config-input-grid">
-                    <div><input type="number" id="smt" step="0.1" onchange="updateSConfig()"><div class="dir-hint">垂直(正下/負上)</div></div>
-                    <div><input type="number" id="sml" step="0.1" onchange="updateSConfig()"><div class="dir-hint">水平(正右/負左)</div></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="card admin-only">
-        <h3>1. 基礎資料維護</h3>
+        <h3>1. 基礎設定</h3>
+        <div class="row-inputs"><input type="text" id="vCodeInp" placeholder="廠商代碼"><input type="text" id="vNameInp" placeholder="廠商名稱"></div>
+        <button onclick="addVendor()">+ 新增廠商</button>
+        <div id="vendorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;"></div>
+        
         <div class="row-inputs">
-            <input type="text" id="vName" placeholder="廠商">
-            <input type="text" id="mName" placeholder="型號">
-            <select id="iType"></select>
+            <input type="text" id="colorInp" placeholder="代碼:顏色 (如 BLK:黑色)">
+            <button class="btn-accent" style="flex:0.5" onclick="addColor()">+ 新增顏色</button>
         </div>
+        <div id="colorTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+
         <div class="row-inputs">
-            <input type="text" id="cNames" placeholder="顏色 (逗點隔開)">
+            <input type="text" id="typeInp" placeholder="新增類別 (如: 單內衣)">
+            <button class="btn-accent" style="flex:0.5" onclick="addItemType()">+ 新增類別</button>
         </div>
-        <button onclick="addBaseData()">新增品項</button>
+        <div id="typeTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+        
+        <div class="field">
+            <select id="setVendorRel"></select>
+            <div class="row-inputs" style="margin-top:5px;">
+                <input type="text" id="setBraId" placeholder="型號 (如: A001)">
+                <select id="itemTypeSelect"></select> </div>
+            <div class="row-inputs">
+                <input type="number" id="setCost" placeholder="進價 (內部用)">
+                <input type="number" id="setPrice" placeholder="售價">
+            </div>
+            <button class="btn-accent" onclick="addModel()">儲存款式</button>
+            <div id="modelTags" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
+        </div>
     </div>
 
     <div class="card">
         <h3>2. 進出貨與操作</h3>
-        <div style="margin-bottom: 10px; display: flex; gap: 10px;">
-            <button onclick="startScan('in')" style="background:#3182ce; flex:1;">📥 連續輸入</button>
-            <button onclick="startScan('out')" style="background:#48bb78; flex:1;">📤 出貨掃描</button>
-            <button onclick="startScan('direct')" style="background:#3182ce; flex:1;">📥 入庫(填量)</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+            <button style="background:#4299e1; padding:10px 5px; font-size:13px;" onclick="startScan('IN_AUTO')">📥 連續入1</button>
+            <button style="background:#3182ce; padding:10px 5px; font-size:13px;" onclick="startScan('IN_MANUAL')">📥 入庫(填量)</button>
+            <button style="background:#48bb78; padding:10px 5px; font-size:13px;" onclick="startScan('OUT_AUTO')">📤 出貨掃描</button>
         </div>
+        
         <div id="scanner-container">
             <div id="scan-feedback">掃描成功！</div>
             <div id="reader"></div>
-            <button onclick="stopScan()" id="stopBtn" style="background:#a0aec0; margin-top:10px;">關閉相機</button>
-        </div>
-<div class="row-inputs">
-            <select id="opVendor" onchange="updateModelOpt()"><option value="">選擇廠商</option></select>
-            <select id="opModel" onchange="updateColorOpt()"><option value="">型號</option></select>
-        </div>
-        <div class="row-inputs">
-            <select id="opColor"><option value="">選擇顏色</option></select>
-            <select id="opSize1"><option value="">尺碼1--</option></select>
-            <select id="opSize2"><option value="">尺碼2--</option></select>
-            <select id="opSize3"><option value="">尺碼3--</option></select>
-        </div>
-        
-        <div class="field"><label>數量</label><input type="number" id="opQty" value="1"></div>
-        
-        <div style="display:flex; gap:10px; flex-direction: column;">
-            <button onclick="processManual('in')" style="background:#a0aec0;">📥 手動入庫</button>
-            <button onclick="processManual('out')" style="background:#48bb78;">📄 加入出貨單</button>
+            <button class="btn-danger" onclick="stopScan()">❌ 關閉相機</button>
         </div>
 
-        <div class="field" style="margin-top:15px;">
-            <select id="labelType">
+        <div class="field">
+            <select id="selectVendor" onchange="updateModelSelect()"></select>
+            <select id="selectModel" style="margin-top:5px;"></select>
+        </div>
+        <div class="row-inputs">
+            <select id="selectColor"></select>
+            <select id="braBand"><option value="-">尺碼1-</option><script>for(let i=30; i<=52; i+=2) document.write(`<option value="${i}">${i}</option>`);</script></select>
+            <select id="braCup"><option value="-">尺碼2</option><script>"ABCDEFGHIJK".split("").forEach(c => document.write(`<option value="${c}">${c}</option>`));</script></select>
+            <select id="braSize"><option value="-">尺碼3</option><script>["SS","S","M","L","XL","XXL","3XL","4XL","FREE"].forEach(s => document.write(`<option value="${s}">${s}</option>`));</script></select>
+        </div>
+        <div class="field"><label>數量</label><input type="number" id="braQty" value="1"></div>
+        
+        <div class="row-inputs">
+            <button onclick="handleManual('IN')">📥 手動入庫</button>
+            <button class="btn-success" onclick="generateInvoiceManual()">📄 加入出貨單</button>
+        </div>
+
+        <div class="row-inputs admin-only" style="margin-top:10px;">
+            <select id="printType" style="flex:0.4">
                 <option value="A4">A4 (35張)</option>
-                <option value="S">單張標籤</option>
+                <option value="SINGLE">單張 (條碼機)</option>
             </select>
-            <button onclick="printFromOp()" style="background:#d4a373; margin-top:5px;">🖨️ 產生標籤</button>
+            <button class="btn-accent" onclick="prepareTags()">🖨️ 產生標籤</button>
+        </div>
+
+        <div class="config-card admin-only">
+            <div class="config-group">
+                <label>📄 A4 標籤版面微調 (mm)</label>
+                <div class="config-input-grid">
+                    <div><input type="number" step="0.1" id="cfg-a4-mt" onchange="savePrintConfigs()"><span class="dir-hint">上(大往下) 15.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-ml" onchange="savePrintConfigs()"><span class="dir-hint">左(大往右) 6.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gx" onchange="savePrintConfigs()"><span class="dir-hint">左右間距 2.5</span></div>
+                    <div><input type="number" step="0.1" id="cfg-a4-gy" onchange="savePrintConfigs()"><span class="dir-hint">上下間距 0</span></div>
+                </div>
+            </div>
+            <div class="config-group" style="margin-bottom:0;">
+                <label>🏷️ 單張標籤機內容微調 (mm)</label>
+                <div class="config-input-grid">
+                    <div><input type="number" step="0.1" id="cfg-s-mt" onchange="savePrintConfigs()"><span class="dir-hint">垂直(正下/負上) 0</span></div>
+                    <div><input type="number" step="0.1" id="cfg-s-ml" onchange="savePrintConfigs()"><span class="dir-hint">水平(正右/負左) 0</span></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <h3>3. 本次出貨清單 (購物車)</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>商品</th><th>數量</th><th>單價</th><th>操作</th></tr></thead>
-                <tbody id="cartBody"></tbody>
-            </table>
-        </div>
-        <div style="margin-top:15px; text-align:right; font-weight:bold; font-size:1.1rem; color: var(--danger);">
-            總計：$<span id="cartTotal">0</span>
-        </div>
-        <div class="row-inputs" style="margin-top:10px;">
-            <button onclick="checkout('print')" class="btn-accent" style="flex:1;">結帳並列印銷貨單</button>
-            <button onclick="checkout('only')" style="flex:1; background:#718096;">僅結帳不列印</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3>4. 庫存查詢與條碼標籤</h3>
+    <div id="print-preview-zone">
+        <h4 style="margin:0 0 10px 0; color:var(--accent);">預覽區域</h4>
+        <div id="preview-msg" style="font-size:14px; margin-bottom:10px; color:#555;"></div>
         <div class="row-inputs">
-            <input type="text" id="qVendor" placeholder="廠商" oninput="renderInv()">
-            <input type="text" id="qModel" placeholder="型號" oninput="renderInv()">
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>廠商/型號</th><th>顏色/尺寸</th><th>庫存</th><th>標籤</th></tr></thead>
-                <tbody id="invBody"></tbody>
-            </table>
-        </div>
-    </div>
-<div class="card admin-only">
-        <h3>5. 銷售日報表</h3>
-        <input type="date" id="reportDate" onchange="renderReport()" style="margin-bottom:10px;">
-        <div id="reportSummary" style="font-size:14px; margin-bottom:10px; line-height:1.6; color:#444;"></div>
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>時間</th><th>商品/金額</th><th>操作</th></tr></thead>
-                <tbody id="reportBody"></tbody>
-            </table>
+            <button onclick="window.print()" style="background:#333;">🖨️ 確認列印</button>
+            <button onclick="closePreview()" class="btn-danger" style="flex:0.5">關閉</button>
         </div>
     </div>
 
-    <div class="card admin-only" style="background: #fdf2f2; border: 1px solid #fecaca;">
-        <h3>6. 系統維護</h3>
-        <div style="display:flex; gap:10px; flex-direction:column;">
-            <button onclick="exportData()" style="background:#4a5568;">匯出完整資料備份 (JSON)</button>
-            <button onclick="triggerImport()" style="background:#718096;">匯入資料備份</button>
-            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-            <button onclick="clearAllData()" class="btn-danger" style="margin-top:10px;">⚠️ 清除系統所有資料</button>
+    <div class="card">
+        <h3>3. 目前庫存與營業統計</h3>
+        <div id="today-sales-stats" class="admin-only" style="background:#fffaf0; border:1px solid #feebc8; padding:12px; border-radius:8px; margin-bottom:15px; font-size:13px; display:none; flex-direction:column; gap:8px;"></div>
+        
+        <div class="field" style="margin-bottom: 10px;">
+            <input type="text" id="stockSearch" placeholder="🔍 搜尋型號、顏色或尺寸..." oninput="render()">
         </div>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>型號</th><th>規格</th><th>存量</th><th class="staff-hidden">操作</th></tr></thead>
+                <tbody id="stockTableBody"></tbody>
+            </table>
+        </div>
+        <div class="row-inputs admin-only" style="margin-top:15px;">
+            <button style="background:#666;" onclick="exportData()">💾 備份</button>
+            <button style="background:#718096;" onclick="triggerImport()">📂 匯入</button>
+        </div>
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
     </div>
 </div>
 
 <div id="print-label-page"></div>
-<div id="print-invoice-page"></div>
+<div id="print-invoice-page">
+    <h2 id="inv-header" style="text-align:center; margin-bottom:5px;"></h2>
+    <h3 style="text-align:center; margin-top:0;">出貨明細單</h3>
+    <table class="inv-table">
+        <thead>
+            <tr>
+                <th>品項規格</th>
+                <th style="width:50px; text-align:center;">數量</th>
+                <th style="width:80px; text-align:center;">單價</th>
+                <th style="width:80px; text-align:center;">小計</th>
+                <th class="no-print" style="width:70px; text-align:center;">操作</th>
+            </tr>
+        </thead>
+        <tbody id="inv-body"></tbody>
+    </table>
+    <div class="total-area">
+        <div>未稅銷售額：$ <span id="inv-subtotal">0</span></div>
+        <div>稅額 (<span id="inv-tax-rate-display">5</span>%)：$ <span id="inv-tax">0</span></div>
+        <div class="grand-total">應付總計：$ <span id="inv-total">0</span></div>
+    </div>
+    <div style="margin-top:30px; display:flex; justify-content: space-between;">
+        <span>經手人：__________</span>
+        <span>列印日期：<span id="print-date"></span></span>
+    </div>
+    <div class="no-print" style="margin-top:30px; display:flex; gap:10px;">
+        <button onclick="confirmAndShip()" style="background:var(--success); flex:1;">✅ 先列印再確認出貨<br>(扣庫存)</button>
+        <button class="btn-danger" onclick="clearInvoice()" style="flex:0.5;">🗑️ 清空單據</button>
+    </div>
+</div>
 
 <script>
-    let vendors = [], models = [], inventory = [], colors = [], itemTypes = ["內衣", "塑身衣", "內褲"];
-    let salesHistory = [], currentUser = null, users = [], cart = [];
-    let compName = "內衣店", taxRate = 5;
-    let a4Config = { mt: 15.5, ml: 6.5, gx: 2.5, gy: 0 };
-    let sConfig = { mt: 0, ml: 0 };
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = 850; gain.gain.setValueAtTime(0, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15); osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
 
-    function save() {
-        localStorage.setItem('lingerie_db', JSON.stringify({
-            v: vendors, m: models, i: inventory, c: colors, t: itemTypes,
-            sh: salesHistory, u: users, cn: compName, tr: taxRate,
-            a4c: a4Config, sc: sConfig
-        }));
-    }
-
-    function load() {
-        const d = JSON.parse(localStorage.getItem('lingerie_db') || '{}');
-        vendors = d.v || []; models = d.m || []; inventory = d.i || [];
-        colors = d.c || []; itemTypes = d.t || ["內衣", "塑身衣", "內褲"];
-        salesHistory = d.sh || []; users = d.u || [];
-        compName = d.cn || "內衣店"; taxRate = d.tr || 5;
-        a4Config = d.a4c || { mt: 15.5, ml: 6.5, gx: 2.5, gy: 0 };
-        sConfig = d.sc || { mt: 0, ml: 0 };
-        
-        document.getElementById('compNameInp').value = compName;
-        document.getElementById('taxRateInp').value = taxRate;
-        document.getElementById('a4mt').value = a4Config.mt;
-        document.getElementById('a4ml').value = a4Config.ml;
-        document.getElementById('a4gx').value = a4Config.gx;
-        document.getElementById('a4gy').value = a4Config.gy;
-        document.getElementById('smt').value = sConfig.mt;
-        document.getElementById('sml').value = sConfig.ml;
-        
-        updateStyles(); renderTypeSelect(); renderUserList(); updateVendorOpt();
-    }
-
-    function updateA4Config() {
-        a4Config.mt = parseFloat(document.getElementById('a4mt').value) || 0;
-        a4Config.ml = parseFloat(document.getElementById('a4ml').value) || 0;
-        a4Config.gx = parseFloat(document.getElementById('a4gx').value) || 0;
-        a4Config.gy = parseFloat(document.getElementById('a4gy').value) || 0;
-        updateStyles(); save();
-    }
-    function updateSConfig() {
-        sConfig.mt = parseFloat(document.getElementById('smt').value) || 0;
-        sConfig.ml = parseFloat(document.getElementById('sml').value) || 0;
-        updateStyles(); save();
-    }
-    function updateStyles() {
-        const r = document.documentElement.style;
-        r.setProperty('--a4-mt', a4Config.mt + 'mm');
-        r.setProperty('--a4-ml', a4Config.ml + 'mm');
-        r.setProperty('--a4-gx', a4Config.gx + 'mm');
-        r.setProperty('--a4-gy', a4Config.gy + 'mm');
-        r.setProperty('--s-mt', sConfig.mt + 'mm');
-        r.setProperty('--s-ml', sConfig.ml + 'mm');
-    }
+    let users = JSON.parse(localStorage.getItem('SYS_USERS')) || [{u:'admin', p:'1234', r:'admin'}];
+    let currentUser = JSON.parse(sessionStorage.getItem('CUR_USER')) || null;
 
     function login() {
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
-        if(u==='admin' && p==='888') currentUser = {n:'Admin', r:'admin'};
-        else {
-            const found = users.find(x => x.n === u && x.p === p);
-            if(found) currentUser = found;
+        const found = users.find(user => user.u === u && user.p === p);
+        if(found) {
+            currentUser = found;
+            sessionStorage.setItem('CUR_USER', JSON.stringify(found));
+            checkAuth();
+        } else { alert("帳號或密碼錯誤"); }
+    }
+
+    function logout() {
+        sessionStorage.removeItem('CUR_USER');
+        location.reload();
+    }
+
+    function checkAuth() {
+        if(!currentUser) {
+            document.getElementById('login-overlay').style.display = 'flex';
+            return;
         }
-        if(currentUser) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.body.className = currentUser.r === 'admin' ? 'is-admin' : '';
-            document.getElementById('userStatus').innerText = `登入中: ${currentUser.n}`;
-            renderInv(); renderReport();
-        } else alert("帳號或密碼錯誤");
-    }
-    function logout() { location.reload(); }
-
-    function renderTypeSelect() {
-        document.getElementById('iType').innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-    }
-
-    function addBaseData() {
-        const v = document.getElementById('vName').value.trim();
-        const m = document.getElementById('mName').value.trim();
-        const t = document.getElementById('iType').value;
-        const cs = document.getElementById('cNames').value.split(',').map(x=>x.trim()).filter(x=>x);
-        const sizes = ["70B","75B","80B","85B","70C","75C","80C","85C","90C","70D","75D","80D","85D","90D","70E","75E","80E","85E","90E","70F","75F","80F","85F","M","L","XL","XXL","XXXL"];
-        if(!v || !m || cs.length===0) return alert("請填寫完整");
-        if(!vendors.includes(v)) vendors.push(v);
-        if(!models.find(x=>x.v===v && x.m===m)) models.push({v, m, t});
-        cs.forEach(c => {
-            sizes.forEach(s => {
-                const code = `${v}-${m}-${c}-${s}`;
-                if(!inventory.find(x => x.code === code)) inventory.push({ v, m, t, c, s, code, q: 0 });
-            });
-        });
-        save(); updateVendorOpt(); renderInv(); alert("品項已建立");
-    }
-
-    function updateVendorOpt() {
-        const s = document.getElementById('opVendor');
-        s.innerHTML = '<option value="">選擇廠商</option>' + vendors.map(v => `<option value="${v}">${v}</option>`).join('');
-    }
-    function updateModelOpt() {
-        const v = document.getElementById('opVendor').value;
-        const s = document.getElementById('opModel');
-        const ms = models.filter(x => x.v === v);
-        s.innerHTML = '<option value="">型號</option>' + ms.map(x => `<option value="${x.m}">${x.m}</option>`).join('');
-    }
-    function updateColorOpt() {
-        const v = document.getElementById('opVendor').value;
-        const m = document.getElementById('opModel').value;
-        const cs = [...new Set(inventory.filter(x => x.v === v && x.m === m).map(x => x.c))];
-        document.getElementById('opColor').innerHTML = '<option value="">選擇顏色</option>' + cs.map(c => `<option value="${c}">${c}</option>`).join('');
-        const szs = inventory.filter(x => x.v === v && x.m === m).map(x => x.s);
-        const szOpt = '<option value="">--</option>' + [...new Set(szs)].map(s => `<option value="${s}">${s}</option>`).join('');
-        document.getElementById('opSize1').innerHTML = szOpt;
-        document.getElementById('opSize2').innerHTML = szOpt;
-        document.getElementById('opSize3').innerHTML = szOpt;
-    }
-
-    function processManual(type) {
-        const v = document.getElementById('opVendor').value;
-        const m = document.getElementById('opModel').value;
-        const c = document.getElementById('opColor').value;
-        const q = parseInt(document.getElementById('opQty').value) || 0;
-        const ss = [document.getElementById('opSize1').value, document.getElementById('opSize2').value, document.getElementById('opSize3').value].filter(x=>x);
-        if(!v || !m || !c || ss.length===0 || q<=0) return alert("請完整選取商品與數量");
-        ss.forEach(s => {
-            const item = inventory.find(x => x.v===v && x.m===m && x.c===c && x.s===s);
-            if(type === 'in') { item.q += q; salesHistory.push({ t: new Date().toLocaleString(), type: '進貨', code: item.code, q, p: 0 }); }
-            else { if(item.q < q) alert(`${s} 庫存不足`); else cart.push({ ...item, qty: q, price: 0 }); }
-        });
-        if(type==='out') renderCart(); else { save(); renderInv(); alert("入庫成功"); }
-    }
-
-    function renderCart() {
-        let total = 0;
-        document.getElementById('cartBody').innerHTML = cart.map((x, i) => {
-            total += x.qty * x.price;
-            return `<tr><td>${x.m}-${x.c}-${x.s}</td><td>${x.qty}</td><td><input type="number" value="${x.price}" onchange="cart[${i}].price=parseInt(this.value);renderCart()" style="width:60px;height:30px;"></td><td><button onclick="cart.splice(${i},1);renderCart()" class="qty-btn">刪</button></td></tr>`;
-        }).join('');
-        document.getElementById('cartTotal').innerText = total;
-    }
-
-    function checkout(mode) {
-        if(cart.length === 0) return;
-        const total = cart.reduce((a, b) => a + (b.qty * b.price), 0);
-        cart.forEach(c => {
-            const item = inventory.find(x => x.code === c.code);
-            item.q -= c.qty;
-            salesHistory.push({ t: new Date().toLocaleString(), type: '銷售', code: c.code, q: c.qty, p: c.price });
-        });
-        if(mode === 'print') {
-            const sub = Math.round(total / (1 + taxRate/100)), tax = total - sub;
-            document.getElementById('print-invoice-page').innerHTML = `<div style="text-align:center;"><h2>${compName} 銷貨單</h2></div><p>日期: ${new Date().toLocaleString()}</p><table class="inv-table"><thead><tr><th>品名規格</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody>${cart.map(x=>`<tr><td>${x.m}-${x.c}-${x.s}</td><td>${x.qty}</td><td>${x.price}</td><td>${x.qty*x.price}</td></tr>`).join('')}</tbody></table><div class="total-area">未稅: $${sub}<br>稅額: $${tax}<br><div class="grand-total">總計: $${total}</div></div>`;
-            window.print();
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('userStatus').innerText = `目前使用者: ${currentUser.u} (${currentUser.r === 'admin' ? '管理員' : '一般員工'})`;
+        if(currentUser.r === 'admin') {
+            document.body.classList.add('is-admin');
+        } else {
+            document.body.classList.remove('is-admin');
         }
-        cart = []; renderCart(); renderInv(); renderReport(); save();
+        render();
     }
 
-    function renderInv() {
-        const qV = document.getElementById('qVendor').value.toLowerCase();
-        const qM = document.getElementById('qModel').value.toLowerCase();
-        document.getElementById('invBody').innerHTML = inventory.filter(x => x.v.toLowerCase().includes(qV) && x.m.toLowerCase().includes(qM) && x.q > 0)
-            .map(x => `<tr><td>${x.v}<br><small>${x.m}</small></td><td>${x.c} / ${x.s}</td><td>${x.q}</td><td><button onclick="printSingle('${x.code}')" class="qty-btn">印</button></td></tr>`).join('');
-    }
-
-    function printSingle(code) {
-        const item = inventory.find(x => x.code === code);
-        const container = document.getElementById('print-label-page');
-        container.innerHTML = `<div class="label-item"><canvas id="c"></canvas><div class="txt">${item.m} ${item.c} ${item.s}</div></div>`;
-        document.body.className = 'print-mode-single';
-        new QRious({ element: document.getElementById('c'), value: code, size: 200 });
-        setTimeout(() => { window.print(); container.innerHTML = ''; }, 500);
-    }
-
-    function renderReport() {
-        const d = document.getElementById('reportDate').value || new Date().toISOString().split('T')[0];
-        const rows = salesHistory.filter(x => x.t.includes(d));
-        let total = 0;
-        document.getElementById('reportBody').innerHTML = rows.map(x => {
-            if(x.type==='銷售') total += (x.q * x.p);
-            return `<tr><td>${x.t.split(' ')[1]}</td><td>${x.code}<br><small>${x.type} ${x.q} @${x.p}</small></td><td>-</td></tr>`;
-        }).join('');
-        document.getElementById('reportSummary').innerHTML = `本日銷售：$${total}`;
-    }
-
-    function exportData() {
-        const blob = new Blob([localStorage.getItem('lingerie_db')], {type:'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `Lingerie_Backup_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-    }
-    function triggerImport() { document.getElementById('importFile').click(); }
-    function importData(e) {
-        const f = e.target.files[0];
-        if(!f) return;
-        const r = new FileReader();
-        r.onload = (ev) => { try { localStorage.setItem('lingerie_db', ev.target.result); location.reload(); } catch(err) { alert("錯誤"); } };
-        r.readAsText(f);
-    }
-    function updateSysConfig() {
-        compName = document.getElementById('compNameInp').value;
-        taxRate = parseFloat(document.getElementById('taxRateInp').value);
-        save();
-    }
-    function renderUserList() {
-        document.getElementById('userList').innerHTML = users.map((u, i) => `<span class="tag">${u.n} <span onclick="users.splice(${i},1);save();renderUserList()" style="color:red;margin-left:5px">×</span></span>`).join('');
-    }
     function addUser() {
-        const n = document.getElementById('newUName').value, p = document.getElementById('newUPass').value, r = document.getElementById('newURole').value;
-        if(n && p) { users.push({n,p,r}); save(); renderUserList(); }
+        const u = document.getElementById('newUName').value;
+        const p = document.getElementById('newUPass').value;
+        const r = document.getElementById('newURole').value;
+        if(u && p) {
+            users.push({u, p, r});
+            localStorage.setItem('SYS_USERS', JSON.stringify(users));
+            document.getElementById('newUName').value = '';
+            document.getElementById('newUPass').value = '';
+            render();
+        }
     }
-    function clearAllData() { if(confirm("確定刪除所有？")) { localStorage.removeItem('lingerie_db'); location.reload(); } }
 
-    window.onload = load;
+    function deleteUser(idx) {
+        if(users[idx].u === 'admin') return alert("不能刪除預設管理員");
+        if(confirm("刪除使用者？")) {
+            users.splice(idx,1);
+            localStorage.setItem('SYS_USERS', JSON.stringify(users));
+            render();
+        }
+    }
+
+    let compName = localStorage.getItem('C_N') || "我的小舖";
+    let taxRate = parseFloat(localStorage.getItem('T_R')) || 5;
+    let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
+    let models = JSON.parse(localStorage.getItem('M_D')) || [];
+    let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
+    let colors = JSON.parse(localStorage.getItem('C_D')) || [{code: "BLK", name: "黑色"}, {code: "SKN", name: "膚色"}];
+    // 商品類別初始資料
+    let itemTypes = JSON.parse(localStorage.getItem('IT_D')) || ["文具", "公仔", "衣服", "褲子"];
+    let salesHistory = JSON.parse(localStorage.getItem('S_H')) || [];
+    let pCfg = JSON.parse(localStorage.getItem('L_P_CFG')) || { a4mt:15.5, a4ml:6.5, a4gx:2.5, a4gy:0, smt:0, sml:0 };
+    let invoiceItems = [];
+    let html5QrCode = null;
+    let isProcessing = false;
+
+    function getColorName(code) {
+        if(!code) return "-";
+        const found = colors.find(c => c.code === code.trim().toUpperCase());
+        return found ? found.name : code;
+    }
+
+    function save() {
+        localStorage.setItem('C_N', compName);
+        localStorage.setItem('T_R', taxRate);
+        localStorage.setItem('V_D', JSON.stringify(vendors));
+        localStorage.setItem('M_D', JSON.stringify(models));
+        localStorage.setItem('I_D', JSON.stringify(inventory));
+        localStorage.setItem('C_D', JSON.stringify(colors));
+        localStorage.setItem('IT_D', JSON.stringify(itemTypes)); // 儲存類別
+        localStorage.setItem('S_H', JSON.stringify(salesHistory));
+        render();
+    }
+
+    function savePrintConfigs() {
+        pCfg = {
+            a4mt: parseFloat(document.getElementById('cfg-a4-mt').value) || 0,
+            a4ml: parseFloat(document.getElementById('cfg-a4-ml').value) || 0,
+            a4gx: parseFloat(document.getElementById('cfg-a4-gx').value) || 0,
+            a4gy: parseFloat(document.getElementById('cfg-a4-gy').value) || 0,
+            smt: parseFloat(document.getElementById('cfg-s-mt').value) || 0,
+            sml: parseFloat(document.getElementById('cfg-s-ml').value) || 0
+        };
+        localStorage.setItem('L_P_CFG', JSON.stringify(pCfg));
+        applyCssConfigs();
+    }
+
+    function applyCssConfigs() {
+        if(document.getElementById('cfg-a4-mt')) {
+            document.getElementById('cfg-a4-mt').value = pCfg.a4mt;
+            document.getElementById('cfg-a4-ml').value = pCfg.a4ml;
+            document.getElementById('cfg-a4-gx').value = pCfg.a4gx;
+            document.getElementById('cfg-a4-gy').value = pCfg.a4gy;
+            document.getElementById('cfg-s-mt').value = pCfg.smt;
+            document.getElementById('cfg-s-ml').value = pCfg.sml;
+        }
+        const r = document.documentElement;
+        r.style.setProperty('--a4-mt', pCfg.a4mt + 'mm');
+        r.style.setProperty('--a4-ml', pCfg.a4ml + 'mm');
+        r.style.setProperty('--a4-gx', pCfg.a4gx + 'mm');
+        r.style.setProperty('--a4-gy', pCfg.a4gy + 'mm');
+        r.style.setProperty('--s-mt', pCfg.smt + 'mm');
+        r.style.setProperty('--s-ml', pCfg.sml + 'mm');
+    }
+
+    function render() {
+        if(!currentUser) return;
+        document.getElementById('compNameInp').value = compName;
+        document.getElementById('taxRateInp').value = taxRate;
+        const vOps = vendors.map(v => `<option value="${v.code}">${v.code}-${v.name}</option>`).join('');
+        document.getElementById('setVendorRel').innerHTML = vOps;
+        document.getElementById('selectVendor').innerHTML = vOps;
+        document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`).join('');
+        
+        // 更新類別選單
+        document.getElementById('itemTypeSelect').innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        
+        document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="deleteVendor(${idx})" style="cursor:pointer">×</span></div>`).join('');
+        document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c.code}:${c.name} <span onclick="deleteColor(${idx})" style="cursor:pointer">×</span></div>`).join('');
+        
+        // 渲染類別標籤
+        document.getElementById('typeTags').innerHTML = itemTypes.map((t,idx) => `<div class="tag">${t} <span onclick="deleteItemType(${idx})" style="cursor:pointer">×</span></div>`).join('');
+        
+        document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.vCode}-${m.braId} ($${m.price}) <span onclick="deleteModel(${idx})" style="cursor:pointer">×</span></div>`).join('');
+        if(document.getElementById('userList')) {
+            document.getElementById('userList').innerHTML = users.map((u,idx) => `<div class="tag" style="background:${u.r==='admin'?'#ffeebb':'#eee'}">${u.u} (${u.r}) <span onclick="deleteUser(${idx})" style="cursor:pointer">×</span></div>`).join('');
+        }
+
+        updateModelSelect();
+
+        const now = new Date();
+        const todayStr = now.toLocaleDateString();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const todaySales = salesHistory.filter(s => new Date(s.date).toLocaleDateString() === todayStr);
+        const monthSales = salesHistory.filter(s => {
+            const d = new Date(s.date);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        });
+        const yearSales = salesHistory.filter(s => new Date(s.date).getFullYear() === currentYear);
+
+        if(salesHistory.length > 0) {
+            const revToday = todaySales.reduce((sum, s) => sum + (s.p * s.q), 0);
+            const revMonth = monthSales.reduce((sum, s) => sum + (s.p * s.q), 0);
+            const revYear = yearSales.reduce((sum, s) => sum + (s.p * s.q), 0);
+            const monthCounts = {};
+            monthSales.forEach(s => { monthCounts[s.id] = (monthCounts[s.id] || 0) + s.q; });
+            const topFive = Object.entries(monthCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([id, q], idx) => `${idx+1}.${id}(${q}件)`)
+                .join(' ');
+            const statsBox = document.getElementById('today-sales-stats');
+            statsBox.style.display = 'flex';
+            statsBox.innerHTML = `
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <span>💰 今日：<b>$${revToday.toLocaleString()}</b></span>
+                    <span>📅 本月：<b>$${revMonth.toLocaleString()}</b></span>
+                    <span>🧾 年度：<b>$${revYear.toLocaleString()}</b></span>
+                </div>
+                <div style="border-top:1px dashed #feebc8; padding-top:5px;">
+                    <span>🏆 <b>本月前五名：</b> <small>${topFive || "尚無資料"}</small></span>
+                </div>
+            `;
+        }
+
+        const searchTerm = document.getElementById('stockSearch') ? document.getElementById('stockSearch').value.toLowerCase() : "";
+        const filteredInven = inventory.slice().reverse().filter(i => {
+            const colorN = getColorName(i.c);
+            const text = `${i.vCode} ${i.braId} ${i.c} ${colorN} ${i.bb||''} ${i.bc||''} ${i.bz||''}`.toLowerCase();
+            return text.includes(searchTerm);
+        });
+        document.getElementById('stockTableBody').innerHTML = filteredInven.map((i)=>{
+            const originalIdx = inventory.findIndex(orig => orig === i);
+            const isLow = i.bq < 3;
+            return `<tr>
+                <td>${i.vCode}<br><small>${i.braId}</small></td>
+                <td><b style="color:var(--primary)">${getColorName(i.c)}</b> ${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}</td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <button class="qty-btn" onclick="adjStockQty(${originalIdx},-1)">-</button>
+                        <span style="font-weight:bold; min-width:25px; text-align:center; font-size:${isLow?'1.1rem':''}; color:${i.bq < 3 ? 'red' : 'inherit'}">${i.bq}</span>
+                        <button class="qty-btn" onclick="adjStockQty(${originalIdx},1)">+</button>
+                    </div>
+                </td>
+                <td class="staff-hidden"><button onclick="deleteItem(${originalIdx})" class="btn-danger" style="padding:4px 8px; width:auto;">刪</button></td>
+            </tr>`;
+        }).join('');
+        applyCssConfigs();
+    }
+
+    function adjStockQty(idx, delta) { inventory[idx].bq += delta; save(); }
+    function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0; save(); }
+    function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
+    function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
+    
+    // 顏色管理
+    function addColor() { const input = document.getElementById('colorInp'); const v = input.value; if(v.includes(':') || v.includes('：')){ const parts = v.split(/[:：]/); const code = parts[0].trim().toUpperCase(); const name = parts[1].trim(); if(!colors.find(c => c.code === code)){ colors.push({code, name}); save(); } input.value=''; } else if(v) { alert("請輸入格式為 代碼:名稱，例如 BLK:黑色"); } }
+    function deleteColor(idx) { if(confirm("刪除顏色對照？")) { colors.splice(idx,1); save(); } }
+
+    // 商品類別管理 (新增)
+    function addItemType() { const input = document.getElementById('typeInp'); const v = input.value.trim(); if(v){ if(!itemTypes.includes(v)){ itemTypes.push(v); save(); } input.value=''; } }
+    function deleteItemType(idx) { if(confirm("刪除此商品類別？")) { itemTypes.splice(idx,1); save(); } }
+
+    function addModel() { const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemTypeSelect').value, cost=document.getElementById('setCost').value, price=document.getElementById('setPrice').value; if(v&&b){ models.push({vCode:v, braId:b, type:t, cost:parseFloat(cost)||0, price:parseFloat(price)||0}); save(); document.getElementById('setBraId').value=''; document.getElementById('setCost').value=''; document.getElementById('setPrice').value=''; } }
+    function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
+    function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
+    function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
+    
+    async function startScan(mode) {
+        document.getElementById('scanner-container').style.display = 'block';
+        html5QrCode = new Html5Qrcode("reader");
+        await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
+            if(isProcessing) return;
+            const p = txt.split(',');
+            if(p.length < 4) return;
+            const [vCode, braId, , c, bb, bc, bz] = p;
+            isProcessing = true;
+            if(mode === 'OUT_AUTO') { addToInvoiceList(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); }
+            else if (mode === 'IN_MANUAL') { playBeep(); const q = parseInt(prompt(`[掃描成功] ${braId}\n顏色：${getColorName(c)}\n入庫數量:`, "1")); if(q > 0) updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', q); }
+            else { updateStock(vCode, braId, c, bb||'-', bc||'-', bz||'-', 1); }
+            document.getElementById('scan-feedback').innerText = `已辨識：${getColorName(c)} ${braId}`;
+            document.getElementById('scan-feedback').style.display = 'block';
+            setTimeout(() => { document.getElementById('scan-feedback').style.display = 'none'; isProcessing = false; }, 800);
+        });
+    }
+    
+    function stopScan() { if(html5QrCode) html5QrCode.stop(); document.getElementById('scanner-container').style.display = 'none'; }
+    function addToInvoiceList(vCode, braId, c, bb, bc, bz, qty) {
+        const cName = getColorName(c);
+        const spec = `${vCode}-${braId} ${cName} (${bb}${bc} ${bz})`;
+        const modelData = models.find(m => m.vCode === vCode && m.braId === braId);
+        const unitPrice = modelData ? modelData.price : 0;
+        let existing = invoiceItems.find(i => i.vCode === vCode && i.braId === braId && i.c === c && i.bb === bb && i.bc === bc && i.bz === bz);
+        if(existing) existing.qty += parseInt(qty); else invoiceItems.push({vCode, braId, c, bb, bc, bz, name:spec, qty:parseInt(qty), price: unitPrice});
+        playBeep(); refreshInvoiceUI();
+    }
+
+    function refreshInvoiceUI() {
+        document.getElementById('inv-header').innerText = compName;
+        document.getElementById('print-date').innerText = new Date().toLocaleString();
+        let subtotal = 0;
+        document.getElementById('inv-body').innerHTML = invoiceItems.map((i, idx) => {
+            const itemTotal = i.qty * i.price;
+            subtotal += itemTotal;
+            return `<tr><td>${i.name}</td><td style="text-align:center;"><div class="no-print" style="display:flex; align-items:center; justify-content:center; gap:5px;"><button onclick="adjInvQty(${idx},-1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">-</button><span style="min-width:20px">${i.qty}</span><button onclick="adjInvQty(${idx},1)" style="padding:2px 8px; width:auto; background:#edf2f7; color:black;">+</button></div><span class="only-print">${i.qty}</span></td><td style="text-align:right;">${i.price}</td><td style="text-align:right;">${itemTotal}</td><td class="no-print" style="text-align:center;"><button onclick="remInvItem(${idx})" class="btn-danger" style="padding:4px 8px; width:auto; font-size:12px;">刪除</button></td></tr>`}).join('');
+        const taxAmount = Math.round(subtotal * (taxRate / 100));
+        const grandTotal = subtotal + taxAmount;
+        document.getElementById('inv-subtotal').innerText = subtotal.toLocaleString();
+        document.getElementById('inv-tax-rate-display').innerText = taxRate;
+        document.getElementById('inv-tax').innerText = taxAmount.toLocaleString();
+        document.getElementById('inv-total').innerText = grandTotal.toLocaleString();
+        document.getElementById('print-label-page').style.display = 'none';
+        document.getElementById('print-invoice-page').style.display = 'block';
+        document.getElementById('print-preview-zone').style.display = 'block';
+    }
+
+    function adjInvQty(idx, delta) { invoiceItems[idx].qty += delta; if(invoiceItems[idx].qty <= 0) remInvItem(idx); else refreshInvoiceUI(); }
+    function remInvItem(idx) { if(confirm("移除此項？")) { invoiceItems.splice(idx, 1); if(invoiceItems.length === 0) clearInvoice(); else refreshInvoiceUI(); } }
+    function confirmAndShip() { if(!confirm("確定扣除庫存並完成出貨？")) return; const now = new Date().toISOString(); invoiceItems.forEach(item => { updateStock(item.vCode, item.braId, item.c, item.bb, item.bc, item.bz, -item.qty); salesHistory.push({ date: now, id: item.braId, p: item.price, q: item.qty }); }); alert("出貨完畢！"); clearInvoice(); save(); }
+    function handleManual(t) { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); updateStock(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, parseInt(document.getElementById('braQty').value)); }
+    function generateInvoiceManual() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); addToInvoiceList(m.vCode, m.braId, document.getElementById('selectColor').value, document.getElementById('braBand').value, document.getElementById('braCup').value, document.getElementById('braSize').value, document.getElementById('braQty').value); }
+    function prepareTags() { const mStr = document.getElementById('selectModel').value; if(!mStr) return; const m = JSON.parse(mStr); const cCode = document.getElementById('selectColor').value; const bb = document.getElementById('braBand').value, bc = document.getElementById('braCup').value, bz = document.getElementById('braSize').value; const type = document.getElementById('printType').value; const page = document.getElementById('print-label-page'); page.innerHTML = ''; page.style.display = 'grid'; document.getElementById('print-invoice-page').style.display = 'none'; document.body.classList.remove('print-mode-a4', 'print-mode-single'); if(type === 'A4') { document.body.classList.add('print-mode-a4'); for(let i=0; i<35; i++) page.appendChild(createLabelItem(m, cCode, bb, bc, bz, 150)); } else { document.body.classList.add('print-mode-single'); page.appendChild(createLabelItem(m, cCode, bb, bc, bz, 200)); } document.getElementById('print-preview-zone').style.display = 'block'; }
+    function createLabelItem(m, cCode, bb, bc, bz, qrSize) { const div = document.createElement('div'); div.className = 'label-item'; const can = document.createElement('canvas'); const txt = document.createElement('div'); txt.className = 'txt'; txt.innerHTML = `${m.vCode} / ${m.braId}<br>${getColorName(cCode)} ${bb==='-'?'':bb}${bc==='-'?'':bc} ${bz==='-'?'':bz}`; div.appendChild(can); div.appendChild(txt); new QRious({ element: can, value: `${m.vCode},${m.braId},,${cCode},${bb},${bc},${bz}`, size: qrSize }); return div; }
+    function closePreview() { document.getElementById('print-preview-zone').style.display = 'none'; }
+    function clearInvoice() { invoiceItems = []; closePreview(); document.getElementById('print-invoice-page').style.display = 'none'; }
+    function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
+    
+    function exportData() { const today = new Date().toISOString().split('T')[0]; const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, it:itemTypes, cn:compName, tr:taxRate, sh:salesHistory})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup_${today}.json`; a.click(); }
+    function triggerImport() { document.getElementById('importFile').click(); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; itemTypes=d.it||itemTypes; compName=d.cn; taxRate=d.tr||5; salesHistory=d.sh||[]; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
+
+    window.onload = checkAuth;
 </script>
 </body>
 </html>
