@@ -193,20 +193,17 @@
         const savedPwd = localStorage.getItem('money_pwd');
         const defaultPwd = "admin123";
 
-        // 1. 優先檢查預設密碼
         if (input === defaultPwd) {
             unlock();
             return;
         }
 
-        // 2. 判斷是否需要設定新密碼
         if (!savedPwd) {
             if (input.length < 4) return alert('請設定至少4位數密碼，或輸入預設密碼解鎖');
             localStorage.setItem('money_pwd', btoa(input));
             alert('專屬密碼已儲存！');
             unlock();
         } else {
-            // 3. 比對已儲存的專屬密碼
             if (btoa(input) === savedPwd) {
                 unlock();
             } else {
@@ -335,11 +332,17 @@
         }
     }
 
+    // --- 修改後的匯出函式 ---
     function exportToExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Finance_Records");
-        XLSX.writeFile(wb, `Finance_Backup_${new Date().toISOString().slice(0,10)}.xlsx`);
+        
+        // 取得當前日期 (YYYY-MM-DD)
+        const today = new Date().toISOString().slice(0, 10);
+        
+        // 執行下載，檔名改為：家庭收支_日期.xlsx
+        XLSX.writeFile(wb, `家庭收支_${today}.xlsx`);
     }
 
     function importFromExcel(e) {
