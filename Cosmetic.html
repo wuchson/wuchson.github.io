@@ -13,7 +13,6 @@
             --panel-bg: #FFFFFF;
         }
 
-        /* 核心修正：所有元素寬度包含 padding，且全域置中 */
         * { box-sizing: border-box; }
 
         body { 
@@ -23,7 +22,7 @@
             margin: 0; 
             padding: 15px; 
             display: flex;
-            justify-content: center; /* 水平置中 */
+            justify-content: center;
             min-height: 100vh;
         }
 
@@ -35,11 +34,10 @@
             gap: 20px; 
         }
 
-        /* 手機版適配：強制置中並限制寬度 */
         @media (max-width: 850px) { 
             .wrapper { 
                 grid-template-columns: 1fr; 
-                max-width: 480px; /* 讓手機畫面不會太散，看起來更精緻 */
+                max-width: 480px;
             }
         }
         
@@ -54,16 +52,15 @@
 
         h2 { border-left: 5px solid var(--accent); padding-left: 12px; font-size: 1.2rem; margin: 0 0 20px 0; }
 
-        /* 表單控制 */
         .form-group { display: flex; flex-direction: column; gap: 12px; }
         input, select { 
             width: 100%; 
             padding: 12px; 
             border: 1px solid #eee; 
             border-radius: 10px; 
-            font-size: 16px; /* 16px 可防止 iOS 自動放大畫面 */
+            font-size: 16px;
             outline: none;
-            -webkit-appearance: none; /* 移除行動裝置預設樣式 */
+            -webkit-appearance: none;
         }
         input:focus { border-color: var(--accent); }
 
@@ -77,7 +74,6 @@
         .btn-row { display: flex; gap: 8px; margin-top: 5px; }
         .btn-sub { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; }
 
-        /* 圖片上傳區域 */
         #imgPreview { 
             width: 100%; 
             height: 140px; 
@@ -92,7 +88,6 @@
         }
         #imgPreview img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 清單樣式 */
         .item-card { 
             display: flex; 
             gap: 12px; 
@@ -161,7 +156,6 @@
 
     document.getElementById('pDate').valueAsDate = new Date();
 
-    // 圖片處理
     document.getElementById('pImg').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -266,12 +260,20 @@
         });
     }
 
+    // --- 修改後的匯出功能 ---
     function exportData() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const fileName = `化妝品_${year}${month}${day}.json`;
+
         const blob = new Blob([JSON.stringify(items)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'makeup_backup.json';
+        a.download = fileName;
         a.click();
+        URL.revokeObjectURL(a.href);
     }
 
     function importData(input) {
