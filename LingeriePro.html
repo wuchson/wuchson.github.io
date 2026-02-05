@@ -8,124 +8,60 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         :root {
-            --primary: #8da399;
-            --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
+            --primary: #8da399; --accent: #d4a373; --bg: #f9f7f2; --card-bg: #ffffff; --border: #e0dcd0; --danger: #e53e3e; --success: #48bb78;
             --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
             --s-mt: 0mm; --s-ml: 0mm;
         }
-        body { font-family: -apple-system, "Noto Sans TC", sans-serif;
-            background: var(--bg); margin: 0; padding: 10px; color: #444; }
-        .container { max-width: 600px;
-            margin: auto; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px;
-            border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        h3 { color: #6b7e75;
-            border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem;
-        }
-        
-        #login-overlay { position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center;
-        }
-        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        
-        .admin-only { display: none;
-        }
-        body.is-admin .admin-only { display: block;
-        }
-        body.is-admin .admin-inline { display: inline-block;
-        }
-        .staff-hidden { display: none;
-        }
-        body.is-admin .staff-hidden { display: block;
-        }
-
-        .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px;
-            margin: 10px 0; }
-        .config-group { margin-bottom: 12px;
-        }
-        .config-group label { display: block; font-size: 11px; font-weight: bold; color: #6b7e75;
-            margin-bottom: 5px; }
-        .config-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;
-        }
-        .config-input-grid input { height: 40px !important; border: 1px solid #ccc; border-radius: 6px;
-            text-align: center; font-size: 14px !important; width: 100% !important; box-sizing: border-box !important;
-        }
-        .dir-hint { font-size: 10px; color: #888; text-align: center; margin-top: 3px; line-height: 1.2;
-        }
-        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%;
-        }
-        .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
-        }
-        input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px;
-            border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px;
-        }
-        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px;
-            background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
-        .btn-accent { background: var(--accent);
-        }
-        .btn-success { background: var(--success);
-        }
-        .btn-danger { background: var(--danger);
-        }
-        #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden;
-            position: relative; }
-        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none;
-        }
-        #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px;
-            display: none; background: white; }
-        .table-wrapper { overflow-x: auto; border-radius: 8px;
-            border: 1px solid #eee; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse;
-            background: #fff; min-width: 450px; font-size: 0.85rem; }
-        th, td { padding: 10px;
-            text-align: left; border-bottom: 1px solid #f9f9f9; }
-        .tag { background: #f0f2f1;
-            padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center;
-        }
-        #print-label-page, #print-invoice-page { display: none;
-        }
-        .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black;
-            border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold;
-        }
+        body { font-family: -apple-system, "Noto Sans TC", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #444; }
+        .container { max-width: 600px; margin: auto; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h3 { color: #6b7e75; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 15px 0; font-size: 1rem; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 90%; max-width: 350px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .admin-only { display: none; }
+        body.is-admin .admin-only { display: block; }
+        body.is-admin .admin-inline { display: inline-block; }
+        .staff-hidden { display: none; }
+        body.is-admin .staff-hidden { display: block; }
+        .config-card { background: #f4f6f5; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; margin: 10px 0; }
+        .config-group { margin-bottom: 12px; }
+        .config-group label { display: block; font-size: 11px; font-weight: bold; color: #6b7e75; margin-bottom: 5px; }
+        .config-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+        .config-input-grid input { height: 40px !important; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 14px !important; width: 100% !important; box-sizing: border-box !important; }
+        .dir-hint { font-size: 10px; color: #888; text-align: center; margin-top: 3px; line-height: 1.2; }
+        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; width: 100%; }
+        .row-inputs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        input, select { flex: 1; min-width: 80px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; background: #fff; height: 48px; }
+        button { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        .btn-accent { background: var(--accent); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        #scanner-container { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; position: relative; }
+        #scan-feedback { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(72, 187, 120, 0.9); color: white; padding: 5px 25px; border-radius: 20px; font-weight: bold; z-index: 10; display: none; }
+        #print-preview-zone { margin-top: 15px; padding: 15px; border: 2px dashed var(--accent); border-radius: 8px; display: none; background: white; }
+        .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; min-width: 450px; font-size: 0.85rem; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f9f9f9; }
+        .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
+        #print-label-page, #print-invoice-page { display: none; }
+        .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
         @media print {
-            .no-print { display: none !important;
-            }
-            body { background: white; margin: 0; padding: 0;
-            }
-            body.print-mode-a4 #print-label-page { display: grid !important;
-                grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; box-sizing: border-box;
-                page-break-after: always; }
-            body.print-mode-a4 .label-item { width: 38mm;
-                height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-            }
-            body.print-mode-a4 .label-item canvas { width: 22mm !important;
-                height: 22mm !important; }
-            body.print-mode-a4 .label-item .txt { font-size: 7.5pt;
-                font-weight: bold; margin-top: 1mm; }
-            body.print-mode-single #print-label-page { display: flex !important;
-                align-items: center; justify-content: center; width: 100vw; height: 100vh; padding-top: var(--s-mt) !important; padding-left: var(--s-ml) !important;
-            }
-            body.print-mode-single .label-item { width: 50mm; height: 30mm;
-                display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5mm;
-            }
-            body.print-mode-single .label-item canvas { width: 25mm !important;
-                height: 25mm !important; }
-            body.print-mode-single .label-item .txt { font-size: 9pt;
-                font-weight: bold; }
-            #print-invoice-page { display: block !important;
-                padding: 10mm; }
-            .inv-table { width: 100%; border-collapse: collapse;
-                margin-top: 10px; }
-            .inv-table th, .inv-table td { border: 1px solid black;
-                padding: 8px; font-size: 10pt; }
-            .total-area { margin-top: 10px;
-                text-align: right; font-size: 10pt; line-height: 1.6; }
-            .total-area .grand-total { font-size: 13pt;
-                font-weight: bold; border-top: 1px double #000; display: inline-block; padding-top: 5px;
-            }
+            .no-print { display: none !important; }
+            body { background: white; margin: 0; padding: 0; }
+            body.print-mode-a4 #print-label-page { display: grid !important; grid-template-columns: repeat(5, 38mm); grid-template-rows: repeat(7, 38mm); padding-top: var(--a4-mt) !important; padding-left: var(--a4-ml) !important; column-gap: var(--a4-gx) !important; row-gap: var(--a4-gy) !important; box-sizing: border-box; page-break-after: always; }
+            body.print-mode-a4 .label-item { width: 38mm; height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+            body.print-mode-a4 .label-item canvas { width: 22mm !important; height: 22mm !important; }
+            body.print-mode-a4 .label-item .txt { font-size: 7.5pt; font-weight: bold; margin-top: 1mm; }
+            body.print-mode-single #print-label-page { display: flex !important; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding-top: var(--s-mt) !important; padding-left: var(--s-ml) !important; }
+            body.print-mode-single .label-item { width: 50mm; height: 30mm; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5mm; }
+            body.print-mode-single .label-item canvas { width: 25mm !important; height: 25mm !important; }
+            body.print-mode-single .label-item .txt { font-size: 9pt; font-weight: bold; }
+            #print-invoice-page { display: block !important; padding: 10mm; }
+            .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            .inv-table th, .inv-table td { border: 1px solid black; padding: 8px; font-size: 10pt; }
+            .total-area { margin-top: 10px; text-align: right; font-size: 10pt; line-height: 1.6; }
+            .total-area .grand-total { font-size: 13pt; font-weight: bold; border-top: 1px double #000; display: inline-block; padding-top: 5px; }
         }
     </style>
 </head>
@@ -143,8 +79,7 @@
 <div class="container no-print">
     <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span id="userStatus" style="font-size: 14px; color: #666;"></span>
-        <button onclick="logout()" 
-style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
+        <button onclick="logout()" style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登出</button>
     </div>
 
     <div class="card admin-only">
@@ -387,7 +322,6 @@ style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登�
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
     let inventory = JSON.parse(localStorage.getItem('I_D')) || [];
     let colors = JSON.parse(localStorage.getItem('C_D')) || [{code: "BLK", name: "黑色"}, {code: "SKN", name: "膚色"}];
-    // 商品類別初始資料
     let itemTypes = JSON.parse(localStorage.getItem('IT_D')) || ["文具", "公仔", "衣服", "褲子"];
     let salesHistory = JSON.parse(localStorage.getItem('S_H')) || [];
     let pCfg = JSON.parse(localStorage.getItem('L_P_CFG')) || { a4mt:15.5, a4ml:6.5, a4gx:2.5, a4gy:0, smt:0, sml:0 };
@@ -408,7 +342,7 @@ style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登�
         localStorage.setItem('M_D', JSON.stringify(models));
         localStorage.setItem('I_D', JSON.stringify(inventory));
         localStorage.setItem('C_D', JSON.stringify(colors));
-        localStorage.setItem('IT_D', JSON.stringify(itemTypes)); // 儲存類別
+        localStorage.setItem('IT_D', JSON.stringify(itemTypes)); 
         localStorage.setItem('S_H', JSON.stringify(salesHistory));
         render();
     }
@@ -453,15 +387,10 @@ style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登�
         document.getElementById('selectVendor').innerHTML = vOps;
         document.getElementById('selectColor').innerHTML = colors.map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`).join('');
         
-        // 更新類別選單
         document.getElementById('itemTypeSelect').innerHTML = itemTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-        
         document.getElementById('vendorTags').innerHTML = vendors.map((v,idx) => `<div class="tag">${v.code} <span onclick="deleteVendor(${idx})" style="cursor:pointer">×</span></div>`).join('');
         document.getElementById('colorTags').innerHTML = colors.map((c,idx) => `<div class="tag">${c.code}:${c.name} <span onclick="deleteColor(${idx})" style="cursor:pointer">×</span></div>`).join('');
-        
-        // 渲染類別標籤
         document.getElementById('typeTags').innerHTML = itemTypes.map((t,idx) => `<div class="tag">${t} <span onclick="deleteItemType(${idx})" style="cursor:pointer">×</span></div>`).join('');
-        
         document.getElementById('modelTags').innerHTML = models.map((m,idx) => `<div class="tag">${m.vCode}-${m.braId} ($${m.price}) <span onclick="deleteModel(${idx})" style="cursor:pointer">×</span></div>`).join('');
         if(document.getElementById('userList')) {
             document.getElementById('userList').innerHTML = users.map((u,idx) => `<div class="tag" style="background:${u.r==='admin'?'#ffeebb':'#eee'}">${u.u} (${u.r}) <span onclick="deleteUser(${idx})" style="cursor:pointer">×</span></div>`).join('');
@@ -535,11 +464,9 @@ style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登�
     function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
     function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
     
-    // 顏色管理
     function addColor() { const input = document.getElementById('colorInp'); const v = input.value; if(v.includes(':') || v.includes('：')){ const parts = v.split(/[:：]/); const code = parts[0].trim().toUpperCase(); const name = parts[1].trim(); if(!colors.find(c => c.code === code)){ colors.push({code, name}); save(); } input.value=''; } else if(v) { alert("請輸入格式為 代碼:名稱，例如 BLK:黑色"); } }
     function deleteColor(idx) { if(confirm("刪除顏色對照？")) { colors.splice(idx,1); save(); } }
 
-    // 商品類別管理 (新增)
     function addItemType() { const input = document.getElementById('typeInp'); const v = input.value.trim(); if(v){ if(!itemTypes.includes(v)){ itemTypes.push(v); save(); } input.value=''; } }
     function deleteItemType(idx) { if(confirm("刪除此商品類別？")) { itemTypes.splice(idx,1); save(); } }
 
@@ -607,7 +534,16 @@ style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登�
     function clearInvoice() { invoiceItems = []; closePreview(); document.getElementById('print-invoice-page').style.display = 'none'; }
     function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
     
-    function exportData() { const today = new Date().toISOString().split('T')[0]; const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, it:itemTypes, cn:compName, tr:taxRate, sh:salesHistory})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup_${today}.json`; a.click(); }
+    // 已修改此處的備份檔名 
+    function exportData() { 
+        const today = new Date().toISOString().split('T')[0];
+        const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, it:itemTypes, cn:compName, tr:taxRate, sh:salesHistory})], {type:"application/json"}); 
+        const a = document.createElement('a'); 
+        a.href = URL.createObjectURL(blob);
+        a.download = `庫存管理_${today}.json`; 
+        a.click(); 
+    }
+    
     function triggerImport() { document.getElementById('importFile').click(); }
     function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; itemTypes=d.it||itemTypes; compName=d.cn; taxRate=d.tr||5; salesHistory=d.sh||[]; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
 
