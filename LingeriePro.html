@@ -45,7 +45,6 @@
         .tag { background: #f0f2f1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #e0e5e3; display: flex; align-items: center; }
         #print-label-page, #print-invoice-page { display: none; }
         .qty-btn { padding: 2px 8px; width: auto; background: #edf2f7; color: black; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        
         @media print {
             .no-print { display: none !important; }
             body { background: white; margin: 0; padding: 0; }
@@ -127,7 +126,7 @@
                 <input type="text" id="setBraId" placeholder="型號 (如: A001)">
                 <select id="itemTypeSelect"></select> </div>
             <div class="row-inputs">
-                <input type="number" id="setCost" placeholder="進價 (內部用)">
+               <input type="number" id="setCost" placeholder="進價 (內部用)">
                 <input type="number" id="setPrice" placeholder="售價">
             </div>
             <button class="btn-accent" onclick="addModel()">儲存款式</button>
@@ -218,11 +217,12 @@
             </table>
         </div>
         <div class="row-inputs admin-only" style="margin-top:15px;">
-            <button style="background:#666;" onclick="exportData()">💾 備份</button>
-            <button style="background:#718096;" onclick="triggerImport()">📂 匯入</button>
+            <button style="background:#2d3748; flex:1.5" onclick="exportToExcel()">📊 匯出 Excel 報表</button>
+            <button style="background:#666;" onclick="exportData()">💾 系統備份</button>
+            <button style="background:#718096;" onclick="triggerImport()">📂 系統匯入</button>
         </div>
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
-    </div>
+   </div>
 </div>
 
 <div id="print-label-page"></div>
@@ -274,10 +274,7 @@
         } else { alert("帳號或密碼錯誤"); }
     }
 
-    function logout() {
-        sessionStorage.removeItem('CUR_USER');
-        location.reload();
-    }
+    function logout() { sessionStorage.removeItem('CUR_USER'); location.reload(); }
 
     function checkAuth() {
         if(!currentUser) {
@@ -286,11 +283,7 @@
         }
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('userStatus').innerText = `目前使用者: ${currentUser.u} (${currentUser.r === 'admin' ? '管理員' : '一般員工'})`;
-        if(currentUser.r === 'admin') {
-            document.body.classList.add('is-admin');
-        } else {
-            document.body.classList.remove('is-admin');
-        }
+        if(currentUser.r === 'admin') { document.body.classList.add('is-admin'); } else { document.body.classList.remove('is-admin'); }
         render();
     }
 
@@ -345,6 +338,32 @@
         localStorage.setItem('IT_D', JSON.stringify(itemTypes)); 
         localStorage.setItem('S_H', JSON.stringify(salesHistory));
         render();
+    }
+
+    // 新增：匯出為 Excel 可讀取的 CSV 報表
+    function exportToExcel() {
+        // 使用 \uFEFF 確保 Excel 開啟時能辨識繁體中文
+        let csvContent = "\uFEFF型號,廠商代碼,顏色名稱,規格尺寸,庫存數量\n";
+        
+        inventory.forEach(i => {
+            const colorN = getColorName(i.c);
+            const sizeInfo = `${i.bb==='-'?'':i.bb}${i.bc==='-'?'':i.bc} ${i.bz==='-'?'':i.bz}`.trim();
+            const row = [
+                i.braId,
+                i.vCode,
+                colorN,
+                sizeInfo,
+                i.bq
+            ].join(",");
+            csvContent += row + "\n";
+        });
+
+        const today = new Date().toISOString().split('T')[0];
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${compName}_庫存報表_${today}.csv`;
+        a.click();
     }
 
     function savePrintConfigs() {
@@ -403,10 +422,7 @@
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
         const todaySales = salesHistory.filter(s => new Date(s.date).toLocaleDateString() === todayStr);
-        const monthSales = salesHistory.filter(s => {
-            const d = new Date(s.date);
-            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-        });
+        const monthSales = salesHistory.filter(s => { const d = new Date(s.date); return d.getMonth() === currentMonth && d.getFullYear() === currentYear; });
         const yearSales = salesHistory.filter(s => new Date(s.date).getFullYear() === currentYear);
 
         if(salesHistory.length > 0) {
@@ -415,11 +431,7 @@
             const revYear = yearSales.reduce((sum, s) => sum + (s.p * s.q), 0);
             const monthCounts = {};
             monthSales.forEach(s => { monthCounts[s.id] = (monthCounts[s.id] || 0) + s.q; });
-            const topFive = Object.entries(monthCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5)
-                .map(([id, q], idx) => `${idx+1}.${id}(${q}件)`)
-                .join(' ');
+            const topFive = Object.entries(monthCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, q], idx) => `${idx+1}.${id}(${q}件)`).join(' ');
             const statsBox = document.getElementById('today-sales-stats');
             statsBox.style.display = 'flex';
             statsBox.innerHTML = `
@@ -534,14 +546,10 @@
     function clearInvoice() { invoiceItems = []; closePreview(); document.getElementById('print-invoice-page').style.display = 'none'; }
     function deleteItem(idx) { if(confirm("刪除此筆紀錄？")) { inventory.splice(idx,1); save(); } }
     
-    // 已修改此處的備份檔名 
     function exportData() { 
         const today = new Date().toISOString().split('T')[0];
         const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, it:itemTypes, cn:compName, tr:taxRate, sh:salesHistory})], {type:"application/json"}); 
-        const a = document.createElement('a'); 
-        a.href = URL.createObjectURL(blob);
-        a.download = `庫存管理_${today}.json`; 
-        a.click(); 
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `系統備份_${today}.json`; a.click(); 
     }
     
     function triggerImport() { document.getElementById('importFile').click(); }
