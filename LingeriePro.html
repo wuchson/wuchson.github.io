@@ -325,7 +325,7 @@ style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">ç™»å‡
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = 850; gain.gain.setValueAtTime(0, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15); osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
 
-    let users = JSON.parse(localStorage.getItem('SYS_USERS')) || [{u:'admin', p:'1234', r:'admin'}];
+    let users = JSON.parse(localStorage.getItem('SYS_USERS')) || [{u:'admin', p:'admin123', r:'admin'}];
     let currentUser = JSON.parse(sessionStorage.getItem('CUR_USER')) || null;
 
     function login() {
