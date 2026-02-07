@@ -15,30 +15,30 @@
         input[type="text"]#edit-name { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
 
         /* 薪資單主體 */
-        #payslip-container { background: white; width: var(--container-width); padding: 35px; border-radius: 4px; box-sizing: border-box; overflow: hidden; }
+        #payslip-container { background: white; width: var(--container-width); padding: 30px 35px; border-radius: 4px; box-sizing: border-box; overflow: hidden; }
         
-        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; border-bottom: 2px solid var(--main-black); padding-bottom: 15px; }
-        #logo-preview { max-width: 45px; max-height: 45px; object-fit: contain; display: none; }
-        #company-title { font-size: 22px; font-weight: 800; outline: none; line-height: 1.4; color: #000; }
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid var(--main-black); padding-bottom: 12px; }
+        #logo-preview { max-width: 40px; max-height: 40px; object-fit: contain; display: none; }
+        #company-title { font-size: 20px; font-weight: 800; outline: none; line-height: 1.2; color: #000; }
 
-        .info-row-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 14px; gap: 10px; white-space: nowrap; }
+        .info-row-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; gap: 10px; white-space: nowrap; }
         .info-item { display: flex; align-items: center; }
-        .info-item span { font-weight: bold; margin-right: 4px; line-height: 1.2; }
-        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 4px 0 6px 0; font-size: 14px; line-height: 1.5; height: auto; }
+        .info-item span { font-weight: bold; margin-right: 4px; }
+        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 2px 0; font-size: 13px; width: auto; }
         
-        #employee-name { width: 75px; }
-        #pay-date { width: 130px; border: none; font-family: inherit; }
+        #employee-name { width: 70px; }
+        #pay-date { width: 120px; border: none; font-family: inherit; }
 
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; font-size: 11px; color: #999; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        th { text-align: left; font-size: 11px; color: #999; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         
-        td { padding: 12px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.6; padding-bottom: 2px; }
-        .value-cell input { width: 100%; border: none; text-align: right; font-size: 16px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.6; padding-bottom: 2px; }
+        /* 縮短每一排的距離 */
+        td { padding: 6px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.2; }
+        .value-cell input { width: 100%; border: none; text-align: right; font-size: 15px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; }
         
-        .total-row td { border-bottom: none; padding-top: 25px; vertical-align: middle; }
+        .total-row td { border-bottom: none; padding-top: 15px; vertical-align: middle; }
         .total-label { font-size: 18px; font-weight: 800; }
-        /* 這裡調整為與合計標籤相同大小 18px */
         #total-amount { font-size: 18px; font-weight: 800; text-align: right; width: 100%; border: none; background: transparent; outline: none; color: #000; line-height: 1.2; }
 
         .btn-group { display: flex; gap: 10px; }
@@ -46,7 +46,7 @@
         .btn-save-pref { background-color: #eee; color: #444; }
         .btn-download { background-color: var(--main-black); color: white; }
 
-        @media (max-width: 480px) { :root { --container-width: 100%; } #payslip-container { padding: 25px 15px; } #employee-name { width: 65px; } #pay-date { width: 120px; font-size: 13px; } }
+        @media (max-width: 480px) { :root { --container-width: 100%; } #payslip-container { padding: 20px 15px; } }
     </style>
 </head>
 <body>
@@ -72,7 +72,7 @@
             <img id="logo-preview" src="" alt="logo">
         </div>
         <div class="info-row-container">
-            <div class="info-item"><span>姓名</span><input type="text" id="employee-name" placeholder="員工姓名"></div>
+            <div class="info-item"><span>姓名</span><input type="text" id="employee-name" placeholder="姓名"></div>
             <div class="info-item"><span>日期</span><input type="date" id="pay-date"></div>
         </div>
         <table>
@@ -112,16 +112,16 @@
         function saveSettings() {
             const companyName = document.getElementById('company-title').innerText;
             const labels = Array.from(document.querySelectorAll('.row-label')).map(input => input.value);
-            localStorage.setItem('salary_final_v3', companyName);
-            localStorage.setItem('salary_final_labels_v3', JSON.stringify(labels));
-            if (currentLogoBase64) localStorage.setItem('salary_final_logo_v3', currentLogoBase64);
+            localStorage.setItem('salary_final_compact_v1', companyName);
+            localStorage.setItem('salary_final_labels_compact_v1', JSON.stringify(labels));
+            if (currentLogoBase64) localStorage.setItem('salary_final_logo_compact_v1', currentLogoBase64);
             alert('✅ 儲存成功！');
         }
 
         function loadSettings() {
-            const name = localStorage.getItem('salary_final_v3');
-            const labels = JSON.parse(localStorage.getItem('salary_final_labels_v3'));
-            const logo = localStorage.getItem('salary_final_logo_v3');
+            const name = localStorage.getItem('salary_final_compact_v1');
+            const labels = JSON.parse(localStorage.getItem('salary_final_labels_compact_v1'));
+            const logo = localStorage.getItem('salary_final_logo_compact_v1');
             if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
             if (labels) {
                 const inputs = document.querySelectorAll('.row-label');
