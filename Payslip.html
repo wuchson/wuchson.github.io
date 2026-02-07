@@ -9,12 +9,28 @@
         :root { --main-black: #1a1a1a; --border-color: #eeeeee; --container-width: 450px; }
         body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
         
+        /* 控制面板 */
         .controls { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: var(--container-width); box-sizing: border-box; }
         .control-item { margin-bottom: 15px; }
         label { font-weight: 700; font-size: 14px; color: #333; display: block; margin-bottom: 8px; }
         input[type="text"]#edit-name { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
 
-        #payslip-container { background: white; width: var(--container-width); padding: 40px; border-radius: 4px; box-sizing: border-box; }
+        /* 終極修正：包裝層，提供 50px 的安全邊界 */
+        #capture-area { 
+            background-color: #f0f2f5; 
+            padding: 50px 20px; /* 這裡提供上下緩衝，防止任何切邊 */
+            display: inline-block;
+        }
+
+        /* 薪資單主體 */
+        #payslip-container { 
+            background: white; 
+            width: var(--container-width); 
+            padding: 40px; 
+            border-radius: 4px; 
+            box-sizing: border-box;
+            box-shadow: 0 0 1px rgba(0,0,0,0.1); /* 極細邊框幫助 html2canvas 識別邊界 */
+        }
         
         .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; border-bottom: 2px solid var(--main-black); padding-bottom: 15px; }
         #logo-preview { max-width: 45px; max-height: 45px; object-fit: contain; display: none; }
@@ -32,21 +48,13 @@
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
         
         td { padding: 12px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.6; }
-        .value-cell input { width: 100%; border: none; text-align: right; font-size: 16px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.6; }
+        .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; }
+        .value-cell input { width: 100%; border: none; text-align: right; font-size: 16px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; }
         
-        /* 合計區域：徹底修正切邊 */
-        .total-row td { border-bottom: none; padding-top: 40px; }
-        .total-label { font-size: 18px; font-weight: 800; }
+        /* 合計區域：增加更多內部間距 */
+        .total-row td { border-bottom: none; padding-top: 50px !important; }
+        .total-label { font-size: 18px; font-weight: 800; padding-top: 10px; }
         
-        .total-amount-wrapper {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            height: 40px; /* 給予足夠的固定高度 */
-            overflow: visible;
-        }
-
         #total-amount { 
             font-size: 28px; 
             font-weight: 900; 
@@ -56,17 +64,16 @@
             background: transparent; 
             outline: none; 
             color: #000; 
-            line-height: 1; /* 設定為 1 防止上下偏移 */
-            padding: 5px 0; /* 四週留白 */
+            line-height: 1.5; /* 增加行高，確保上方空間 */
+            padding-top: 10px;
         }
 
         .btn-group { display: flex; gap: 10px; }
-        button { flex: 1; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; }
+        button { flex: 1; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; }
         .btn-save-pref { background-color: #eee; color: #444; }
         .btn-download { background-color: var(--main-black); color: white; }
-        button:active { opacity: 0.7; }
 
-        @media (max-width: 480px) { :root { --container-width: 100%; } #payslip-container { padding: 30px 20px; } #employee-name { width: 65px; } #pay-date { width: 120px; font-size: 13px; } }
+        @media (max-width: 480px) { :root { --container-width: 100%; } #capture-area { padding: 20px 5px; width: 100%; box-sizing: border-box; } }
     </style>
 </head>
 <body>
@@ -86,27 +93,25 @@
         </div>
     </div>
 
-    <div id="payslip-container">
-        <div class="header">
-            <div id="company-title" contenteditable="true">MODERN CORP.</div>
-            <img id="logo-preview" src="" alt="logo">
+    <div id="capture-area">
+        <div id="payslip-container">
+            <div class="header">
+                <div id="company-title" contenteditable="true">MODERN CORP.</div>
+                <img id="logo-preview" src="" alt="logo">
+            </div>
+            <div class="info-row-container">
+                <div class="info-item"><span>姓名</span><input type="text" id="employee-name" placeholder="員工姓名"></div>
+                <div class="info-item"><span>日期</span><input type="date" id="pay-date"></div>
+            </div>
+            <table>
+                <thead><tr><th style="text-align: left;">薪資項目</th><th style="text-align: right;">金額</th></tr></thead>
+                <tbody id="table-body"></tbody>
+                <tr class="total-row">
+                    <td class="total-label">合計</td>
+                    <td><input type="text" id="total-amount" readonly value="0"></td>
+                </tr>
+            </table>
         </div>
-        <div class="info-row-container">
-            <div class="info-item"><span>姓名</span><input type="text" id="employee-name" placeholder="員工姓名"></div>
-            <div class="info-item"><span>日期</span><input type="date" id="pay-date"></div>
-        </div>
-        <table>
-            <thead><tr><th style="text-align: left;">薪資項目</th><th style="text-align: right;">金額</th></tr></thead>
-            <tbody id="table-body"></tbody>
-            <tr class="total-row">
-                <td class="total-label">合計</td>
-                <td>
-                    <div class="total-amount-wrapper">
-                        <input type="text" id="total-amount" readonly value="0">
-                    </div>
-                </td>
-            </tr>
-        </table>
     </div>
 
     <script>
@@ -135,16 +140,16 @@
         function saveSettings() {
             const companyName = document.getElementById('company-title').innerText;
             const labels = Array.from(document.querySelectorAll('.row-label')).map(input => input.value);
-            localStorage.setItem('salary_final_v5', companyName);
-            localStorage.setItem('salary_final_labels_v5', JSON.stringify(labels));
-            if (currentLogoBase64) localStorage.setItem('salary_final_logo_v5', currentLogoBase64);
-            alert('✅ 設定儲存成功！');
+            localStorage.setItem('salary_final_v6', companyName);
+            localStorage.setItem('salary_final_labels_v6', JSON.stringify(labels));
+            if (currentLogoBase64) localStorage.setItem('salary_final_logo_v6', currentLogoBase64);
+            alert('✅ 儲存成功！');
         }
 
         function loadSettings() {
-            const name = localStorage.getItem('salary_final_v5');
-            const labels = JSON.parse(localStorage.getItem('salary_final_labels_v5'));
-            const logo = localStorage.getItem('salary_final_logo_v5');
+            const name = localStorage.getItem('salary_final_v6');
+            const labels = JSON.parse(localStorage.getItem('salary_final_labels_v6'));
+            const logo = localStorage.getItem('salary_final_logo_v6');
             if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
             if (labels) {
                 const inputs = document.querySelectorAll('.row-label');
@@ -155,32 +160,34 @@
 
         document.getElementById('logo-input').onchange = function(e) {
             const reader = new FileReader();
-            reader.onload = e => { currentLogoBase64 = e.target.result; const img = document.getElementById('logo-preview'); img.src = currentLogoBase64; img.style.display = 'block'; };
+            reader.onload = e => { 
+                currentLogoBase64 = e.target.result;
+                const img = document.getElementById('logo-preview'); 
+                img.src = currentLogoBase64; img.style.display = 'block'; 
+            };
             reader.readAsDataURL(e.target.files[0]);
         };
 
         function updateTitle(val) { document.getElementById('company-title').innerText = val; }
 
         function downloadJPG() {
-            const target = document.getElementById('payslip-container');
+            // 修正：抓取包含緩衝空間的 capture-area
+            const target = document.getElementById('capture-area');
             const empName = document.getElementById('employee-name').value || "Unnamed";
             const payDate = document.getElementById('pay-date').value || "NoDate";
             
-            // 使用 window.scrollTo(0,0) 確保截圖時不會因為頁面不在頂端而產生偏移
             window.scrollTo(0, 0);
 
             html2canvas(target, { 
-                scale: 3, 
-                backgroundColor: "#ffffff",
+                scale: 2.5, // 稍微降低倍率提高穩定性
+                backgroundColor: "#f0f2f5", // 與背景色一致
                 useCORS: true,
-                // 核心修正：增加額外的截圖範圍邊距，防止邊緣裁切
-                y: -5,
-                height: target.offsetHeight + 10,
-                logging: false
+                logging: false,
+                allowTaint: true
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `薪資單_${empName}_${payDate}.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
                 link.click();
             });
         }
