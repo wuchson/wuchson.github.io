@@ -21,91 +21,36 @@
         #logo-preview { max-width: 40px; max-height: 40px; object-fit: contain; display: none; }
         #company-title { font-size: 20px; font-weight: 800; outline: none; line-height: 1.2; color: #000; }
 
-        /* 修正：姓名與日期垂直置中 */
-        .info-row-container { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            align-items: center; 
-            margin-bottom: 15px; 
-            font-size: 14px; 
-            gap: 15px; 
-        }
-        .info-item { display: flex; align-items: center; height: 24px; } /* 固定高度幫助置中 */
-        .info-item span { font-weight: bold; margin-right: 6px; white-space: nowrap; }
+        .info-row-container { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 15px; font-size: 14px; gap: 15px; }
+        .info-item { display: flex; align-items: center; }
+        .info-item span { font-weight: bold; margin-right: 6px; white-space: nowrap; line-height: 1; }
+        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 2px 0; font-size: 14px; line-height: 1.2; height: 20px; font-family: inherit; }
         
-        .info-item input { 
-            flex: 1;
-            border: none; 
-            border-bottom: 1px solid #ccc; 
-            outline: none; 
-            background: transparent; 
-            font-size: 14px; 
-            height: 100%; /* 充滿容器高度 */
-            padding: 0; /* 移除預設 padding 避免推擠 */
-            display: flex;
-            align-items: center;
-            font-family: inherit;
-        }
-        
-        #pay-date { border-bottom: 1px solid #ccc; }
+        #employee-name { width: 100%; }
+        #pay-date { width: 100%; border-bottom: 1px solid #ccc; }
 
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         
-        /* 修正：表格單元格與輸入框垂直置中 */
-        td { 
-            padding: 0; /* 改由 input 控制空間 */
-            height: 32px; /* 固定每一列的高度 */
-            border-bottom: 1px solid var(--border-color); 
-            vertical-align: middle; 
-        }
+        td { padding: 6px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.2; }
         
-        .label-cell input, .value-cell input { 
-            width: 100%; 
-            height: 32px; /* 與 td 同高 */
-            background: transparent; 
-            border: none; 
-            outline: none; 
-            display: flex;
-            align-items: center; /* 強制垂直置中 */
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .label-cell input { font-size: 14px; color: #333; }
-        .value-cell input { 
-            text-align: right; 
-            font-size: 15px; 
-            font-weight: 600; 
-            font-family: 'Courier New', monospace; 
-            color: #333; 
-        }
+        /* 修改：預設金額顏色 */
+        .value-cell input { width: 100%; border: none; text-align: right; font-size: 15px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; color: #333; }
         
+        /* 修改：負數紅色的樣式類別 */
         .value-cell input.negative { color: #d93025 !important; }
 
-        .total-row td { border-bottom: none; height: 45px; padding-top: 15px; }
-        .total-label { font-size: 18px; font-weight: 800; display: flex; align-items: center; height: 100%; }
-        #total-amount { 
-            font-size: 18px; 
-            font-weight: 800; 
-            text-align: right; 
-            width: 100%; 
-            height: 100%;
-            border: none; 
-            background: transparent; 
-            outline: none; 
-            color: #000; 
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
+        .total-row td { border-bottom: none; padding-top: 15px; vertical-align: middle; }
+        .total-label { font-size: 18px; font-weight: 800; }
+        #total-amount { font-size: 18px; font-weight: 800; text-align: right; width: 100%; border: none; background: transparent; outline: none; color: #000; line-height: 1.2; }
 
         .btn-group { display: flex; gap: 10px; }
         button { flex: 1; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; }
         .btn-save-pref { background-color: #eee; color: #444; }
         .btn-download { background-color: var(--main-black); color: white; }
 
-        @media (max-width: 480px) { :root { --container-width: 100%; } }
+        @media (max-width: 480px) { :root { --container-width: 100%; } #payslip-container { padding: 20px 15px; } }
     </style>
 </head>
 <body>
@@ -162,13 +107,19 @@
             }
         }
 
+        // 修改：增加自動變紅色的邏輯
         function calculateTotal() {
             let total = 0;
             document.querySelectorAll('.amount').forEach(input => {
                 const val = parseFloat(input.value) || 0;
                 total += val;
-                if (val < 0) { input.classList.add('negative'); } 
-                else { input.classList.remove('negative'); }
+                
+                // 如果是負數，加入 'negative' 類別變紅；否則移除
+                if (val < 0) {
+                    input.classList.add('negative');
+                } else {
+                    input.classList.remove('negative');
+                }
             });
             document.getElementById('total-amount').value = total.toLocaleString();
         }
@@ -176,16 +127,16 @@
         function saveSettings() {
             const companyName = document.getElementById('company-title').innerText;
             const labels = Array.from(document.querySelectorAll('.row-label')).map(input => input.value);
-            localStorage.setItem('salary_final_v5', companyName);
-            localStorage.setItem('salary_final_labels_v5', JSON.stringify(labels));
-            if (currentLogoBase64) localStorage.setItem('salary_final_logo_v5', currentLogoBase64);
+            localStorage.setItem('salary_final_v4', companyName);
+            localStorage.setItem('salary_final_labels_v4', JSON.stringify(labels));
+            if (currentLogoBase64) localStorage.setItem('salary_final_logo_v4', currentLogoBase64);
             alert('✅ 儲存成功！');
         }
 
         function loadSettings() {
-            const name = localStorage.getItem('salary_final_v5');
-            const labels = JSON.parse(localStorage.getItem('salary_final_labels_v5'));
-            const logo = localStorage.getItem('salary_final_logo_v5');
+            const name = localStorage.getItem('salary_final_v4');
+            const labels = JSON.parse(localStorage.getItem('salary_final_labels_v4'));
+            const logo = localStorage.getItem('salary_final_logo_v4');
             if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
             if (labels) {
                 const inputs = document.querySelectorAll('.row-label');
