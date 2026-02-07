@@ -21,18 +21,37 @@
         #logo-preview { max-width: 40px; max-height: 40px; object-fit: contain; display: none; }
         #company-title { font-size: 20px; font-weight: 800; outline: none; line-height: 1.2; color: #000; }
 
-        .info-row-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; gap: 10px; white-space: nowrap; }
+        /* 修正：對齊姓名與日期 */
+        .info-row-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            align-items: center; /* 垂直置中對齊 */
+            margin-bottom: 15px; 
+            font-size: 14px; 
+            gap: 15px; 
+        }
         .info-item { display: flex; align-items: center; }
-        .info-item span { font-weight: bold; margin-right: 4px; }
-        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 2px 0; font-size: 13px; width: auto; }
+        .info-item span { font-weight: bold; margin-right: 6px; white-space: nowrap; line-height: 1; }
         
-        #employee-name { width: 70px; }
-        #pay-date { width: 120px; border: none; font-family: inherit; }
+        /* 統一輸入框樣式，解決切邊與對齊問題 */
+        .info-item input { 
+            border: none; 
+            border-bottom: 1px solid #ccc; 
+            outline: none; 
+            background: transparent; 
+            padding: 2px 0; 
+            font-size: 14px; 
+            line-height: 1.2;
+            height: 20px; /* 固定高度確保對齊 */
+            font-family: inherit;
+        }
+        
+        #employee-name { width: 100%; }
+        #pay-date { width: 100%; border-bottom: 1px solid #ccc; } /* 給日期也加上底線，確保視覺高度一致 */
 
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         
-        /* 縮短每一排的距離 */
         td { padding: 6px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.2; }
         .value-cell input { width: 100%; border: none; text-align: right; font-size: 15px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; }
@@ -112,16 +131,16 @@
         function saveSettings() {
             const companyName = document.getElementById('company-title').innerText;
             const labels = Array.from(document.querySelectorAll('.row-label')).map(input => input.value);
-            localStorage.setItem('salary_final_compact_v1', companyName);
-            localStorage.setItem('salary_final_labels_compact_v1', JSON.stringify(labels));
-            if (currentLogoBase64) localStorage.setItem('salary_final_logo_compact_v1', currentLogoBase64);
+            localStorage.setItem('salary_final_v4', companyName);
+            localStorage.setItem('salary_final_labels_v4', JSON.stringify(labels));
+            if (currentLogoBase64) localStorage.setItem('salary_final_logo_v4', currentLogoBase64);
             alert('✅ 儲存成功！');
         }
 
         function loadSettings() {
-            const name = localStorage.getItem('salary_final_compact_v1');
-            const labels = JSON.parse(localStorage.getItem('salary_final_labels_compact_v1'));
-            const logo = localStorage.getItem('salary_final_logo_compact_v1');
+            const name = localStorage.getItem('salary_final_v4');
+            const labels = JSON.parse(localStorage.getItem('salary_final_labels_v4'));
+            const logo = localStorage.getItem('salary_final_logo_v4');
             if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
             if (labels) {
                 const inputs = document.querySelectorAll('.row-label');
