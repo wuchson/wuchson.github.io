@@ -15,57 +15,49 @@
         label { font-weight: 700; font-size: 14px; color: #333; display: block; margin-bottom: 8px; }
         input[type="text"]#edit-name { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
 
-        /* 終極修正：包裝層，提供 50px 的安全邊界 */
+        /* 外部包裝層：給予充足的渲染空間 */
         #capture-area { 
             background-color: #f0f2f5; 
-            padding: 50px 20px; /* 這裡提供上下緩衝，防止任何切邊 */
+            padding: 60px 30px; 
             display: inline-block;
         }
 
-        /* 薪資單主體 */
         #payslip-container { 
             background: white; 
             width: var(--container-width); 
             padding: 40px; 
             border-radius: 4px; 
             box-sizing: border-box;
-            box-shadow: 0 0 1px rgba(0,0,0,0.1); /* 極細邊框幫助 html2canvas 識別邊界 */
         }
         
+        /* 標題與資訊 */
         .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; border-bottom: 2px solid var(--main-black); padding-bottom: 15px; }
         #logo-preview { max-width: 45px; max-height: 45px; object-fit: contain; display: none; }
-        #company-title { font-size: 22px; font-weight: 800; outline: none; line-height: 1.4; color: #000; }
+        #company-title { font-size: 22px; font-weight: 800; outline: none; }
 
         .info-row-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; font-size: 14px; gap: 10px; white-space: nowrap; }
         .info-item { display: flex; align-items: center; }
-        .info-item span { font-weight: bold; margin-right: 4px; }
-        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 4px 0 6px 0; font-size: 14px; }
-        
-        #employee-name { width: 75px; }
-        #pay-date { width: 130px; border: none; font-family: inherit; }
+        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 4px 0; font-size: 14px; width: 75px; }
 
+        /* 表格樣式 */
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; font-size: 11px; color: #999; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
-        
         td { padding: 12px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; }
-        .value-cell input { width: 100%; border: none; text-align: right; font-size: 16px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; }
+        .label-cell input { width: 100%; border: none; font-size: 14px; outline: none; background: transparent; }
+        .value-cell input { width: 100%; border: none; text-align: right; font-size: 16px; font-weight: 600; outline: none; background: transparent; }
         
-        /* 合計區域：增加更多內部間距 */
-        .total-row td { border-bottom: none; padding-top: 50px !important; }
-        .total-label { font-size: 18px; font-weight: 800; padding-top: 10px; }
+        /* 合計區域：關鍵修正 */
+        .total-row td { border-bottom: none; padding-top: 60px !important; position: relative; }
+        .total-label { font-size: 20px; font-weight: 800; vertical-align: middle; }
         
-        #total-amount { 
-            font-size: 28px; 
+        /* 使用 div 代替 input 顯示金額，避免盒模型切邊 */
+        #total-amount-display { 
+            font-size: 32px; 
             font-weight: 900; 
             text-align: right; 
-            width: 100%; 
-            border: none; 
-            background: transparent; 
-            outline: none; 
             color: #000; 
-            line-height: 1.5; /* 增加行高，確保上方空間 */
+            line-height: 1.8; /* 超大行高確保上方空間 */
             padding-top: 10px;
+            font-family: 'Arial', sans-serif;
         }
 
         .btn-group { display: flex; gap: 10px; }
@@ -73,7 +65,7 @@
         .btn-save-pref { background-color: #eee; color: #444; }
         .btn-download { background-color: var(--main-black); color: white; }
 
-        @media (max-width: 480px) { :root { --container-width: 100%; } #capture-area { padding: 20px 5px; width: 100%; box-sizing: border-box; } }
+        @media (max-width: 480px) { :root { --container-width: 100%; } #capture-area { padding: 30px 10px; } }
     </style>
 </head>
 <body>
@@ -85,7 +77,7 @@
         </div>
         <div class="control-item">
             <label>企業識別 LOGO</label>
-            <input type="file" id="logo-input" accept="image/*" style="font-size: 12px;">
+            <input type="file" id="logo-input" accept="image/*">
         </div>
         <div class="btn-group">
             <button class="btn-save-pref" onclick="saveSettings()">儲存為預設</button>
@@ -104,11 +96,11 @@
                 <div class="info-item"><span>日期</span><input type="date" id="pay-date"></div>
             </div>
             <table>
-                <thead><tr><th style="text-align: left;">薪資項目</th><th style="text-align: right;">金額</th></tr></thead>
+                <thead><tr><th style="text-align: left; font-size: 11px; color: #999;">項目</th><th style="text-align: right; font-size: 11px; color: #999;">金額</th></tr></thead>
                 <tbody id="table-body"></tbody>
                 <tr class="total-row">
                     <td class="total-label">合計</td>
-                    <td><input type="text" id="total-amount" readonly value="0"></td>
+                    <td><div id="total-amount-display">0</div></td>
                 </tr>
             </table>
         </div>
@@ -134,22 +126,22 @@
         function calculateTotal() {
             let total = 0;
             document.querySelectorAll('.amount').forEach(input => total += parseFloat(input.value) || 0);
-            document.getElementById('total-amount').value = total.toLocaleString();
+            document.getElementById('total-amount-display').innerText = total.toLocaleString();
         }
 
         function saveSettings() {
-            const companyName = document.getElementById('company-title').innerText;
+            const name = document.getElementById('company-title').innerText;
             const labels = Array.from(document.querySelectorAll('.row-label')).map(input => input.value);
-            localStorage.setItem('salary_final_v6', companyName);
-            localStorage.setItem('salary_final_labels_v6', JSON.stringify(labels));
-            if (currentLogoBase64) localStorage.setItem('salary_final_logo_v6', currentLogoBase64);
-            alert('✅ 儲存成功！');
+            localStorage.setItem('payslip_v7_name', name);
+            localStorage.setItem('payslip_v7_labels', JSON.stringify(labels));
+            if (currentLogoBase64) localStorage.setItem('payslip_v7_logo', currentLogoBase64);
+            alert('✅ 預設已儲存！');
         }
 
         function loadSettings() {
-            const name = localStorage.getItem('salary_final_v6');
-            const labels = JSON.parse(localStorage.getItem('salary_final_labels_v6'));
-            const logo = localStorage.getItem('salary_final_logo_v6');
+            const name = localStorage.getItem('payslip_v7_name');
+            const labels = JSON.parse(localStorage.getItem('payslip_v7_labels'));
+            const logo = localStorage.getItem('payslip_v7_logo');
             if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
             if (labels) {
                 const inputs = document.querySelectorAll('.row-label');
@@ -160,34 +152,31 @@
 
         document.getElementById('logo-input').onchange = function(e) {
             const reader = new FileReader();
-            reader.onload = e => { 
-                currentLogoBase64 = e.target.result;
-                const img = document.getElementById('logo-preview'); 
-                img.src = currentLogoBase64; img.style.display = 'block'; 
-            };
+            reader.onload = e => { currentLogoBase64 = e.target.result; const img = document.getElementById('logo-preview'); img.src = currentLogoBase64; img.style.display = 'block'; };
             reader.readAsDataURL(e.target.files[0]);
         };
 
         function updateTitle(val) { document.getElementById('company-title').innerText = val; }
 
         function downloadJPG() {
-            // 修正：抓取包含緩衝空間的 capture-area
             const target = document.getElementById('capture-area');
             const empName = document.getElementById('employee-name').value || "Unnamed";
-            const payDate = document.getElementById('pay-date').value || "NoDate";
             
+            // 強制頁面回到頂部，避免 offset 計算錯誤
             window.scrollTo(0, 0);
 
             html2canvas(target, { 
-                scale: 2.5, // 稍微降低倍率提高穩定性
-                backgroundColor: "#f0f2f5", // 與背景色一致
+                scale: 3, 
+                backgroundColor: "#f0f2f5",
                 useCORS: true,
-                logging: false,
-                allowTaint: true
+                // 加入偏移緩衝，強制從目標上方 20 像素處開始抓取
+                y: target.getBoundingClientRect().top - 20,
+                height: target.offsetHeight + 40,
+                logging: false
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `薪資單_${empName}_${payDate}.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.download = `薪資單_${empName}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
                 link.click();
             });
         }
