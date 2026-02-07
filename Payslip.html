@@ -21,41 +21,26 @@
         #logo-preview { max-width: 40px; max-height: 40px; object-fit: contain; display: none; }
         #company-title { font-size: 20px; font-weight: 800; outline: none; line-height: 1.2; color: #000; }
 
-        /* 修正：對齊姓名與日期 */
-        .info-row-container { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            align-items: center; /* 垂直置中對齊 */
-            margin-bottom: 15px; 
-            font-size: 14px; 
-            gap: 15px; 
-        }
+        .info-row-container { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 15px; font-size: 14px; gap: 15px; }
         .info-item { display: flex; align-items: center; }
         .info-item span { font-weight: bold; margin-right: 6px; white-space: nowrap; line-height: 1; }
-        
-        /* 統一輸入框樣式，解決切邊與對齊問題 */
-        .info-item input { 
-            border: none; 
-            border-bottom: 1px solid #ccc; 
-            outline: none; 
-            background: transparent; 
-            padding: 2px 0; 
-            font-size: 14px; 
-            line-height: 1.2;
-            height: 20px; /* 固定高度確保對齊 */
-            font-family: inherit;
-        }
+        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 2px 0; font-size: 14px; line-height: 1.2; height: 20px; font-family: inherit; }
         
         #employee-name { width: 100%; }
-        #pay-date { width: 100%; border-bottom: 1px solid #ccc; } /* 給日期也加上底線，確保視覺高度一致 */
+        #pay-date { width: 100%; border-bottom: 1px solid #ccc; }
 
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         
         td { padding: 6px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.2; }
-        .value-cell input { width: 100%; border: none; text-align: right; font-size: 15px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; }
         
+        /* 修改：預設金額顏色 */
+        .value-cell input { width: 100%; border: none; text-align: right; font-size: 15px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; color: #333; }
+        
+        /* 修改：負數紅色的樣式類別 */
+        .value-cell input.negative { color: #d93025 !important; }
+
         .total-row td { border-bottom: none; padding-top: 15px; vertical-align: middle; }
         .total-label { font-size: 18px; font-weight: 800; }
         #total-amount { font-size: 18px; font-weight: 800; text-align: right; width: 100%; border: none; background: transparent; outline: none; color: #000; line-height: 1.2; }
@@ -122,9 +107,20 @@
             }
         }
 
+        // 修改：增加自動變紅色的邏輯
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('.amount').forEach(input => total += parseFloat(input.value) || 0);
+            document.querySelectorAll('.amount').forEach(input => {
+                const val = parseFloat(input.value) || 0;
+                total += val;
+                
+                // 如果是負數，加入 'negative' 類別變紅；否則移除
+                if (val < 0) {
+                    input.classList.add('negative');
+                } else {
+                    input.classList.remove('negative');
+                }
+            });
             document.getElementById('total-amount').value = total.toLocaleString();
         }
 
