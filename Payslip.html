@@ -24,7 +24,6 @@
         .info-row-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 14px; gap: 10px; white-space: nowrap; }
         .info-item { display: flex; align-items: center; }
         .info-item span { font-weight: bold; margin-right: 4px; line-height: 1.2; }
-        /* 解決切邊關鍵：增加 padding-bottom 與 line-height */
         .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 4px 0 6px 0; font-size: 14px; line-height: 1.5; height: auto; }
         
         #employee-name { width: 75px; }
@@ -33,14 +32,14 @@
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
         
-        /* 解決表格內文字切邊關鍵 */
         td { padding: 12px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.6; padding-bottom: 2px; }
         .value-cell input { width: 100%; border: none; text-align: right; font-size: 16px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.6; padding-bottom: 2px; }
         
-        .total-row td { border-bottom: none; padding-top: 25px; }
+        /* 修正點：增加合計欄位的上方緩衝與行高 */
+        .total-row td { border-bottom: none; padding-top: 35px; }
         .total-label { font-size: 18px; font-weight: 800; }
-        #total-amount { font-size: 24px; font-weight: 800; text-align: right; width: 100%; border: none; background: transparent; outline: none; color: #000; line-height: 1.2; }
+        #total-amount { font-size: 24px; font-weight: 800; text-align: right; width: 100%; border: none; background: transparent; outline: none; color: #000; line-height: 1.5; }
 
         .btn-group { display: flex; gap: 10px; }
         button { flex: 1; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; }
@@ -152,13 +151,17 @@
             const empName = document.getElementById('employee-name').value || "Unnamed";
             const payDate = document.getElementById('pay-date').value || "NoDate";
             
-            // 下載時優化渲染
+            // 修正點：確保截圖時捲軸在頂部，並微調渲染區域邊界
+            window.scrollTo(0, 0);
+
             html2canvas(target, { 
                 scale: 3, 
                 backgroundColor: "#ffffff",
                 useCORS: true,
+                y: -2,
+                height: target.offsetHeight + 4,
                 scrollX: 0,
-                scrollY: -window.scrollY // 確保截圖不會因為頁面滾動而偏位
+                scrollY: 0
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `薪資單_${empName}_${payDate}.jpg`;
