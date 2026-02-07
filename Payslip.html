@@ -97,7 +97,7 @@
     </div>
 
     <script>
-        const defaultLabels = ["基本薪資", "加班津貼", "績效獎金", "交通補助", "伙食津貼", "勞保費用(扣)", "健保費用(扣)", "所得稅(扣)", "請假扣款", "全勤獎金", "其他項目", "", "", "", "", "", "", "", "", ""];
+        const defaultLabels = ["基本薪資", "加班津貼", "績效獎金", "交通補助", "伙食津貼", "勞保費用(扣)", "健保費用(扣)", "所得稅(扣)", "請假扣款", "全勤獎金", "其他項目", "", "", "", "", ""];
 
         window.onload = function() {
             renderTable();
@@ -111,7 +111,7 @@
             for (let i = 0; i < 20; i++) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="label-cell"><input type="text" class="row-label" placeholder="輸入項目..." value="${defaultLabels[i] || ''}"></td>
+                    <td class="label-cell"><input type="text" class="row-label" placeholder="" value="${defaultLabels[i] || ''}"></td>
                     <td class="value-cell"><input type="number" class="amount" placeholder="0" oninput="calculateTotal()"></td>
                 `;
                 tbody.appendChild(tr);
