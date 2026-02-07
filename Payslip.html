@@ -108,7 +108,7 @@
         function renderTable() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = "";
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 16; i++) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="label-cell"><input type="text" class="row-label" placeholder="" value="${defaultLabels[i] || ''}"></td>
@@ -168,7 +168,7 @@
                 logging: false,
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `PAYSLIP_${empName}_${payDate}.jpg`;
+                link.download = `薪資_${empName}_${payDate}.jpg`;
                 link.href = canvas.toDataURL('image/jpeg', 1.0);
                 link.click();
             });
