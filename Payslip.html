@@ -32,16 +32,38 @@
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         
-        td { padding: 6px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .label-cell input { width: 100%; background: transparent; border: none; font-size: 14px; outline: none; color: #333; line-height: 1.2; }
+        /* 調整 td 的 padding，縮小底部空間 */
+        td { padding: 4px 0 8px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         
-        /* 修改：預設金額顏色 */
-        .value-cell input { width: 100%; border: none; text-align: right; font-size: 15px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; color: #333; }
+        /* 針對 Input 進行微調，使用 negative margin 將文字往上提 */
+        .label-cell input { 
+            width: 100%; 
+            background: transparent; 
+            border: none; 
+            font-size: 14px; 
+            outline: none; 
+            color: #333; 
+            line-height: 1; 
+            margin-top: -2px; 
+        }
         
-        /* 修改：負數紅色的樣式類別 */
+        .value-cell input { 
+            width: 100%; 
+            border: none; 
+            text-align: right; 
+            font-size: 15px; 
+            font-weight: 600; 
+            outline: none; 
+            font-family: 'Courier New', monospace; 
+            background: transparent; 
+            line-height: 1; 
+            color: #333;
+            margin-top: -2px;
+        }
+        
         .value-cell input.negative { color: #d93025 !important; }
 
-        .total-row td { border-bottom: none; padding-top: 15px; vertical-align: middle; }
+        .total-row td { border-bottom: none; padding-top: 20px; vertical-align: middle; }
         .total-label { font-size: 18px; font-weight: 800; }
         #total-amount { font-size: 18px; font-weight: 800; text-align: right; width: 100%; border: none; background: transparent; outline: none; color: #000; line-height: 1.2; }
 
@@ -107,14 +129,11 @@
             }
         }
 
-        // 修改：增加自動變紅色的邏輯
         function calculateTotal() {
             let total = 0;
             document.querySelectorAll('.amount').forEach(input => {
                 const val = parseFloat(input.value) || 0;
                 total += val;
-                
-                // 如果是負數，加入 'negative' 類別變紅；否則移除
                 if (val < 0) {
                     input.classList.add('negative');
                 } else {
@@ -171,7 +190,11 @@
                 backgroundColor: "#ffffff",
                 useCORS: true,
                 scrollX: 0,
-                scrollY: -window.scrollY
+                scrollY: -window.scrollY,
+                // 確保文字平滑度
+                onclone: (clonedDoc) => {
+                    clonedDoc.getElementById('payslip-container').style.transform = "none";
+                }
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `薪資單_${empName}_${payDate}.jpg`;
