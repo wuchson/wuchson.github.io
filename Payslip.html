@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>現代感薪資單產生器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { --main-black: #1a1a1a; --light-gray: #f8f9fa; --border-color: #eeeeee; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background-color: #eef2f5; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; color: var(--main-black); }
+        
+        /* 控制面板優化 */
+        .controls { background: white; padding: 25px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 480px; }
+        .control-item { margin-bottom: 15px; }
+        label { font-weight: 600; font-size: 14px; color: #666; display: block; margin-bottom: 8px; }
+        input[type="text"]#edit-name { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        /* 薪資單主體：現代卡片感 */
+        #payslip-container { 
+            background: white; width: 450px; padding: 45px; 
+            border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.03); 
+            position: relative; box-sizing: border-box;
+        }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 35px; border-bottom: 2px solid var(--main-black); padding-bottom: 15px; }
+        #logo-preview { max-width: 55px; max-height: 55px; object-fit: contain; display: none; margin-bottom: 5px; }
+        #company-title { font-size: 24px; font-weight: 800; letter-spacing: 1px; outline: none; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; font-size: 14px; color: #444; }
+        .info-item span { font-weight: bold; color: var(--main-black); margin-right: 5px; }
+        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; width: 100px; font-size: 14px; padding: 2px 5px; transition: 0.3s; }
+        .info-item input:focus { border-bottom-color: var(--main-black); }
+
+        /* 表格設計：去縱線現代風 */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; font-size: 12px; text-transform: uppercase; color: #999; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 12px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        
+        .label-cell input { width: 100%; background: transparent; border: none; font-size: 15px; font-weight: 500; outline: none; color: #333; }
+        .value-cell input { width: 100%; border: none; text-align: right; font-size: 16px; font-weight: 600; outline: none; background: transparent; font-family: 'Courier New', monospace; }
+        
+        /* 合計列：加重視覺 */
+        .total-row td { border-bottom: none; padding-top: 25px; }
+        .total-label { font-size: 18px; font-weight: 800; }
+        #total-amount { font-size: 24px; font-weight: 800; text-align: right; color: var(--main-black); width: 100%; border: none; background: transparent; outline: none; }
+
+        /* 按鈕優化 */
+        .btn-group { display: flex; gap: 12px; }
+        button { flex: 1; padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-save-pref { background-color: #f1f3f5; color: #495057; }
+        .btn-download { background-color: var(--main-black); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        button:hover { transform: translateY(-2px); opacity: 0.9; }
+        button:active { transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <div class="control-item">
+            <label>企業識別 LOGO</label>
+            <input type="file" id="logo-input" accept="image/*">
+        </div>
+        <div class="control-item">
+            <label>公司名稱</label>
+            <input type="text" id="edit-name" placeholder="輸入後自動更新薪資單標題" oninput="updateTitle(this.value)">
+        </div>
+        <div class="btn-group">
+            <button class="btn-save-pref" onclick="saveSettings()">儲存預設欄位</button>
+            <button class="btn-download" onclick="downloadJPG()">生成 JPG 圖片</button>
+        </div>
+    </div>
+
+    <div id="payslip-container">
+        <div class="header">
+            <div id="company-title" contenteditable="true">MODERN CORP.</div>
+            <img id="logo-preview" src="" alt="logo">
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item"><span>姓名</span><input type="text" id="employee-name" placeholder="Employee Name"></div>
+            <div class="info-item"><span>日期</span><input type="date" id="pay-date" style="border:none;"></div>
+        </div>
+
+        <table id="salary-table">
+            <thead>
+                <tr>
+                    <th style="text-align: left;">項目描述 / Description</th>
+                    <th style="text-align: right;">金額 / Amount</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+            <tr class="total-row">
+                <td class="total-label">合計 TOTAL</td>
+                <td><input type="text" id="total-amount" readonly value="0"></td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        const defaultLabels = ["基本薪資", "加班津貼", "績效獎金", "交通補助", "伙食津貼", "勞保費用(扣)", "健保費用(扣)", "所得稅(扣)", "請假扣款", "全勤獎金", "其他項目", "", "", "", "", "", "", "", "", ""];
+
+        window.onload = function() {
+            renderTable();
+            loadSettings();
+            document.getElementById('pay-date').valueAsDate = new Date();
+        };
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = "";
+            for (let i = 0; i < 20; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="label-cell"><input type="text" class="row-label" placeholder="輸入項目..." value="${defaultLabels[i] || ''}"></td>
+                    <td class="value-cell"><input type="number" class="amount" placeholder="0" oninput="calculateTotal()"></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('.amount').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            document.getElementById('total-amount').value = total.toLocaleString();
+        }
+
+        function saveSettings() {
+            const companyName = document.getElementById('company-title').innerText;
+            const labels = Array.from(document.querySelectorAll('.row-label')).map(input => input.value);
+            localStorage.setItem('salary_modern_v1', companyName);
+            localStorage.setItem('salary_modern_labels', JSON.stringify(labels));
+            alert('✨ 現代感模版設定已儲存！');
+        }
+
+        function loadSettings() {
+            const name = localStorage.getItem('salary_modern_v1');
+            const labels = JSON.parse(localStorage.getItem('salary_modern_labels'));
+            if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
+            if (labels) {
+                const inputs = document.querySelectorAll('.row-label');
+                labels.forEach((v, i) => { if (inputs[i]) inputs[i].value = v; });
+            }
+        }
+
+        document.getElementById('logo-input').onchange = function(e) {
+            const reader = new FileReader();
+            reader.onload = e => { 
+                const img = document.getElementById('logo-preview'); 
+                img.src = e.target.result; 
+                img.style.display = 'block'; 
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        function updateTitle(val) { document.getElementById('company-title').innerText = val; }
+
+        function downloadJPG() {
+            const target = document.getElementById('payslip-container');
+            const empName = document.getElementById('employee-name').value || "Unnamed";
+            const payDate = document.getElementById('pay-date').value || "NoDate";
+
+            // 下載時暫時移除一些陰影避免渲染異常
+            html2canvas(target, { 
+                scale: 3, 
+                backgroundColor: "#ffffff",
+                logging: false,
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `PAYSLIP_${empName}_${payDate}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 1.0);
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
