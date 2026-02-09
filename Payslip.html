@@ -13,12 +13,13 @@
         .control-item { margin-bottom: 15px; }
         label { font-weight: 700; font-size: 14px; color: #333; display: block; margin-bottom: 8px; }
         input[type="text"]#edit-name { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input[type="range"] { width: 100%; cursor: pointer; }
 
         /* 薪資單主體 */
         #payslip-container { background: white; width: var(--container-width); padding: 30px 35px; border-radius: 4px; box-sizing: border-box; overflow: hidden; }
         
-        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid var(--main-black); padding-bottom: 12px; }
-        #logo-preview { max-width: 40px; max-height: 40px; object-fit: contain; display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--main-black); padding-bottom: 12px; }
+        #logo-preview { width: 40px; height: auto; object-fit: contain; display: none; }
         #company-title { font-size: 20px; font-weight: 800; outline: none; line-height: 1.2; color: #000; }
 
         .info-row-container { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 15px; font-size: 14px; gap: 15px; }
@@ -31,36 +32,10 @@
 
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
-        
-        /* 調整 td 的 padding，縮小底部空間 */
         td { padding: 4px 0 8px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         
-        /* 針對 Input 進行微調，使用 negative margin 將文字往上提 */
-        .label-cell input { 
-            width: 100%; 
-            background: transparent; 
-            border: none; 
-            font-size: 13px; 
-            outline: none; 
-            color: #333; 
-            line-height: 1.5; 
-            margin-top: -2px; 
-        }
-        
-        .value-cell input { 
-            width: 100%; 
-            border: none; 
-            text-align: right; 
-            font-size: 18px; 
-            font-weight: 600; 
-            outline: none; 
-            font-family: 'Courier New', monospace; 
-            background: transparent; 
-            line-height: 0; 
-            color: #333;
-            margin-top: -2px;
-        }
-        
+        .label-cell input { width: 100%; background: transparent; border: none; font-size: 13px; outline: none; color: #333; line-height: 1.5; margin-top: -2px; }
+        .value-cell input { width: 100%; border: none; text-align: right; font-size: 18px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; color: #333; margin-top: -2px; }
         .value-cell input.negative { color: #d93025 !important; }
 
         .total-row td { border-bottom: none; padding-top: 20px; vertical-align: middle; }
@@ -84,7 +59,9 @@
         </div>
         <div class="control-item">
             <label>企業識別 LOGO</label>
-            <input type="file" id="logo-input" accept="image/*" style="font-size: 12px;">
+            <input type="file" id="logo-input" accept="image/*" style="font-size: 12px; margin-bottom: 10px;">
+            <label>LOGO 寬度: <span id="logo-width-val">40</span>px</label>
+            <input type="range" id="logo-size" min="20" max="150" value="40" oninput="resizeLogo(this.value)">
         </div>
         <div class="btn-group">
             <button class="btn-save-pref" onclick="saveSettings()">儲存為預設</button>
@@ -134,20 +111,25 @@
             document.querySelectorAll('.amount').forEach(input => {
                 const val = parseFloat(input.value) || 0;
                 total += val;
-                if (val < 0) {
-                    input.classList.add('negative');
-                } else {
-                    input.classList.remove('negative');
-                }
+                input.classList.toggle('negative', val < 0);
             });
             document.getElementById('total-amount').value = total.toLocaleString();
+        }
+
+        function resizeLogo(val) {
+            const img = document.getElementById('logo-preview');
+            img.style.width = val + 'px';
+            document.getElementById('logo-width-val').innerText = val;
         }
 
         function saveSettings() {
             const companyName = document.getElementById('company-title').innerText;
             const labels = Array.from(document.querySelectorAll('.row-label')).map(input => input.value);
+            const logoWidth = document.getElementById('logo-size').value;
+
             localStorage.setItem('salary_final_v4', companyName);
             localStorage.setItem('salary_final_labels_v4', JSON.stringify(labels));
+            localStorage.setItem('salary_logo_width_v4', logoWidth);
             if (currentLogoBase64) localStorage.setItem('salary_final_logo_v4', currentLogoBase64);
             alert('✅ 儲存成功！');
         }
@@ -156,10 +138,16 @@
             const name = localStorage.getItem('salary_final_v4');
             const labels = JSON.parse(localStorage.getItem('salary_final_labels_v4'));
             const logo = localStorage.getItem('salary_final_logo_v4');
+            const logoWidth = localStorage.getItem('salary_logo_width_v4');
+
             if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
             if (labels) {
                 const inputs = document.querySelectorAll('.row-label');
                 labels.forEach((v, i) => { if (inputs[i]) inputs[i].value = v; });
+            }
+            if (logoWidth) {
+                document.getElementById('logo-size').value = logoWidth;
+                resizeLogo(logoWidth);
             }
             if (logo) {
                 currentLogoBase64 = logo;
@@ -189,12 +177,7 @@
                 scale: 3, 
                 backgroundColor: "#ffffff",
                 useCORS: true,
-                scrollX: 0,
-                scrollY: -window.scrollY,
-                // 確保文字平滑度
-                onclone: (clonedDoc) => {
-                    clonedDoc.getElementById('payslip-container').style.transform = "none";
-                }
+                scrollY: -window.scrollY
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `薪資單_${empName}_${payDate}.jpg`;
