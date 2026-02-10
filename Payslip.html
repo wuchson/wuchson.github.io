@@ -25,16 +25,14 @@
         .info-row-container { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-bottom: 15px; font-size: 14px; gap: 15px; }
         .info-item { display: flex; align-items: center; }
         .info-item span { font-weight: bold; margin-right: 6px; white-space: nowrap; line-height: 1; }
-        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 2px 0; font-size: 14px; line-height: 1.2; height: 20px; font-family: inherit; }
+        .info-item input { border: none; border-bottom: 1px solid #ccc; outline: none; background: transparent; padding: 2px 0; font-size: 14px; line-height: 1.2; height: 20px; font-family: inherit; width: 100%; }
         
-        #employee-name { width: 100%; }
-        #pay-date { width: 100%; border-bottom: 1px solid #ccc; }
-
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; color: #999; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         td { padding: 4px 0 8px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         
         .label-cell input { width: 100%; background: transparent; border: none; font-size: 13px; outline: none; color: #333; line-height: 1.5; margin-top: -2px; }
+        /* 修改金額輸入框樣式以適應 text 類型 */
         .value-cell input { width: 100%; border: none; text-align: right; font-size: 18px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; color: #333; margin-top: -2px; }
         .value-cell input.negative { color: #d93025 !important; }
 
@@ -100,8 +98,9 @@
             tbody.innerHTML = "";
             for (let i = 0; i < 16; i++) {
                 const tr = document.createElement('tr');
+                // 這裡使用了 type="tel" 和 inputmode="decimal" 來解決舊手機鍵盤沒有負號的問題
                 tr.innerHTML = `<td class="label-cell"><input type="text" class="row-label" value="${defaultLabels[i] || ''}"></td>
-                                <td class="value-cell"><input type="number" class="amount" placeholder="0" oninput="calculateTotal()"></td>`;
+                                <td class="value-cell"><input type="tel" inputmode="decimal" class="amount" placeholder="0" oninput="calculateTotal()"></td>`;
                 tbody.appendChild(tr);
             }
         }
@@ -109,7 +108,9 @@
         function calculateTotal() {
             let total = 0;
             document.querySelectorAll('.amount').forEach(input => {
-                const val = parseFloat(input.value) || 0;
+                // 移除非數字和負號以外的字元，避免使用者輸入錯誤
+                let cleanVal = input.value.replace(/[^\d.-]/g, '');
+                const val = parseFloat(cleanVal) || 0;
                 total += val;
                 input.classList.toggle('negative', val < 0);
             });
