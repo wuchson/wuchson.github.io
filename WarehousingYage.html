@@ -4,28 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>倉儲定位助手-雲端版</title>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #4361ee; --accent: #4cc9f0; --danger: #f72585; --warning: #ffb703; --bg: #f8f9fc; --card: #ffffff; --text: #2b2d42; }
-        * { box-sizing: border-box; }
-        body { font-family: sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        * { box-sizing: border-box; font-family: 'PingFang TC', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
         header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 20px; text-align: center; }
         .container { width: 100%; padding: 15px; max-width: 600px; margin: 0 auto; }
         
+        .admin-bar { background: #eaedf7; padding: 12px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .admin-bar input { padding: 8px; border: 1px solid #ccd; border-radius: 6px; width: 130px; }
+
+        .tool-bar { display: none; gap: 10px; margin-bottom: 20px; }
+        .btn-tool { flex: 1; padding: 10px; background: #fff; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; }
+
         .input-card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: -30px; border: 2px solid transparent; }
         .input-card.edit-mode { border-color: var(--warning); background: #fffdf5; }
-        
         .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         @media (max-width: 480px) { .grid-row { grid-template-columns: 1fr; } }
         
-        .input-group label { font-size: 13px; font-weight: bold; color: #8d99ae; }
+        .input-group label { font-size: 12px; font-weight: bold; color: #8d99ae; }
         .input-group input { padding: 12px; border: 2px solid #edf2f4; border-radius: 8px; font-size: 16px; width: 100%; margin-top: 4px; }
         
-        .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-main.update { background: var(--warning); color: #000; }
-        .btn-main:disabled { background: #ccc; opacity: 0.7; }
-
-        .admin-bar { background: #eaedf7; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
-        .admin-bar input { padding: 8px; border: 1px solid #ccd; border-radius: 4px; width: 120px; }
 
         .search-bar { margin: 25px 0 15px 0; }
         .search-bar input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--primary); font-size: 16px; }
@@ -38,73 +40,72 @@
         .btn-edit { background: #e9ecef; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .btn-del { background: #fff5f5; color: var(--danger); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         
-        #loading { text-align: center; color: #888; padding: 20px; }
+        #status { text-align: center; color: #888; padding: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<header><h2 style="margin:0;">📦 倉儲定位助手</h2></header>
+<header><h2 style="margin:0;">📦 倉儲雲端助手 Pro</h2></header>
 
 <div class="container">
     <div class="admin-bar">
-        <span style="font-size: 13px; color: #4361ee; font-weight: bold;">🔑 管理員模式</span>
-        <input type="password" id="adminPwd" placeholder="輸入密碼解鎖修改" oninput="toggleAdminMode()">
+        <span style="font-size: 13px; color: var(--primary); font-weight: bold;">🔑 管理模式</span>
+        <input type="password" id="adminPwd" placeholder="輸入密碼解鎖" oninput="toggleAdminMode()">
+    </div>
+
+    <div class="tool-bar" id="toolBar">
+        <button class="btn-tool" onclick="document.getElementById('fileImport').click()">📥 匯入 Excel</button>
+        <button class="btn-tool" onclick="exportToExcel()">📤 匯出備份</button>
+        <input type="file" id="fileImport" accept=".xlsx, .xls" style="display:none" onchange="importFromExcel(event)">
     </div>
 
     <div class="input-card" id="inputCard">
         <input type="hidden" id="editId">
         <div class="grid-row">
             <div class="input-group"><label>廠商</label><input type="text" id="vendor"></div>
-            <div class="input-group"><label>型號 (A1234)</label><input type="text" id="sku"></div>
+            <div class="input-group"><label>型號 (SKU)</label><input type="text" id="sku"></div>
         </div>
         <div class="grid-row">
-            <div class="input-group"><label>品名(內衣/內褲)</label><input type="text" id="itemName"></div>
-            <div class="input-group"><label>儲位位置(例如: A棟-1F-B區-B2F架上-說明)</label><input type="text" id="location"></div>
+            <div class="input-group"><label>品名</label><input type="text" id="itemName"></div>
+            <div class="input-group"><label>儲位位置</label><input type="text" id="location"></div>
         </div>
-        <button id="submitBtn" class="btn-main" onclick="handleSave()">保存單筆資料</button>
+        <button id="submitBtn" class="btn-main" onclick="handleSave()">保存資料</button>
     </div>
 
     <div class="search-bar">
         <input type="text" id="searchInput" placeholder="🔍 快速搜尋..." onkeyup="render()">
     </div>
 
-    <div id="loading">讀取雲端資料中...</div>
+    <div id="status">雲端資料載入中...</div>
     <div id="list"></div>
 </div>
 
 <script>
-    // --- ⚠️ 重要：請在此處填入你的 Google Apps Script 部署 URL ---
+    // --- ⚠️ 重要：請貼上你的 Google Apps Script URL ---
     const API_URL = "https://script.google.com/macros/s/AKfycbyvVtwur7SG6FQxtp_pW7DIJiOn0hkU85ic23g7HGPqixm7W4vKygC1SeYjF5-EX-8L/exec";
 
     let db = [];
 
-    // 初始載入
+    // 初始化讀取
     async function loadData() {
-        document.getElementById('loading').style.display = 'block';
         try {
-            const resp = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'read' })
-            });
+            const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read' }) });
             db = await resp.json();
+            document.getElementById('status').innerText = `共 ${db.length} 筆資料`;
             render();
-        } catch (e) {
-            alert("讀取失敗，請檢查網路或 API 設定");
-        }
-        document.getElementById('loading').style.display = 'none';
+        } catch (e) { document.getElementById('status').innerText = "連線失敗"; }
     }
 
     // 權限切換
     function toggleAdminMode() {
         const pwd = document.getElementById('adminPwd').value;
-        const btns = document.querySelectorAll('.action-btns');
-        // 如果輸入框有內容，嘗試顯示編輯按鈕 (實際權限仍以後端驗證為準)
-        btns.forEach(b => b.style.display = pwd.length > 0 ? 'flex' : 'none');
+        const show = pwd.length > 0;
+        document.getElementById('toolBar').style.display = show ? 'flex' : 'none';
+        render();
     }
 
-    // 保存與更新
+    // 保存
     async function handleSave() {
-        const btn = document.getElementById('submitBtn');
         const item = {
             id: document.getElementById('editId').value,
             vendor: document.getElementById('vendor').value,
@@ -112,87 +113,88 @@
             name: document.getElementById('itemName').value,
             loc: document.getElementById('location').value
         };
+        if(!item.sku || !item.loc) return alert("型號與位置必填");
 
-        if(!item.sku || !item.loc) return alert("型號與位置必填！");
-
-        btn.disabled = true;
-        btn.innerText = "連線中...";
-
+        document.getElementById('status').innerText = "上傳中...";
         const resp = await fetch(API_URL, {
             method: 'POST',
-            body: JSON.stringify({
-                action: 'save',
-                data: item,
-                password: document.getElementById('adminPwd').value
-            })
+            body: JSON.stringify({ action: 'save', data: item, password: document.getElementById('adminPwd').value })
         });
-
         const result = await resp.text();
-        if(result.includes("Error")) {
-            alert(result);
-        } else {
-            clearInputs();
-            exitEditMode();
-            await loadData();
-        }
-        btn.disabled = false;
-        btn.innerText = "保存單筆資料";
+        if(result.includes("Error")) alert(result);
+        else { clearInputs(); resetMode(); await loadData(); }
     }
 
-    // 進入編輯
+    // 匯出 Excel
+    function exportToExcel() {
+        const exportData = db.map(i => ({ "廠商": i.vendor, "型號": i.sku, "品名": i.name, "儲位": i.loc }));
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "倉儲資料");
+        XLSX.writeFile(workbook, `倉儲備份_${new Date().toLocaleDateString()}.xlsx`);
+    }
+
+    // 匯入 Excel
+    async function importFromExcel(event) {
+        const file = event.target.files[0];
+        const pwd = document.getElementById('adminPwd').value;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            const newItems = json.map(row => ({
+                vendor: row['廠商'] || '',
+                sku: String(row['型號'] || row['SKU'] || ''),
+                name: row['品名'] || '',
+                loc: String(row['儲位'] || row['位置'] || '')
+            })).filter(i => i.sku && i.loc);
+
+            if (confirm(`讀取到 ${newItems.length} 筆，確定匯入？`)) {
+                document.getElementById('status').innerText = "批次上傳中...";
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'batchSave', data: newItems, password: pwd }) });
+                location.reload();
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // 刪除
+    async function deleteItem(id) {
+        if(!confirm('確定刪除？')) return;
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, password: document.getElementById('adminPwd').value }) });
+        await loadData();
+    }
+
     function startEdit(id) {
         const item = db.find(i => i.id == id);
-        if(!item) return;
         document.getElementById('editId').value = item.id;
         document.getElementById('vendor').value = item.vendor;
         document.getElementById('sku').value = item.sku;
         document.getElementById('itemName').value = item.name;
         document.getElementById('location').value = item.loc;
-
-        const btn = document.getElementById('submitBtn');
-        btn.innerText = "💾 更新此資料位置";
-        btn.classList.add('update');
+        document.getElementById('submitBtn').innerText = "💾 更新此資料";
+        document.getElementById('submitBtn').classList.add('update');
         document.getElementById('inputCard').classList.add('edit-mode');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 刪除
-    async function deleteItem(id) {
-        if(!confirm('確定要刪除嗎？')) return;
-        const resp = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'delete',
-                id: id,
-                password: document.getElementById('adminPwd').value
-            })
-        });
-        const result = await resp.text();
-        if(result.includes("Error")) alert(result);
-        await loadData();
-    }
-
-    function exitEditMode() {
+    function resetMode() {
         document.getElementById('editId').value = "";
+        document.getElementById('submitBtn').innerText = "保存資料";
         document.getElementById('submitBtn').classList.remove('update');
         document.getElementById('inputCard').classList.remove('edit-mode');
     }
 
-    function clearInputs() {
-        document.querySelectorAll('.input-group input').forEach(i => i.value = '');
-    }
+    function clearInputs() { document.querySelectorAll('.input-group input').forEach(i => i.value = ''); }
 
     function render() {
         const query = document.getElementById('searchInput').value.toLowerCase();
+        const isAdmin = document.getElementById('adminPwd').value.length > 0;
         const listDiv = document.getElementById('list');
-        const pwdEntered = document.getElementById('adminPwd').value.length > 0;
         listDiv.innerHTML = '';
-
-        db.filter(i => 
-            String(i.sku).toLowerCase().includes(query) || 
-            String(i.vendor).toLowerCase().includes(query) ||
-            String(i.loc).toLowerCase().includes(query)
-        ).forEach(i => {
+        db.filter(i => String(i.sku).toLowerCase().includes(query) || String(i.vendor).toLowerCase().includes(query) || String(i.loc).toLowerCase().includes(query))
+          .forEach(i => {
             listDiv.innerHTML += `
                 <div class="item-card">
                     <div class="item-info">
@@ -200,13 +202,12 @@
                         <div style="font-size:13px; color:#666;">${i.vendor} | ${i.name}</div>
                         <div class="item-loc">📍 ${i.loc}</div>
                     </div>
-                    <div class="action-btns" style="display: ${pwdEntered ? 'flex' : 'none'}">
+                    <div class="action-btns" style="display: ${isAdmin ? 'flex' : 'none'}">
                         <button class="btn-edit" onclick="startEdit('${i.id}')">修改</button>
                         <button class="btn-del" onclick="deleteItem('${i.id}')">刪除</button>
                     </div>
-                </div>
-            `;
-        });
+                </div>`;
+          });
     }
 
     window.onload = loadData;
