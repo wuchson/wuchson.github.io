@@ -5,31 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>顏色名稱判定器</title>
     <style>
-        :root { --ink: #1a1a1c; --gold: #b3935d; --soft-bg: #f9f9fb; }
-        body { background: var(--soft-bg); font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; color: var(--ink); }
-        .cam-view { width: 100%; max-width: 450px; aspect-ratio: 1; position: relative; background: #000; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        :root { --ink: #1a1a1c; --gold: #b3935d; --paper: #f9f9fb; }
+        body { background: var(--paper); font-family: "PingFang TC", "STHeiti", sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; color: var(--ink); }
+        .cam-view { width: 100%; max-width: 450px; aspect-ratio: 1; position: relative; background: #000; }
         #v { width: 100%; height: 100%; object-fit: cover; }
-        .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; border: 2px solid #fff; border-radius: 50%; mix-blend-mode: difference; z-index: 10; }
+        .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 2px solid #fff; border-radius: 50%; mix-blend-mode: difference; z-index: 10; }
         
-        .card { width: 94%; max-width: 450px; background: white; border-radius: 30px; padding: 25px; margin-top: -40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); z-index: 20; box-sizing: border-box; }
-        .swatch-box { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-        #preview { width: 90px; height: 90px; border-radius: 20px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
+        .card { width: 94%; max-width: 450px; background: white; border-radius: 30px; padding: 25px; margin-top: -30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); z-index: 20; box-sizing: border-box; }
+        .swatch-row { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        #preview { width: 85px; height: 85px; border-radius: 25px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
         
-        .name-stack { flex: 1; }
-        .lv-tag { font-size: 10px; color: var(--gold); letter-spacing: 2px; font-weight: bold; }
-        .lv-val { font-size: 22px; font-weight: 700; margin-bottom: 5px; color: var(--ink); }
-        .lv-sub { font-size: 14px; color: #888; border-left: 2px solid #eee; padding-left: 8px; margin-top: 5px; }
+        .name-main { font-size: 28px; font-weight: 800; color: #111; margin-bottom: 5px; letter-spacing: -1px; }
+        .name-sub { font-size: 14px; color: var(--gold); font-weight: 600; margin-bottom: 15px; }
 
-        .controls { margin-top: 25px; background: #fdfdfd; padding: 15px; border-radius: 15px; }
-        .s-row { margin-bottom: 12px; }
-        .s-head { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-bottom: 4px; }
-        input[type=range] { width: 100%; height: 4px; appearance: none; background: #eee; border-radius: 2px; outline: none; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: white; border: 1px solid #ddd; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
-        .btn-row { display: flex; gap: 10px; width: 94%; max-width: 450px; margin: 20px 0; }
-        button { flex: 1; padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 15px; }
-        .btn-main { background: var(--ink); color: white; }
-        .btn-mo { background: #efebe9; color: #5d4037; }
+        .btn-row { display: flex; gap: 10px; width: 94%; max-width: 450px; margin: 15px 0; }
+        button { flex: 1; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-p { background: var(--ink); color: white; }
+        .btn-m { background: #efebe9; color: #5d4037; }
+        
+        .sliders { background: #fcfcfc; padding: 20px; border-radius: 20px; border: 1px solid #f0f0f0; }
+        .s-item { margin-bottom: 15px; }
+        .s-info { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-bottom: 5px; }
+        input[type=range] { width: 100%; height: 4px; appearance: none; background: #eee; outline: none; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; background: #fff; border: 1px solid #ddd; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -40,30 +38,27 @@
 </div>
 
 <div class="btn-row">
-    <button class="btn-main" onclick="detect()">📸 擷取並辨識</button>
-    <button class="btn-mo" id="mo-btn" onclick="toggleMorandi()">✨ 莫蘭迪化</button>
+    <button class="btn-p" onclick="detect()">📸 擷取精確色彩</button>
+    <button class="btn-m" id="mo-btn" onclick="toggleMorandi()">✨ 莫蘭迪化</button>
 </div>
 
 <div class="card" id="res" style="display:none;">
-    <div class="swatch-box">
+    <div class="swatch-row">
         <div id="preview"></div>
-        <div class="name-stack">
-            <div class="lv-tag">專業命名</div>
-            <div class="lv-val" id="lv3">-</div>
-            <div id="hex" style="font-family: monospace; font-size: 14px; color: #ccc;">#FFFFFF</div>
+        <div style="flex:1">
+            <div id="hex" style="font-family: monospace; font-size: 12px; color: #ccc;">#FFFFFF</div>
+            <div class="name-main" id="lv3">-</div>
+            <div class="name-sub" id="lv2">-</div>
         </div>
     </div>
     
-    <div class="lv-sub" id="lv2">-</div>
-    <div class="lv-sub" id="lv1" style="border:none; font-size:12px; color:#bbb;">-</div>
-
-    <div class="controls">
-        <div class="s-row">
-            <div class="s-head"><span>明度 (Lightness)</span><span id="lv">50%</span></div>
+    <div class="sliders">
+        <div class="s-item">
+            <div class="s-info"><span>亮度 (L) - 影響色相深淺</span><span id="lv">50%</span></div>
             <input type="range" id="ls" min="0" max="100" oninput="ui()">
         </div>
-        <div class="s-row">
-            <div class="s-head"><span>飽和度 (Saturation)</span><span id="sv">50%</span></div>
+        <div class="s-item">
+            <div class="s-info"><span>飽和度 (S) - 影響灰度質感</span><span id="sv">50%</span></div>
             <input type="range" id="ss" min="0" max="100" oninput="ui()">
         </div>
     </div>
@@ -83,14 +78,11 @@ function detect() {
     const hsl=rgbToHsl(p[0],p[1],p[2]);
     cH=hsl[0]*360; cS=hsl[1]*100; cL=hsl[2]*100; backupS=cS;
     document.getElementById('ls').value=cL; document.getElementById('ss').value=cS;
-    document.getElementById('mo-btn').innerText = "✨ 莫蘭迪化";
     ui();
 }
 
 function toggleMorandi() {
-    const b = document.getElementById('mo-btn');
-    if (cS > 30) { backupS=cS; cS=25; b.innerText="⏪ 還原原始色"; }
-    else { cS=backupS; b.innerText="✨ 莫蘭迪化"; }
+    if(cS>30){backupS=cS; cS=25;} else {cS=backupS;}
     document.getElementById('ss').value=cS; ui();
 }
 
@@ -103,75 +95,60 @@ function ui() {
     document.getElementById('hex').innerText=hex;
     document.getElementById('lv').innerText=cL+"%";
     document.getElementById('sv').innerText=cS+"%";
-    const n = getNames(cH, cS, cL);
-    document.getElementById('lv1').innerText=n.v1;
-    document.getElementById('lv2').innerText=n.v2;
-    document.getElementById('lv3').innerText=n.v3;
+
+    const n = getComprehensiveName(cH, cS, cL);
+    document.getElementById('lv3').innerText = n.v3;
+    document.getElementById('lv2').innerText = n.v2;
 }
 
-function getNames(h,s,l) {
-    // 1. 金屬色與無彩色 (白、灰、黑、金、銀)
-    if (l > 93) return {v1:"白色系", v2:"純白色", v3:"絲絨雪紡白"};
-    if (l < 10) return {v1:"黑色系", v2:"極黑色", v3:"黑曜石石墨"};
-    if (s < 12) {
-        if (h > 35 && h < 90 && l > 50) return {v1:"銀/金屬", v2:"香檳銀", v3:"冷霧香檳金"};
-        if (l > 75) return {v1:"灰色系", v2:"淺灰色", v3:"晨霧羊絨灰"};
-        if (l < 40) return {v1:"灰色系", v2:"深灰色", v3:"板岩沉穩灰"};
-        return {v1:"灰色系", v2:"中灰色", v3:"莫蘭迪灰"};
+function getComprehensiveName(h, s, l) {
+    // 1. 極致無彩色判定
+    if (l > 95) return {v3:"純淨雪紡", v2:"極致白色系"};
+    if (l < 8) return {v3:"黑曜漆石", v2:"極致黑色系"};
+    if (s < 10) {
+        if (l > 80) return {v3:"晨露雲煙", v2:"淺亮灰色"};
+        if (l > 55) return {v3:"莫蘭迪岩灰", v2:"中性灰色"};
+        if (l > 30) return {v3:"板岩冷灰", v2:"深沉灰色"};
+        return {v3:"玄武岩灰", v2:"極深灰色"};
     }
 
-    // 2. 膚色與裸色系 (高度細分)
-    if (h >= 10 && h <= 45 && s < 45 && l > 45) {
-        if (l > 85) return {v1:"裸色系", v2:"米色", v3:"冷調裸紗"};
-        if (l > 75) return {v1:"裸色系", v2:"粉膚色", v3:"蜜粉杏桃"};
-        if (l > 60) return {v1:"裸色系", v2:"自然膚", v3:"溫潤奶茶"};
-        return {v1:"裸色系", v2:"裸棕色", v3:"法式可可"};
-    }
-
-    // 3. 全色相細分
-    const lib = [
-        { r:[0, 15],   n:["紅","緋紅","勃艮第紅","微醺玫瑰","夕陽珊瑚"] },
-        { r:[15, 35],  n:["橙","琥珀","焦糖瑪奇朵","暖陽橙","肉桂棕"] },
-        { r:[35, 55],  n:["棕","褐色","胡桃木棕","摩卡卡其","煙草棕"] },
-        { r:[55, 68],  n:["黃","金黃","奶油卡士達","香檳金","向日葵"] },
-        { r:[68, 110], n:["嫩綠","芽綠","莫內花園綠","青蘋果","初春綠"] },
-        { r:[110, 160],n:["綠","森綠","翡翠絲絨","抹茶莫蘭迪","孔雀綠"] },
-        { r:[160, 195],n:["青","湖綠","蒂芬妮藍","鴨蛋青","薄荷藍"] },
-        { r:[195, 235],n:["藍","蔚藍","午夜藏青","迷霧深藍","愛琴海"] },
-        { r:[235, 265],n:["藍紫","靛藍","薰衣草灰","鳶尾花","迷幻藍"] },
-        { r:[265, 310],n:["紫","絳紫","葡萄莊園","極致深紫","丁香紫"] },
-        { r:[310, 340],n:["玫紅","紫紅","蔓越莓","覆盆子","煙燻粉"] },
-        { r:[340, 360],n:["粉","櫻粉","草莓甜心","芭比粉","少女肌"] }
+    // 2. 膚色、金屬、莫蘭迪高度細分演算法
+    // 每個 Hue 區間定義 [超淺(粉/白), 淺(莫蘭迪), 中(鮮艷), 深(暗色)]
+    const dictionary = [
+        {h: 15, names:["粉白櫻花", "迷霧胭脂", "緋紅火焰", "勃艮第酒紅"]}, //紅
+        {h: 35, names:["蜜粉杏桃", "奶茶裸膚", "珊瑚亮橘", "焦糖琥珀"]}, //粉橘/膚
+        {h: 50, names:["香檳裸紗", "燕麥土色", "沉穩赭石", "黑巧克力"]}, //大地/棕
+        {h: 65, names:["象牙奶霜", "陶坯淺黃", "向日葵黃", "古銅金"]},   //黃/金
+        {h: 90, names:["清透檸綠", "艾草莫蘭迪", "萊姆嫩綠", "橄欖綠"]}, //黃綠
+        {h: 125, names:["薄荷清晨", "鼠尾草綠", "翡翠絲絨", "森林秘境"]}, //綠
+        {h: 160, names:["冰晶藍綠", "鴨蛋青", "孔雀碧綠", "普魯士綠"]}, //青綠
+        {h: 190, names:["夢幻湖藍", "霧霾藍", "蒂芬妮藍", "深海藍"]},   //青藍
+        {h: 220, names:["勿忘草藍", "北歐冷藍", "地中海蔚藍", "午夜藏青"]}, //藍
+        {h: 260, names:["絲絨紫蘭", "薰衣草灰", "皇家寶藍", "靛青黑"]},   //藍紫
+        {h: 290, names:["丁香紫", "迷霧紫", "極致絳紫", "黑醋栗紫"]},   //紫
+        {h: 330, names:["野莓粉", "煙燻玫瑰", "蔓越莓紅", "桑葚色"]}    //紫紅
     ];
 
-    let m = lib.find(x => h >= x.r[0] && h < x.r[1]) || lib[0];
-    let v1 = m.n[0], v2 = m.n[1], v3 = m.n[2];
+    let sector = dictionary.find(x => h < x.h) || dictionary[0];
+    let v3 = "";
+    let v2 = "";
 
-    // 根據明度(L)與飽和度(S)進行詞彙偏移
-    if (s < 30) v3 = "迷霧" + m.n[0] + " (莫蘭迪)";
-    else if (l < 30) v3 = m.n[2]; // 深色選用重色名
-    else if (l > 75) v3 = m.n[3] || m.n[1]; // 淺色選用輕盈名
-    else if (s > 80) v3 = m.n[4] || m.n[2]; // 高彩選用鮮豔名
+    // 根據 L 和 S 決定選用哪個名字
+    if (l > 80) { v3 = sector.names[0]; v2 = "輕盈透感"; }
+    else if (s < 35) { v3 = sector.names[1]; v2 = "高級莫蘭迪感"; }
+    else if (l < 35) { v3 = sector.names[3]; v2 = "深邃質感"; }
+    else { v3 = sector.names[2]; v2 = "鮮明飽和"; }
 
-    // 額外金屬質感判定
-    if (s > 15 && s < 40 && l > 40 && l < 70) {
-        if (h > 40 && h < 60) v3 = "古銅金";
-        if (h > 180 && h < 220) v3 = "太空銀藍";
-    }
+    // 金屬質感修正
+    if (h > 40 && h < 70 && s < 40 && l > 40) { v3 = "冷霧古銅"; v2 = "金屬礦物感"; }
+    if (h > 180 && h < 240 && s < 25 && l > 60) { v3 = "鈦金銀藍"; v2 = "冷冽金屬感"; }
 
-    return {v1:v1+"系", v2:v2, v3:v3};
+    return {v3, v2};
 }
 
-function rgbToHsl(r,g,b){
-    r/=255,g/=255,b/=255; let max=Math.max(r,g,b),min=Math.min(r,g,b),h,s,l=(max+min)/2;
-    if(max==min)h=s=0;else{let d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);
-    switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break;}h/=6;}
-    return [h,s,l];
-}
-function hslToHex(h,s,l){
-    l/=100;const a=s*Math.min(l,1-l)/100;const f=n=>{const k=(n+h/30)%12;const color=l-a*Math.max(Math.min(k-3,9-k,1),-1);
-    return Math.round(255*color).toString(16).padStart(2,'0');};return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
-}
+// 輔助函數
+function rgbToHsl(r,g,b){r/=255,g/=255,b/=255;let max=Math.max(r,g,b),min=Math.min(r,g,b),h,s,l=(max+min)/2;if(max==min)h=s=0;else{let d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break;}h/=6;}return [h,s,l];}
+function hslToHex(h,s,l){l/=100;const a=s*Math.min(l,1-l)/100;const f=n=>{const k=(n+h/30)%12;const color=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*color).toString(16).padStart(2,'0');};return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();}
 </script>
 </body>
 </html>
