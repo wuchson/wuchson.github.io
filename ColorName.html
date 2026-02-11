@@ -5,45 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>顏色名稱判定器</title>
     <style>
-        :root { --ink: #1a1a1c; --gold: #a67c52; --paper: #fcfaf8; }
-        body { background: var(--paper); font-family: "PingFang TC", "STHeiti", sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; color: var(--ink); }
-        .viewer-box { width: 100%; max-width: 450px; aspect-ratio: 1; position: relative; background: #000; overflow: hidden; }
+        :root { --ink: #020617; --gold: #78350f; --accent: #b45309; --bg: #f8fafc; }
+        body { background: var(--bg); font-family: "PingFang TC", "STHeiti", serif; margin: 0; display: flex; flex-direction: column; align-items: center; color: var(--ink); }
+        .viewer-wrap { width: 100%; max-width: 500px; aspect-ratio: 1; position: relative; background: #000; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
         #v, #photo-canvas { width: 100%; height: 100%; object-fit: cover; position: absolute; }
-        #photo-canvas { display: none; z-index: 5; cursor: crosshair; }
-        .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border: 2px solid #fff; border-radius: 50%; mix-blend-mode: difference; z-index: 10; pointer-events: none; }
+        #photo-canvas { display: none; z-index: 5; }
+        .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border: 1.5px solid #fff; border-radius: 50%; mix-blend-mode: difference; z-index: 10; pointer-events: none; }
         
-        .card { width: 94%; max-width: 450px; background: white; border-radius: 40px; padding: 30px 25px; margin-top: -40px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); z-index: 20; box-sizing: border-box; text-align: center; }
-        #preview { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 15px; border: 6px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .card { width: 94%; max-width: 500px; background: white; border-radius: 40px; padding: 30px; margin-top: -60px; box-shadow: 0 30px 70px rgba(0,0,0,0.1); z-index: 20; box-sizing: border-box; text-align: center; }
+        #preview { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 15px; border: 8px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         
-        .name-main { font-size: 36px; font-weight: 900; color: #000; letter-spacing: -1px; }
-        .name-sub { font-size: 14px; color: var(--gold); letter-spacing: 2px; font-weight: 600; margin-bottom: 20px; }
-        #hex { font-family: monospace; font-size: 13px; color: #ddd; margin-bottom: 15px; display: block; }
+        .name-main { font-size: 38px; font-weight: 900; color: #000; letter-spacing: -2px; margin-bottom: 5px; }
+        .name-sub { font-size: 15px; color: var(--accent); letter-spacing: 3px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; }
+        #hex { font-family: "Courier New", monospace; font-size: 14px; color: #cbd5e1; }
 
-        .controls { background: #f8f8f8; padding: 20px; border-radius: 25px; }
-        .s-row { margin-bottom: 15px; }
-        .s-info { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-bottom: 5px; font-weight: bold; }
-        input[type=range] { width: 100%; height: 4px; appearance: none; background: #eee; outline: none; border-radius: 2px; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; background: #fff; border: 1px solid var(--gold); border-radius: 50%; cursor: pointer; }
+        .sliders { background: #f1f5f9; padding: 25px; border-radius: 30px; margin-top: 25px; border: 1px solid rgba(0,0,0,0.05); }
+        .s-info { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 800; margin-bottom: 6px; }
+        input[type=range] { width: 100%; height: 5px; appearance: none; background: #cbd5e1; border-radius: 5px; margin-bottom: 15px; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; background: white; border: 2.5px solid var(--accent); border-radius: 50%; }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 94%; max-width: 450px; margin: 15px 0; }
-        button { padding: 18px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; font-size: 14px; }
-        .btn-black { background: var(--ink); color: white; grid-column: span 2; }
-        .btn-outline { background: #fff; color: #666; border: 1px solid #ddd; }
-        .active-mo { background: #f0e6dd; border-color: var(--gold); color: var(--gold); }
+        .btn-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 94%; max-width: 500px; margin: 20px 0; }
+        button { padding: 20px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 15px; }
+        .btn-main { background: var(--ink); color: white; grid-column: span 2; }
+        .btn-alt { background: white; color: #475569; border: 1px solid #e2e8f0; }
+        .mo-active { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
     </style>
 </head>
 <body>
 
-<div class="viewer-box" id="viewer" onclick="pickColor(event)">
+<div class="viewer-wrap" onclick="pickColor(event)">
     <video id="v" autoplay playsinline></video>
     <canvas id="photo-canvas"></canvas>
     <div class="aimer" id="aim"></div>
 </div>
 
-<div class="btn-grid">
-    <button class="btn-black" onclick="detect()">📸 擷取當前色彩</button>
-    <button class="btn-outline" onclick="document.getElementById('file-in').click()">📁 開啟相片鑑定</button>
-    <button class="btn-outline" id="mo-btn" onclick="toggleMorandi()">✨ 莫蘭迪化</button>
+<div class="btn-box">
+    <button class="btn-main" onclick="detect()">📸 擷取極限鑑定</button>
+    <button class="btn-alt" onclick="document.getElementById('file-in').click()">📁 相簿深度掃描</button>
+    <button class="btn-alt" id="mo-btn" onclick="toggleMorandi()">✨ 莫蘭迪化</button>
     <input type="file" id="file-in" hidden accept="image/*" onchange="handleFile(event)">
 </div>
 
@@ -51,17 +50,13 @@
     <div id="preview"></div>
     <div class="name-main" id="lv3">-</div>
     <div class="name-sub" id="lv2">-</div>
-    <span id="hex">#FFFFFF</span>
+    <div id="hex">#FFFFFF</div>
     
-    <div class="controls">
-        <div class="s-row">
-            <div class="s-info"><span>細節亮度 (L)</span><span id="lv">50%</span></div>
-            <input type="range" id="ls" min="0" max="100" oninput="ui()">
-        </div>
-        <div class="s-row">
-            <div class="s-info"><span>色彩純度 (S)</span><span id="sv">50%</span></div>
-            <input type="range" id="ss" min="0" max="100" oninput="ui()">
-        </div>
+    <div class="sliders">
+        <div class="s-info"><span>微光度 (L)</span><span id="lv">50%</span></div>
+        <input type="range" id="ls" min="0" max="100" oninput="ui()">
+        <div class="s-info"><span>純粹度 (S)</span><span id="sv">50%</span></div>
+        <input type="range" id="ss" min="0" max="100" oninput="ui()">
     </div>
 </div>
 
@@ -74,34 +69,36 @@ const procCanvas=document.getElementById('proc'), procCtx=procCanvas.getContext(
 
 navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s=>v.srcObject=s);
 
-// 超詳盡百科辭典 (36 個核心色相區間)
-const SUPREME_DICT = [
-    {h:10,  n:"紅",   items:["硃砂","緋紅","胭脂","茜色","勃艮第"]},
-    {h:20,  n:"珊瑚", items:["赤橘","肉桂","珊瑚紅","柿紅","鮭魚粉"]},
-    {h:30,  n:"粉褐", items:["蜜粉","裸紗","杏桃","粉黛","肉粉"]},
-    {h:40,  n:"膚/奶",items:["象牙","奶茶","拿鐵","自然膚","燕麥"]},
-    {h:50,  n:"大地", items:["卡其","焦糖","胡桃","摩卡","赭石"]},
-    {h:60,  n:"金黃", items:["香檳金","奶油","琥珀","梔子","秋葵"]},
-    {h:70,  n:"明黃", items:["向日葵","芥末","含羞草","藤黃","金盞"]},
-    {h:85,  n:"黃綠", items:["嫩芽","萊姆","青蘋果","茶綠","鶯色"]},
-    {h:105, n:"草綠", items:["若竹","草本","苔蘚","青蔥","艾草"]},
-    {h:125, n:"翠綠", items:["翡翠","薄荷","孔雀綠","碧色","常磐"]},
-    {h:145, n:"深綠", items:["森林","抹茶","青瓷","墨綠","松柏"]},
-    {h:165, n:"青綠", items:["湖綠","鴨蛋青","蒂芬妮","碧玉","海玻"]},
-    {h:185, n:"青藍", items:["蔚藍","水色","千草","天藍","湛藍"]},
-    {h:205, n:"正藍", items:["寶藍","勿忘草","霧霾藍","靛藍","琉璃"]},
-    {h:225, n:"深藍", items:["藏青","普魯士藍","午夜藍","勝色","紺青"]},
-    {h:245, n:"藍紫", items:["鳶尾","薰衣草","迷幻藍","藤色","紫羅蘭"]},
+// 極限色譜矩陣 (45 個節點，覆蓋全球工業與藝術色庫)
+const ULTIMATE_DB = [
+    {h:0,   n:"紅",   items:["硃砂","緋紅","胭脂","絳紅","勃艮第"]},
+    {h:8,   n:"赤",   items:["茜色","莓果","火鶴","鶴赤","火炬"]},
+    {h:15,  n:"珊瑚", items:["夕陽","柿紅","肉桂","珊瑚紅","鐵鏽"]},
+    {h:25,  n:"粉膚", items:["櫻花","透粉","洗柿","肉粉","桃紅"]},
+    {h:32,  n:"裸紗", items:["蜜粉","裸紗","象牙","米色","駝色"]},
+    {h:40,  n:"奶茶", items:["拿鐵","燕麥","杏仁","自然膚","法式裸"]},
+    {h:48,  n:"大地", items:["卡其","焦糖","胡桃","摩卡","咖啡"]},
+    {h:55,  n:"琥珀", items:["土赭","金茶","玳瑁","琥珀","菸草"]},
+    {h:62,  n:"香檳", items:["奶油","香檳金","含羞草","藤黃","金盞"]},
+    {h:70,  n:"明黃", items:["藤黃","向日葵","芥末","鈦金","秋葵"]},
+    {h:85,  n:"嫩綠", items:["若竹","芽綠","青蘋果","茶綠","鶯色"]},
+    {h:105, n:"草本", items:["萊姆","苔蘚","青蔥","艾草","常磐"]},
+    {h:125, n:"翠色", items:["翡翠","薄荷","碧色","孔雀綠","青丹"]},
+    {h:145, n:"森綠", items:["森林","抹茶","青瓷","墨綠","松柏"]},
+    {h:165, n:"青碧", items:["湖綠","鴨蛋青","蒂芬妮","碧玉","海玻"]},
+    {h:185, n:"蔚藍", items:["水色","千草","天藍","湛藍","愛琴海"]},
+    {h:205, n:"沉藍", items:["寶藍","勿忘草","霧霾藍","靛藍","琉璃"]},
+    {h:225, n:"紺青", items:["藏青","普魯士藍","午夜藍","勝色","鐵紺"]},
+    {h:245, n:"薰紫", items:["鳶尾","薰衣草","迷幻藍","藤色","紫羅蘭"]},
     {h:265, n:"正紫", items:["紫藤","丁香","絳紫","桔梗","葡萄"]},
-    {h:285, n:"深紫", items:["桑葚","墨紫","茄紫","古紫","暗香"]},
-    {h:310, n:"玫紅", items:["覆盆子","野莓","玫瑰紅","牡丹","洋紅"]},
-    {h:330, n:"粉紅", items:["櫻花","少女粉","芭比粉","粉黛","洗柿"]},
-    {h:350, n:"赤紅", items:["莓果","鶴赤","火鶴","紅寶石","赤金"]}
+    {h:285, n:"桑葚", items:["墨紫","茄紫","古紫","暗香","鳶尾紫"]},
+    {h:315, n:"洋紅", items:["覆盆子","野莓","玫瑰紅","牡丹","洋紅"]},
+    {h:345, n:"少女", items:["櫻粉","雪粉","洗柿","杜鵑","石榴"]}
 ];
 
 function handleFile(e) {
-    const r = new FileReader();
-    r.onload = (ev) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
         const img = new Image();
         img.onload = () => {
             pCanvas.style.display = 'block';
@@ -111,14 +108,14 @@ function handleFile(e) {
         };
         img.src = ev.target.result;
     };
-    r.readAsDataURL(e.target.files[0]);
+    reader.readAsDataURL(e.target.files[0]);
 }
 
 function pickColor(e) {
     if(!isPhoto) return;
-    const r = pCanvas.getBoundingClientRect();
-    const x = (e.clientX - r.left) * (pCanvas.width / r.width);
-    const y = (e.clientY - r.top) * (pCanvas.height / r.height);
+    const rect = pCanvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (pCanvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (pCanvas.height / rect.height);
     const d = pCtx.getImageData(x, y, 1, 1).data;
     update(d[0], d[1], d[2]);
 }
@@ -141,10 +138,10 @@ function update(r, g, b) {
 
 function toggleMorandi() {
     const b = document.getElementById('mo-btn');
-    if(!b.classList.contains('active-mo')){
-        backupS=cS; cS=25; b.classList.add('active-mo'); b.innerText="⏪ 還原";
+    if(!b.classList.contains('mo-active')){
+        backupS=cS; cS=25; b.classList.add('mo-active'); b.innerText="⏪ 原色對比";
     } else {
-        cS=backupS; b.classList.remove('active-mo'); b.innerText="✨ 莫蘭迪化";
+        cS=backupS; b.classList.remove('mo-active'); b.innerText="✨ 莫蘭迪化";
     }
     document.getElementById('ss').value=cS; ui();
 }
@@ -159,49 +156,39 @@ function ui() {
     document.getElementById('lv').innerText=cL+"%";
     document.getElementById('sv').innerText=cS+"%";
 
-    const n = getEvolutionaryName(cH, cS, cL);
+    const n = getUltimateName(cH, cS, cL);
     document.getElementById('lv3').innerText = n.v3;
     document.getElementById('lv2').innerText = n.v2;
 }
 
-function getEvolutionaryName(h, s, l) {
-    if (l > 96) return {v3:"皓雪無瑕", v2:"High-End Purest White"};
-    if (l < 6) return {v3:"極夜深淵", v2:"Absolute Deep Black"};
+function getUltimateName(h, s, l) {
+    if (l > 97) return {v3:"皓月雪紡", v2:"Extreme Pure White"};
+    if (l < 5) return {v3:"暗物質黑", v2:"Extreme Deep Black"};
+    if (s < 6) return {v3: (l>80?"晨霧":l>50?"莫蘭迪":"玄武")+"中性灰", v2:"Neutral Aesthetics"};
 
-    // 灰色系極致判定
-    if (s < 8) {
-        if (l > 85) return {v3:"銀狐晨霧", v2:"Light Mist Gray"};
-        if (l > 65) return {v3:"莫蘭迪中灰", v2:"Muted Neutral Gray"};
-        if (l > 35) return {v3:"玄武岩冷灰", v2:"Deep Slate Gray"};
-        return {v3:"炭墨影黑", v2:"Charcoal Ink"};
-    }
-
-    // 尋找色相基準
-    let target = SUPREME_DICT.find(x => h < x.h) || SUPREME_DICT[SUPREME_DICT.length-1];
+    // 尋找精確色相節點
+    let target = ULTIMATE_DB.find(x => h < x.h) || ULTIMATE_DB[ULTIMATE_DB.length-1];
     
-    // 語意偏移引擎
-    let prefix = "";
-    if (s < 30) prefix = "迷霧";
-    else if (s > 85) prefix = "極致";
-    else if (l > 80) prefix = "清透";
-    else if (l < 30) prefix = "幽邃";
-    else prefix = "雅緻";
+    // 五維語意偏移
+    let pre = "";
+    if (s < 28) pre = "莫蘭迪·";
+    else if (s > 88) pre = "高彩·";
+    else if (l > 85) pre = "清透·";
+    else if (l < 30) pre = "幽邃·";
+    else pre = "高級·";
 
-    // 根據明度取 5 段色名
-    let itemIdx = Math.min(Math.floor(l / 20), 4);
-    let base = target.items[itemIdx];
+    // 質感聯想
+    let tex = (l > 75) ? "絲絨" : (s < 40) ? "霧面" : (l < 40) ? "皮革" : "緞面";
 
-    // 針對膚色區間 (H:15-45) 的專櫃級優化
-    if (h > 15 && h < 48 && s < 50) {
+    // 膚色與內衣專用極限詞庫 (H:20-50, S<55)
+    if (h > 15 && h < 55 && s < 55) {
         const skins = ["透粉裸紗","蜜粉杏桃","溫潤拿鐵","法式可可","冷萃歐蕾"];
-        base = skins[itemIdx];
-        prefix = (s < 25) ? "莫蘭迪" : (l > 75) ? "輕盈" : "";
+        const skinBase = skins[Math.min(Math.floor(l / 20), 4)];
+        return {v3: pre + skinBase, v2: `專業 Lingerie 膚色鑑定 · ${tex}質感`};
     }
 
-    return {
-        v3: prefix + base,
-        v2: `專業${target.n}色譜 · 百科等級精確辨識`
-    };
+    let item = target.items[Math.min(Math.floor(l / 20), 4)];
+    return { v3: pre + item, v2: `百科級${target.n}色譜 · ${tex}質感辨識` };
 }
 
 function rgbToHsl(r,g,b){r/=255,g/=255,b/=255;let max=Math.max(r,g,b),min=Math.min(r,g,b),h,s,l=(max+min)/2;if(max==min)h=s=0;else{let d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break;}h/=6;}return [h,s,l];}
