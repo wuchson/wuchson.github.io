@@ -2,197 +2,189 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>倉儲定位系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Stock Pro</title>
     <style>
         :root {
             --primary: #4361ee;
-            --success: #4cc9f0;
+            --accent: #4cc9f0;
             --danger: #f72585;
             --bg: #f8f9fc;
             --card: #ffffff;
             --text: #2b2d42;
         }
 
+        /* 基礎設定：防止溢出 */
+        * { box-sizing: border-box; }
         body {
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            overflow-x: hidden; /* 徹底禁止左右滑動 */
         }
 
-        /* Header 樣式 */
         header {
             width: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--success));
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
         }
 
         .container {
-            width: 90%;
-            max-width: 800px;
-            margin-bottom: 50px;
+            width: 100%;
+            padding: 15px;
+            max-width: 600px; /* 限制最大寬度，電腦看也美觀 */
+            margin: 0 auto;
         }
 
-        /* 輸入區域樣式 */
-        .input-section {
+        /* 輸入區域：手機自動變一欄 */
+        .input-card {
             background: var(--card);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            margin-top: -50px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-top: -30px;
         }
 
-        @media (max-width: 600px) {
-            .input-section { grid-template-columns: 1fr; }
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 電腦預設兩欄 */
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        /* 手機螢幕優化 (小於 480px) */
+        @media (max-width: 480px) {
+            .grid-row { grid-template-columns: 1fr; } /* 手機強制一欄 */
         }
 
         .input-group { display: flex; flex-direction: column; }
-        .input-group label { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #8d99ae; }
+        .input-group label { font-size: 13px; font-weight: bold; color: #8d99ae; margin-bottom: 4px; }
         .input-group input {
             padding: 12px;
             border: 2px solid #edf2f4;
             border-radius: 8px;
             font-size: 16px;
-            transition: 0.3s;
+            width: 100%; /* 確保寬度不超出 */
         }
-        .input-group input:focus { outline: none; border-color: var(--primary); }
 
         .btn-add {
-            grid-column: span 1;
+            width: 100%;
+            padding: 14px;
             background: var(--primary);
             color: white;
             border: none;
-            padding: 15px;
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
             margin-top: 10px;
         }
-        
-        @after .btn-add { grid-column: span 2; } /* 電腦版佔滿兩欄 */
 
         /* 搜尋框 */
-        .search-bar {
-            margin: 30px 0 20px 0;
-            position: relative;
-        }
+        .search-bar { margin: 25px 0 15px 0; }
         .search-bar input {
             width: 100%;
-            padding: 15px 20px;
-            border-radius: 50px;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
             font-size: 16px;
-            box-sizing: border-box;
         }
 
-        /* 貨品卡片樣式 */
-        .list-container { display: grid; gap: 15px; }
+        /* 卡片顯示 */
         .item-card {
-            background: var(--card);
+            background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 6px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            border-left: 5px solid var(--primary);
-            animation: fadeIn 0.4s ease-out;
+            word-break: break-all; /* 防止長文字撐破框 */
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .item-info { flex: 1; }
-        .item-sku { font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
-        .item-detail { font-size: 14px; color: #666; }
-        .item-location {
-            margin-top: 10px;
+        .item-info { flex: 1; padding-right: 10px; }
+        .item-sku { font-size: 18px; font-weight: 800; color: var(--primary); }
+        .item-loc {
+            background: #fff0f3;
+            color: var(--danger);
             display: inline-block;
-            background: #f1f3f9;
-            padding: 5px 12px;
-            border-radius: 5px;
-            color: var(--danger);
-            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 5px;
         }
 
-        .btn-delete {
-            background: #fee;
-            color: var(--danger);
+        .btn-del {
+            background: #eee;
+            color: #999;
             border: none;
-            padding: 8px 12px;
+            padding: 8px;
             border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1 style="margin:0; font-size: 28px;">📦 WAREHOUSING</h1>
-    <p style="opacity: 0.8; font-size: 14px;">高效能庫存定位系統</p>
+    <h2 style="margin:0;">📦 倉儲快查助手</h2>
 </header>
 
 <div class="container">
-    <div class="input-section">
-        <div class="input-group">
-            <label>廠商</label>
-            <input type="text" id="vendor" placeholder="供應商名稱">
+    <div class="input-card">
+        <div class="grid-row">
+            <div class="input-group">
+                <label>廠商</label>
+                <input type="text" id="vendor" placeholder="廠商 A">
+            </div>
+            <div class="input-group">
+                <label>型號 (SKU)</label>
+                <input type="text" id="sku" placeholder="ABC-123">
+            </div>
         </div>
-        <div class="input-group">
-            <label>型號 (SKU)</label>
-            <input type="text" id="sku" placeholder="零件/商品型號">
+        <div class="grid-row">
+            <div class="input-group">
+                <label>品名</label>
+                <input type="text" id="itemName" placeholder="螺絲/墊片">
+            </div>
+            <div class="input-group">
+                <label>儲位位置</label>
+                <input type="text" id="location" placeholder="棟-層-區-架">
+            </div>
         </div>
-        <div class="input-group">
-            <label>品名</label>
-            <input type="text" id="itemName" placeholder="貨品描述">
-        </div>
-        <div class="input-group">
-            <label>儲位位置</label>
-            <input type="text" id="location" placeholder="棟-樓-區-架">
-        </div>
-        <button class="btn-add" style="grid-column: span 2;" onclick="addItem()">保存貨品位置</button>
+        <button class="btn-add" onclick="addItem()">保存資料</button>
     </div>
 
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="🔍 快速搜尋型號、廠商或位置..." onkeyup="render()">
+        <input type="text" id="searchInput" placeholder="🔍 快速搜尋..." onkeyup="render()">
     </div>
 
-    <div id="list" class="list-container"></div>
+    <div id="list"></div>
 </div>
 
 <script>
     let db = JSON.parse(localStorage.getItem('stockDB')) || [];
 
     function addItem() {
-        const item = {
-            id: Date.now(),
-            vendor: document.getElementById('vendor').value,
-            sku: document.getElementById('sku').value,
-            name: document.getElementById('itemName').value,
-            loc: document.getElementById('location').value
-        };
+        const vendor = document.getElementById('vendor').value;
+        const sku = document.getElementById('sku').value;
+        const name = document.getElementById('itemName').value;
+        const loc = document.getElementById('location').value;
 
-        if(!item.sku || !item.loc) return alert("型號與位置是必填項！");
+        if(!sku || !loc) return alert("型號與位置必填！");
 
-        db.unshift(item); // 新增的排在前面
+        db.unshift({ id: Date.now(), vendor, sku, name, loc });
         localStorage.setItem('stockDB', JSON.stringify(db));
         
         // 清空
-        document.querySelectorAll('.input-section input').forEach(i => i.value = '');
+        document.querySelectorAll('input').forEach(i => { if(i.id !== 'searchInput') i.value = ''; });
         render();
     }
 
@@ -209,26 +201,23 @@
         const listDiv = document.getElementById('list');
         listDiv.innerHTML = '';
 
-        const filtered = db.filter(i => 
+        db.filter(i => 
             i.sku.toLowerCase().includes(query) || 
             i.vendor.toLowerCase().includes(query) ||
             i.loc.toLowerCase().includes(query)
-        );
-
-        filtered.forEach(i => {
+        ).forEach(i => {
             listDiv.innerHTML += `
                 <div class="item-card">
                     <div class="item-info">
                         <div class="item-sku">${i.sku}</div>
-                        <div class="item-detail">廠商：${i.vendor || '未註記'} | 品名：${i.name || '通用'}</div>
-                        <div class="item-location">📍 ${i.loc}</div>
+                        <div style="font-size:13px; color:#666;">${i.vendor} | ${i.name}</div>
+                        <div class="item-loc">📍 ${i.loc}</div>
                     </div>
-                    <button class="btn-delete" onclick="deleteItem(${i.id})">刪除</button>
+                    <button class="btn-del" onclick="deleteItem(${i.id})">刪除</button>
                 </div>
             `;
         });
     }
-
     render();
 </script>
 
