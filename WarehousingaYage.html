@@ -1,0 +1,51 @@
+// 請將此網址替換成你在 Google 部署後得到的 URL
+const API_URL = "https://script.google.com/macros/s/AKfycbyvVtwur7SG6FQxtp_pW7DIJiOn0hkU85ic23g7HGPqixm7W4vKygC1SeYjF5-EX-8L/exec";
+
+let db = [];
+
+// 初始讀取
+async function loadData() {
+    const resp = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'read' })
+    });
+    db = await resp.json();
+    render();
+}
+
+// 儲存資料
+async function handleSave() {
+    const btn = document.getElementById('submitBtn');
+    const item = {
+        id: document.getElementById('editId').value,
+        vendor: document.getElementById('vendor').value,
+        sku: document.getElementById('sku').value,
+        name: document.getElementById('itemName').value,
+        loc: document.getElementById('location').value
+    };
+
+    btn.disabled = true;
+    await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'save', data: item })
+    });
+    
+    // 清除並重新載入
+    document.getElementById('editId').value = "";
+    clearInputs();
+    exitEditMode();
+    await loadData();
+    btn.disabled = false;
+}
+
+// 刪除資料
+async function deleteItem(id) {
+    if(!confirm('確定刪除？')) return;
+    await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'delete', id: id })
+    });
+    await loadData();
+}
+
+window.onload = loadData;
