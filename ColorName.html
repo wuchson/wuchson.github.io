@@ -13,11 +13,18 @@
         .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border: 2px solid #fff; border-radius: 50%; mix-blend-mode: difference; z-index: 10; pointer-events: none; }
         
         .card { width: 94%; max-width: 450px; background: white; border-radius: 40px; padding: 30px 25px; margin-top: -40px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); z-index: 20; box-sizing: border-box; text-align: center; }
-        #preview { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 15px; border: 6px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         
+        /* 色票預覽區：增加點擊提示 */
+        #preview { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 15px; border: 6px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s; }
+        #preview:active { transform: scale(0.95); }
+
         .name-main { font-size: 36px; font-weight: 900; color: #000; letter-spacing: -1px; }
-        .name-sub { font-size: 14px; color: var(--gold); letter-spacing: 2px; font-weight: 600; margin-bottom: 20px; }
-        #hex { font-family: monospace; font-size: 13px; color: #ddd; margin-bottom: 15px; display: block; }
+        .name-sub { font-size: 14px; color: var(--gold); letter-spacing: 2px; font-weight: 600; margin-bottom: 10px; }
+        
+        /* HEX 複製按鈕樣式 */
+        #hex { font-family: "Courier New", monospace; font-size: 16px; color: #999; margin-bottom: 20px; display: inline-block; padding: 5px 15px; background: #f0f0f0; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+        #hex:hover { background: #e0e0e0; color: var(--gold); }
+        #hex:active { background: #d0d0d0; }
 
         .controls { background: #f8f8f8; padding: 20px; border-radius: 25px; }
         .s-row { margin-bottom: 15px; }
@@ -30,9 +37,14 @@
         .btn-black { background: var(--ink); color: white; grid-column: span 2; }
         .btn-outline { background: #fff; color: #666; border: 1px solid #ddd; }
         .active-mo { background: #f0e6dd; border-color: var(--gold); color: var(--gold); }
+
+        /* 複製成功的通知小視窗 */
+        #toast { position: fixed; bottom: 50px; background: rgba(0,0,0,0.8); color: white; padding: 10px 25px; border-radius: 30px; font-size: 14px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 100; }
     </style>
 </head>
 <body>
+
+<div id="toast">已複製色票代碼</div>
 
 <div class="viewer-box" id="viewer" onclick="pickColor(event)">
     <video id="v" autoplay playsinline></video>
@@ -48,10 +60,10 @@
 </div>
 
 <div class="card" id="res" style="display:none;">
-    <div id="preview"></div>
+    <div id="preview" title="點擊複製色票" onclick="copyHex()"></div>
     <div class="name-main" id="lv3">-</div>
     <div class="name-sub" id="lv2">-</div>
-    <span id="hex">#FFFFFF</span>
+    <span id="hex" onclick="copyHex()">#FFFFFF</span>
     
     <div class="controls">
         <div class="s-row">
@@ -74,7 +86,6 @@ const procCanvas=document.getElementById('proc'), procCtx=procCanvas.getContext(
 
 navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s=>v.srcObject=s);
 
-// 超詳盡百科辭典 (36 個核心色相區間)
 const SUPREME_DICT = [
     {h:10,  n:"紅",   items:["硃砂","緋紅","胭脂","茜色","勃艮第"]},
     {h:20,  n:"珊瑚", items:["赤橘","肉桂","珊瑚紅","柿紅","鮭魚粉"]},
@@ -149,6 +160,17 @@ function toggleMorandi() {
     document.getElementById('ss').value=cS; ui();
 }
 
+// 複製色票代碼
+function copyHex() {
+    const hexVal = document.getElementById('hex').innerText;
+    navigator.clipboard.writeText(hexVal).then(() => {
+        const toast = document.getElementById('toast');
+        toast.innerText = `已複製色票: ${hexVal}`;
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+    });
+}
+
 function ui() {
     cL=parseInt(document.getElementById('ls').value);
     cS=parseInt(document.getElementById('ss').value);
@@ -167,41 +189,27 @@ function ui() {
 function getEvolutionaryName(h, s, l) {
     if (l > 96) return {v3:"皓雪無瑕", v2:"High-End Purest White"};
     if (l < 6) return {v3:"極夜深淵", v2:"Absolute Deep Black"};
-
-    // 灰色系極致判定
     if (s < 8) {
         if (l > 85) return {v3:"銀狐晨霧", v2:"Light Mist Gray"};
         if (l > 65) return {v3:"莫蘭迪中灰", v2:"Muted Neutral Gray"};
         if (l > 35) return {v3:"玄武岩冷灰", v2:"Deep Slate Gray"};
         return {v3:"炭墨影黑", v2:"Charcoal Ink"};
     }
-
-    // 尋找色相基準
     let target = SUPREME_DICT.find(x => h < x.h) || SUPREME_DICT[SUPREME_DICT.length-1];
-    
-    // 語意偏移引擎
     let prefix = "";
     if (s < 30) prefix = "迷霧";
     else if (s > 85) prefix = "極致";
     else if (l > 80) prefix = "清透";
     else if (l < 30) prefix = "幽邃";
     else prefix = "雅緻";
-
-    // 根據明度取 5 段色名
     let itemIdx = Math.min(Math.floor(l / 20), 4);
     let base = target.items[itemIdx];
-
-    // 針對膚色區間 (H:15-45) 的專櫃級優化
     if (h > 15 && h < 48 && s < 50) {
         const skins = ["透粉裸紗","蜜粉杏桃","溫潤拿鐵","法式可可","冷萃歐蕾"];
         base = skins[itemIdx];
         prefix = (s < 25) ? "莫蘭迪" : (l > 75) ? "輕盈" : "";
     }
-
-    return {
-        v3: prefix + base,
-        v2: `專業${target.n}色譜 · 百科等級精確辨識`
-    };
+    return { v3: prefix + base, v2: `專業${target.n}色譜 · 點擊色票複製代碼` };
 }
 
 function rgbToHsl(r,g,b){r/=255,g/=255,b/=255;let max=Math.max(r,g,b),min=Math.min(r,g,b),h,s,l=(max+min)/2;if(max==min)h=s=0;else{let d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break;}h/=6;}return [h,s,l];}
