@@ -1,51 +1,176 @@
-// 請將此網址替換成你在 Google 部署後得到的 URL
-const API_URL = "https://script.google.com/macros/s/AKfycbyvVtwur7SG6FQxtp_pW7DIJiOn0hkU85ic23g7HGPqixm7W4vKygC1SeYjF5-EX-8L/exec";
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>倉儲雲端助手</title>
+    <style>
+        :root { --primary: #4361ee; --accent: #4cc9f0; --danger: #f72585; --warning: #ffb703; --bg: #f8f9fc; --card: #ffffff; --text: #2b2d42; }
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 20px; text-align: center; }
+        .container { width: 100%; padding: 15px; max-width: 600px; margin: 0 auto; }
+        .input-card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: -30px; border: 2px solid transparent; }
+        .input-card.edit-mode { border-color: var(--warning); background: #fffdf5; }
+        .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        @media (max-width: 480px) { .grid-row { grid-template-columns: 1fr; } }
+        .input-group label { font-size: 12px; font-weight: bold; color: #8d99ae; }
+        .input-group input { padding: 12px; border: 2px solid #edf2f4; border-radius: 8px; font-size: 16px; width: 100%; margin-top: 4px; }
+        .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-main.update { background: var(--warning); color: #000; }
+        .btn-main:disabled { background: #ccc; cursor: not-allowed; }
+        .search-bar { margin: 25px 0 15px 0; }
+        .search-bar input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--primary); font-size: 16px; }
+        .item-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 6px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .item-sku { font-size: 18px; font-weight: 800; color: var(--primary); }
+        .item-loc { background: #fff0f3; color: var(--danger); display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 14px; }
+        .action-btns { display: flex; flex-direction: column; gap: 8px; }
+        .btn-edit { background: #e9ecef; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .btn-del { background: #fff5f5; color: var(--danger); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        #loadingOverlay { text-align: center; padding: 20px; color: #666; }
+    </style>
+</head>
+<body>
 
-let db = [];
+<header><h2>📦 倉儲定位助手 GitHub 雲端版</h2></header>
 
-// 初始讀取
-async function loadData() {
-    const resp = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'read' })
-    });
-    db = await resp.json();
-    render();
-}
+<div class="container">
+    <div class="input-card" id="inputCard">
+        <input type="hidden" id="editId">
+        <div class="grid-row">
+            <div class="input-group"><label>廠商</label><input type="text" id="vendor"></div>
+            <div class="input-group"><label>型號 (SKU)</label><input type="text" id="sku"></div>
+        </div>
+        <div class="grid-row">
+            <div class="input-group"><label>品名</label><input type="text" id="itemName"></div>
+            <div class="input-group"><label>儲位位置</label><input type="text" id="location"></div>
+        </div>
+        <button id="submitBtn" class="btn-main" onclick="handleSave()">保存資料</button>
+    </div>
 
-// 儲存資料
-async function handleSave() {
-    const btn = document.getElementById('submitBtn');
-    const item = {
-        id: document.getElementById('editId').value,
-        vendor: document.getElementById('vendor').value,
-        sku: document.getElementById('sku').value,
-        name: document.getElementById('itemName').value,
-        loc: document.getElementById('location').value
-    };
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 快速搜尋廠商、型號或儲位..." onkeyup="render()">
+    </div>
 
-    btn.disabled = true;
-    await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'save', data: item })
-    });
-    
-    // 清除並重新載入
-    document.getElementById('editId').value = "";
-    clearInputs();
-    exitEditMode();
-    await loadData();
-    btn.disabled = false;
-}
+    <div id="loadingOverlay">正在讀取雲端資料...</div>
+    <div id="list"></div>
+</div>
 
-// 刪除資料
-async function deleteItem(id) {
-    if(!confirm('確定刪除？')) return;
-    await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'delete', id: id })
-    });
-    await loadData();
-}
+<script>
+    // ⚠️ 請在此處填入你部署好的 Google Apps Script URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbyvVtwur7SG6FQxtp_pW7DIJiOn0hkU85ic23g7HGPqixm7W4vKygC1SeYjF5-EX-8L/exec";
 
-window.onload = loadData;
+    let db = [];
+
+    // 初始化讀取
+    async function loadData() {
+        document.getElementById('loadingOverlay').style.display = 'block';
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'read' })
+            });
+            db = await response.json();
+            render();
+        } catch (e) {
+            alert('連線失敗，請檢查 API URL');
+        }
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    // 保存與更新
+    async function handleSave() {
+        const submitBtn = document.getElementById('submitBtn');
+        const item = {
+            id: document.getElementById('editId').value,
+            vendor: document.getElementById('vendor').value,
+            sku: document.getElementById('sku').value,
+            name: document.getElementById('itemName').value,
+            loc: document.getElementById('location').value
+        };
+
+        if(!item.sku || !item.loc) return alert("型號與位置必填！");
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "同步中...";
+
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'save', data: item })
+        });
+
+        clearInputs();
+        resetMode();
+        await loadData();
+        submitBtn.disabled = false;
+        submitBtn.innerText = "保存資料";
+    }
+
+    // 刪除資料
+    async function deleteItem(id) {
+        if(!confirm('確定要刪除嗎？')) return;
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete', id: id })
+        });
+        await loadData();
+    }
+
+    // 進入編輯模式
+    function startEdit(id) {
+        const item = db.find(i => i.id == id);
+        if (!item) return;
+
+        document.getElementById('editId').value = item.id;
+        document.getElementById('vendor').value = item.vendor;
+        document.getElementById('sku').value = item.sku;
+        document.getElementById('itemName').value = item.name;
+        document.getElementById('location').value = item.loc;
+
+        document.getElementById('submitBtn').innerText = "💾 更新此位置";
+        document.getElementById('submitBtn').classList.add('update');
+        document.getElementById('inputCard').classList.add('edit-mode');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetMode() {
+        document.getElementById('editId').value = "";
+        document.getElementById('submitBtn').innerText = "保存資料";
+        document.getElementById('submitBtn').classList.remove('update');
+        document.getElementById('inputCard').classList.remove('edit-mode');
+    }
+
+    function clearInputs() {
+        document.querySelectorAll('.input-group input').forEach(i => i.value = '');
+    }
+
+    function render() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const listDiv = document.getElementById('list');
+        listDiv.innerHTML = '';
+        
+        db.filter(i => 
+            String(i.sku).toLowerCase().includes(query) || 
+            String(i.vendor).toLowerCase().includes(query) ||
+            String(i.loc).toLowerCase().includes(query)
+        ).forEach(i => {
+            listDiv.innerHTML += `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-sku">${i.sku}</div>
+                        <div style="font-size:13px; color:#666;">${i.vendor} | ${i.name}</div>
+                        <div class="item-loc">📍 ${i.loc}</div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-edit" onclick="startEdit(${i.id})">修改</button>
+                        <button class="btn-del" onclick="deleteItem(${i.id})">刪除</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
