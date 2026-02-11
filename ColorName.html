@@ -3,105 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>顏色名稱判定器</title>
+    <title>顏色鑑定器</title>
     <style>
         :root { --ink: #0f172a; --gold: #926b4e; --slate: #64748b; --silk: #f8fafc; }
-        body { background: var(--silk); font-family: "PingFang TC", "Hiragino Mincho ProN", serif; margin: 0; display: flex; flex-direction: column; align-items: center; color: var(--ink); -webkit-tap-highlight-color: transparent; }
+        body { background: var(--silk); font-family: "PingFang TC", "Hiragino Mincho ProN", serif; margin: 0; display: flex; flex-direction: column; align-items: center; color: var(--ink); }
         
-        /* 頂部相機區 */
-        .cam-view { width: 100%; max-width: 450px; aspect-ratio: 1; position: relative; background: #000; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        #v { width: 100%; height: 100%; object-fit: cover; }
-        .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 18px; height: 18px; border: 2px solid #fff; border-radius: 50%; mix-blend-mode: difference; z-index: 10; pointer-events: none; }
-        .aimer::after { content: ''; position: absolute; top: 50%; left: 50%; width: 2px; height: 2px; background: #fff; transform: translate(-50%, -50%); }
+        .viewer-container { width: 100%; max-width: 450px; aspect-ratio: 1; position: relative; background: #000; overflow: hidden; cursor: crosshair; }
+        #v, #photo-canvas { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        #photo-canvas { display: none; z-index: 5; }
+        .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 2px solid #fff; border-radius: 50%; mix-blend-mode: difference; z-index: 10; pointer-events: none; }
 
-        /* 卡片內容區 */
-        .card { width: 94%; max-width: 450px; background: white; border-radius: 40px 40px 30px 30px; padding: 35px 25px; margin-top: -50px; box-shadow: 0 25px 60px rgba(0,0,0,0.1); z-index: 20; box-sizing: border-box; text-align: center; }
-        #preview { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 20px; border: 8px solid #fff; box-shadow: 0 12px 25px rgba(0,0,0,0.08); transition: background-color 0.3s; }
+        .card { width: 94%; max-width: 450px; background: white; border-radius: 40px 40px 30px 30px; padding: 30px 20px; margin-top: -50px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); z-index: 20; box-sizing: border-box; text-align: center; }
+        #preview { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; border: 6px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         
-        .name-main { font-size: 34px; font-weight: 900; color: var(--ink); letter-spacing: -1.5px; margin-bottom: 8px; }
-        .name-sub { font-size: 14px; color: var(--gold); letter-spacing: 2px; font-weight: 600; text-transform: uppercase; opacity: 0.8; }
-        #hex { font-family: monospace; font-size: 13px; color: #cbd5e1; margin-top: 10px; display: block; }
+        .name-main { font-size: 32px; font-weight: 900; color: var(--ink); margin-bottom: 5px; }
+        .name-sub { font-size: 13px; color: var(--gold); letter-spacing: 2px; font-weight: 600; }
 
-        /* 滑桿控制 */
-        .controls { background: #f1f5f9; padding: 25px; border-radius: 30px; margin-top: 25px; border: 1px solid rgba(0,0,0,0.02); }
-        .s-row { margin-bottom: 20px; }
-        .s-row:last-child { margin-bottom: 0; }
-        .s-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--slate); margin-bottom: 8px; font-weight: 700; }
-        input[type=range] { width: 100%; height: 6px; appearance: none; background: #cbd5e1; outline: none; border-radius: 3px; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height: 28px; background: #fff; border: 2px solid var(--gold); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .controls { background: #f1f5f9; padding: 20px; border-radius: 25px; margin-top: 20px; }
+        .s-row { margin-bottom: 15px; }
+        .s-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--slate); margin-bottom: 5px; }
+        input[type=range] { width: 100%; height: 4px; appearance: none; background: #cbd5e1; outline: none; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; background: #fff; border: 2px solid var(--gold); border-radius: 50%; }
 
-        /* 按鈕區 */
-        .btn-row { display: flex; gap: 12px; width: 94%; max-width: 450px; margin: 20px 0; }
-        button { flex: 1; padding: 20px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer; transition: all 0.2s; font-size: 16px; }
-        .btn-p { background: var(--ink); color: white; box-shadow: 0 10px 20px rgba(15,23,42,0.2); }
-        .btn-p:active { transform: scale(0.96); }
-        .btn-m { background: #fff; color: var(--gold); border: 2.5px solid #e2e8f0; }
-        .btn-m.active { background: #efebe9; border-color: var(--gold); }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 94%; max-width: 450px; margin: 15px 0; }
+        button { padding: 16px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-black { background: var(--ink); color: white; grid-column: span 2; font-size: 16px; }
+        .btn-outline { background: #fff; color: var(--gold); border: 1px solid #e2e8f0; }
+        .btn-active { background: #efebe9; border-color: var(--gold); }
     </style>
 </head>
 <body>
 
-<div class="cam-view">
+<div class="viewer-container" id="viewer" onclick="pickColor(event)">
     <video id="v" autoplay playsinline></video>
-    <div class="aimer"></div>
+    <canvas id="photo-canvas"></canvas>
+    <div class="aimer" id="aim"></div>
 </div>
 
-<div class="btn-row">
-    <button class="btn-p" onclick="detect()">📸 核心鑑定</button>
-    <button class="btn-m" id="mo-btn" onclick="toggleMorandi()">✨ 莫蘭迪化</button>
+<div class="btn-grid">
+    <button class="btn-black" onclick="detect()">📸 擷取畫面顏色</button>
+    <button class="btn-outline" onclick="document.getElementById('file-in').click()">📁 開啟相片</button>
+    <button class="btn-outline" id="mo-btn" onclick="toggleMorandi()">✨ 莫蘭迪化</button>
+    <input type="file" id="file-in" hidden accept="image/*" onchange="handleFile(event)">
 </div>
 
 <div class="card" id="res" style="display:none;">
     <div id="preview"></div>
     <div class="name-main" id="lv3">-</div>
     <div class="name-sub" id="lv2">-</div>
-    <span id="hex">#FFFFFF</span>
+    <div id="hex" style="font-family:monospace; color:#ccc; margin-top:10px;">#FFFFFF</div>
     
     <div class="controls">
         <div class="s-row">
-            <div class="s-info"><span>環境明度 (Depth)</span><span id="lv">50%</span></div>
+            <div class="s-info"><span>明度 (L)</span><span id="lv">50%</span></div>
             <input type="range" id="ls" min="0" max="100" oninput="ui()">
         </div>
         <div class="s-row">
-            <div class="s-info"><span>色彩飽和 (Saturation)</span><span id="sv">50%</span></div>
+            <div class="s-info"><span>飽和度 (S)</span><span id="sv">50%</span></div>
             <input type="range" id="ss" min="0" max="100" oninput="ui()">
         </div>
     </div>
 </div>
 
-<canvas id="c" style="display:none;"></canvas>
+<canvas id="process-canvas" style="display:none;"></canvas>
 
 <script>
-let cH=0, cS=50, cL=50, backupS=50;
-const v=document.getElementById('v'), c=document.getElementById('c'), ctx=c.getContext('2d');
+let cH=0, cS=50, cL=50, backupS=50, isPhoto=false;
+const v=document.getElementById('v'), pCanvas=document.getElementById('photo-canvas'), pCtx=pCanvas.getContext('2d');
+const procCanvas=document.getElementById('process-canvas'), procCtx=procCanvas.getContext('2d');
 
-navigator.mediaDevices.getUserMedia({video:{facingMode:"environment", width: 1280, height: 720}})
-    .then(s=>v.srcObject=s)
-    .catch(err=>alert("請允許相機存取以進行鑑定"));
+navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s=>v.srcObject=s);
+
+function handleFile(e) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            pCanvas.style.display = 'block';
+            pCanvas.width = img.width; pCanvas.height = img.height;
+            pCtx.drawImage(img, 0, 0);
+            isPhoto = true;
+            document.getElementById('aim').style.display = 'none';
+            alert("已載入相片，點擊圖片任何位置即可鑑定顏色");
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+}
+
+function pickColor(e) {
+    if(!isPhoto) return;
+    const rect = pCanvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (pCanvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (pCanvas.height / rect.height);
+    const p = pCtx.getImageData(x, y, 1, 1).data;
+    updateByRGB(p[0], p[1], p[2]);
+}
 
 function detect() {
-    c.width=v.videoWidth; c.height=v.videoHeight;
-    ctx.drawImage(v,0,0);
-    const p=ctx.getImageData(c.width/2,c.height/2,1,1).data;
-    const hsl=rgbToHsl(p[0],p[1],p[2]);
-    cH=hsl[0]*360; cS=hsl[1]*100; cL=hsl[2]*100; backupS=cS;
-    document.getElementById('ls').value=cL;
-    document.getElementById('ss').value=cS;
-    document.getElementById('mo-btn').classList.remove('active');
-    document.getElementById('mo-btn').innerText = "✨ 莫蘭迪化";
+    isPhoto = false;
+    pCanvas.style.display = 'none';
+    document.getElementById('aim').style.display = 'block';
+    procCanvas.width = v.videoWidth; procCanvas.height = v.videoHeight;
+    procCtx.drawImage(v, 0, 0);
+    const p = procCtx.getImageData(procCanvas.width/2, procCanvas.height/2, 1, 1).data;
+    updateByRGB(p[0], p[1], p[2]);
+}
+
+function updateByRGB(r, g, b) {
+    const hsl = rgbToHsl(r, g, b);
+    cH = hsl[0]*360; cS = hsl[1]*100; cL = hsl[2]*100; backupS = cS;
+    document.getElementById('ls').value = cL;
+    document.getElementById('ss').value = cS;
     ui();
 }
 
 function toggleMorandi() {
     const btn = document.getElementById('mo-btn');
-    if(!btn.classList.contains('active')){
-        backupS=cS; cS=25; 
-        btn.classList.add('active');
-        btn.innerText = "⏪ 還原色彩";
+    if(!btn.classList.contains('btn-active')){
+        backupS=cS; cS=25; btn.classList.add('btn-active'); btn.innerText = "⏪ 還原";
     } else {
-        cS=backupS;
-        btn.classList.remove('active');
-        btn.innerText = "✨ 莫蘭迪化";
+        cS=backupS; btn.classList.remove('btn-active'); btn.innerText = "✨ 莫蘭迪化";
     }
     document.getElementById('ss').value=cS; ui();
 }
@@ -124,8 +146,6 @@ function ui() {
 function generateVastName(h, s, l) {
     if (l > 94) return {v3:"雪紡純白", v2:"High-End Silk White"};
     if (l < 7) return {v3:"曜石極黑", v2:"Obsidian Dark Collection"};
-
-    // 基礎色庫
     const library = [
         {h: 12,  n:"紅",  items:["胭脂", "緋紅", "勃艮第", "蔓越莓", "夕陽紅"]},
         {h: 25,  n:"珊瑚",items:["赤橘", "夕陽", "珊瑚", "朱砂", "柿子紅"]},
@@ -140,35 +160,19 @@ function generateVastName(h, s, l) {
         {h: 300, n:"紫色",items:["絳紫", "丁香", "桑葚", "迷霧紫", "葡萄"]},
         {h: 340, n:"玫粉",items:["櫻花", "玫瑰", "少女", "紅酒", "芭比"]}
     ];
-
     if (s < 10) {
         const greyPrefix = l > 80 ? "晨霧" : l > 50 ? "莫蘭迪" : "板岩";
         return {v3: greyPrefix + "岩灰", v2: "Minimalist Gray Aesthetic"};
     }
-
     let sector = library.find(x => h < x.h) || library[0];
-    
-    // 語意合成邏輯
-    let prefix = "";
-    let material = "";
-    
-    if (l > 82) { prefix = "清透"; material = "蕾絲織網"; }
-    else if (l > 65) { prefix = "柔和"; material = "絲絨綢緞"; }
-    else if (s < 32) { prefix = "迷霧"; material = "莫蘭迪感"; }
-    else if (l < 38) { prefix = "幽邃"; material = "皮革質地"; }
-    else if (s > 75) { prefix = "極致"; material = "緞面光澤"; }
-    else { prefix = "經典"; material = "成衣面料"; }
-
+    let prefix = (l > 82) ? "清透" : (l > 65) ? "柔和" : (s < 32) ? "迷霧" : (l < 38) ? "幽邃" : (s > 75) ? "極致" : "經典";
     let baseIdx = Math.min(Math.floor(l / 20), 4);
     let baseName = sector.items[baseIdx];
-
-    // 針對膚色與內衣的強化細分
     if (h >= 15 && h <= 50 && s < 48) {
         const skins = ["透粉裸紗", "蜜粉杏桃", "暖陽奶茶", "法式可可", "冷萃歐蕾"];
         return {v3: skins[Math.floor(l/20)] || "極致裸膚", v2: "Lingerie Skin Collection"};
     }
-
-    return { v3: prefix + baseName + (s < 28 ? "灰" : ""), v2: `${material} · ${sector.n}色系` };
+    return { v3: prefix + baseName + (s < 28 ? "灰" : ""), v2: `${sector.n}色系 · 質感語意系統` };
 }
 
 function rgbToHsl(r,g,b){r/=255,g/=255,b/=255;let max=Math.max(r,g,b),min=Math.min(r,g,b),h,s,l=(max+min)/2;if(max==min)h=s=0;else{let d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break;}h/=6;}return [h,s,l];}
