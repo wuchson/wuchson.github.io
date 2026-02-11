@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>顏色名稱判定器</title>
+    <style>
+        :root { --bg: #fdfaf7; --ink: #3d3d3f; --soft-gold: #c5a880; }
+        body { background: var(--bg); font-family: "PingFang TC", sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; color: var(--ink); }
+        .cam-view { width: 100%; max-width: 450px; aspect-ratio: 4/3; position: relative; background: #000; }
+        #v { width: 100%; height: 100%; object-fit: cover; }
+        .aimer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 1px solid rgba(255,255,255,0.8); border-radius: 50%; mix-blend-mode: difference; }
+        
+        .card { width: 92%; max-width: 450px; background: white; border-radius: 25px; padding: 25px; margin-top: 15px; box-shadow: 0 15px 35px rgba(197,168,128,0.1); border: 1px solid #f0e6d6; }
+        .swatch-row { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
+        #preview { width: 75px; height: 75px; border-radius: 50%; border: 4px solid #fdfaf7; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .level { margin-bottom: 15px; padding-left: 10px; border-left: 2px solid #eee; }
+        .tag { font-size: 10px; color: var(--soft-gold); font-weight: bold; letter-spacing: 2px; margin-bottom: 4px; display: block; }
+        .name { font-size: 18px; font-weight: 500; }
+        .name.lv3 { color: #8a6d5d; font-family: "serif"; font-weight: 600; }
+
+        .controls { margin-top: 20px; border-top: 1px solid #f5eee6; padding-top: 20px; }
+        .btn-group { display: flex; gap: 8px; margin-bottom: 20px; width: 92%; max-width: 450px; }
+        button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .btn-black { background: #3d3d3f; color: white; }
+        .btn-morandi { background: #e0d7cc; color: #5d544b; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="cam-view">
+    <video id="v" autoplay playsinline></video>
+    <div class="aimer"></div>
+</div>
+
+<div class="btn-group" style="margin-top:15px;">
+    <button class="btn-black" onclick="detect()">📸 擷取顏色</button>
+    <button class="btn-morandi" onclick="makeMorandi()">✨ 莫蘭迪化</button>
+</div>
+
+<div class="card" id="res" style="display:none;">
+    <div class="swatch-row">
+        <div id="preview"></div>
+        <div>
+            <div id="hex" style="font-family: monospace; font-size: 18px;">#FFFFFF</div>
+            <button onclick="document.getElementById('f').click()" style="background:none; color:var(--soft-gold); padding:0; font-size:12px; text-decoration:underline;">選取相片</button>
+            <input type="file" id="f" hidden accept="image/*" onchange="fromFile(event)">
+        </div>
+    </div>
+    
+    <div class="level"><span class="tag">基礎分類</span><div class="name" id="lv1">-</div></div>
+    <div class="level"><span class="tag">大眾描述</span><div class="name" id="lv2">-</div></div>
+    <div class="level"><span class="tag">專櫃質感名</span><div class="name lv3" id="lv3">-</div></div>
+
+    <div class="controls">
+        <input type="range" id="ls" min="0" max="100" style="width:100%; margin-bottom:10px;" oninput="uiUpdate()">
+        <div style="font-size:10px; text-align:center; color:#ccc;">滑動調整亮度進行虛擬試色</div>
+    </div>
+</div>
+
+<canvas id="c" style="display:none;"></canvas>
+
+<script>
+let curH=0, curS=0, curL=0;
+const v=document.getElementById('v'), c=document.getElementById('c'), ctx=c.getContext('2d');
+navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s=>v.srcObject=s);
+
+function detect() {
+    c.width=v.videoWidth; c.height=v.videoHeight;
+    ctx.drawImage(v,0,0); sample(c.width/2, c.height/2);
+}
+
+function fromFile(e) {
+    const r=new FileReader();
+    r.onload=ev=>{ const i=new Image(); i.onload=()=>{c.width=i.width;c.height=i.height;ctx.drawImage(i,0,0);sample(i.width/2,i.height/2);}; i.src=ev.target.result; };
+    r.readAsDataURL(e.target.files[0]);
+}
+
+function sample(x,y) {
+    const p=ctx.getImageData(x,y,1,1).data;
+    const hsl=rgbToHsl(p[0],p[1],p[2]);
+    curH=hsl[0]*360; curS=hsl[1]*100; curL=hsl[2]*100;
+    document.getElementById('ls').value=curL;
+    uiUpdate();
+}
+
+function makeMorandi() {
+    curS = 25; // 強制降低飽和度到莫蘭迪區間
+    uiUpdate();
+}
+
+function uiUpdate() {
+    curL = parseInt(document.getElementById('ls').value);
+    const hex = hslToHex(curH, curS, curL);
+    document.getElementById('res').style.display='block';
+    document.getElementById('preview').style.backgroundColor=hex;
+    document.getElementById('hex').innerText=hex;
+    const n = analyze(curH, curS, curL);
+    document.getElementById('lv1').innerText=n.v1;
+    document.getElementById('lv2').innerText=n.v2;
+    document.getElementById('lv3').innerText=n.v3;
+}
+
+function analyze(h,s,l) {
+    let v1, v2, v3;
+    // 服飾內衣特殊邏輯：膚色/裸色判定 (h:10-40, s:10-40)
+    if (h > 10 && h < 45 && s < 45 && l > 50) {
+        v1 = "膚色/裸色";
+        if (l > 85) { v2="淺米色"; v3="柔粉裸紗"; }
+        else if (l > 75) { v2="膚粉色"; v3="蜜粉杏桃"; }
+        else { v2="裸褐色"; v3="溫潤奶茶"; }
+        return {v1,v2,v3};
+    }
+
+    if (s < 10) {
+        v1="中性色";
+        if(l>90) {v2="白色"; v3="冷冽絲絨白";}
+        else if(l<15) {v2="黑色"; v3="黑曜岩"}
+        else {v2="灰色"; v3="晨霧岩灰";}
+    } else {
+        if (h<20 || h>=340) { v1="紅色系"; v2=s<40?"乾燥玫瑰":"緋紅色"; v3=l<40?"勃艮第紅":"微醺玫瑰"; }
+        else if (h<50) { v1="暖色系"; v2=l>70?"奶油色":"焦糖色"; v3=l>70?"香草卡士達":"琥珀咖啡"; }
+        else if (h<170) { v1="綠色系"; v2=s<35?"莫蘭迪綠":"草綠色"; v3=s<35?"鼠尾草綠":"森林呼吸"; }
+        else if (h<260) { v1="藍色系"; v2=s<35?"霧霾藍":"寶藍色"; v3=s<35?"普魯士藍灰":"午夜霓虹"; }
+        else { v1="紫色系"; v2="薰衣草色"; v3="莫內花園紫"; }
+    }
+    return {v1,v2,v3};
+}
+
+function rgbToHsl(r,g,b){
+    r/=255,g/=255,b/=255; let max=Math.max(r,g,b),min=Math.min(r,g,b),h,s,l=(max+min)/2;
+    if(max==min)h=s=0;else{let d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break;}h/=6;}
+    return [h,s,l];
+}
+function hslToHex(h,s,l){
+    l/=100;const a=s*Math.min(l,1-l)/100;const f=n=>{const k=(n+h/30)%12;const color=l-a*Math.max(Math.min(k-3,9-k,1),-1);
+    return Math.round(255*color).toString(16).padStart(2,'0');};return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+}
+</script>
+</body>
+</html>
