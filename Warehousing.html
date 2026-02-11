@@ -10,6 +10,7 @@
             --primary: #4361ee;
             --accent: #4cc9f0;
             --danger: #f72585;
+            --warning: #ffb703;
             --bg: #f8f9fc;
             --card: #ffffff;
             --text: #2b2d42;
@@ -41,7 +42,12 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             margin-top: -30px;
+            border: 2px solid transparent;
+            transition: 0.3s;
         }
+
+        /* 編輯模式時的邊框顏色 */
+        .input-card.edit-mode { border-color: var(--warning); background: #fffdf5; }
 
         .grid-row {
             display: grid;
@@ -60,12 +66,13 @@
             padding: 12px; border: 2px solid #edf2f4; border-radius: 8px; font-size: 16px; width: 100%;
         }
 
-        .btn-add {
+        .btn-main {
             width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
             border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
+        
+        .btn-main.update { background: var(--warning); color: #000; }
 
-        /* 工具列 */
         .tool-bar {
             margin-top: 15px;
             display: flex;
@@ -73,21 +80,9 @@
             justify-content: center;
         }
         .btn-tool {
-            flex: 1;
-            padding: 10px;
-            font-size: 13px;
-            border-radius: 8px;
-            border: 1px solid #d1d9e6;
-            background: #fff;
-            cursor: pointer;
-            color: #4a5568;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
+            flex: 1; padding: 10px; font-size: 13px; border-radius: 8px; border: 1px solid #d1d9e6;
+            background: #fff; cursor: pointer; color: #4a5568; font-weight: 600;
         }
-        .btn-tool:active { background: #f0f4f8; }
 
         .search-bar { margin: 25px 0 15px 0; }
         .search-bar input {
@@ -97,7 +92,7 @@
         .item-card {
             background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px;
             border-left: 6px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center; word-break: break-all;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
         .item-info { flex: 1; padding-right: 10px; }
@@ -107,10 +102,9 @@
             padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px;
         }
 
-        .btn-del {
-            background: #f7f7f7; color: #bbb; border: none; padding: 8px; border-radius: 6px;
-            font-size: 12px; white-space: nowrap; cursor: pointer;
-        }
+        .action-btns { display: flex; flex-direction: column; gap: 8px; }
+        .btn-edit { background: #e9ecef; color: #495057; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-del { background: #fff5f5; color: var(--danger); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
 
         #fileImport { display: none; }
     </style>
@@ -119,12 +113,11 @@
 
 <header>
     <h2 style="margin:0;">📦 倉儲快查助手 Pro</h2>
-    <small id="lastUpdated" style="opacity: 0.8;"></small>
 </header>
 
 <div class="container">
-    <div class="input-card">
-        <div class="grid-row">
+    <div class="input-card" id="inputCard">
+        <input type="hidden" id="editId"> <div class="grid-row">
             <div class="input-group">
                 <label>廠商</label>
                 <input type="text" id="vendor" placeholder="例如: 廠商A">
@@ -140,11 +133,11 @@
                 <input type="text" id="itemName" placeholder="例如: 牛仔裙">
             </div>
             <div class="input-group">
-                <label>儲位位置(例如: A棟-1F-B區-說明</label>
+                <label>儲位位置</label>
                 <input type="text" id="location" placeholder="A-1F-B-架上">
             </div>
         </div>
-        <button class="btn-add" onclick="addItem()">保存單筆資料</button>
+        <button id="submitBtn" class="btn-main" onclick="handleSave()">保存單筆資料</button>
         
         <div class="tool-bar">
             <button class="btn-tool" onclick="document.getElementById('fileImport').click()">📥 匯入 Excel</button>
@@ -154,7 +147,7 @@
     </div>
 
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="🔍 快速搜尋型號或廠商..." onkeyup="render()">
+        <input type="text" id="searchInput" placeholder="🔍 快速搜尋..." onkeyup="render()">
     </div>
 
     <div id="list"></div>
@@ -162,37 +155,78 @@
 
 <script>
     let db = JSON.parse(localStorage.getItem('stockDB')) || [];
+    let isEditing = false;
 
-    // 格式化日期
-    function getTodayDate() {
-        return new Date().toISOString().split('T')[0];
-    }
-
-    function addItem() {
+    // 保存或更新資料
+    function handleSave() {
         const vendor = document.getElementById('vendor').value;
         const sku = document.getElementById('sku').value;
         const name = document.getElementById('itemName').value;
         const loc = document.getElementById('location').value;
+        const editId = document.getElementById('editId').value;
 
         if(!sku || !loc) return alert("型號與位置必填！");
 
-        db.unshift({ id: Date.now(), vendor, sku, name, loc });
+        if (isEditing) {
+            // 更新模式
+            const index = db.findIndex(i => i.id == editId);
+            db[index] = { ...db[index], vendor, sku, name, loc };
+            exitEditMode();
+        } else {
+            // 新增模式
+            db.unshift({ id: Date.now(), vendor, sku, name, loc });
+        }
+
         saveAndRender();
-        document.querySelectorAll('.input-card input').forEach(i => { if(i.id !== 'searchInput') i.value = ''; });
+        clearInputs();
     }
 
-    // --- Excel 匯入 ---
+    // 進入編輯模式
+    function startEdit(id) {
+        const item = db.find(i => i.id == id);
+        if (!item) return;
+
+        isEditing = true;
+        document.getElementById('editId').value = item.id;
+        document.getElementById('vendor').value = item.vendor;
+        document.getElementById('sku').value = item.sku;
+        document.getElementById('itemName').value = item.name;
+        document.getElementById('location').value = item.loc;
+
+        // 切換 UI 狀態
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "💾 更新此資料位置";
+        btn.classList.add('update');
+        document.getElementById('inputCard').classList.add('edit-mode');
+        
+        // 自動捲動到頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function exitEditMode() {
+        isEditing = false;
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "保存單筆資料";
+        btn.classList.remove('update');
+        document.getElementById('inputCard').classList.remove('edit-mode');
+        document.getElementById('editId').value = "";
+    }
+
+    function clearInputs() {
+        document.querySelectorAll('.input-group input').forEach(i => i.value = '');
+    }
+
+    // --- 以下為原本的 Excel 匯入/匯出與刪除功能 ---
+
     function importFromExcel(event) {
         const file = event.target.files[0];
         if(!file) return;
-
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
             const json = XLSX.utils.sheet_to_json(sheet);
-
             const newItems = json.map(row => ({
                 id: Date.now() + Math.random(),
                 vendor: row['廠商'] || '',
@@ -200,44 +234,23 @@
                 name: row['品名'] || '',
                 loc: String(row['儲位'] || row['位置'] || '')
             })).filter(i => i.sku && i.loc);
-
-            if(newItems.length > 0) {
-                if(confirm(`偵測到 ${newItems.length} 筆資料。按「確定」與現有資料合併，按「取消」則清空舊資料並匯入。`)) {
-                    db = [...newItems, ...db];
-                } else {
-                    db = newItems;
-                }
-                saveAndRender();
-                alert("匯入成功！");
-            }
+            db = [...newItems, ...db];
+            saveAndRender();
         };
         reader.readAsArrayBuffer(file);
-        event.target.value = ''; // 重置 input
     }
 
-    // --- Excel 匯出 ---
     function exportToExcel() {
-        if (db.length === 0) return alert("目前沒有資料可以匯出");
-
-        // 整理資料，只輸出需要的欄位
-        const exportData = db.map(i => ({
-            "廠商": i.vendor,
-            "型號": i.sku,
-            "品名": i.name,
-            "儲位": i.loc
-        }));
-
+        if (db.length === 0) return alert("沒有資料");
+        const exportData = db.map(i => ({ "廠商": i.vendor, "型號": i.sku, "品名": i.name, "儲位": i.loc }));
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "庫存清單");
-
-        // 自動取名：倉儲-2026-02-11.xlsx
-        const fileName = `倉儲-${getTodayDate()}.xlsx`;
-        XLSX.writeFile(workbook, fileName);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "庫存");
+        XLSX.writeFile(workbook, `倉儲-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
     function deleteItem(id) {
-        if(confirm('確定要刪除這筆貨品紀錄嗎？')) {
+        if(confirm('確定要刪除嗎？')) {
             db = db.filter(i => i.id !== id);
             saveAndRender();
         }
@@ -252,23 +265,22 @@
         const query = document.getElementById('searchInput').value.toLowerCase();
         const listDiv = document.getElementById('list');
         listDiv.innerHTML = '';
-
-        const filtered = db.filter(i => 
+        db.filter(i => 
             String(i.sku).toLowerCase().includes(query) || 
             String(i.vendor).toLowerCase().includes(query) ||
-            String(i.loc).toLowerCase().includes(query) ||
-            String(i.name).toLowerCase().includes(query)
-        );
-
-        filtered.forEach(i => {
+            String(i.loc).toLowerCase().includes(query)
+        ).forEach(i => {
             listDiv.innerHTML += `
                 <div class="item-card">
                     <div class="item-info">
                         <div class="item-sku">${i.sku}</div>
-                        <div style="font-size:13px; color:#666;">${i.vendor || '無廠商'} | ${i.name || '無品名'}</div>
+                        <div style="font-size:13px; color:#666;">${i.vendor} | ${i.name}</div>
                         <div class="item-loc">📍 ${i.loc}</div>
                     </div>
-                    <button class="btn-del" onclick="deleteItem(${i.id})">刪除</button>
+                    <div class="action-btns">
+                        <button class="btn-edit" onclick="startEdit(${i.id})">修改</button>
+                        <button class="btn-del" onclick="deleteItem(${i.id})">刪除</button>
+                    </div>
                 </div>
             `;
         });
