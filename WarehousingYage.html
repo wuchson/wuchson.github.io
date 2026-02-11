@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>倉儲定位助手-雲端版</title>
+    <title>倉儲定位助手 Pro</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #4361ee; --accent: #4cc9f0; --danger: #f72585; --warning: #ffb703; --bg: #f8f9fc; --card: #ffffff; --text: #2b2d42; }
-        * { box-sizing: border-box; font-family: 'PingFang TC', sans-serif; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
-        header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 20px; text-align: center; }
+        header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .container { width: 100%; padding: 15px; max-width: 600px; margin: 0 auto; }
         
-        .admin-bar { background: #eaedf7; padding: 12px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
-        .admin-bar input { padding: 8px; border: 1px solid #ccd; border-radius: 6px; width: 130px; }
+        .admin-bar { background: #eaedf7; padding: 12px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #d1d9e6; }
+        .admin-bar input { padding: 8px 12px; border: 1px solid #ccd; border-radius: 6px; width: 140px; font-size: 14px; }
 
         .tool-bar { display: none; gap: 10px; margin-bottom: 20px; }
-        .btn-tool { flex: 1; padding: 10px; background: #fff; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-tool { flex: 1; padding: 10px; background: #fff; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .btn-tool:hover { background: var(--primary); color: #fff; }
 
         .input-card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-top: -30px; border: 2px solid transparent; }
         .input-card.edit-mode { border-color: var(--warning); background: #fffdf5; }
@@ -24,21 +25,23 @@
         @media (max-width: 480px) { .grid-row { grid-template-columns: 1fr; } }
         
         .input-group label { font-size: 12px; font-weight: bold; color: #8d99ae; }
-        .input-group input { padding: 12px; border: 2px solid #edf2f4; border-radius: 8px; font-size: 16px; width: 100%; margin-top: 4px; }
+        .input-group input { padding: 12px; border: 2px solid #edf2f4; border-radius: 8px; font-size: 16px; width: 100%; margin-top: 4px; outline: none; }
+        .input-group input:focus { border-color: var(--primary); }
         
         .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-main:active { transform: scale(0.98); }
         .btn-main.update { background: var(--warning); color: #000; }
 
         .search-bar { margin: 25px 0 15px 0; }
-        .search-bar input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--primary); font-size: 16px; }
+        .search-bar input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--primary); font-size: 16px; outline: none; }
 
         .item-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 6px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .item-sku { font-size: 18px; font-weight: 800; color: var(--primary); }
         .item-loc { background: #fff0f3; color: var(--danger); display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 14px; }
         
         .action-btns { display: none; flex-direction: column; gap: 8px; }
-        .btn-edit { background: #e9ecef; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .btn-del { background: #fff5f5; color: var(--danger); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-edit { background: #e9ecef; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .btn-del { background: #fff5f5; color: var(--danger); border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
         
         #status { text-align: center; color: #888; padding: 10px; font-size: 14px; }
     </style>
@@ -50,7 +53,7 @@
 <div class="container">
     <div class="admin-bar">
         <span style="font-size: 13px; color: var(--primary); font-weight: bold;">🔑 管理模式</span>
-        <input type="password" id="adminPwd" placeholder="輸入密碼解鎖" oninput="toggleAdminMode()">
+        <input type="password" id="adminPwd" placeholder="輸入正確密碼" oninput="checkPassword()">
     </div>
 
     <div class="tool-bar" id="toolBar">
@@ -62,50 +65,56 @@
     <div class="input-card" id="inputCard">
         <input type="hidden" id="editId">
         <div class="grid-row">
-            <div class="input-group"><label>廠商</label><input type="text" id="vendor"></div>
-            <div class="input-group"><label>型號 (A1234)</label><input type="text" id="sku"></div>
+            <div class="input-group"><label>廠商</label><input type="text" id="vendor" autocomplete="off"></div>
+            <div class="input-group"><label>型號 (A1234)</label><input type="text" id="sku" autocomplete="off"></div>
         </div>
         <div class="grid-row">
-            <div class="input-group"><label>品名(內衣/內褲)</label><input type="text" id="itemName"></div>
-            <div class="input-group"><label>儲位位置(例如: A棟-1F-B區-B2F架上-說明)</label><input type="text" id="location"></div>
+            <div class="input-group"><label>品名(內衣/內褲)</label><input type="text" id="itemName" autocomplete="off"></div>
+            <div class="input-group"><label>儲位位置(例如: A棟-1F-B區-B2F架上-說明)</label><input type="text" id="location" autocomplete="off"></div>
         </div>
-        <button id="submitBtn" class="btn-main" onclick="handleSave()">保存資料</button>
+        <button id="submitBtn" class="btn-main" onclick="handleSave()">保存單筆資料</button>
     </div>
 
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="🔍 快速搜尋..." onkeyup="render()">
+        <input type="text" id="searchInput" placeholder="🔍 快速搜尋產品、廠商、位置..." onkeyup="render()">
     </div>
 
-    <div id="status">雲端資料載入中...</div>
+    <div id="status">雲端資料同步中...</div>
     <div id="list"></div>
 </div>
 
 <script>
-    // --- ⚠️ 重要：請貼上你的 Google Apps Script URL ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbyvVtwur7SG6FQxtp_pW7DIJiOn0hkU85ic23g7HGPqixm7W4vKygC1SeYjF5-EX-8L/exec";
+    // --- ⚠️ 關鍵設定區 ---
+    const API_URL = "你的_GOOGLE_SCRIPT_URL"; // 請填入 Google 部署網址
+    const LOCAL_ADMIN_PWD = "0000"; // 請填入跟後端一樣的密碼
 
     let db = [];
 
-    // 初始化讀取
+    // 密碼即時檢查
+    function checkPassword() {
+        const inputPwd = document.getElementById('adminPwd').value;
+        const toolBar = document.getElementById('toolBar');
+        
+        // 只有密碼完全一樣才開啟按鈕
+        if (inputPwd === LOCAL_ADMIN_PWD) {
+            toolBar.style.display = 'flex';
+        } else {
+            toolBar.style.display = 'none';
+        }
+        render(); // 重新渲染列表以更新「修改/刪除」按鈕
+    }
+
     async function loadData() {
         try {
             const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'read' }) });
             db = await resp.json();
-            document.getElementById('status').innerText = `共 ${db.length} 筆資料`;
+            document.getElementById('status').innerText = `目前庫存：${db.length} 筆`;
             render();
-        } catch (e) { document.getElementById('status').innerText = "連線失敗"; }
+        } catch (e) { document.getElementById('status').innerText = "❌ 無法連線至雲端"; }
     }
 
-    // 權限切換
-    function toggleAdminMode() {
-        const pwd = document.getElementById('adminPwd').value;
-        const show = pwd.length > 0;
-        document.getElementById('toolBar').style.display = show ? 'flex' : 'none';
-        render();
-    }
-
-    // 保存
     async function handleSave() {
+        const pwd = document.getElementById('adminPwd').value;
         const item = {
             id: document.getElementById('editId').value,
             vendor: document.getElementById('vendor').value,
@@ -113,28 +122,32 @@
             name: document.getElementById('itemName').value,
             loc: document.getElementById('location').value
         };
-        if(!item.sku || !item.loc) return alert("型號與位置必填");
+        if(!item.sku || !item.loc) return alert("型號與儲位是必填項目！");
 
-        document.getElementById('status').innerText = "上傳中...";
+        document.getElementById('status').innerText = "資料傳送中...";
         const resp = await fetch(API_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'save', data: item, password: document.getElementById('adminPwd').value })
+            body: JSON.stringify({ action: 'save', data: item, password: pwd })
         });
         const result = await resp.text();
-        if(result.includes("Error")) alert(result);
-        else { clearInputs(); resetMode(); await loadData(); }
+        if(result.includes("Error")) {
+            alert("❌ " + result);
+            document.getElementById('status').innerText = "存取遭拒";
+        } else {
+            clearInputs();
+            resetMode();
+            await loadData();
+        }
     }
 
-    // 匯出 Excel
     function exportToExcel() {
         const exportData = db.map(i => ({ "廠商": i.vendor, "型號": i.sku, "品名": i.name, "儲位": i.loc }));
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "倉儲資料");
-        XLSX.writeFile(workbook, `倉儲備份_${new Date().toLocaleDateString()}.xlsx`);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "WarehouseData");
+        XLSX.writeFile(workbook, `庫存備份_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // 匯入 Excel
     async function importFromExcel(event) {
         const file = event.target.files[0];
         const pwd = document.getElementById('adminPwd').value;
@@ -150,8 +163,8 @@
                 loc: String(row['儲位'] || row['位置'] || '')
             })).filter(i => i.sku && i.loc);
 
-            if (confirm(`讀取到 ${newItems.length} 筆，確定匯入？`)) {
-                document.getElementById('status').innerText = "批次上傳中...";
+            if (confirm(`讀取到 ${newItems.length} 筆資料，確認匯入雲端？`)) {
+                document.getElementById('status').innerText = "批次匯入中...";
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'batchSave', data: newItems, password: pwd }) });
                 location.reload();
             }
@@ -159,10 +172,12 @@
         reader.readAsArrayBuffer(file);
     }
 
-    // 刪除
     async function deleteItem(id) {
-        if(!confirm('確定刪除？')) return;
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, password: document.getElementById('adminPwd').value }) });
+        if(!confirm('警告：確定要刪除這筆資料嗎？')) return;
+        const pwd = document.getElementById('adminPwd').value;
+        const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id, password: pwd }) });
+        const result = await resp.text();
+        if(result.includes("Error")) alert(result);
         await loadData();
     }
 
@@ -173,7 +188,7 @@
         document.getElementById('sku').value = item.sku;
         document.getElementById('itemName').value = item.name;
         document.getElementById('location').value = item.loc;
-        document.getElementById('submitBtn').innerText = "💾 更新此資料";
+        document.getElementById('submitBtn').innerText = "💾 確認更新位置";
         document.getElementById('submitBtn').classList.add('update');
         document.getElementById('inputCard').classList.add('edit-mode');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -181,25 +196,30 @@
 
     function resetMode() {
         document.getElementById('editId').value = "";
-        document.getElementById('submitBtn').innerText = "保存資料";
+        document.getElementById('submitBtn').innerText = "保存單筆資料";
         document.getElementById('submitBtn').classList.remove('update');
         document.getElementById('inputCard').classList.remove('edit-mode');
     }
 
-    function clearInputs() { document.querySelectorAll('.input-group input').forEach(i => i.value = ''); }
+    function clearInputs() { document.querySelectorAll('.input-card input').forEach(i => i.value = ''); }
 
     function render() {
         const query = document.getElementById('searchInput').value.toLowerCase();
-        const isAdmin = document.getElementById('adminPwd').value.length > 0;
+        const isAdmin = document.getElementById('adminPwd').value === LOCAL_ADMIN_PWD;
         const listDiv = document.getElementById('list');
         listDiv.innerHTML = '';
-        db.filter(i => String(i.sku).toLowerCase().includes(query) || String(i.vendor).toLowerCase().includes(query) || String(i.loc).toLowerCase().includes(query))
-          .forEach(i => {
+
+        db.filter(i => 
+            String(i.sku).toLowerCase().includes(query) || 
+            String(i.vendor).toLowerCase().includes(query) || 
+            String(i.loc).toLowerCase().includes(query) ||
+            String(i.name).toLowerCase().includes(query)
+        ).forEach(i => {
             listDiv.innerHTML += `
                 <div class="item-card">
                     <div class="item-info">
                         <div class="item-sku">${i.sku}</div>
-                        <div style="font-size:13px; color:#666;">${i.vendor} | ${i.name}</div>
+                        <div style="font-size:13px; color:#666; margin: 4px 0;">${i.vendor} | ${i.name}</div>
                         <div class="item-loc">📍 ${i.loc}</div>
                     </div>
                     <div class="action-btns" style="display: ${isAdmin ? 'flex' : 'none'}">
@@ -207,7 +227,7 @@
                         <button class="btn-del" onclick="deleteItem('${i.id}')">刪除</button>
                     </div>
                 </div>`;
-          });
+        });
     }
 
     window.onload = loadData;
