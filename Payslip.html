@@ -15,7 +15,6 @@
         input[type="text"]#edit-name { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         input[type="range"] { width: 100%; cursor: pointer; }
 
-        /* 薪資單主體 */
         #payslip-container { background: white; width: var(--container-width); padding: 30px 35px; border-radius: 4px; box-sizing: border-box; overflow: hidden; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--main-black); padding-bottom: 12px; }
@@ -32,7 +31,6 @@
         td { padding: 4px 0 8px 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         
         .label-cell input { width: 100%; background: transparent; border: none; font-size: 13px; outline: none; color: #333; line-height: 1.5; margin-top: -2px; }
-        /* 修改金額輸入框樣式以適應 text 類型 */
         .value-cell input { width: 100%; border: none; text-align: right; font-size: 18px; font-weight: 600; outline: none; font-family: 'Courier New', monospace; background: transparent; line-height: 1.2; color: #333; margin-top: -2px; }
         .value-cell input.negative { color: #d93025 !important; }
 
@@ -84,7 +82,7 @@
     </div>
 
     <script>
-        const defaultLabels = ["基本薪資", "加班津貼", "績效獎金", "出差補助", "年假", "伙食津貼", "表現津貼", "勞保費(扣)", "健保費(扣)", "事假", "病假", "其他項目", "", "", "", ""];
+        const defaultLabels = ["基本薪資", "加班津貼", "績效獎金", "出差補助", "年假", "伙食津貼", "表現津貼", "勞保費(扣)", "健保費(扣)", "事假(扣)", "病假(扣)", "其他項目", "", "", "", ""];
         let currentLogoBase64 = "";
 
         window.onload = function() {
@@ -98,21 +96,53 @@
             tbody.innerHTML = "";
             for (let i = 0; i < 16; i++) {
                 const tr = document.createElement('tr');
-                // 這裡使用了 type="tel" 和 inputmode="decimal" 來解決舊手機鍵盤沒有負號的問題
-                tr.innerHTML = `<td class="label-cell"><input type="text" class="row-label" value="${defaultLabels[i] || ''}"></td>
-                                <td class="value-cell"><input type="tel" inputmode="decimal" class="amount" placeholder="0" oninput="calculateTotal()"></td>`;
+                const labelName = defaultLabels[i] || '';
+                
+                // 判斷是否包含「(扣)」
+                const isDeduction = labelName.includes("(扣)");
+                const defaultValue = isDeduction ? "-" : "";
+                const cssClass = isDeduction ? "amount negative" : "amount";
+
+                tr.innerHTML = `
+                    <td class="label-cell">
+                        <input type="text" class="row-label" value="${labelName}" oninput="handleLabelChange(this)">
+                    </td>
+                    <td class="value-cell">
+                        <input type="tel" inputmode="decimal" class="${cssClass}" 
+                               value="${defaultValue}" placeholder="0" oninput="calculateTotal(this)">
+                    </td>`;
                 tbody.appendChild(tr);
             }
+            calculateTotal();
+        }
+
+        // 當使用者手動修改項目名稱時，自動判斷是否要加負號
+        function handleLabelChange(input) {
+            const amountInput = input.parentElement.nextElementSibling.querySelector('.amount');
+            if (input.value.includes("(扣)")) {
+                if (!amountInput.value.startsWith("-")) {
+                    amountInput.value = "-" + amountInput.value.replace(/-/g, '');
+                }
+            }
+            calculateTotal();
         }
 
         function calculateTotal() {
             let total = 0;
             document.querySelectorAll('.amount').forEach(input => {
-                // 移除非數字和負號以外的字元，避免使用者輸入錯誤
-                let cleanVal = input.value.replace(/[^\d.-]/g, '');
+                let valStr = input.value;
+                
+                // 如果只有一個負號，視為 0
+                if (valStr === "-") valStr = "0";
+                
+                // 移除非數字、負號、小數點以外的字元
+                let cleanVal = valStr.replace(/[^\d.-]/g, '');
+                
                 const val = parseFloat(cleanVal) || 0;
                 total += val;
-                input.classList.toggle('negative', val < 0);
+                
+                // 動態調整顏色
+                input.classList.toggle('negative', val < 0 || input.value.startsWith("-"));
             });
             document.getElementById('total-amount').value = total.toLocaleString();
         }
@@ -144,7 +174,17 @@
             if (name) { document.getElementById('company-title').innerText = name; document.getElementById('edit-name').value = name; }
             if (labels) {
                 const inputs = document.querySelectorAll('.row-label');
-                labels.forEach((v, i) => { if (inputs[i]) inputs[i].value = v; });
+                const amounts = document.querySelectorAll('.amount');
+                labels.forEach((v, i) => { 
+                    if (inputs[i]) {
+                        inputs[i].value = v;
+                        // 載入時重新判斷扣款項目
+                        if (v.includes("(扣)") && !amounts[i].value.startsWith("-")) {
+                            amounts[i].value = "-";
+                            amounts[i].classList.add('negative');
+                        }
+                    }
+                });
             }
             if (logoWidth) {
                 document.getElementById('logo-size').value = logoWidth;
