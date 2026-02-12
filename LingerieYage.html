@@ -286,9 +286,20 @@
         document.getElementById('cfg-a4-gy').value = pCfg.a4gy;
     }
 
-    function login() {
+function login() {
         const u = document.getElementById('loginUser').value;
         const p = document.getElementById('loginPass').value;
+        
+        // 緊急救援帳號 (當雲端沒資料時可用)
+        if (u === "admin" && p === "admin123") {
+            currentUser = {u: "admin", r: "admin", p: "admin123"};
+            sessionStorage.setItem('L_P_USER', JSON.stringify(currentUser));
+            checkAuth();
+            render();
+            return;
+        }
+
+        // 正常雲端帳號檢查
         const found = users.find(user => user.u === u && user.p === p);
         if (found) {
             currentUser = found;
@@ -296,14 +307,11 @@
             checkAuth();
             render();
         } else {
-            alert("帳號或密碼錯誤。");
+            alert("帳號密碼錯誤。請試試帳號 admin 密碼 admin123");
         }
     }
 
-    function logout() {
-        sessionStorage.removeItem('L_P_USER');
-        location.reload();
-    }
+
 </script>
 // --- 5. 介面渲染 (完全保留 20260212-1 樣式) ---
     function getVendorName(c) { const v = vendors.find(x => x.code === c); return v ? v.name : c; }
