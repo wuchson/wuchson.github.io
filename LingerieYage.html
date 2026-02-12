@@ -320,8 +320,9 @@ style="width: auto; padding: 5px 15px; font-size: 12px; background: #666;">登�
         <button class="btn-danger" onclick="clearInvoice()" style="flex:0.5;">🗑️ 清空單據</button>
     </div>
 </div>
-const API_URL = "https://script.google.com/macros/s/AKfycbwKljH08lC3P_P0hrey_qrAL2iXnljuXYQwfN1FgmUNfop1PXWNqTfe9GiuHkYOaWceCA/exec";
+
 <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwKljH08lC3P_P0hrey_qrAL2iXnljuXYQwfN1FgmUNfop1PXWNqTfe9GiuHkYOaWceCA/exec";
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = 850; gain.gain.setValueAtTime(0, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15); osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
 
