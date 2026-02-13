@@ -1,401 +1,564 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1">
-    <title>Lingerie Pro - 雲端智慧庫存系統</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lingerie Pro 商用穩定版</title>
 
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
-    <style>
-        :root {
-            --primary: #8da399;
-            --accent: #d4a373; 
-            --bg: #f9f7f2; 
-            --card-bg: #ffffff; 
-            --border: #e0dcd0; 
-            --danger: #e53e3e; 
-            --success: #48bb78;
-            /* A4 標籤列印微調參數 */
-            --a4-mt: 15.5mm; --a4-ml: 6.5mm; --a4-gx: 2.5mm; --a4-gy: 0mm;
-        }
+<style>
+:root{
+--primary:#8da399;
+--accent:#d4a373;
+--bg:#f9f7f2;
+--card:#ffffff;
+--border:#e0dcd0;
+--danger:#e53e3e;
+--success:#48bb78;
+}
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            font-family: -apple-system, "Noto Sans TC", sans-serif;
-            background: var(--bg); margin: 0; padding: 10px; color: #444; 
-            line-height: 1.6;
-        }
+body{
+font-family:-apple-system,"Noto Sans TC",sans-serif;
+background:var(--bg);
+margin:0;
+padding:10px;
+color:#444;
+}
 
-        .container { max-width: 800px; margin: 0 auto; }
-        
-        /* 卡片式設計 */
-        .card { 
-            background: var(--card-bg); border-radius: 12px; padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
+.container{
+max-width:600px;
+margin:auto;
+}
 
-        h2, h3 { color: var(--primary); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 8px; }
+.card{
+background:var(--card);
+border-radius:12px;
+padding:15px;
+margin-bottom:15px;
+border:1px solid var(--border);
+box-shadow:0 2px 4px rgba(0,0,0,0.05);
+}
 
-        /* 表單元素 */
-        input, select, button { 
-            width: 100%; padding: 12px; margin: 8px 0; 
-            border: 1px solid var(--border); border-radius: 8px; font-size: 16px;
-        }
-        
-        button { 
-            background: var(--primary); color: white; border: none; 
-            cursor: pointer; font-weight: bold; transition: opacity 0.2s;
-        }
-        button:active { opacity: 0.8; }
-        button.secondary { background: var(--accent); }
-        button.danger { background: var(--danger); }
+h3{
+color:#6b7e75;
+border-left:4px solid var(--accent);
+padding-left:10px;
+margin:0 0 15px 0;
+font-size:1rem;
+}
 
-        /* 表格響應式 */
-        .table-container { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th, td { border: 1px solid var(--border); padding: 10px; text-align: left; font-size: 14px; }
-        th { background: #f4f1ea; color: var(--primary); }
+input,select{
+padding:10px;
+border-radius:8px;
+border:1px solid var(--border);
+width:100%;
+box-sizing:border-box;
+margin-bottom:8px;
+}
 
-        /* 導覽列 */
-        .nav-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
-            gap: 8px; margin-bottom: 20px; 
-        }
-        .nav-item { 
-            padding: 10px; text-align: center; background: #eee; 
-            border-radius: 8px; cursor: pointer; font-size: 14px;
-        }
-        .nav-item.active { background: var(--primary); color: white; }
+button{
+background:var(--primary);
+color:#fff;
+border:none;
+border-radius:8px;
+padding:10px;
+cursor:pointer;
+width:100%;
+font-weight:bold;
+}
 
-        /* 隱藏區塊 */
-        .page { display: none; }
-        .page.active { display: block; }
+.btn-danger{background:var(--danger);}
+.btn-success{background:var(--success);}
+.btn-accent{background:var(--accent);}
 
-        /* 載入中動畫 */
-        #loadingOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.8); display: none;
-            justify-content: center; align-items: center; z-index: 9999;
-        }
+#login-overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:var(--bg);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
 
-        /* 列印預覽專用樣式 */
-        @media print {
-            body * { visibility: hidden; }
-            #printPreview, #printPreview * { visibility: visible; }
-            #printPreview { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
-        }
-    </style>
+.login-card{
+width:90%;
+max-width:350px;
+background:#fff;
+padding:30px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+</style>
 </head>
 <body>
-    <div id="loadingOverlay"><div>系統連線中，請稍候...</div></div>
 
-    <div class="container">
-        <div id="loginPage" class="card">
-            <h2>系統登入</h2>
-            <input type="text" id="loginUser" placeholder="帳號">
-            <input type="password" id="loginPass" placeholder="密碼">
-            <button onclick="handleLogin()">登入</button>
-        </div>
+<!-- ===============================
+   登入畫面
+================================ -->
+<div id="login-overlay">
+    <div class="login-card">
+        <h2 style="text-align:center;color:var(--primary);margin-top:0;">
+            系統登入
+        </h2>
 
-        <div id="mainSystem" style="display:none;">
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 id="displayUserName">歡迎使用</h3>
-                    <button onclick="handleLogout()" style="width:auto; padding:5px 15px;" class="danger">登出</button>
-                </div>
-                <div class="nav-grid">
-                    <div class="nav-item active" onclick="showPage('scanPage')">掃描進出</div>
-                    <div class="nav-item" onclick="showPage('inventoryPage')">庫存查詢</div>
-                    <div class="nav-item" onclick="showPage('salesPage')">營業統計</div>
-                    <div class="nav-item admin-only" onclick="showPage('setupPage')">基礎設定</div>
-                    <div class="nav-item admin-only" onclick="showPage('configPage')">系統環境</div>
-                </div>
-            </div>
+        <input type="text" id="loginUser" placeholder="帳號">
+        <input type="password" id="loginPass" placeholder="密碼">
 
-            <div id="configPage" class="page card">
-                <h3>系統環境設定</h3>
-                <label>公司名稱</label>
-                <input type="text" id="cfgCompName">
-                <label>稅率 (%)</label>
-                <input type="number" id="cfgTaxRate" step="0.01">
-                <button onclick="saveSystemConfig()">儲存設定</button>
-                <hr>
-                <h3>帳號管理</h3>
-                <div class="table-container">
-                    <table id="userTable">
-                        <thead><tr><th>帳號</th><th>密碼</th><th>姓名</th><th>操作</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <button class="secondary" onclick="addUser()">新增帳號</button>
-            </div>
+        <button onclick="login()">登入系統</button>
+    </div>
+</div>
 
-            <div id="setupPage" class="page card">
-                <h3>廠商管理</h3>
-                <div class="table-container">
-                    <table id="vendorTable">
-                        <thead><tr><th>代碼</th><th>名稱</th><th>操作</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <button class="secondary" onclick="addVendor()">新增廠商</button>
+<!-- ===============================
+   主容器
+================================ -->
+<div class="container">
 
-                <hr>
-                <h3>胸罩型號管理</h3>
-                <div class="table-container">
-                    <table id="modelTable">
-                        <thead><tr><th>廠商</th><th>型號</th><th>類別</th><th>成本</th><th>售價</th><th>操作</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <button class="secondary" onclick="addModel()">新增型號</button>
-            </div>
-<div id="scanPage" class="page active card">
-                <h3>掃描 / 手動輸入</h3>
-                <div id="reader" style="width: 100%; background: #eee; border-radius: 8px;"></div>
-                <div style="margin-top: 10px; display: flex; gap: 5px;">
-                    <button onclick="startScanner()" style="flex:1;">啟動相機</button>
-                    <button onclick="stopScanner()" style="flex:1;" class="danger">停止相機</button>
-                </div>
+    <!-- 使用者資訊列 -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span id="userStatus" style="font-size:14px;color:#666;"></span>
+        <button onclick="logout()" style="width:auto;padding:5px 15px;font-size:12px;background:#666;">
+            登出
+        </button>
+    </div>
 
-                <hr>
-                <label>選擇廠商</label>
-                <select id="braVendor" onchange="updateModelSelect()"></select>
-                
-                <label>選擇型號</label>
-                <select id="braModel"></select>
+    <!-- 系統設定 -->
+    <div class="card admin-only">
+        <h3>系統設定</h3>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
-                    <div>
-                        <label>下胸圍</label>
-                        <select id="braBand">
-                            <option value="70">70</option><option value="75">75</option>
-                            <option value="80">80</option><option value="85">85</option>
-                            <option value="90">90</option><option value="95">95</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>罩杯</label>
-                        <select id="braCup">
-                            <option value="A">A</option><option value="B">B</option>
-                            <option value="C">C</option><option value="D">D</option>
-                            <option value="E">E</option><option value="F">F</option>
-                            <option value="G">G</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>顏色</label>
-                        <select id="braColor"></select>
-                    </div>
-                </div>
+        <input type="text" id="compNameInp" placeholder="公司名稱">
+        <input type="number" id="taxRateInp" placeholder="稅率 (%)">
 
-                <label>數量</label>
-                <input type="number" id="braQty" value="1" min="1">
+        <button class="btn-success" onclick="updateSysConfig()">
+            儲存系統設定
+        </button>
+    </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="processStock('IN')" style="background: var(--success);">進貨 (+)</button>
-                    <button onclick="processStock('OUT')" class="danger">出貨 (-)</button>
-                </div>
-            </div>
+    <!-- 廠商管理 -->
+    <div class="card admin-only">
+        <h3>廠商管理</h3>
 
-            <div id="printSetupPage" class="page card">
-                <h3>標籤列印設定 (A4 標籤紙)</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div><label>上邊距 (mm)</label><input type="number" id="p_mt" step="0.1" value="15.5"></div>
-                    <div><label>左邊距 (mm)</label><input type="number" id="p_ml" step="0.1" value="6.5"></div>
-                    <div><label>水平間距 (mm)</label><input type="number" id="p_gx" step="0.1" value="2.5"></div>
-                    <div><label>垂直間距 (mm)</label><input type="number" id="p_gy" step="0.1" value="0"></div>
-                </div>
-                <button onclick="savePrintConfig()">儲存列印參數</button>
-                
-                <hr>
-                <h4>列印預覽</h4>
-                <div id="printPreviewContainer" style="background: white; border: 1px solid #ccc; padding: 10px; min-height: 200px;">
-                    </div>
-                <button onclick="window.print()" style="margin-top: 10px;">執行列印 (Ctrl+P)</button>
-            </div>
-<div id="inventoryPage" class="page card">
-                <h3>庫存查詢</h3>
-                <input type="text" id="invSearch" placeholder="搜尋型號或廠商..." oninput="renderInventory()">
-                <div class="table-container">
-                    <table id="inventoryTable">
-                        <thead>
-                            <tr>
-                                <th>廠商/型號</th>
-                                <th>顏色/規格</th>
-                                <th>庫存</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
+        <input type="text" id="vCodeInp" placeholder="廠商代碼">
+        <input type="text" id="vNameInp" placeholder="廠商名稱">
 
-            <div id="salesPage" class="page card">
-                <h3>今日營業概況</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                    <div style="background: #f4f1ea; padding: 10px; border-radius: 8px; text-align: center;">
-                        <small>銷售總額</small>
-                        <div id="statRevenue" style="font-size: 20px; font-weight: bold; color: var(--primary);">$0</div>
-                    </div>
-                    <div style="background: #f4f1ea; padding: 10px; border-radius: 8px; text-align: center;">
-                        <small>售出件數</small>
-                        <div id="statQty" style="font-size: 20px; font-weight: bold; color: var(--primary);">0</div>
-                    </div>
-                </div>
-                
-                <h4>今日出貨明細</h4>
-                <div class="table-container">
-                    <table id="salesHistoryTable">
-                        <thead>
-                            <tr>
-                                <th>時間</th>
-                                <th>型號</th>
-                                <th>金額</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <button onclick="exportDailyReport()" style="margin-top: 10px;" class="secondary">產生本日報表</button>
-            </div>
+        <button onclick="addVendor()">新增廠商</button>
 
-            <div id="printPreview" class="no-screen">
-                </div>
+        <div id="vendorList"></div>
+    </div>
 
-        </div> </div> <div id="qrcode-hidden" style="display:none;"></div>
+    <!-- 款式管理 -->
+    <div class="card admin-only">
+        <h3>款式管理</h3>
+
+        <select id="setVendorRel"></select>
+        <input type="text" id="setBraId" placeholder="型號">
+        <input type="number" id="setCost" placeholder="進價">
+        <input type="number" id="setPrice" placeholder="售價">
+
+        <button class="btn-accent" onclick="addModel()">
+            新增款式
+        </button>
+
+        <div id="modelList"></div>
+    </div>
+
+    <!-- 庫存操作 -->
+    <div class="card">
+        <h3>庫存操作</h3>
+
+        <select id="selectVendor"></select>
+        <select id="selectModel"></select>
+
+        <input type="number" id="braQty" value="1" placeholder="數量">
+
+        <button onclick="handleManual('IN')">
+            手動入庫
+        </button>
+
+        <button class="btn-success" onclick="handleManual('OUT')">
+            手動出庫
+        </button>
+    </div>
+
+    <!-- 庫存列表 -->
+    <div class="card">
+        <h3>目前庫存</h3>
+        <div id="stockList"></div>
+    </div>
+
+</div>
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwKljH08lC3P_P0hrey_qrAL2iXnljuXYQwfN1FgmUNfop1PXWNqTfe9GiuHkYOaWceCA/exec"; // <--- 請務必替換成您的 Web App 網址
 
-// 系統全局變數
-let users = [], vendors = [], models = [], inventory = [], colors = [], itemTypes = [], salesHistory = [];
-let sysConfig = { compName: "", taxRate: 0.05 }, printConfig = {};
+/* ===============================
+   🔴 改成你的 Apps Script 網址
+================================ */
+const API_URL = "請貼上你的AppsScript網址";
+
+/* ===============================
+   全域變數（完全雲端版）
+================================ */
 let currentUser = null;
 
-// --- 1. 核心：初始化與資料同步 ---
+let users = [];
+let vendors = [];
+let models = [];
+let inventory = [];
+let colors = [];
+let itemTypes = [];
+let salesHistory = [];
 
-async function init() {
-    showLoading(true);
-    try {
-        const response = await fetch(`${API_URL}?action=getAll`);
-        const data = await response.json();
-        
-        // 轉換二維陣列為 JSON 物件
-        users = arrayToObj(data.users, ["u", "p", "r"]);
-        vendors = arrayToObj(data.vendors, ["code", "name"]);
-        models = arrayToObj(data.models, ["vCode", "braId", "type", "cost", "price"]);
-        inventory = arrayToObj(data.inventory, ["vCode", "braId", "c", "bb", "bc", "bz", "bq"]);
-        colors = arrayToObj(data.colors, ["code", "name"]);
-        itemTypes = data.itemTypes.map(r => r[0]);
-        salesHistory = arrayToObj(data.salesHistory, ["date", "id", "p", "q"]);
-        
-        renderAll(); // 渲染所有介面
-        showLoading(false);
-    } catch (e) {
-        alert("連線失敗，請檢查 API 網址或網路狀態");
-        showLoading(false);
+let compName = "";
+let taxRate = 5;
+
+/* ===============================
+   登入（雲端版）
+================================ */
+async function login(){
+
+    const u = document.getElementById("loginUser").value;
+    const p = document.getElementById("loginPass").value;
+
+    const res = await fetch(API_URL,{
+        method:"POST",
+        body:JSON.stringify({
+            action:"login",
+            payload:{ username:u, password:p }
+        })
+    });
+
+    const data = await res.json();
+
+    if(data.success){
+        currentUser = data.user;
+        sessionStorage.setItem("CUR_USER",JSON.stringify(data.user));
+
+        await loadAllData();
+        checkAuth();
+    }else{
+        alert(data.message);
     }
 }
 
-// 核心同步函數：將所有變數寫回試算表
-async function syncAll() {
-    showLoading(true);
+/* ===============================
+   登出
+================================ */
+function logout(){
+    sessionStorage.removeItem("CUR_USER");
+    location.reload();
+}
+
+/* ===============================
+   權限檢查
+================================ */
+function checkAuth(){
+
+    if(!currentUser){
+        document.getElementById("login-overlay").style.display="flex";
+        return;
+    }
+
+    document.getElementById("login-overlay").style.display="none";
+
+    document.getElementById("userStatus").innerText =
+        `目前使用者：${currentUser.u} (${currentUser.r})`;
+
+    if(currentUser.r === "admin"){
+        document.querySelectorAll(".admin-only")
+            .forEach(el=>el.style.display="block");
+    }else{
+        document.querySelectorAll(".admin-only")
+            .forEach(el=>el.style.display="none");
+    }
+}
+
+/* ===============================
+   雲端讀取全部資料
+================================ */
+async function loadAllData(){
+
+    const res = await fetch(API_URL + "?action=getAll");
+    const data = await res.json();
+
+    users = data.users.slice(1).map(r=>({u:r[0],p:r[1],r:r[2]}));
+
+    vendors = data.vendors.slice(1)
+        .map(r=>({code:r[0],name:r[1]}));
+
+    models = data.models.slice(1)
+        .map(r=>({
+            vCode:r[0],
+            braId:r[1],
+            type:r[2],
+            cost:r[3],
+            price:r[4]
+        }));
+
+    inventory = data.inventory.slice(1)
+        .map(r=>({
+            vCode:r[0],
+            braId:r[1],
+            c:r[2],
+            bb:r[3],
+            bc:r[4],
+            bz:r[5],
+            bq:r[6]
+        }));
+
+    salesHistory = data.salesHistory.slice(1)
+        .map(r=>({
+            date:r[0],
+            id:r[1],
+            p:r[2],
+            q:r[3]
+        }));
+
+    if(data.sysConfig.length > 1){
+        compName = data.sysConfig[1][0];
+        taxRate = parseFloat(data.sysConfig[1][1]);
+    }
+
+    render();
+}
+
+/* ===============================
+   雲端儲存（商用穩定版）
+================================ */
+async function save(){
+
     const payload = {
-        action: "saveAll",
-        payload: {
-            users: objToArray(users, ["u", "p", "r"]),
-            vendors: objToArray(vendors, ["code", "name"]),
-            models: objToArray(models, ["vCode", "braId", "type", "cost", "price"]),
-            inventory: objToArray(inventory, ["vCode", "braId", "c", "bb", "bc", "bz", "bq"]),
-            colors: objToArray(colors, ["code", "name"]),
-            itemTypes: itemTypes.map(t => [t]),
-            salesHistory: objToArray(salesHistory, ["date", "id", "p", "q"]),
-            sysConfig: [[sysConfig.compName, sysConfig.taxRate]],
-            printConfig: [[printConfig.mt, printConfig.ml]] // 依此類推
-        }
+
+        users:[["u","p","r"],
+            ...users.map(x=>[x.u,x.p,x.r])
+        ],
+
+        vendors:[["code","name"],
+            ...vendors.map(x=>[x.code,x.name])
+        ],
+
+        models:[["vCode","braId","type","cost","price"],
+            ...models.map(x=>[
+                x.vCode,x.braId,x.type,x.cost,x.price
+            ])
+        ],
+
+        inventory:[["vCode","braId","c","bb","bc","bz","bq"],
+            ...inventory.map(x=>[
+                x.vCode,x.braId,x.c,x.bb,x.bc,x.bz,x.bq
+            ])
+        ],
+
+        salesHistory:[["date","id","p","q"],
+            ...salesHistory.map(x=>[
+                x.date,x.id,x.p,x.q
+            ])
+        ],
+
+        sysConfig:[["compName","taxRate"],
+            [compName,taxRate]
+        ]
     };
 
-    await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
+    await fetch(API_URL,{
+        method:"POST",
+        body:JSON.stringify({
+            action:"saveAll",
+            payload
+        })
     });
-    showLoading(false);
-    init(); // 儲存後重新讀取
+
+    await loadAllData();
+}
+/* ===============================
+   系統設定
+================================ */
+function updateSysConfig(){
+    compName = document.getElementById("compNameInp").value;
+    taxRate = parseFloat(document.getElementById("taxRateInp").value) || 0;
+    save();
 }
 
-// --- 2. 登入邏輯 ---
+/* ===============================
+   廠商管理
+================================ */
+function addVendor(){
 
-function handleLogin() {
-    const u = document.getElementById('loginUser').value;
-    const p = document.getElementById('loginPass').value;
-    const found = users.find(user => user.u === u && user.p === p);
-    
-    if (found) {
-        currentUser = found;
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('mainSystem').style.display = 'block';
-        document.getElementById('displayUserName').innerText = `你好, ${found.r}`;
-        if (found.r !== "Admin") {
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-        }
-    } else {
-        alert("帳號或密碼錯誤");
+    const code = document.getElementById("vCodeInp").value;
+    const name = document.getElementById("vNameInp").value;
+
+    if(!code || !name) return alert("請輸入完整資料");
+
+    vendors.push({code,name});
+    save();
+
+    document.getElementById("vCodeInp").value="";
+    document.getElementById("vNameInp").value="";
+}
+
+function deleteVendor(index){
+    if(confirm("確定刪除廠商？")){
+        vendors.splice(index,1);
+        save();
     }
 }
 
-// --- 3. 新增與刪除範例 (以帳號管理為例) ---
+/* ===============================
+   款式管理
+================================ */
+function addModel(){
 
-function addUser() {
-    const u = prompt("輸入新帳號:");
-    const p = prompt("輸入新密碼:");
-    const r = prompt("輸入權限 (Admin/User):");
-    if (u && p) {
-        users.push({ u, p, r });
-        syncAll(); // 立即同步至雲端
+    const vCode = document.getElementById("setVendorRel").value;
+    const braId = document.getElementById("setBraId").value;
+    const cost = parseFloat(document.getElementById("setCost").value) || 0;
+    const price = parseFloat(document.getElementById("setPrice").value) || 0;
+
+    if(!vCode || !braId) return alert("資料不完整");
+
+    models.push({vCode,braId,type:"",cost,price});
+    save();
+
+    document.getElementById("setBraId").value="";
+    document.getElementById("setCost").value="";
+    document.getElementById("setPrice").value="";
+}
+
+function deleteModel(index){
+    if(confirm("確定刪除款式？")){
+        models.splice(index,1);
+        save();
     }
 }
 
-function deleteUser(index) {
-    if (confirm("確定刪除此帳號？")) {
-        users.splice(index, 1);
-        syncAll();
+/* ===============================
+   庫存處理
+================================ */
+function handleManual(type){
+
+    const modelStr = document.getElementById("selectModel").value;
+    const qty = parseInt(document.getElementById("braQty").value);
+
+    if(!modelStr || qty<=0)
+        return alert("資料不完整");
+
+    const model = JSON.parse(modelStr);
+    const finalQty = type==="OUT" ? -qty : qty;
+
+    let item = inventory.find(i=>
+        i.vCode===model.vCode &&
+        i.braId===model.braId
+    );
+
+    if(item){
+        item.bq += finalQty;
+    }else{
+        inventory.push({
+            vCode:model.vCode,
+            braId:model.braId,
+            c:"",
+            bb:"",
+            bc:"",
+            bz:"",
+            bq:finalQty
+        });
     }
+
+    inventory = inventory.filter(i=>i.bq>0);
+
+    save();
 }
 
-// --- 工具函數 ---
+/* ===============================
+   畫面渲染
+================================ */
+function render(){
 
-function arrayToObj(arr, fields) {
-    if (!arr || arr.length <= 1) return [];
-    return arr.slice(1).map(row => {
-        let obj = {};
-        fields.forEach((f, i) => obj[f] = row[i]);
-        return obj;
-    });
+    // 公司名稱
+    document.getElementById("compNameInp").value = compName;
+    document.getElementById("taxRateInp").value = taxRate;
+
+    // 廠商下拉
+    const vendorOptions = vendors.map(v=>
+        `<option value="${v.code}">
+            ${v.code}-${v.name}
+         </option>`
+    ).join("");
+
+    document.getElementById("setVendorRel").innerHTML = vendorOptions;
+    document.getElementById("selectVendor").innerHTML = vendorOptions;
+
+    // 款式下拉
+    const selectedVendor = document.getElementById("selectVendor").value;
+
+    const filteredModels = models.filter(m=>
+        m.vCode===selectedVendor
+    );
+
+    document.getElementById("selectModel").innerHTML =
+        filteredModels.map(m=>
+            `<option value='${JSON.stringify(m)}'>
+                ${m.braId}
+             </option>`
+        ).join("");
+
+    // 廠商列表
+    document.getElementById("vendorList").innerHTML =
+        vendors.map((v,i)=>
+            `<div>
+                ${v.code}-${v.name}
+                <button onclick="deleteVendor(${i})"
+                    style="width:auto;background:red">
+                    刪
+                </button>
+             </div>`
+        ).join("");
+
+    // 款式列表
+    document.getElementById("modelList").innerHTML =
+        models.map((m,i)=>
+            `<div>
+                ${m.vCode}-${m.braId}
+                <button onclick="deleteModel(${i})"
+                    style="width:auto;background:red">
+                    刪
+                </button>
+             </div>`
+        ).join("");
+
+    // 庫存列表
+    document.getElementById("stockList").innerHTML =
+        inventory.map(i=>
+            `<div>
+                ${i.vCode}-${i.braId}
+                庫存:${i.bq}
+             </div>`
+        ).join("");
 }
+/* ===============================
+   頁面初始化
+================================ */
+window.onload = async function(){
 
-function objToArray(objs, fields) {
-    const header = fields;
-    const rows = objs.map(o => fields.map(f => o[f]));
-    return [header, ...rows];
-}
+    // 讀取已登入使用者
+    const savedUser = sessionStorage.getItem("CUR_USER");
 
-function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-}
+    if(savedUser){
+        currentUser = JSON.parse(savedUser);
+        await loadAllData();
+        checkAuth();
+    }else{
+        document.getElementById("login-overlay").style.display="flex";
+    }
 
-function showLoading(show) {
-    document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-}
+    // 當廠商改變時自動更新款式
+    document.getElementById("selectVendor")
+        .addEventListener("change",render);
+};
 
-window.onload = init;
 </script>
+
 </body>
 </html>
