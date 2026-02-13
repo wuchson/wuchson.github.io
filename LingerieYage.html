@@ -565,7 +565,36 @@ async function save() {
     function addModel() { const v=document.getElementById('setVendorRel').value, b=document.getElementById('setBraId').value, t=document.getElementById('itemTypeSelect').value, cost=document.getElementById('setCost').value, price=document.getElementById('setPrice').value; if(v&&b){ models.push({vCode:v, braId:b, type:t, cost:parseFloat(cost)||0, price:parseFloat(price)||0}); save(); document.getElementById('setBraId').value=''; document.getElementById('setCost').value=''; document.getElementById('setPrice').value=''; } }
     function deleteModel(idx) { if(confirm("刪除款式？")) { models.splice(idx,1); save(); } }
     function updateModelSelect() { const v = document.getElementById('selectVendor').value; const fil = models.filter(m => m.vCode === v); document.getElementById('selectModel').innerHTML = fil.map(m => `<option value='${JSON.stringify(m)}'>${m.braId}</option>`).join(''); }
-    function updateStock(vCode, braId, c, bb, bc, bz, qty) { let item = inventory.find(i => i.vCode===vCode && i.braId===braId && i.c===c && i.bb===bb && i.bc===bc && i.bz===bz); if(item) item.bq += qty; else inventory.push({vCode, braId, c, bb, bc, bz, bq:qty}); save(); playBeep(); }
+    function updateStock(vCode, braId, c, bb, bc, bz, qty) {
+
+    let item = inventory.find(i =>
+        i.vCode === vCode &&
+        i.braId === braId &&
+        i.c === c &&
+        i.bb === bb &&
+        i.bc === bc &&
+        i.bz === bz
+    );
+
+    if(item){
+        item.bq += qty;
+    } else {
+        inventory.push({
+            vCode,
+            braId,
+            c,
+            bb,
+            bc,
+            bz,
+            bq: qty
+        });
+    }
+
+    // 自動清除 0 庫存
+    inventory = inventory.filter(i => i.bq > 0);
+
+    save();
+}
     
     async function startScan(mode) {
         document.getElementById('scanner-container').style.display = 'block';
@@ -629,6 +658,33 @@ async function save() {
     function exportData() { const today = new Date().toISOString().split('T')[0]; const blob = new Blob([JSON.stringify({v:vendors, m:models, i:inventory, c:colors, it:itemTypes, cn:compName, tr:taxRate, sh:salesHistory})], {type:"application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lingerie_Backup_${today}.json`; a.click(); }
     function triggerImport() { document.getElementById('importFile').click(); }
     function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); vendors=d.v; models=d.m; inventory=d.i; colors=d.c; itemTypes=d.it||itemTypes; compName=d.cn; taxRate=d.tr||5; salesHistory=d.sh||[]; save(); alert("匯入成功！"); } catch(err) { alert("檔案格式不正確"); } }; r.readAsText(f); }
+
+function handleManual(type){
+
+    const model = JSON.parse(document.getElementById('selectModel').value);
+    const color = document.getElementById('selectColor').value;
+    const band = document.getElementById('braBand').value;
+    const cup = document.getElementById('braCup').value;
+    const size = document.getElementById('braSize').value;
+    const qty = parseInt(document.getElementById('braQty').value);
+
+    if(!model || !color || qty <= 0){
+        alert("請選擇完整資料");
+        return;
+    }
+
+    const finalQty = type === "OUT" ? -qty : qty;
+
+    updateStock(
+        model.vCode,
+        model.braId,
+        color,
+        band,
+        cup,
+        size,
+        finalQty
+    );
+}
 
 window.onload = async function() {
     const res = await fetch(API_URL + "?action=getAll");
