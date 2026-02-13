@@ -388,7 +388,11 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwKljH08lC3P_P0hrey_qrA
         }
     }
 
-    let compName = localStorage.getItem('C_N') || "我的內衣小舖";
+    let compName = localStorage.getItem('C_N');
+
+if(!compName || compName === "compName"){
+    compName = "我的內衣小舖";
+}
     let taxRate = parseFloat(localStorage.getItem('T_R')) || 5;
     let vendors = JSON.parse(localStorage.getItem('V_D')) || [];
     let models = JSON.parse(localStorage.getItem('M_D')) || [];
@@ -550,7 +554,15 @@ async function save() {
     }
 
     function adjStockQty(idx, delta) { inventory[idx].bq += delta; save(); }
-    function updateSysConfig() { compName = document.getElementById('compNameInp').value; taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0; save(); }
+    function updateSysConfig() {
+    compName = document.getElementById('compNameInp').value;
+    taxRate = parseFloat(document.getElementById('taxRateInp').value) || 0;
+
+    localStorage.setItem('C_N', compName);
+    localStorage.setItem('T_R', taxRate);
+
+    save();
+}
     function addVendor() { const c=document.getElementById('vCodeInp').value, n=document.getElementById('vNameInp').value; if(c&&n){vendors.push({code:c, name:n}); save(); document.getElementById('vCodeInp').value=''; document.getElementById('vNameInp').value='';} }
     function deleteVendor(idx) { if(confirm("刪除廠商？")) { vendors.splice(idx,1); save(); } }
     
