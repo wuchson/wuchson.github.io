@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park | 全屬性還原版 V22</title>
+    <title>Smart Park | 完整日期檔名版 V23</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -11,7 +11,6 @@
         .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
         
-        /* 費率設定 */
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .config-group { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .config-group label { font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
@@ -39,13 +38,13 @@
         .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; }
         .btn-sub { background: #fff; border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; flex: 1; color: #64748b; }
         .section-title { font-size: 14px; font-weight: bold; color: var(--primary); margin: 15px 0 8px 5px; }
-        .hist-item { padding: 10px; border-bottom: 1px dashed #e2e8f0; font-size: 12px; display: flex; justify-content: space-between; }
+        .hist-item { padding: 10px; border-bottom: 1px dashed #e2e8f0; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業管理 V22</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業管理 V23</h2>
 
     <div class="stats-grid">
         <div class="stat-box"><span class="stat-label">今日營收</span><span id="revD" class="stat-val">$0</span></div>
@@ -75,7 +74,7 @@
     <div class="section-title">🚗 場內車輛 (<span id="countIn">0</span>)</div>
     <div class="card" style="padding:0 16px;"><div id="parkingList"></div></div>
 
-    <div class="section-title">🔍 歷史紀錄</div>
+    <div class="section-title">🔍 歷史紀錄查詢</div>
     <div class="card">
         <input type="text" id="histSearch" placeholder="搜尋歷史車牌..." oninput="renderHistory()">
         <div id="historyResults" style="max-height: 180px; overflow-y: auto;"></div>
@@ -86,13 +85,13 @@
         <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入還原</button>
         <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importComprehensiveCSV(event)">
     </div>
-    <button class="btn-sub" style="width:100%; margin-top:8px; color:var(--danger); border-color:#fee2e2" onclick="clearAll()">⚠️ 清空資料</button>
+    <button class="btn-sub" style="width:100%; margin-top:8px; color:var(--danger); border-color:#fee2e2" onclick="clearAll()">⚠️ 清空資料庫</button>
 </div>
 
 <script>
-    let pkList = JSON.parse(localStorage.getItem('pk_v22_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v22_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_v22_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
+    let pkList = JSON.parse(localStorage.getItem('pk_v23_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v23_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v23_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
     let currentMode = 'timer';
 
     function switchMode(m) {
@@ -107,7 +106,7 @@
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('pk_v22_cfg', JSON.stringify(config));
+        localStorage.setItem('pk_v23_cfg', JSON.stringify(config));
         render();
     }
 
@@ -122,15 +121,15 @@
 
     function render() {
         const list = document.getElementById('parkingList');
-        list.innerHTML = pkList.length ? '' : '<p style="text-align:center; color:#94a3b8; padding:20px 0;">空</p>';
+        list.innerHTML = pkList.length ? '' : '<p style="text-align:center; color:#94a3b8; padding:20px 0; font-size:13px;">場內無車輛</p>';
         pkList.forEach((car, idx) => {
             list.innerHTML += `<div class="car-item"><div><b>${car.plate}<span class="badge ${car.mode==='fixed'?'badge-fixed':'badge-timer'}">${car.mode==='fixed'?'單':'計'}</span></b><div style="font-size:11px;color:#64748b;">${new Date(car.time).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</div><div class="fee-tag">$${calculateFee(car)}</div></div><button class="btn-checkout" onclick="checkOut(${idx})">結帳</button></div>`;
         });
         document.getElementById('countIn').innerText = pkList.length;
         updateStats();
         renderHistory();
-        localStorage.setItem('pk_v22_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v22_hist', JSON.stringify(pkHist));
+        localStorage.setItem('pk_v23_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v23_hist', JSON.stringify(pkHist));
     }
 
     function updateStats() {
@@ -145,7 +144,7 @@
         const query = document.getElementById('histSearch').value.toUpperCase();
         const results = document.getElementById('historyResults');
         const filtered = pkHist.filter(h => h.plate.includes(query)).reverse();
-        results.innerHTML = filtered.length ? '' : '<p style="text-align:center; color:#94a3b8; padding:10px;">無</p>';
+        results.innerHTML = filtered.length ? '' : '<p style="text-align:center; color:#94a3b8; padding:10px; font-size:12px;">無歷史紀錄</p>';
         filtered.forEach(h => {
             results.innerHTML += `<div class="hist-item"><div><b>${h.plate}</b><div style="font-size:10px; color:#94a3b8;">${new Date(h.exitTime).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</div></div><b>$${h.fee}</b></div>`;
         });
@@ -168,8 +167,11 @@
         }
     }
 
-    // --- V22 強化匯出：包含模式欄位 ---
+    // --- V23 強化匯出：日期檔名 + 完整屬性 ---
     function exportFullReport() {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}_${String(now.getDate()).padStart(2, '0')}`;
+        
         let csv = "\ufeff車牌,進場時間,出場時間,金額,模式,狀態\n";
         pkList.forEach(c => {
             csv += `${c.plate},${new Date(c.time).toLocaleString()},--,${calculateFee(c)},${c.mode},場內\n`;
@@ -177,14 +179,15 @@
         pkHist.forEach(h => {
             csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee},completed,已結帳\n`;
         });
+
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `全備份_V22_${new Date().getTime()}.csv`;
+        a.download = `停車費_${dateStr}.csv`;
         a.click();
     }
 
-    // --- V22 強化匯入：還原計時/單次模式 ---
+    // --- V23 強化匯入：還原模式 ---
     function importComprehensiveCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -193,39 +196,28 @@
             const lines = ev.target.result.split(/\r?\n/);
             let newPkList = [];
             let newPkHist = [];
-            
             lines.forEach((line, i) => {
                 if (i === 0 || !line.trim()) return;
                 const cols = line.split(',');
                 if (cols.length >= 5) {
                     const plate = cols[0].trim();
                     const cleanDate = (s) => new Date(s.replace(/[上下]午/g, '').replace(/[年月]/g, '/').replace(/日/g, '')).getTime();
-                    
                     const tEntry = cleanDate(cols[1]);
                     const tExitStr = cols[2].trim();
                     const fee = parseInt(cols[3].replace(/[^0-9]/g, '')) || 0;
-                    const mode = cols[4].trim(); // 讀取模式
+                    const mode = cols[4].trim();
 
                     if (plate && !isNaN(tEntry)) {
                         if (tExitStr === "--" || tExitStr === "") {
-                            // 還原場內車輛的模式與金額
-                            newPkList.push({ 
-                                plate: plate, 
-                                time: tEntry, 
-                                mode: (mode === 'fixed') ? 'fixed' : 'timer', 
-                                fixedAmount: (mode === 'fixed') ? fee : 0 
-                            });
+                            newPkList.push({ plate, time: tEntry, mode: (mode==='fixed'?'fixed':'timer'), fixedAmount: (mode==='fixed'?fee:0) });
                         } else {
                             const tExit = cleanDate(tExitStr);
-                            if (!isNaN(tExit)) newPkHist.push({ plate, entryTime: tEntry, exitTime: tExit, fee: fee });
+                            if (!isNaN(tExit)) newPkHist.push({ plate, entryTime: tEntry, exitTime: tExit, fee });
                         }
                     }
                 }
             });
-
-            if (confirm(`解析成功！是否覆蓋現有資料？`)) {
-                pkList = newPkList; pkHist = newPkHist; render();
-            }
+            if (confirm("是否覆蓋現有資料並還原備份？")) { pkList = newPkList; pkHist = newPkHist; render(); }
         };
         reader.readAsText(file);
     }
