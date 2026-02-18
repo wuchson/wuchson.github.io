@@ -3,52 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park Ultimate | 終極修復版</title>
+    <title>Smart Park | 純數據穩定版</title>
     <style>
-        :root {
-            --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b;
-            --bg: #f1f5f9; --text: #0f172a; --white: #ffffff;
-        }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 600px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px; }
-
-        /* 統計看板 */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .stat-box { background: white; padding: 10px 5px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
         .stat-label { font-size: 11px; color: #64748b; font-weight: bold; }
         .stat-val { font-size: 15px; font-weight: bold; display: block; margin-top: 4px; }
-
-        /* 費率設定 */
         .config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .config-group { display: flex; flex-direction: column; }
         .config-group label { font-size: 10px; color: #475569; margin-bottom: 4px; font-weight: bold; }
-        .config-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; text-align: center; color: #000; outline: none; }
-
-        /* 列表顯示 */
-        .car-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f1f5f9; }
+        .config-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; text-align: center; outline: none; }
+        .car-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; }
         .car-info b { font-size: 18px; color: #000; display: block; }
-        .entry-stamp { font-size: 11px; color: #64748b; margin: 4px 0; background: #f8fafc; display: inline-block; padding: 2px 5px; border-radius: 4px; }
-        .duration-text { font-size: 13px; color: var(--primary); font-weight: 600; }
-        .fee-tag { color: var(--warning); font-weight: bold; font-size: 22px; margin-top: 2px; }
-        
+        .entry-stamp { font-size: 11px; color: #64748b; margin: 4px 0; background: #f8fafc; padding: 2px 5px; border-radius: 4px; display: inline-block; }
+        .fee-tag { color: var(--warning); font-weight: bold; font-size: 22px; }
         input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; margin-bottom: 8px; outline: none; }
         .mode-selector { display: flex; background: #e2e8f0; border-radius: 8px; padding: 4px; margin-bottom: 12px; }
         .mode-btn { flex: 1; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; }
-        .mode-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
+        .mode-btn.active { background: var(--white); color: var(--primary); }
         button { cursor: pointer; border: none; border-radius: 10px; font-weight: bold; }
         .btn-main { background: var(--primary); color: #fff; padding: 14px; width: 100%; font-size: 16px; }
         .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 15px; }
-        .btn-sm { padding: 8px 12px; font-size: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: var(--text); }
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; vertical-align: middle; }
+        .btn-sm { padding: 8px 12px; font-size: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: var(--text); flex: 1; min-width: 120px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V14</h2>
 
     <div class="stats-grid">
         <div class="stat-box" style="border-color: var(--primary);"><span class="stat-label">今日營收</span><span id="revD" class="stat-val">$0</span></div>
@@ -58,59 +45,42 @@
 
     <div class="card">
         <div class="config-grid">
-            <div class="config-group"><label>30分基底($)</label><input type="number" id="rate30" value="20" onchange="saveCfg()"></div>
-            <div class="config-group"><label>1小時高($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
-            <div class="config-group"><label>單日上限($)</label><input type="number" id="rateMax" value="200" onchange="saveCfg()"></div>
+            <div class="config-group"><label>30分基底</label><input type="number" id="rate30" value="20" onchange="saveCfg()"></div>
+            <div class="config-group"><label>1小時高</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
+            <div class="config-group"><label>單日上限</label><input type="number" id="rateMax" value="200" onchange="saveCfg()"></div>
         </div>
     </div>
 
     <div class="card">
-        <div class="mode-selector">
-            <button class="mode-btn active" id="modeTimer" onclick="switchMode('timer')">⏳ 計時模式</button>
-            <button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">💰 固定金額</button>
-        </div>
+        <div class="mode-selector"><button class="mode-btn active" id="modeTimer" onclick="switchMode('timer')">計時</button><button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">單次</button></div>
         <input type="text" id="plateInput" placeholder="輸入車牌號碼">
-        <input type="number" id="fixedAmountInput" placeholder="輸入單次收費金額" style="display:none;">
+        <input type="number" id="fixedAmountInput" placeholder="輸入金額" style="display:none;">
         <button class="btn-main" onclick="checkIn()">登記進場</button>
     </div>
 
     <div class="card" style="padding:0; overflow:hidden;">
-        <div style="padding:10px; background:#f8fafc; border-bottom:1px solid #eee;">
-            <input type="text" id="searchInput" style="margin-bottom:0; padding:8px; font-size:14px;" placeholder="🔍 搜尋車牌..." oninput="render()">
-        </div>
+        <input type="text" id="searchInput" style="margin:10px; width:calc(100% - 20px);" placeholder="🔍 搜尋車牌..." oninput="render()">
         <div id="parkingList"></div>
     </div>
 
-    <div class="card" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
-        <button class="btn-sm" onclick="exportExcel()">📥 匯出完整報表 (CSV)</button>
-        <button class="btn-sm" onclick="document.getElementById('importFile').click()">📤 匯入歷史資料 (CSV)</button>
+    <div class="card" style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <button class="btn-sm" onclick="exportHistory()">📥 匯出歷史收費 (可匯入)</button>
+        <button class="btn-sm" onclick="exportCurrent()">📤 匯出場內車輛 (備份)</button>
+        <button class="btn-sm" onclick="document.getElementById('importFile').click()">🚀 匯入歷史紀錄</button>
         <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importCSV(event)">
         <button class="btn-sm" style="color:var(--danger)" onclick="clearData()">⚠️ 清空系統</button>
     </div>
 </div>
 
 <script>
-    // 使用專屬儲存空間以防混淆
-    let parkingData = JSON.parse(localStorage.getItem('parking_list_v13')) || [];
-    let historyData = JSON.parse(localStorage.getItem('parking_hist_v13')) || [];
-    let config = JSON.parse(localStorage.getItem('parking_cfg_v13')) || { r30: 20, r60: 40, rMax: 200 };
+    let parkingData = JSON.parse(localStorage.getItem('pk_list_v14')) || [];
+    let historyData = JSON.parse(localStorage.getItem('pk_hist_v14')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_cfg_v14')) || { r30: 20, r60: 40, rMax: 200 };
     let currentMode = 'timer';
 
-    function switchMode(mode) {
-        currentMode = mode;
-        document.getElementById('modeTimer').classList.toggle('active', mode === 'timer');
-        document.getElementById('modeFixed').classList.toggle('active', mode === 'fixed');
-        document.getElementById('fixedAmountInput').style.display = (mode === 'fixed') ? 'block' : 'none';
-    }
-
-    function saveCfg() {
-        config.r30 = parseInt(document.getElementById('rate30').value) || 0;
-        config.r60 = parseInt(document.getElementById('rate60').value) || 0;
-        config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('parking_cfg_v13', JSON.stringify(config));
-        render();
-    }
-
+    function switchMode(m) { currentMode = m; document.getElementById('modeTimer').classList.toggle('active', m === 'timer'); document.getElementById('modeFixed').classList.toggle('active', m === 'fixed'); document.getElementById('fixedAmountInput').style.display = (m === 'fixed') ? 'block' : 'none'; }
+    function saveCfg() { config.r30 = parseInt(document.getElementById('rate30').value); config.r60 = parseInt(document.getElementById('rate60').value); config.rMax = parseInt(document.getElementById('rateMax').value); localStorage.setItem('pk_cfg_v14', JSON.stringify(config)); render(); }
+    
     function calculateFee(car) {
         if (car.mode === 'fixed') return car.fixedAmount;
         const totalMins = Math.floor((Date.now() - car.time) / 60000); 
@@ -122,43 +92,27 @@
         return Math.min(fee, config.rMax);
     }
 
-    function formatTime(ts) {
-        const d = new Date(ts);
-        return `${d.getMonth()+1}/${d.getDate()} ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false})}`;
-    }
-
     function render() {
         const list = document.getElementById('parkingList');
         const kw = document.getElementById('searchInput').value.toUpperCase();
         list.innerHTML = '';
-        
-        parkingData.filter(c => c.plate.includes(kw)).forEach((car) => {
-            const idx = parkingData.indexOf(car);
+        parkingData.filter(c => c.plate.includes(kw)).forEach((car, idx) => {
             const diff = Math.floor((Date.now() - car.time) / 60000);
-            list.innerHTML += `
-                <div class="car-item">
-                    <div style="flex: 1;">
-                        <b>${car.plate}<span class="badge ${car.mode==='fixed'?'badge-fixed':'badge-timer'}">${car.mode==='fixed'?'固定':'計時'}</span></b>
-                        <div class="entry-stamp">📅 進：${formatTime(car.time)}</div>
-                        <div class="duration-text">🕒 停：${Math.floor(diff/60)}時${diff%60}分</div>
-                        <div class="fee-tag">$${calculateFee(car)}</div>
-                    </div>
-                    <button class="btn-checkout" onclick="checkOut(${idx})">結帳</button>
-                </div>`;
+            list.innerHTML += `<div class="car-item"><div><b>${car.plate}</b><div class="entry-stamp">進：${new Date(car.time).toLocaleString()}</div><div style="font-size:12px; color:var(--primary)">停：${Math.floor(diff/60)}時${diff%60}分</div><div class="fee-tag">$${calculateFee(car)}</div></div><button class="btn-checkout" onclick="checkOut(${idx})">結帳</button></div>`;
         });
         updateRevenue();
-        localStorage.setItem('parking_list_v13', JSON.stringify(parkingData));
-        localStorage.setItem('parking_hist_v13', JSON.stringify(historyData));
+        localStorage.setItem('pk_list_v14', JSON.stringify(parkingData));
+        localStorage.setItem('pk_hist_v14', JSON.stringify(historyData));
     }
 
     function updateRevenue() {
         const now = new Date();
         let d=0, m=0, y=0;
         historyData.forEach(h => {
-            const date = new Date(h.exitTime);
-            if (date.toDateString() === now.toDateString()) d += h.fee;
-            if (date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) m += h.fee;
-            if (date.getFullYear() === now.getFullYear()) y += h.fee;
+            const dt = new Date(h.exitTime);
+            if (dt.toDateString() === now.toDateString()) d += h.fee;
+            if (dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear()) m += h.fee;
+            if (dt.getFullYear() === now.getFullYear()) y += h.fee;
         });
         document.getElementById('revD').innerText = `$${d.toLocaleString()}`;
         document.getElementById('revM').innerText = `$${m.toLocaleString()}`;
@@ -167,86 +121,74 @@
 
     function checkIn() {
         const p = document.getElementById('plateInput');
-        const f = document.getElementById('fixedAmountInput');
         if (!p.value) return alert('請輸入車牌');
-        parkingData.push({ plate: p.value.toUpperCase(), time: Date.now(), mode: currentMode, fixedAmount: parseInt(f.value)||0 });
-        p.value = ''; f.value = ''; render();
+        parkingData.push({ plate: p.value.toUpperCase(), time: Date.now(), mode: currentMode, fixedAmount: parseInt(document.getElementById('fixedAmountInput').value) || 0 });
+        p.value = ''; render();
     }
 
     function checkOut(idx) {
         const car = parkingData[idx];
         const fee = calculateFee(car);
-        if (confirm(`車牌：${car.plate}\n應付金額：$${fee}`)) {
+        if (confirm(`結帳：${car.plate}\n金額：$${fee}`)) {
             historyData.push({ plate: car.plate, entryTime: car.time, exitTime: Date.now(), fee: fee });
             parkingData.splice(idx, 1);
             render();
         }
     }
 
-    function exportExcel() {
-        let csv = "\ufeff=== 區塊一：場內未結清車輛 ===\n";
-        csv += "車牌,進場時間,目前停放時間,目前預估金額,狀態\n";
-        parkingData.forEach(c => {
-            const diff = Math.floor((Date.now() - c.time) / 60000);
-            csv += `${c.plate},${new Date(c.time).toLocaleString()},${Math.floor(diff/60)}時${diff%60}分,${calculateFee(c)},場內車輛\n`;
-        });
-        csv += "\n=== 區塊二：已結帳歷史紀錄 ===\n";
-        csv += "車牌,進場時間,出場時間,實收金額,狀態\n";
-        historyData.forEach(h => {
-            csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee},已結帳\n`;
-        });
+    // --- 分開匯出功能 ---
+    function exportHistory() {
+        let csv = "\ufeff車牌,進場時間,出場時間,金額\n";
+        historyData.forEach(h => csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee}\n`);
+        downloadCSV(csv, "歷史營收報表");
+    }
+
+    function exportCurrent() {
+        let csv = "\ufeff車牌,進場時間,預估金額\n";
+        parkingData.forEach(c => csv += `${c.plate},${new Date(c.time).toLocaleString()},${calculateFee(c)}\n`);
+        downloadCSV(csv, "場內車輛備份");
+    }
+
+    function downloadCSV(csv, name) {
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `停車報表_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`;
+        a.download = `${name}_${new Date().toLocaleDateString()}.csv`;
         a.click();
     }
 
-    // --- 強化版匯入邏輯：直接讀取 CSV 行內容 ---
+    // --- 強化匯入邏輯 ---
     function importCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const content = ev.target.result;
-            const lines = content.split(/\r?\n/); // 支援不同平台的換行符
-            const newHist = [];
-            
-            lines.forEach(line => {
-                const cols = line.split(',');
-                // 只要這行有 5 個欄位且包含「已結帳」就進行抓取
-                if (cols.length >= 5 && cols[4].includes("已結帳")) {
-                    const plate = cols[0].trim();
-                    const entryT = new Date(cols[1]).getTime();
-                    const exitT = new Date(cols[2]).getTime();
-                    const fee = parseInt(cols[3]);
-                    
-                    if (plate && !isNaN(entryT) && !isNaN(exitT)) {
-                        newHist.push({ plate, entryTime: entryT, exitTime: exitT, fee: fee || 0 });
-                    }
+            const lines = ev.target.result.split('\n');
+            const imported = [];
+            for(let i = 1; i < lines.length; i++) {
+                const col = lines[i].split(',');
+                if (col.length >= 4) {
+                    const plate = col[0].trim();
+                    const eT = new Date(col[1]).getTime();
+                    const xT = new Date(col[2]).getTime();
+                    const fee = parseInt(col[3]);
+                    if (plate && !isNaN(eT) && !isNaN(xT)) imported.push({ plate, entryTime: eT, exitTime: xT, fee });
                 }
-            });
-
-            if (newHist.length > 0) {
-                if (confirm(`偵測到 ${newHist.length} 筆已結帳紀錄，是否合併至系統？`)) {
-                    // 合併資料並去重（以進場與出場時間相同為準）
-                    historyData = [...historyData, ...newHist];
-                    // 簡單去重
-                    historyData = Array.from(new Set(historyData.map(a => JSON.stringify(a)))).map(a => JSON.parse(a));
-                    render();
-                    alert('資料匯入並更新成功！');
-                }
-            } else {
-                alert('匯入失敗：格式不正確。請確保檔案是從本系統「匯出」的原始 CSV。');
             }
+            if (imported.length > 0) {
+                if(confirm(`找到 ${imported.length} 筆紀錄，是否匯入？`)) {
+                    historyData = [...historyData, ...imported];
+                    render();
+                    alert('匯入成功！');
+                }
+            } else { alert('匯入失敗：格式不正確。請使用本系統匯出的「歷史收費」檔案。'); }
         };
         reader.readAsText(file);
     }
 
-    function clearData() { if (confirm("確定清空所有數據？(不可恢復)")) { localStorage.clear(); location.reload(); } }
-    setInterval(render, 15000); 
+    function clearData() { if (confirm("確定清空所有數據？")) { localStorage.clear(); location.reload(); } }
+    setInterval(render, 30000); 
     render();
 </script>
-
 </body>
 </html>
