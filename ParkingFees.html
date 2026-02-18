@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>停車收費系統</title>
+    <title>Smart Park Ultimate | 終極修復版</title>
     <style>
         :root {
             --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b;
@@ -26,7 +26,7 @@
         .config-group label { font-size: 10px; color: #475569; margin-bottom: 4px; font-weight: bold; }
         .config-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; text-align: center; color: #000; outline: none; }
 
-        /* 列表 */
+        /* 列表顯示 */
         .car-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f1f5f9; }
         .car-info b { font-size: 18px; color: #000; display: block; }
         .entry-stamp { font-size: 11px; color: #64748b; margin: 4px 0; background: #f8fafc; display: inline-block; padding: 2px 5px; border-radius: 4px; }
@@ -43,8 +43,6 @@
         .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 15px; }
         .btn-sm { padding: 8px 12px; font-size: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: var(--text); }
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; vertical-align: middle; }
-        .badge-timer { background: #dbeafe; color: #1e40af; }
-        .badge-fixed { background: #fef3c7; color: #92400e; }
     </style>
 </head>
 <body>
@@ -92,9 +90,10 @@
 </div>
 
 <script>
-    let parkingData = JSON.parse(localStorage.getItem('v12_list')) || [];
-    let historyData = JSON.parse(localStorage.getItem('v12_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('v12_cfg')) || { r30: 20, r60: 40, rMax: 200 };
+    // 使用專屬儲存空間以防混淆
+    let parkingData = JSON.parse(localStorage.getItem('parking_list_v13')) || [];
+    let historyData = JSON.parse(localStorage.getItem('parking_hist_v13')) || [];
+    let config = JSON.parse(localStorage.getItem('parking_cfg_v13')) || { r30: 20, r60: 40, rMax: 200 };
     let currentMode = 'timer';
 
     function switchMode(mode) {
@@ -108,7 +107,7 @@
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('v12_cfg', JSON.stringify(config));
+        localStorage.setItem('parking_cfg_v13', JSON.stringify(config));
         render();
     }
 
@@ -148,8 +147,8 @@
                 </div>`;
         });
         updateRevenue();
-        localStorage.setItem('v12_list', JSON.stringify(parkingData));
-        localStorage.setItem('v12_hist', JSON.stringify(historyData));
+        localStorage.setItem('parking_list_v13', JSON.stringify(parkingData));
+        localStorage.setItem('parking_hist_v13', JSON.stringify(historyData));
     }
 
     function updateRevenue() {
@@ -186,10 +185,10 @@
 
     function exportExcel() {
         let csv = "\ufeff=== 區塊一：場內未結清車輛 ===\n";
-        csv += "車牌,進場時間,停放時長,目前預估金額,狀態\n";
+        csv += "車牌,進場時間,目前停放時間,目前預估金額,狀態\n";
         parkingData.forEach(c => {
             const diff = Math.floor((Date.now() - c.time) / 60000);
-            csv += `${c.plate},${new Date(c.time).toLocaleString()},${Math.floor(diff/60)}時${diff%60}分,${calculateFee(c)},在場未結\n`;
+            csv += `${c.plate},${new Date(c.time).toLocaleString()},${Math.floor(diff/60)}時${diff%60}分,${calculateFee(c)},場內車輛\n`;
         });
         csv += "\n=== 區塊二：已結帳歷史紀錄 ===\n";
         csv += "車牌,進場時間,出場時間,實收金額,狀態\n";
@@ -199,47 +198,52 @@
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `停車場報表_${new Date().toLocaleDateString()}.csv`;
+        a.download = `停車報表_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`;
         a.click();
     }
 
-    // --- 核心修復：智慧辨識匯入 ---
+    // --- 強化版匯入邏輯：直接讀取 CSV 行內容 ---
     function importCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const lines = ev.target.result.split('\n');
+            const content = ev.target.result;
+            const lines = content.split(/\r?\n/); // 支援不同平台的換行符
             const newHist = [];
+            
             lines.forEach(line => {
                 const cols = line.split(',');
-                // 邏輯：判斷該行是否包含「已結帳」關鍵字，且欄位長度足夠
-                if (cols.length >= 5 && cols[4].trim().includes("已結帳")) {
+                // 只要這行有 5 個欄位且包含「已結帳」就進行抓取
+                if (cols.length >= 5 && cols[4].includes("已結帳")) {
                     const plate = cols[0].trim();
                     const entryT = new Date(cols[1]).getTime();
                     const exitT = new Date(cols[2]).getTime();
-                    const feeAmt = parseInt(cols[3]);
+                    const fee = parseInt(cols[3]);
                     
                     if (plate && !isNaN(entryT) && !isNaN(exitT)) {
-                        newHist.push({ plate: plate, entryTime: entryT, exitTime: exitT, fee: feeAmt || 0 });
+                        newHist.push({ plate, entryTime: entryT, exitTime: exitT, fee: fee || 0 });
                     }
                 }
             });
-            
+
             if (newHist.length > 0) {
-                if(confirm(`偵測到 ${newHist.length} 筆已結帳紀錄，是否匯入？`)) {
-                    historyData = newHist;
+                if (confirm(`偵測到 ${newHist.length} 筆已結帳紀錄，是否合併至系統？`)) {
+                    // 合併資料並去重（以進場與出場時間相同為準）
+                    historyData = [...historyData, ...newHist];
+                    // 簡單去重
+                    historyData = Array.from(new Set(historyData.map(a => JSON.stringify(a)))).map(a => JSON.parse(a));
                     render();
-                    alert('匯入成功，營收看板已更新！');
+                    alert('資料匯入並更新成功！');
                 }
             } else {
-                alert('匯入失敗：找不到有效的「已結帳」紀錄。請確保檔案是從本系統匯出的 CSV。');
+                alert('匯入失敗：格式不正確。請確保檔案是從本系統「匯出」的原始 CSV。');
             }
         };
         reader.readAsText(file);
     }
 
-    function clearData() { if (confirm("確定清空？")) { localStorage.clear(); location.reload(); } }
+    function clearData() { if (confirm("確定清空所有數據？(不可恢復)")) { localStorage.clear(); location.reload(); } }
     setInterval(render, 15000); 
     render();
 </script>
