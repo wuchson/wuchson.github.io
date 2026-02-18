@@ -3,112 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park | 純數據穩定版</title>
+    <title>Smart Park Ultimate | V15 萬用相容版</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
-        * { box-sizing: border-box; }
-        body { font-family: system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .card { background: var(--white); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 12px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .stat-box { background: white; padding: 10px 5px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.5; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
+        
+        /* 營收看板 */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-box { background: white; padding: 12px 5px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
         .stat-label { font-size: 11px; color: #64748b; font-weight: bold; }
-        .stat-val { font-size: 15px; font-weight: bold; display: block; margin-top: 4px; }
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .config-group { display: flex; flex-direction: column; }
-        .config-group label { font-size: 10px; color: #475569; margin-bottom: 4px; font-weight: bold; }
-        .config-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; text-align: center; outline: none; }
-        .car-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; }
-        .car-info b { font-size: 18px; color: #000; display: block; }
-        .entry-stamp { font-size: 11px; color: #64748b; margin: 4px 0; background: #f8fafc; padding: 2px 5px; border-radius: 4px; display: inline-block; }
-        .fee-tag { color: var(--warning); font-weight: bold; font-size: 22px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; margin-bottom: 8px; outline: none; }
-        .mode-selector { display: flex; background: #e2e8f0; border-radius: 8px; padding: 4px; margin-bottom: 12px; }
-        .mode-btn { flex: 1; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; }
-        .mode-btn.active { background: var(--white); color: var(--primary); }
-        button { cursor: pointer; border: none; border-radius: 10px; font-weight: bold; }
-        .btn-main { background: var(--primary); color: #fff; padding: 14px; width: 100%; font-size: 16px; }
-        .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 15px; }
-        .btn-sm { padding: 8px 12px; font-size: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: var(--text); flex: 1; min-width: 120px; }
+        .stat-val { font-size: 16px; font-weight: 900; display: block; margin-top: 4px; color: var(--primary); }
+
+        /* 輸入與列表 */
+        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; margin-bottom: 10px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        .car-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .car-item:last-child { border-bottom: none; }
+        .fee-tag { color: var(--warning); font-weight: 800; font-size: 24px; }
+        
+        /* 按鈕樣式 */
+        button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; transition: 0.2s; active { transform: scale(0.98); } }
+        .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; }
+        .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; font-size: 14px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .btn-sub { background: #fff; border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V14</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車管理系統 V15</h2>
 
     <div class="stats-grid">
-        <div class="stat-box" style="border-color: var(--primary);"><span class="stat-label">今日營收</span><span id="revD" class="stat-val">$0</span></div>
-        <div class="stat-box" style="border-color: var(--success);"><span class="stat-label">本月營收</span><span id="revM" class="stat-val">$0</span></div>
-        <div class="stat-box" style="border-color: #8b5cf6;"><span class="stat-label">年度營收</span><span id="revY" class="stat-val">$0</span></div>
+        <div class="stat-box" style="border-color: var(--primary);"><span class="stat-label">今日</span><span id="revD" class="stat-val">$0</span></div>
+        <div class="stat-box" style="border-color: var(--success);"><span class="stat-label">本月</span><span id="revM" class="stat-val">$0</span></div>
+        <div class="stat-box" style="border-color: #8b5cf6;"><span class="stat-label">年度</span><span id="revY" class="stat-val">$0</span></div>
     </div>
 
     <div class="card">
-        <div class="config-grid">
-            <div class="config-group"><label>30分基底</label><input type="number" id="rate30" value="20" onchange="saveCfg()"></div>
-            <div class="config-group"><label>1小時高</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
-            <div class="config-group"><label>單日上限</label><input type="number" id="rateMax" value="200" onchange="saveCfg()"></div>
-        </div>
+        <input type="text" id="plateInput" placeholder="輸入車牌號碼 (例: ABC-1234)">
+        <button class="btn-main" onclick="checkIn()">🚗 登記進場</button>
     </div>
 
-    <div class="card">
-        <div class="mode-selector"><button class="mode-btn active" id="modeTimer" onclick="switchMode('timer')">計時</button><button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">單次</button></div>
-        <input type="text" id="plateInput" placeholder="輸入車牌號碼">
-        <input type="number" id="fixedAmountInput" placeholder="輸入金額" style="display:none;">
-        <button class="btn-main" onclick="checkIn()">登記進場</button>
-    </div>
-
-    <div class="card" style="padding:0; overflow:hidden;">
-        <input type="text" id="searchInput" style="margin:10px; width:calc(100% - 20px);" placeholder="🔍 搜尋車牌..." oninput="render()">
+    <div class="card" style="padding-top:0; padding-bottom:0;">
+        <input type="text" id="searchInput" style="margin-top:15px;" placeholder="🔍 搜尋車牌..." oninput="render()">
         <div id="parkingList"></div>
     </div>
 
-    <div class="card" style="display: flex; flex-wrap: wrap; gap: 8px;">
-        <button class="btn-sm" onclick="exportHistory()">📥 匯出歷史收費 (可匯入)</button>
-        <button class="btn-sm" onclick="exportCurrent()">📤 匯出場內車輛 (備份)</button>
-        <button class="btn-sm" onclick="document.getElementById('importFile').click()">🚀 匯入歷史紀錄</button>
-        <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importCSV(event)">
-        <button class="btn-sm" style="color:var(--danger)" onclick="clearData()">⚠️ 清空系統</button>
+    <div class="btn-group">
+        <button class="btn-sub" onclick="exportFullReport()">📥 匯出完整報表</button>
+        <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入歷史資料</button>
+        <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importAnyCSV(event)">
+        <button class="btn-sub" style="grid-column: span 2; color: var(--danger);" onclick="clearAll()">⚠️ 清空系統資料</button>
     </div>
 </div>
 
 <script>
-    let parkingData = JSON.parse(localStorage.getItem('pk_list_v14')) || [];
-    let historyData = JSON.parse(localStorage.getItem('pk_hist_v14')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_cfg_v14')) || { r30: 20, r60: 40, rMax: 200 };
-    let currentMode = 'timer';
+    // 使用新的資料庫 key 避免衝突
+    let pkList = JSON.parse(localStorage.getItem('pk_v15_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v15_hist')) || [];
+    const cfg = { r30: 20, r60: 40, rMax: 200 };
 
-    function switchMode(m) { currentMode = m; document.getElementById('modeTimer').classList.toggle('active', m === 'timer'); document.getElementById('modeFixed').classList.toggle('active', m === 'fixed'); document.getElementById('fixedAmountInput').style.display = (m === 'fixed') ? 'block' : 'none'; }
-    function saveCfg() { config.r30 = parseInt(document.getElementById('rate30').value); config.r60 = parseInt(document.getElementById('rate60').value); config.rMax = parseInt(document.getElementById('rateMax').value); localStorage.setItem('pk_cfg_v14', JSON.stringify(config)); render(); }
-    
     function calculateFee(car) {
-        if (car.mode === 'fixed') return car.fixedAmount;
-        const totalMins = Math.floor((Date.now() - car.time) / 60000); 
-        const hours = Math.floor(totalMins / 60);
-        let fee = hours * config.r60;
-        const minsInCurrentHour = totalMins % 60;
-        if (minsInCurrentHour <= 30) fee += config.r30;
-        else fee += Math.min(config.r30 + (minsInCurrentHour - 30), config.r60);
-        return Math.min(fee, config.rMax);
+        const mins = Math.floor((Date.now() - car.time) / 60000);
+        const hrs = Math.floor(mins / 60);
+        let fee = hrs * cfg.r60;
+        const rem = mins % 60;
+        if (rem <= 30) fee += cfg.r30;
+        else fee += Math.min(cfg.r30 + (rem - 30), cfg.r60);
+        return Math.min(fee, cfg.rMax);
     }
 
     function render() {
         const list = document.getElementById('parkingList');
         const kw = document.getElementById('searchInput').value.toUpperCase();
         list.innerHTML = '';
-        parkingData.filter(c => c.plate.includes(kw)).forEach((car, idx) => {
+        
+        pkList.filter(c => c.plate.includes(kw)).forEach((car, idx) => {
             const diff = Math.floor((Date.now() - car.time) / 60000);
-            list.innerHTML += `<div class="car-item"><div><b>${car.plate}</b><div class="entry-stamp">進：${new Date(car.time).toLocaleString()}</div><div style="font-size:12px; color:var(--primary)">停：${Math.floor(diff/60)}時${diff%60}分</div><div class="fee-tag">$${calculateFee(car)}</div></div><button class="btn-checkout" onclick="checkOut(${idx})">結帳</button></div>`;
+            list.innerHTML += `
+                <div class="car-item">
+                    <div>
+                        <b>${car.plate}</b>
+                        <div style="font-size:11px; color:#64748b;">進場: ${new Date(car.time).toLocaleString()}</div>
+                        <div style="font-size:12px; color:var(--primary); font-weight:bold;">已停: ${Math.floor(diff/60)}時${diff%60}分</div>
+                        <div class="fee-tag">$${calculateFee(car)}</div>
+                    </div>
+                    <button class="btn-checkout" onclick="checkOut(${idx})">結帳</button>
+                </div>`;
         });
-        updateRevenue();
-        localStorage.setItem('pk_list_v14', JSON.stringify(parkingData));
-        localStorage.setItem('pk_hist_v14', JSON.stringify(historyData));
+        updateStats();
+        localStorage.setItem('pk_v15_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v15_hist', JSON.stringify(pkHist));
     }
 
-    function updateRevenue() {
+    function updateStats() {
         const now = new Date();
         let d=0, m=0, y=0;
-        historyData.forEach(h => {
+        pkHist.forEach(h => {
             const dt = new Date(h.exitTime);
             if (dt.toDateString() === now.toDateString()) d += h.fee;
             if (dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear()) m += h.fee;
@@ -121,74 +116,79 @@
 
     function checkIn() {
         const p = document.getElementById('plateInput');
-        if (!p.value) return alert('請輸入車牌');
-        parkingData.push({ plate: p.value.toUpperCase(), time: Date.now(), mode: currentMode, fixedAmount: parseInt(document.getElementById('fixedAmountInput').value) || 0 });
+        if (!p.value) return;
+        pkList.push({ plate: p.value.toUpperCase(), time: Date.now() });
         p.value = ''; render();
     }
 
     function checkOut(idx) {
-        const car = parkingData[idx];
+        const car = pkList[idx];
         const fee = calculateFee(car);
-        if (confirm(`結帳：${car.plate}\n金額：$${fee}`)) {
-            historyData.push({ plate: car.plate, entryTime: car.time, exitTime: Date.now(), fee: fee });
-            parkingData.splice(idx, 1);
+        if (confirm(`車牌：${car.plate}\n收費金額：$${fee}`)) {
+            pkHist.push({ plate: car.plate, entryTime: car.time, exitTime: Date.now(), fee: fee });
+            pkList.splice(idx, 1);
             render();
         }
     }
 
-    // --- 分開匯出功能 ---
-    function exportHistory() {
-        let csv = "\ufeff車牌,進場時間,出場時間,金額\n";
-        historyData.forEach(h => csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee}\n`);
-        downloadCSV(csv, "歷史營收報表");
-    }
-
-    function exportCurrent() {
-        let csv = "\ufeff車牌,進場時間,預估金額\n";
-        parkingData.forEach(c => csv += `${c.plate},${new Date(c.time).toLocaleString()},${calculateFee(c)}\n`);
-        downloadCSV(csv, "場內車輛備份");
-    }
-
-    function downloadCSV(csv, name) {
+    // --- 萬用匯出：包含在場與歷史 ---
+    function exportFullReport() {
+        let csv = "\ufeff=== 在場車輛清單 ===\n車牌,進場時間,目前金額\n";
+        pkList.forEach(c => csv += `${c.plate},${new Date(c.time).toLocaleString()},${calculateFee(c)}\n`);
+        
+        csv += "\n=== 歷史結帳紀錄 ===\n車牌,進場時間,出場時間,實收金額\n";
+        pkHist.forEach(h => csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee}\n`);
+        
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `${name}_${new Date().toLocaleDateString()}.csv`;
+        a.download = `停車場報表_${new Date().getTime()}.csv`;
         a.click();
     }
 
-    // --- 強化匯入邏輯 ---
-    function importCSV(e) {
+    // --- 萬用解析器：智慧辨識數據 ---
+    function importAnyCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const lines = ev.target.result.split('\n');
-            const imported = [];
-            for(let i = 1; i < lines.length; i++) {
-                const col = lines[i].split(',');
-                if (col.length >= 4) {
-                    const plate = col[0].trim();
-                    const eT = new Date(col[1]).getTime();
-                    const xT = new Date(col[2]).getTime();
-                    const fee = parseInt(col[3]);
-                    if (plate && !isNaN(eT) && !isNaN(xT)) imported.push({ plate, entryTime: eT, exitTime: xT, fee });
+            const lines = ev.target.result.split(/\r?\n/);
+            const importedHist = [];
+            
+            lines.forEach(line => {
+                const parts = line.split(',');
+                // 判斷這一行是否包含「已結帳」所需的 4 個關鍵欄位
+                if (parts.length >= 4) {
+                    const plate = parts[0].trim();
+                    const t1 = new Date(parts[1]).getTime();
+                    const t2 = new Date(parts[2]).getTime();
+                    const fee = parseInt(parts[3]);
+                    
+                    // 只要「車牌、進場時間、出場時間、金額」這四個都有值，就視為有效數據
+                    if (plate && !isNaN(t1) && !isNaN(t2) && !isNaN(fee)) {
+                        importedHist.push({ plate, entryTime: t1, exitTime: t2, fee });
+                    }
                 }
-            }
-            if (imported.length > 0) {
-                if(confirm(`找到 ${imported.length} 筆紀錄，是否匯入？`)) {
-                    historyData = [...historyData, ...imported];
+            });
+
+            if (importedHist.length > 0) {
+                if (confirm(`偵測到 ${importedHist.length} 筆歷史紀錄，是否匯入？`)) {
+                    pkHist = [...pkHist, ...importedHist];
+                    // 去除重複紀錄
+                    pkHist = Array.from(new Set(pkHist.map(JSON.stringify))).map(JSON.parse);
                     render();
                     alert('匯入成功！');
                 }
-            } else { alert('匯入失敗：格式不正確。請使用本系統匯出的「歷史收費」檔案。'); }
+            } else {
+                alert('匯入失敗：找不到有效數據。\n請確保檔案是原系統匯出的 CSV。');
+            }
         };
         reader.readAsText(file);
     }
 
-    function clearData() { if (confirm("確定清空所有數據？")) { localStorage.clear(); location.reload(); } }
-    setInterval(render, 30000); 
+    function clearAll() { if (confirm("確定清空？")) { localStorage.clear(); location.reload(); } }
     render();
 </script>
+
 </body>
 </html>
