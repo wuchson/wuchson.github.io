@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park | 完整日期檔名版 V23</title>
+    <title>停車收費系統 V24</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -11,24 +11,31 @@
         .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
         
+        /* 費率設定區 */
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .config-group { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .config-group label { font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
         .config-group input { padding: 5px; border: none; background: transparent; font-size: 16px; font-weight: bold; text-align: center; outline: none; color: var(--primary); }
 
+        /* 營收看板 */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .stat-box { background: white; padding: 10px 5px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
         .stat-label { font-size: 11px; color: #64748b; font-weight: bold; }
         .stat-val { font-size: 15px; font-weight: 900; display: block; margin-top: 4px; color: var(--primary); }
 
+        /* 模式切換 */
         .mode-selector { display: flex; background: #e2e8f0; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
         .mode-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; }
         .mode-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
         input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; margin-bottom: 8px; outline: none; }
         
+        /* 車輛清單加強 */
         .car-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
-        .fee-tag { color: var(--warning); font-weight: 800; font-size: 22px; }
+        .car-info-main { flex-grow: 1; }
+        .duration-tag { font-size: 12px; color: var(--primary); font-weight: bold; margin-top: 4px; display: block; }
+        .fee-tag { color: var(--warning); font-weight: 800; font-size: 22px; margin-top: 2px; }
+        
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; vertical-align: middle; }
         .badge-timer { background: #dbeafe; color: #1e40af; }
         .badge-fixed { background: #fef3c7; color: #92400e; }
@@ -44,7 +51,7 @@
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業管理 V23</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V24</h2>
 
     <div class="stats-grid">
         <div class="stat-box"><span class="stat-label">今日營收</span><span id="revD" class="stat-val">$0</span></div>
@@ -76,7 +83,7 @@
 
     <div class="section-title">🔍 歷史紀錄查詢</div>
     <div class="card">
-        <input type="text" id="histSearch" placeholder="搜尋歷史車牌..." oninput="renderHistory()">
+        <input type="text" id="histSearch" placeholder="搜尋車牌..." oninput="renderHistory()">
         <div id="historyResults" style="max-height: 180px; overflow-y: auto;"></div>
     </div>
 
@@ -89,9 +96,9 @@
 </div>
 
 <script>
-    let pkList = JSON.parse(localStorage.getItem('pk_v23_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v23_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_v23_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
+    let pkList = JSON.parse(localStorage.getItem('pk_v24_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v24_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v24_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
     let currentMode = 'timer';
 
     function switchMode(m) {
@@ -106,7 +113,7 @@
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('pk_v23_cfg', JSON.stringify(config));
+        localStorage.setItem('pk_v24_cfg', JSON.stringify(config));
         render();
     }
 
@@ -119,18 +126,41 @@
         return Math.min(fee, config.rMax);
     }
 
+    // 新增：計算停放時間文字
+    function getDurationText(entryTime) {
+        const diff = Math.floor((Date.now() - entryTime) / 60000); // 總分鐘
+        const hours = Math.floor(diff / 60);
+        const mins = diff % 60;
+        return `⏱️ 已停：${hours}時 ${mins}分`;
+    }
+
     function render() {
         const list = document.getElementById('parkingList');
         list.innerHTML = pkList.length ? '' : '<p style="text-align:center; color:#94a3b8; padding:20px 0; font-size:13px;">場內無車輛</p>';
+        
         pkList.forEach((car, idx) => {
-            list.innerHTML += `<div class="car-item"><div><b>${car.plate}<span class="badge ${car.mode==='fixed'?'badge-fixed':'badge-timer'}">${car.mode==='fixed'?'單':'計'}</span></b><div style="font-size:11px;color:#64748b;">${new Date(car.time).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</div><div class="fee-tag">$${calculateFee(car)}</div></div><button class="btn-checkout" onclick="checkOut(${idx})">結帳</button></div>`;
+            const durationTxt = car.mode === 'fixed' ? '單次收費不計時' : getDurationText(car.time);
+            list.innerHTML += `
+                <div class="car-item">
+                    <div class="car-info-main">
+                        <b>${car.plate}<span class="badge ${car.mode==='fixed'?'badge-fixed':'badge-timer'}">${car.mode==='fixed'?'單次':'計時'}</span></b>
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">進: ${new Date(car.time).toLocaleString([], {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</div>
+                        <span class="duration-tag">${durationTxt}</span>
+                        <div class="fee-tag">$${calculateFee(car)}</div>
+                    </div>
+                    <button class="btn-checkout" onclick="checkOut(${idx})">結帳</button>
+                </div>`;
         });
+        
         document.getElementById('countIn').innerText = pkList.length;
         updateStats();
         renderHistory();
-        localStorage.setItem('pk_v23_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v23_hist', JSON.stringify(pkHist));
+        localStorage.setItem('pk_v24_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v24_hist', JSON.stringify(pkHist));
     }
+
+    // 每分鐘自動重新渲染一次，更新停放時間
+    setInterval(render, 60000);
 
     function updateStats() {
         const d = pkHist.filter(h => new Date(h.exitTime).toDateString() === new Date().toDateString()).reduce((s, h) => s + h.fee, 0);
@@ -167,19 +197,12 @@
         }
     }
 
-    // --- V23 強化匯出：日期檔名 + 完整屬性 ---
     function exportFullReport() {
         const now = new Date();
         const dateStr = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}_${String(now.getDate()).padStart(2, '0')}`;
-        
         let csv = "\ufeff車牌,進場時間,出場時間,金額,模式,狀態\n";
-        pkList.forEach(c => {
-            csv += `${c.plate},${new Date(c.time).toLocaleString()},--,${calculateFee(c)},${c.mode},場內\n`;
-        });
-        pkHist.forEach(h => {
-            csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee},completed,已結帳\n`;
-        });
-
+        pkList.forEach(c => { csv += `${c.plate},${new Date(c.time).toLocaleString()},--,${calculateFee(c)},${c.mode},場內\n`; });
+        pkHist.forEach(h => { csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee},completed,已結帳\n`; });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
@@ -187,7 +210,6 @@
         a.click();
     }
 
-    // --- V23 強化匯入：還原模式 ---
     function importComprehensiveCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -206,7 +228,6 @@
                     const tExitStr = cols[2].trim();
                     const fee = parseInt(cols[3].replace(/[^0-9]/g, '')) || 0;
                     const mode = cols[4].trim();
-
                     if (plate && !isNaN(tEntry)) {
                         if (tExitStr === "--" || tExitStr === "") {
                             newPkList.push({ plate, time: tEntry, mode: (mode==='fixed'?'fixed':'timer'), fixedAmount: (mode==='fixed'?fee:0) });
