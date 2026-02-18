@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park | 終極穩定版 V18</title>
+    <title>Smart Park | 歷史查詢版 V19</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -11,6 +11,7 @@
         .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
         
+        /* 費率設定 */
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .config-group { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .config-group label { font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
@@ -21,30 +22,34 @@
         .stat-label { font-size: 11px; color: #64748b; font-weight: bold; }
         .stat-val { font-size: 15px; font-weight: 900; display: block; margin-top: 4px; color: var(--primary); }
 
-        .mode-selector { display: flex; background: #e2e8f0; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
-        .mode-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; }
-        .mode-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; margin-bottom: 8px; outline: none; }
         
+        /* 車輛清單樣式 */
         .car-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
         .fee-tag { color: var(--warning); font-weight: 800; font-size: 24px; }
+        
+        /* 歷史紀錄專用 */
+        .hist-item { padding: 10px; border-bottom: 1px dashed #e2e8f0; font-size: 13px; display: flex; justify-content: space-between; }
+        .hist-info { color: #64748b; font-size: 11px; }
+        .hist-plate { font-weight: bold; color: var(--text); font-size: 14px; }
 
-        button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; transition: 0.2s; }
-        .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; margin-top: 5px; }
+        button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; }
+        .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; }
         .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .btn-sub { background: #fff; border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; color: #64748b; }
+        .btn-sub { background: #fff; border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; flex: 1; }
+        
+        .section-title { font-size: 14px; font-weight: bold; color: var(--primary); margin: 15px 0 8px 5px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業停車管理 V18</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業停車管理 V19</h2>
 
     <div class="stats-grid">
         <div class="stat-box"><span class="stat-label">今日</span><span id="revD" class="stat-val">$0</span></div>
         <div class="stat-box"><span class="stat-label">本月</span><span id="revM" class="stat-val">$0</span></div>
-        <div class="stat-box"><span class="stat-label">年度</span><span id="revY" class="stat-val">$0</span></div>
+        <div class="stat-box"><span class="stat-label">歷史總計</span><span id="revTotal" class="stat-val">$0</span></div>
     </div>
 
     <div class="card">
@@ -57,52 +62,45 @@
     </div>
 
     <div class="card">
-        <div class="mode-selector">
-            <button class="mode-btn active" id="modeTimer" onclick="switchMode('timer')">⏳ 計時</button>
-            <button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">💰 單次</button>
-        </div>
-        <input type="text" id="plateInput" placeholder="車牌號碼">
-        <input type="number" id="fixedAmountInput" placeholder="固定金額" style="display:none;">
+        <input type="text" id="plateInput" placeholder="輸入車牌登記進場">
         <button class="btn-main" onclick="checkIn()">✅ 登記進場</button>
     </div>
 
-    <div class="card" id="listCard" style="padding-top:0; padding-bottom:0;">
-        <input type="text" id="searchInput" style="margin-top:15px;" placeholder="🔍 搜尋車牌..." oninput="render()">
+    <div class="section-title">🚗 場內車輛 <span id="countIn" style="color:#64748b; font-weight:normal;">0 輛</span></div>
+    <div class="card" style="padding:0 16px;">
         <div id="parkingList"></div>
     </div>
 
-    <div class="btn-group">
+    <div class="section-title">🔍 查詢已收費紀錄</div>
+    <div class="card">
+        <input type="text" id="histSearch" placeholder="輸入車牌查詢歷史紀錄..." oninput="renderHistory()">
+        <div id="historyResults" style="max-height: 300px; overflow-y: auto;"></div>
+        <div id="searchTotal" style="margin-top:10px; text-align:right; font-weight:bold; color:var(--success);"></div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:20px;">
         <button class="btn-sub" onclick="exportFullReport()">📥 匯出報表</button>
         <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入紀錄</button>
         <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importSmartCSV(event)">
-        <button class="btn-sub" style="grid-column: span 2; color: var(--danger);" onclick="clearAll()">⚠️ 清空系統</button>
     </div>
+    <button class="btn-sub" style="width:100%; margin-top:8px; color:var(--danger); border-color:#fee2e2" onclick="clearAll()">⚠️ 清空系統資料</button>
 </div>
 
 <script>
-    let pkList = JSON.parse(localStorage.getItem('pk_v18_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v18_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_v18_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
-    let currentMode = 'timer';
-
-    function switchMode(m) {
-        currentMode = m;
-        document.getElementById('modeTimer').classList.toggle('active', m === 'timer');
-        document.getElementById('modeFixed').classList.toggle('active', m === 'fixed');
-        document.getElementById('fixedAmountInput').style.display = (m === 'fixed') ? 'block' : 'none';
-    }
+    let pkList = JSON.parse(localStorage.getItem('pk_v19_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v19_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v19_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
 
     function saveCfg() {
         config.rBase = parseInt(document.getElementById('rateBase').value) || 0;
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('pk_v18_cfg', JSON.stringify(config));
+        localStorage.setItem('pk_v19_cfg', JSON.stringify(config));
         render();
     }
 
     function calculateFee(car) {
-        if (car.mode === 'fixed') return car.fixedAmount;
         const mins = Math.floor((Date.now() - car.time) / 60000);
         let fee = config.rBase + Math.floor(mins / 60) * config.r60;
         const rem = mins % 60;
@@ -111,35 +109,65 @@
     }
 
     function render() {
-        document.getElementById('rateBase').value = config.rBase;
-        document.getElementById('rate30').value = config.r30;
-        document.getElementById('rate60').value = config.r60;
-        document.getElementById('rateMax').value = config.rMax;
-
+        // 場內車輛
         const list = document.getElementById('parkingList');
-        const kw = document.getElementById('searchInput').value.toUpperCase();
-        list.innerHTML = '';
-        
-        pkList.filter(c => c.plate.includes(kw)).forEach((car, idx) => {
-            const diff = Math.floor((Date.now() - car.time) / 60000);
-            list.innerHTML += `<div class="car-item"><div><b>${car.plate}</b><div style="font-size:11px;color:#64748b;">${new Date(car.time).toLocaleString()}</div><div class="fee-tag">$${calculateFee(car)}</div></div><button class="btn-checkout" onclick="checkOut(${idx})">結帳</button></div>`;
+        list.innerHTML = pkList.length ? '' : '<p style="text-align:center; color:#94a3b8; font-size:14px; padding:20px 0;">目前無場內車輛</p>';
+        pkList.forEach((car, idx) => {
+            list.innerHTML += `<div class="car-item"><div><b style="font-size:18px;">${car.plate}</b><div style="font-size:11px;color:#64748b;">${new Date(car.time).toLocaleString()}</div><div class="fee-tag" style="font-size:18px;">$${calculateFee(car)}</div></div><button class="btn-checkout" onclick="checkOut(${idx})">結帳</button></div>`;
         });
+        document.getElementById('countIn').innerText = `${pkList.length} 輛`;
+        
         updateStats();
-        localStorage.setItem('pk_v18_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v18_hist', JSON.stringify(pkHist));
+        renderHistory();
+        localStorage.setItem('pk_v19_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v19_hist', JSON.stringify(pkHist));
+    }
+
+    function renderHistory() {
+        const query = document.getElementById('histSearch').value.toUpperCase();
+        const results = document.getElementById('historyResults');
+        const filtered = pkHist.filter(h => h.plate.includes(query)).reverse(); // 最新的在前
+        
+        results.innerHTML = filtered.length ? '' : '<p style="text-align:center; color:#94a3b8; padding:10px;">查無歷史紀錄</p>';
+        
+        let sum = 0;
+        filtered.forEach(h => {
+            sum += h.fee;
+            results.innerHTML += `
+                <div class="hist-item">
+                    <div>
+                        <div class="hist-plate">${h.plate}</div>
+                        <div class="hist-info">進: ${new Date(h.entryTime).toLocaleString()}</div>
+                        <div class="hist-info">出: ${new Date(h.exitTime).toLocaleString()}</div>
+                    </div>
+                    <div style="font-weight:bold; color:var(--success); font-size:16px;">$${h.fee}</div>
+                </div>`;
+        });
+        
+        document.getElementById('searchTotal').innerText = query ? `搜尋結果總額：$${sum}` : "";
     }
 
     function updateStats() {
-        const now = new Date().toDateString();
-        const d = pkHist.filter(h => new Date(h.exitTime).toDateString() === now).reduce((s, h) => s + h.fee, 0);
+        const today = new Date().toDateString();
+        const thisMonth = new Date().getMonth();
+        const thisYear = new Date().getFullYear();
+
+        const d = pkHist.filter(h => new Date(h.exitTime).toDateString() === today).reduce((s, h) => s + h.fee, 0);
+        const m = pkHist.filter(h => {
+            const dt = new Date(h.exitTime);
+            return dt.getMonth() === thisMonth && dt.getFullYear() === thisYear;
+        }).reduce((s, h) => s + h.fee, 0);
+        const total = pkHist.reduce((s, h) => s + h.fee, 0);
+
         document.getElementById('revD').innerText = `$${d}`;
-        document.getElementById('revM').innerText = `$${pkHist.reduce((s,h)=>s+h.fee,0)}`; // 簡化顯示
+        document.getElementById('revM').innerText = `$${m}`;
+        document.getElementById('revTotal').innerText = `$${total}`;
     }
 
     function checkIn() {
         const p = document.getElementById('plateInput');
-        if (!p.value) return alert('請輸入車牌');
-        pkList.push({ plate: p.value.toUpperCase(), time: Date.now(), mode: currentMode, fixedAmount: parseInt(document.getElementById('fixedAmountInput').value) || 0 });
+        if (!p.value) return;
+        pkList.push({ plate: p.value.toUpperCase(), time: Date.now() });
         p.value = ''; render();
     }
 
@@ -158,11 +186,10 @@
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `停車報表_${new Date().getTime()}.csv`;
+        a.download = `停車歷史報表_${new Date().getTime()}.csv`;
         a.click();
     }
 
-    // --- 終極智慧匯入解析器 ---
     function importSmartCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -170,13 +197,11 @@
         reader.onload = function(ev) {
             const lines = ev.target.result.split(/\r?\n/);
             const imported = [];
-            
             lines.forEach((line, i) => {
                 if (i === 0 || !line.trim()) return; 
                 const cols = line.split(',');
                 if (cols.length >= 4) {
                     const plate = cols[0].trim();
-                    // 強大解析：移除中文字元（如 上午/下午/年/月/日），只留數字與符號
                     const cleanDate = (str) => {
                         let s = str.replace(/[上下]午/g, '').replace(/[年月]/g, '/').replace(/日/g, '');
                         return new Date(s).getTime();
@@ -184,34 +209,27 @@
                     const t1 = cleanDate(cols[1]);
                     const t2 = cleanDate(cols[2]);
                     const fee = parseInt(cols[3].replace(/[^0-9]/g, ''));
-
-                    if (plate && !isNaN(t1) && !isNaN(t2)) {
-                        imported.push({ plate, entryTime: t1, exitTime: t2, fee: fee || 0 });
-                    }
+                    if (plate && !isNaN(t1) && !isNaN(t2)) imported.push({ plate, entryTime: t1, exitTime: t2, fee: fee || 0 });
                 }
             });
-
             if (imported.length > 0) {
-                if (confirm(`找到 ${imported.length} 筆歷史紀錄，是否匯入？`)) {
+                if (confirm(`成功解析 ${imported.length} 筆紀錄，是否匯入？`)) {
                     pkHist = [...pkHist, ...imported];
-                    // 去重邏輯
-                    const seen = new Set();
-                    pkHist = pkHist.filter(el => {
-                        const duplicate = seen.has(el.plate + el.entryTime);
-                        seen.add(el.plate + el.entryTime);
-                        return !duplicate;
-                    });
+                    pkHist = Array.from(new Set(pkHist.map(JSON.stringify))).map(JSON.parse);
                     render();
-                    alert('匯入成功！');
                 }
-            } else {
-                alert('無法解析檔案內容。請確保 CSV 欄位順序為：車牌,進場時間,出場時間,金額');
-            }
+            } else { alert('無法解析內容，請檢查 CSV 格式。'); }
         };
         reader.readAsText(file);
     }
 
-    function clearAll() { if (confirm("清空？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if (confirm("確定清空所有資料？")) { localStorage.clear(); location.reload(); } }
+    
+    // 初始化設定值
+    document.getElementById('rateBase').value = config.rBase;
+    document.getElementById('rate30').value = config.r30;
+    document.getElementById('rate60').value = config.r60;
+    document.getElementById('rateMax').value = config.rMax;
     render();
 </script>
 </body>
