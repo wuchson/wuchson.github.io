@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park | 全功能旗艦版 V16</title>
+    <title>Smart Park | 專業收費版 V17</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -11,21 +11,19 @@
         .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
         
-        /* 營收看板 */
+        /* 費率設定區 - 四格佈局 */
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .config-group { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .config-group label { font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
+        .config-group input { padding: 5px; border: none; background: transparent; font-size: 16px; font-weight: bold; text-align: center; outline: none; color: var(--primary); }
+
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .stat-box { background: white; padding: 10px 5px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
         .stat-label { font-size: 11px; color: #64748b; font-weight: bold; }
         .stat-val { font-size: 15px; font-weight: 900; display: block; margin-top: 4px; color: var(--primary); }
 
-        /* 費率設定區 */
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .config-group { display: flex; flex-direction: column; }
-        .config-group label { font-size: 10px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
-        .config-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; text-align: center; outline: none; }
-
-        /* 模式切換與輸入 */
         .mode-selector { display: flex; background: #e2e8f0; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
-        .mode-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; transition: 0.2s; }
+        .mode-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; }
         .mode-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; margin-bottom: 8px; outline: none; }
         
@@ -35,7 +33,8 @@
         .badge-timer { background: #dbeafe; color: #1e40af; }
         .badge-fixed { background: #fef3c7; color: #92400e; }
 
-        button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; }
+        button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
         .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; margin-top: 5px; }
         .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
@@ -45,7 +44,7 @@
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業停車管理系統</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業停車管理系統 V17</h2>
 
     <div class="stats-grid">
         <div class="stat-box" style="border-color: var(--primary);"><span class="stat-label">今日</span><span id="revD" class="stat-val">$0</span></div>
@@ -55,8 +54,9 @@
 
     <div class="card">
         <div class="config-grid">
-            <div class="config-group"><label>30分($)</label><input type="number" id="rate30" value="20" onchange="saveCfg()"></div>
-            <div class="config-group"><label>1小時($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
+            <div class="config-group"><label>基本入場費($)</label><input type="number" id="rateBase" value="10" onchange="saveCfg()"></div>
+            <div class="config-group"><label>續停 30分($)</label><input type="number" id="rate30" value="20" onchange="saveCfg()"></div>
+            <div class="config-group"><label>續停 1小時($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
             <div class="config-group"><label>單日上限($)</label><input type="number" id="rateMax" value="200" onchange="saveCfg()"></div>
         </div>
     </div>
@@ -67,7 +67,7 @@
             <button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">💰 單次/固定</button>
         </div>
         <input type="text" id="plateInput" placeholder="請輸入車牌號碼">
-        <input type="number" id="fixedAmountInput" placeholder="請輸入單次收費金額" style="display:none;">
+        <input type="number" id="fixedAmountInput" placeholder="請輸入單次固定金額" style="display:none;">
         <button class="btn-main" onclick="checkIn()">✅ 登記進場</button>
     </div>
 
@@ -85,9 +85,9 @@
 </div>
 
 <script>
-    let pkList = JSON.parse(localStorage.getItem('pk_v16_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v16_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_v16_cfg')) || { r30: 20, r60: 40, rMax: 200 };
+    let pkList = JSON.parse(localStorage.getItem('pk_v17_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v17_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v17_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
     let currentMode = 'timer';
 
     function switchMode(m) {
@@ -98,28 +98,36 @@
     }
 
     function saveCfg() {
+        config.rBase = parseInt(document.getElementById('rateBase').value) || 0;
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('pk_v16_cfg', JSON.stringify(config));
+        localStorage.setItem('pk_v17_cfg', JSON.stringify(config));
         render();
     }
 
     function calculateFee(car) {
         if (car.mode === 'fixed') return car.fixedAmount;
+        
         const mins = Math.floor((Date.now() - car.time) / 60000);
         const hrs = Math.floor(mins / 60);
-        let fee = hrs * config.r60;
+        
+        // 基本費 + 續停費
+        let fee = config.rBase;
+        
+        let extraFee = hrs * config.r60;
         const rem = mins % 60;
         if (rem > 0) {
-            if (rem <= 30) fee += config.r30;
-            else fee += config.r60;
+            if (rem <= 30) extraFee += config.r30;
+            else extraFee += config.r60;
         }
+        
+        fee += extraFee;
         return Math.min(fee, config.rMax);
     }
 
     function render() {
-        // 更新費率輸入框顯示
+        document.getElementById('rateBase').value = config.rBase;
         document.getElementById('rate30').value = config.r30;
         document.getElementById('rate60').value = config.r60;
         document.getElementById('rateMax').value = config.rMax;
@@ -142,8 +150,8 @@
                 </div>`;
         });
         updateStats();
-        localStorage.setItem('pk_v16_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v16_hist', JSON.stringify(pkHist));
+        localStorage.setItem('pk_v17_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v17_hist', JSON.stringify(pkHist));
     }
 
     function updateStats() {
@@ -202,14 +210,14 @@
         reader.onload = function(ev) {
             const lines = ev.target.result.split(/\r?\n/);
             const imported = [];
-            lines.forEach(line => {
+            lines.forEach((line, i) => {
+                if (i === 0) return; // 跳過標題
                 const cols = line.split(',');
                 if (cols.length >= 4) {
                     const plate = cols[0].trim();
                     const t1 = new Date(cols[1]).getTime();
                     const t2 = new Date(cols[2]).getTime();
                     const fee = parseInt(cols[3]);
-                    // 只匯入帶有有效出場時間和金額的「已結帳」紀錄
                     if (plate && !isNaN(t1) && !isNaN(t2)) {
                         imported.push({ plate, entryTime: t1, exitTime: t2, fee: fee || 0 });
                     }
