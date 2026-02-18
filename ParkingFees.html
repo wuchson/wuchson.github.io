@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park | 專業收費版 V17</title>
+    <title>Smart Park | 終極穩定版 V18</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -11,7 +11,6 @@
         .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
         
-        /* 費率設定區 - 四格佈局 */
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .config-group { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .config-group label { font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
@@ -29,12 +28,8 @@
         
         .car-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
         .fee-tag { color: var(--warning); font-weight: 800; font-size: 24px; }
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; vertical-align: middle; }
-        .badge-timer { background: #dbeafe; color: #1e40af; }
-        .badge-fixed { background: #fef3c7; color: #92400e; }
 
         button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; transition: 0.2s; }
-        button:active { transform: scale(0.98); }
         .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; margin-top: 5px; }
         .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
@@ -44,50 +39,50 @@
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業停車管理系統 V17</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業停車管理 V18</h2>
 
     <div class="stats-grid">
-        <div class="stat-box" style="border-color: var(--primary);"><span class="stat-label">今日</span><span id="revD" class="stat-val">$0</span></div>
-        <div class="stat-box" style="border-color: var(--success);"><span class="stat-label">本月</span><span id="revM" class="stat-val">$0</span></div>
-        <div class="stat-box" style="border-color: #8b5cf6;"><span class="stat-label">年度</span><span id="revY" class="stat-val">$0</span></div>
+        <div class="stat-box"><span class="stat-label">今日</span><span id="revD" class="stat-val">$0</span></div>
+        <div class="stat-box"><span class="stat-label">本月</span><span id="revM" class="stat-val">$0</span></div>
+        <div class="stat-box"><span class="stat-label">年度</span><span id="revY" class="stat-val">$0</span></div>
     </div>
 
     <div class="card">
         <div class="config-grid">
-            <div class="config-group"><label>基本入場費($)</label><input type="number" id="rateBase" value="10" onchange="saveCfg()"></div>
+            <div class="config-group"><label>基本費($)</label><input type="number" id="rateBase" value="10" onchange="saveCfg()"></div>
             <div class="config-group"><label>續停 30分($)</label><input type="number" id="rate30" value="20" onchange="saveCfg()"></div>
-            <div class="config-group"><label>續停 1小時($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
+            <div class="config-group"><label>續停 1時($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
             <div class="config-group"><label>單日上限($)</label><input type="number" id="rateMax" value="200" onchange="saveCfg()"></div>
         </div>
     </div>
 
     <div class="card">
         <div class="mode-selector">
-            <button class="mode-btn active" id="modeTimer" onclick="switchMode('timer')">⏳ 計時模式</button>
-            <button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">💰 單次/固定</button>
+            <button class="mode-btn active" id="modeTimer" onclick="switchMode('timer')">⏳ 計時</button>
+            <button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">💰 單次</button>
         </div>
-        <input type="text" id="plateInput" placeholder="請輸入車牌號碼">
-        <input type="number" id="fixedAmountInput" placeholder="請輸入單次固定金額" style="display:none;">
+        <input type="text" id="plateInput" placeholder="車牌號碼">
+        <input type="number" id="fixedAmountInput" placeholder="固定金額" style="display:none;">
         <button class="btn-main" onclick="checkIn()">✅ 登記進場</button>
     </div>
 
-    <div class="card" style="padding-top:0; padding-bottom:0;">
+    <div class="card" id="listCard" style="padding-top:0; padding-bottom:0;">
         <input type="text" id="searchInput" style="margin-top:15px;" placeholder="🔍 搜尋車牌..." oninput="render()">
         <div id="parkingList"></div>
     </div>
 
     <div class="btn-group">
-        <button class="btn-sub" onclick="exportFullReport()">📥 匯出完整報表</button>
-        <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入歷史紀錄</button>
-        <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importAnyCSV(event)">
-        <button class="btn-sub" style="grid-column: span 2; color: var(--danger);" onclick="clearAll()">⚠️ 清空所有資料</button>
+        <button class="btn-sub" onclick="exportFullReport()">📥 匯出報表</button>
+        <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入紀錄</button>
+        <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importSmartCSV(event)">
+        <button class="btn-sub" style="grid-column: span 2; color: var(--danger);" onclick="clearAll()">⚠️ 清空系統</button>
     </div>
 </div>
 
 <script>
-    let pkList = JSON.parse(localStorage.getItem('pk_v17_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v17_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_v17_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
+    let pkList = JSON.parse(localStorage.getItem('pk_v18_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v18_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v18_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 200 };
     let currentMode = 'timer';
 
     function switchMode(m) {
@@ -102,27 +97,16 @@
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('pk_v17_cfg', JSON.stringify(config));
+        localStorage.setItem('pk_v18_cfg', JSON.stringify(config));
         render();
     }
 
     function calculateFee(car) {
         if (car.mode === 'fixed') return car.fixedAmount;
-        
         const mins = Math.floor((Date.now() - car.time) / 60000);
-        const hrs = Math.floor(mins / 60);
-        
-        // 基本費 + 續停費
-        let fee = config.rBase;
-        
-        let extraFee = hrs * config.r60;
+        let fee = config.rBase + Math.floor(mins / 60) * config.r60;
         const rem = mins % 60;
-        if (rem > 0) {
-            if (rem <= 30) extraFee += config.r30;
-            else extraFee += config.r60;
-        }
-        
-        fee += extraFee;
+        if (rem > 0) fee += (rem <= 30) ? config.r30 : config.r60;
         return Math.min(fee, config.rMax);
     }
 
@@ -138,106 +122,97 @@
         
         pkList.filter(c => c.plate.includes(kw)).forEach((car, idx) => {
             const diff = Math.floor((Date.now() - car.time) / 60000);
-            list.innerHTML += `
-                <div class="car-item">
-                    <div>
-                        <b>${car.plate}<span class="badge ${car.mode==='fixed'?'badge-fixed':'badge-timer'}">${car.mode==='fixed'?'單次':'計時'}</span></b>
-                        <div style="font-size:11px; color:#64748b; margin:4px 0;">進場: ${new Date(car.time).toLocaleString()}</div>
-                        <div style="font-size:12px; color:var(--primary); font-weight:bold;">已停: ${Math.floor(diff/60)}時${diff%60}分</div>
-                        <div class="fee-tag">$${calculateFee(car)}</div>
-                    </div>
-                    <button class="btn-checkout" onclick="checkOut(${idx})">結帳</button>
-                </div>`;
+            list.innerHTML += `<div class="car-item"><div><b>${car.plate}</b><div style="font-size:11px;color:#64748b;">${new Date(car.time).toLocaleString()}</div><div class="fee-tag">$${calculateFee(car)}</div></div><button class="btn-checkout" onclick="checkOut(${idx})">結帳</button></div>`;
         });
         updateStats();
-        localStorage.setItem('pk_v17_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v17_hist', JSON.stringify(pkHist));
+        localStorage.setItem('pk_v18_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v18_hist', JSON.stringify(pkHist));
     }
 
     function updateStats() {
-        const now = new Date();
-        let d=0, m=0, y=0;
-        pkHist.forEach(h => {
-            const dt = new Date(h.exitTime);
-            if (dt.toDateString() === now.toDateString()) d += h.fee;
-            if (dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear()) m += h.fee;
-            if (dt.getFullYear() === now.getFullYear()) y += h.fee;
-        });
-        document.getElementById('revD').innerText = `$${d.toLocaleString()}`;
-        document.getElementById('revM').innerText = `$${m.toLocaleString()}`;
-        document.getElementById('revY').innerText = `$${y.toLocaleString()}`;
+        const now = new Date().toDateString();
+        const d = pkHist.filter(h => new Date(h.exitTime).toDateString() === now).reduce((s, h) => s + h.fee, 0);
+        document.getElementById('revD').innerText = `$${d}`;
+        document.getElementById('revM').innerText = `$${pkHist.reduce((s,h)=>s+h.fee,0)}`; // 簡化顯示
     }
 
     function checkIn() {
         const p = document.getElementById('plateInput');
-        const f = document.getElementById('fixedAmountInput');
         if (!p.value) return alert('請輸入車牌');
-        pkList.push({ 
-            plate: p.value.toUpperCase(), 
-            time: Date.now(), 
-            mode: currentMode, 
-            fixedAmount: parseInt(f.value) || 0 
-        });
-        p.value = ''; f.value = ''; render();
+        pkList.push({ plate: p.value.toUpperCase(), time: Date.now(), mode: currentMode, fixedAmount: parseInt(document.getElementById('fixedAmountInput').value) || 0 });
+        p.value = ''; render();
     }
 
     function checkOut(idx) {
         const car = pkList[idx];
         const fee = calculateFee(car);
-        if (confirm(`結帳車牌：${car.plate}\n收費金額：$${fee}`)) {
+        if (confirm(`結帳：${car.plate}\n金額：$${fee}`)) {
             pkHist.push({ plate: car.plate, entryTime: car.time, exitTime: Date.now(), fee: fee });
-            pkList.splice(idx, 1);
-            render();
+            pkList.splice(idx, 1); render();
         }
     }
 
     function exportFullReport() {
-        let csv = "\ufeff車牌,進場時間,出場時間,金額,狀態\n";
-        pkList.forEach(c => csv += `${c.plate},${new Date(c.time).toLocaleString()},--,${calculateFee(c)},場內車輛\n`);
-        pkHist.forEach(h => csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee},已結帳\n`);
-        
+        let csv = "\ufeff車牌,進場時間,出場時間,金額\n";
+        pkHist.forEach(h => csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `停車場報表_${new Date().getTime()}.csv`;
+        a.download = `停車報表_${new Date().getTime()}.csv`;
         a.click();
     }
 
-    function importAnyCSV(e) {
+    // --- 終極智慧匯入解析器 ---
+    function importSmartCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
             const lines = ev.target.result.split(/\r?\n/);
             const imported = [];
+            
             lines.forEach((line, i) => {
-                if (i === 0) return; // 跳過標題
+                if (i === 0 || !line.trim()) return; 
                 const cols = line.split(',');
                 if (cols.length >= 4) {
                     const plate = cols[0].trim();
-                    const t1 = new Date(cols[1]).getTime();
-                    const t2 = new Date(cols[2]).getTime();
-                    const fee = parseInt(cols[3]);
+                    // 強大解析：移除中文字元（如 上午/下午/年/月/日），只留數字與符號
+                    const cleanDate = (str) => {
+                        let s = str.replace(/[上下]午/g, '').replace(/[年月]/g, '/').replace(/日/g, '');
+                        return new Date(s).getTime();
+                    };
+                    const t1 = cleanDate(cols[1]);
+                    const t2 = cleanDate(cols[2]);
+                    const fee = parseInt(cols[3].replace(/[^0-9]/g, ''));
+
                     if (plate && !isNaN(t1) && !isNaN(t2)) {
                         imported.push({ plate, entryTime: t1, exitTime: t2, fee: fee || 0 });
                     }
                 }
             });
+
             if (imported.length > 0) {
-                if (confirm(`偵測到 ${imported.length} 筆歷史紀錄，是否匯入？`)) {
+                if (confirm(`找到 ${imported.length} 筆歷史紀錄，是否匯入？`)) {
                     pkHist = [...pkHist, ...imported];
-                    pkHist = Array.from(new Set(pkHist.map(JSON.stringify))).map(JSON.parse);
+                    // 去重邏輯
+                    const seen = new Set();
+                    pkHist = pkHist.filter(el => {
+                        const duplicate = seen.has(el.plate + el.entryTime);
+                        seen.add(el.plate + el.entryTime);
+                        return !duplicate;
+                    });
                     render();
                     alert('匯入成功！');
                 }
-            } else { alert('匯入失敗：格式不正確。'); }
+            } else {
+                alert('無法解析檔案內容。請確保 CSV 欄位順序為：車牌,進場時間,出場時間,金額');
+            }
         };
         reader.readAsText(file);
     }
 
-    function clearAll() { if (confirm("確定清空？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if (confirm("清空？")) { localStorage.clear(); location.reload(); } }
     render();
 </script>
-
 </body>
 </html>
