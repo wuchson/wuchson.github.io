@@ -3,39 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Park Ultimate | V15 萬用相容版</title>
+    <title>Smart Park | 全功能旗艦版 V16</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
-        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.5; }
+        * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
         
         /* 營收看板 */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-box { background: white; padding: 12px 5px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .stat-box { background: white; padding: 10px 5px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
         .stat-label { font-size: 11px; color: #64748b; font-weight: bold; }
-        .stat-val { font-size: 16px; font-weight: 900; display: block; margin-top: 4px; color: var(--primary); }
+        .stat-val { font-size: 15px; font-weight: 900; display: block; margin-top: 4px; color: var(--primary); }
 
-        /* 輸入與列表 */
-        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; margin-bottom: 10px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); }
-        .car-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
-        .car-item:last-child { border-bottom: none; }
-        .fee-tag { color: var(--warning); font-weight: 800; font-size: 24px; }
+        /* 費率設定區 */
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .config-group { display: flex; flex-direction: column; }
+        .config-group label { font-size: 10px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
+        .config-group input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; text-align: center; outline: none; }
+
+        /* 模式切換與輸入 */
+        .mode-selector { display: flex; background: #e2e8f0; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
+        .mode-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #64748b; background: transparent; transition: 0.2s; }
+        .mode-btn.active { background: var(--white); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; margin-bottom: 8px; outline: none; }
         
-        /* 按鈕樣式 */
-        button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; transition: 0.2s; active { transform: scale(0.98); } }
-        .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; }
-        .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; font-size: 14px; }
+        .car-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
+        .fee-tag { color: var(--warning); font-weight: 800; font-size: 24px; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; vertical-align: middle; }
+        .badge-timer { background: #dbeafe; color: #1e40af; }
+        .badge-fixed { background: #fef3c7; color: #92400e; }
+
+        button { cursor: pointer; border: none; border-radius: 12px; font-weight: bold; }
+        .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; margin-top: 5px; }
+        .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .btn-sub { background: #fff; border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; }
+        .btn-sub { background: #fff; border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; color: #64748b; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車管理系統 V15</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 專業停車管理系統</h2>
 
     <div class="stats-grid">
         <div class="stat-box" style="border-color: var(--primary);"><span class="stat-label">今日</span><span id="revD" class="stat-val">$0</span></div>
@@ -44,8 +54,21 @@
     </div>
 
     <div class="card">
-        <input type="text" id="plateInput" placeholder="輸入車牌號碼 (例: ABC-1234)">
-        <button class="btn-main" onclick="checkIn()">🚗 登記進場</button>
+        <div class="config-grid">
+            <div class="config-group"><label>30分($)</label><input type="number" id="rate30" value="20" onchange="saveCfg()"></div>
+            <div class="config-group"><label>1小時($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
+            <div class="config-group"><label>單日上限($)</label><input type="number" id="rateMax" value="200" onchange="saveCfg()"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="mode-selector">
+            <button class="mode-btn active" id="modeTimer" onclick="switchMode('timer')">⏳ 計時模式</button>
+            <button class="mode-btn" id="modeFixed" onclick="switchMode('fixed')">💰 單次/固定</button>
+        </div>
+        <input type="text" id="plateInput" placeholder="請輸入車牌號碼">
+        <input type="number" id="fixedAmountInput" placeholder="請輸入單次收費金額" style="display:none;">
+        <button class="btn-main" onclick="checkIn()">✅ 登記進場</button>
     </div>
 
     <div class="card" style="padding-top:0; padding-bottom:0;">
@@ -55,29 +78,52 @@
 
     <div class="btn-group">
         <button class="btn-sub" onclick="exportFullReport()">📥 匯出完整報表</button>
-        <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入歷史資料</button>
+        <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入歷史紀錄</button>
         <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importAnyCSV(event)">
-        <button class="btn-sub" style="grid-column: span 2; color: var(--danger);" onclick="clearAll()">⚠️ 清空系統資料</button>
+        <button class="btn-sub" style="grid-column: span 2; color: var(--danger);" onclick="clearAll()">⚠️ 清空所有資料</button>
     </div>
 </div>
 
 <script>
-    // 使用新的資料庫 key 避免衝突
-    let pkList = JSON.parse(localStorage.getItem('pk_v15_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v15_hist')) || [];
-    const cfg = { r30: 20, r60: 40, rMax: 200 };
+    let pkList = JSON.parse(localStorage.getItem('pk_v16_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v16_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v16_cfg')) || { r30: 20, r60: 40, rMax: 200 };
+    let currentMode = 'timer';
+
+    function switchMode(m) {
+        currentMode = m;
+        document.getElementById('modeTimer').classList.toggle('active', m === 'timer');
+        document.getElementById('modeFixed').classList.toggle('active', m === 'fixed');
+        document.getElementById('fixedAmountInput').style.display = (m === 'fixed') ? 'block' : 'none';
+    }
+
+    function saveCfg() {
+        config.r30 = parseInt(document.getElementById('rate30').value) || 0;
+        config.r60 = parseInt(document.getElementById('rate60').value) || 0;
+        config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
+        localStorage.setItem('pk_v16_cfg', JSON.stringify(config));
+        render();
+    }
 
     function calculateFee(car) {
+        if (car.mode === 'fixed') return car.fixedAmount;
         const mins = Math.floor((Date.now() - car.time) / 60000);
         const hrs = Math.floor(mins / 60);
-        let fee = hrs * cfg.r60;
+        let fee = hrs * config.r60;
         const rem = mins % 60;
-        if (rem <= 30) fee += cfg.r30;
-        else fee += Math.min(cfg.r30 + (rem - 30), cfg.r60);
-        return Math.min(fee, cfg.rMax);
+        if (rem > 0) {
+            if (rem <= 30) fee += config.r30;
+            else fee += config.r60;
+        }
+        return Math.min(fee, config.rMax);
     }
 
     function render() {
+        // 更新費率輸入框顯示
+        document.getElementById('rate30').value = config.r30;
+        document.getElementById('rate60').value = config.r60;
+        document.getElementById('rateMax').value = config.rMax;
+
         const list = document.getElementById('parkingList');
         const kw = document.getElementById('searchInput').value.toUpperCase();
         list.innerHTML = '';
@@ -87,8 +133,8 @@
             list.innerHTML += `
                 <div class="car-item">
                     <div>
-                        <b>${car.plate}</b>
-                        <div style="font-size:11px; color:#64748b;">進場: ${new Date(car.time).toLocaleString()}</div>
+                        <b>${car.plate}<span class="badge ${car.mode==='fixed'?'badge-fixed':'badge-timer'}">${car.mode==='fixed'?'單次':'計時'}</span></b>
+                        <div style="font-size:11px; color:#64748b; margin:4px 0;">進場: ${new Date(car.time).toLocaleString()}</div>
                         <div style="font-size:12px; color:var(--primary); font-weight:bold;">已停: ${Math.floor(diff/60)}時${diff%60}分</div>
                         <div class="fee-tag">$${calculateFee(car)}</div>
                     </div>
@@ -96,8 +142,8 @@
                 </div>`;
         });
         updateStats();
-        localStorage.setItem('pk_v15_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v15_hist', JSON.stringify(pkHist));
+        localStorage.setItem('pk_v16_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v16_hist', JSON.stringify(pkHist));
     }
 
     function updateStats() {
@@ -116,28 +162,31 @@
 
     function checkIn() {
         const p = document.getElementById('plateInput');
-        if (!p.value) return;
-        pkList.push({ plate: p.value.toUpperCase(), time: Date.now() });
-        p.value = ''; render();
+        const f = document.getElementById('fixedAmountInput');
+        if (!p.value) return alert('請輸入車牌');
+        pkList.push({ 
+            plate: p.value.toUpperCase(), 
+            time: Date.now(), 
+            mode: currentMode, 
+            fixedAmount: parseInt(f.value) || 0 
+        });
+        p.value = ''; f.value = ''; render();
     }
 
     function checkOut(idx) {
         const car = pkList[idx];
         const fee = calculateFee(car);
-        if (confirm(`車牌：${car.plate}\n收費金額：$${fee}`)) {
+        if (confirm(`結帳車牌：${car.plate}\n收費金額：$${fee}`)) {
             pkHist.push({ plate: car.plate, entryTime: car.time, exitTime: Date.now(), fee: fee });
             pkList.splice(idx, 1);
             render();
         }
     }
 
-    // --- 萬用匯出：包含在場與歷史 ---
     function exportFullReport() {
-        let csv = "\ufeff=== 在場車輛清單 ===\n車牌,進場時間,目前金額\n";
-        pkList.forEach(c => csv += `${c.plate},${new Date(c.time).toLocaleString()},${calculateFee(c)}\n`);
-        
-        csv += "\n=== 歷史結帳紀錄 ===\n車牌,進場時間,出場時間,實收金額\n";
-        pkHist.forEach(h => csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee}\n`);
+        let csv = "\ufeff車牌,進場時間,出場時間,金額,狀態\n";
+        pkList.forEach(c => csv += `${c.plate},${new Date(c.time).toLocaleString()},--,${calculateFee(c)},場內車輛\n`);
+        pkHist.forEach(h => csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee},已結帳\n`);
         
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
@@ -146,42 +195,34 @@
         a.click();
     }
 
-    // --- 萬用解析器：智慧辨識數據 ---
     function importAnyCSV(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
             const lines = ev.target.result.split(/\r?\n/);
-            const importedHist = [];
-            
+            const imported = [];
             lines.forEach(line => {
-                const parts = line.split(',');
-                // 判斷這一行是否包含「已結帳」所需的 4 個關鍵欄位
-                if (parts.length >= 4) {
-                    const plate = parts[0].trim();
-                    const t1 = new Date(parts[1]).getTime();
-                    const t2 = new Date(parts[2]).getTime();
-                    const fee = parseInt(parts[3]);
-                    
-                    // 只要「車牌、進場時間、出場時間、金額」這四個都有值，就視為有效數據
-                    if (plate && !isNaN(t1) && !isNaN(t2) && !isNaN(fee)) {
-                        importedHist.push({ plate, entryTime: t1, exitTime: t2, fee });
+                const cols = line.split(',');
+                if (cols.length >= 4) {
+                    const plate = cols[0].trim();
+                    const t1 = new Date(cols[1]).getTime();
+                    const t2 = new Date(cols[2]).getTime();
+                    const fee = parseInt(cols[3]);
+                    // 只匯入帶有有效出場時間和金額的「已結帳」紀錄
+                    if (plate && !isNaN(t1) && !isNaN(t2)) {
+                        imported.push({ plate, entryTime: t1, exitTime: t2, fee: fee || 0 });
                     }
                 }
             });
-
-            if (importedHist.length > 0) {
-                if (confirm(`偵測到 ${importedHist.length} 筆歷史紀錄，是否匯入？`)) {
-                    pkHist = [...pkHist, ...importedHist];
-                    // 去除重複紀錄
+            if (imported.length > 0) {
+                if (confirm(`偵測到 ${imported.length} 筆歷史紀錄，是否匯入？`)) {
+                    pkHist = [...pkHist, ...imported];
                     pkHist = Array.from(new Set(pkHist.map(JSON.stringify))).map(JSON.parse);
                     render();
                     alert('匯入成功！');
                 }
-            } else {
-                alert('匯入失敗：找不到有效數據。\n請確保檔案是原系統匯出的 CSV。');
-            }
+            } else { alert('匯入失敗：格式不正確。'); }
         };
         reader.readAsText(file);
     }
