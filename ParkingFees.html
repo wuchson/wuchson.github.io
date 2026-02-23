@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>停車收費系統 V27</title>
+    <title>停車收費系統 V28</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -46,7 +46,7 @@
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V27</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V28</h2>
 
     <div class="stats-grid">
         <div class="stat-box"><span class="stat-label">今日營收</span><span id="revD" class="stat-val">$0</span></div>
@@ -61,7 +61,7 @@
             <div class="config-group"><label>1時上限($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
             <div class="config-group"><label>單日最高($)</label><input type="number" id="rateMax" value="300" onchange="saveCfg()"></div>
         </div>
-        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center;">* 計費邏輯：每分鐘 +1元，直到觸及該時段上限</p>
+        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center;">* 計費：滿24小時採單日最高累計，不足日按分鐘計算</p>
     </div>
 
     <div class="card">
@@ -77,7 +77,7 @@
     <div class="section-title">🚗 場內車輛 (<span id="countIn">0</span>)</div>
     <div class="card" style="padding:0 16px;"><div id="parkingList"></div></div>
 
-    <div class="section-title">🔍 全場搜尋 (含時間明細)</div>
+    <div class="section-title">🔍 全場搜尋 (含歷史明細)</div>
     <div class="card">
         <input type="text" id="globalSearch" placeholder="搜尋車牌..." oninput="renderAll()">
         <div id="searchResults" style="max-height: 300px; overflow-y: auto;"></div>
@@ -112,49 +112,49 @@
         renderAll();
     }
 
-    // --- 精準分鐘計費邏輯 ---
+    // --- 核心計費邏輯 V28：支援跨日累計 ---
     function calculateFee(car) {
         if (car.mode === 'fixed') return car.fixedAmount || 0;
         
         const totalMins = Math.floor((Date.now() - car.time) / 60000);
         if (totalMins <= 0) return config.rBase;
 
-        let fee = config.rBase;
-        
-        // 拆解時間段：每 30 分鐘為一個單元
-        const halfHours = Math.floor(totalMins / 30);
-        const remainingMins = totalMins % 30;
+        const minsPerDay = 1440; // 24小時
+        const fullDays = Math.floor(totalMins / minsPerDay);
+        const remainingMins = totalMins % minsPerDay;
 
-        // 計算完整的 30 分鐘單元
-        for (let i = 1; i <= halfHours; i++) {
-            // 奇數個 30 分 (0.5h, 1.5h...) -> 適用 30分上限扣除之前的費用
-            // 偶數個 30 分 (1h, 2h...) -> 適用 1時上限扣除之前的費用
-            if (i % 2 !== 0) {
-                // 這是某個小時的「前半小時」
-                fee = (Math.floor(fee / config.r60) * config.r60) + config.r30;
-            } else {
-                // 這是某個小時的「整點」
-                fee = (Math.floor((fee-1) / config.r60) + 1) * config.r60;
+        // 1. 累計滿天的金額
+        let totalFee = fullDays * config.rMax;
+
+        // 2. 計算剩餘不滿一天的金額
+        if (remainingMins > 0 || fullDays === 0) {
+            let lastDayFee = config.rBase;
+            const halfHours = Math.floor(remainingMins / 30);
+            const minsInHalfHour = remainingMins % 30;
+
+            // 計算 30 分鐘單元
+            for (let i = 1; i <= halfHours; i++) {
+                if (i % 2 !== 0) {
+                    lastDayFee = (Math.floor(lastDayFee / config.r60) * config.r60) + config.r30;
+                } else {
+                    lastDayFee = (Math.floor((lastDayFee - 1) / config.r60) + 1) * config.r60;
+                }
             }
+
+            // 計算最後分鐘數
+            if (minsInHalfHour > 0) {
+                const isSecondHalf = (halfHours % 2 !== 0);
+                const limit = isSecondHalf ? config.r60 : config.r30;
+                const currentHourBase = Math.floor(lastDayFee / config.r60) * config.r60;
+                lastDayFee += minsInHalfHour;
+                if (lastDayFee > (currentHourBase + limit)) lastDayFee = currentHourBase + limit;
+            }
+            
+            // 當天結算金額不能超過單日上限
+            totalFee += Math.min(lastDayFee, config.rMax);
         }
 
-        // 計算最後不足 30 分鐘的分鐘數 (+1元/分)
-        if (remainingMins > 0) {
-            const currentPeriodBase = fee;
-            const isSecondHalf = (halfHours % 2 !== 0); // 是否在該小時的後半段
-            const limit = isSecondHalf ? config.r60 : config.r30;
-            
-            // 基礎費加上分鐘數
-            fee += remainingMins;
-            
-            // 檢查是否觸及該時段上限
-            const currentHourBase = Math.floor(currentPeriodBase / config.r60) * config.r60;
-            if (fee > (currentHourBase + limit)) {
-                fee = currentHourBase + limit;
-            }
-        }
-
-        return Math.min(fee, config.rMax);
+        return totalFee;
     }
 
     function formatTime(ts) {
@@ -171,12 +171,14 @@
         pkList.forEach((car, originalIdx) => {
             if (car.plate.includes(query)) {
                 const diff = Math.floor((Date.now() - car.time) / 60000);
+                const h = Math.floor(diff/60);
+                const m = diff%60;
                 list.innerHTML += `
                     <div class="car-item">
                         <div>
                             <b>${car.plate}<span class="badge badge-in">場內</span></b>
                             <span class="time-label">🚦 進場: ${formatTime(car.time)}</span>
-                            <div style="font-size:11px;color:var(--primary);font-weight:bold;">⏱️ 已停: ${Math.floor(diff/60)}時${diff%60}分</div>
+                            <div style="font-size:11px;color:var(--primary);font-weight:bold;">⏱️ 已停: ${h >= 24 ? Math.floor(h/24)+'天'+(h%24) : h}時${m}分</div>
                             <div class="fee-tag">$${calculateFee(car)}</div>
                         </div>
                         <button class="btn-checkout" onclick="checkOut(${originalIdx})">結帳</button>
