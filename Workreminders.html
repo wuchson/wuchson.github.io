@@ -6,109 +6,68 @@
     <title>工作提醒</title>
     <style>
         :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --accent: #000000;
-            --border: #e5e5e5;
-            --secondary: #888888;
+            --bg: #ffffff; --text: #1a1a1a; --accent: #000000; --border: #e5e5e5; --secondary: #888888;
         }
-
         [data-theme="dark"] {
-            --bg: #121212;
-            --text: #ffffff;
-            --accent: #ffffff;
-            --border: #2a2a2a;
-            --secondary: #a0a0a0;
+            --bg: #121212; --text: #ffffff; --accent: #ffffff; --border: #2a2a2a; --secondary: #a0a0a0;
         }
-
         body {
-            font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            transition: all 0.4s ease;
+            font-family: "PingFang TC", "Noto Sans TC", sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; display: flex; justify-content: center; min-height: 100vh; transition: 0.4s;
         }
-
-        .wrapper {
-            width: 100%;
-            max-width: 480px;
-            padding: 60px 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
+        .wrapper { width: 100%; max-width: 480px; padding: 60px 24px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         h1 { font-size: 24px; font-weight: 600; letter-spacing: 2px; margin: 0; }
-        .today-info { font-size: 13px; color: var(--secondary); margin-top: 5px; letter-spacing: 1px; }
+        .today-info { font-size: 13px; color: var(--secondary); margin-top: 5px; }
 
-        /* 搜尋框設計 */
-        .search-container { margin-bottom: 30px; }
+        /* 搜尋與篩選區 */
+        .filter-section { margin-bottom: 30px; }
         #searchInput {
             width: 100%; border: none; background: rgba(0,0,0,0.03);
-            padding: 10px 15px; border-radius: 20px; font-size: 14px;
+            padding: 12px 15px; border-radius: 10px; font-size: 14px;
             color: var(--text); outline: none; box-sizing: border-box;
-            transition: 0.3s;
         }
-        #searchInput:focus { background: rgba(0,0,0,0.06); box-shadow: 0 0 0 1px var(--border); }
         [data-theme="dark"] #searchInput { background: rgba(255,255,255,0.05); }
+        .filter-tabs { display: flex; gap: 10px; margin-top: 12px; }
+        .tab { 
+            font-size: 11px; padding: 4px 12px; border: 1px solid var(--border); 
+            border-radius: 15px; cursor: pointer; color: var(--secondary); transition: 0.2s;
+        }
+        .tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
-        /* 進度統計 */
+        /* 進度條 */
         .progress-section { margin-bottom: 40px; }
-        .progress-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 10px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 10px; color: var(--secondary); }
         .progress-track { height: 1.5px; background: var(--border); position: relative; }
-        #progress-fill { height: 1.5px; background: var(--accent); width: 0%; transition: width 0.7s ease; position: absolute; top: 0; left: 0; }
+        #progress-fill { height: 1.5px; background: var(--accent); width: 0%; transition: 0.7s ease; position: absolute; top: 0; left: 0; }
 
-        /* 工具選單 */
-        .nav-tools { display: flex; gap: 15px; margin-bottom: 30px; }
-        .nav-btn { font-size: 11px; background: none; border: none; color: var(--secondary); cursor: pointer; padding: 0; letter-spacing: 1px; }
-        .nav-btn:hover { color: var(--accent); text-decoration: underline; }
-
-        /* 輸入區域 */
+        /* 輸入區 */
         .input-area { margin-bottom: 40px; border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
         input[type="text"]#taskName {
             width: 100%; border: none; border-bottom: 1px solid var(--border);
-            padding: 10px 0; font-size: 16px; outline: none; background: transparent;
-            color: var(--text) !important; margin-bottom: 15px;
+            padding: 10px 0; font-size: 16px; outline: none; background: transparent; color: var(--text); margin-bottom: 15px;
         }
         .options-row { display: flex; gap: 10px; }
         select, input[type="datetime-local"] {
-            flex: 1; border: 1px solid var(--border); background: transparent;
-            padding: 8px; font-size: 12px; color: var(--secondary); border-radius: 6px; outline: none;
+            flex: 1; border: 1px solid var(--border); background: transparent; padding: 8px; font-size: 12px; color: var(--secondary); border-radius: 6px;
         }
         #add-btn {
             margin-top: 20px; width: 100%; padding: 12px; background: var(--accent);
             color: var(--bg); border: none; font-size: 13px; letter-spacing: 4px; cursor: pointer; border-radius: 6px;
         }
 
-        /* 任務列表 */
+        /* 列表 */
         ul { list-style: none; padding: 0; }
-        li {
-            padding: 20px 0; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            animation: fadeIn 0.4s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+        li { padding: 18px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .task-info { flex-grow: 1; cursor: pointer; }
-        .task-title { font-size: 16px; margin-bottom: 6px; font-weight: 500; display: flex; align-items: center; }
+        .task-title { font-size: 16px; margin-bottom: 6px; font-weight: 500; }
         .task-meta { font-size: 11px; color: var(--secondary); }
-
         .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 12px; }
-        .high { background: #ff4d4f; box-shadow: 0 0 5px rgba(255,77,79,0.4); }
-        .mid { background: #faad14; }
-        .low { background: #52c41a; }
-
+        .high { background: #ff4d4f; } .mid { background: #faad14; } .low { background: #52c41a; }
         .completed { opacity: 0.35; filter: grayscale(1); }
         .completed .task-title { text-decoration: line-through; }
-        .del-link { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; padding-left: 15px; }
-        .del-link:hover { color: var(--text); }
+        .del-link { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; }
     </style>
 </head>
 <body data-theme="light">
@@ -116,37 +75,31 @@
 <div class="wrapper">
     <header>
         <div>
-            <h1>Studio Tasks</h1>
-            <div class="today-info" id="current-date">...</div>
+            <h1>任務清單</h1>
+            <div class="today-info" id="current-date">載入中...</div>
         </div>
-        <button class="nav-btn" onclick="toggleTheme()" id="theme-toggle">切換模式</button>
+        <button class="nav-btn" onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; color:var(--secondary); font-size:11px;">切換模式</button>
     </header>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="🔍 搜尋任務內容..." oninput="render()">
+    <div class="filter-section">
+        <input type="text" id="searchInput" placeholder="搜尋關鍵字..." oninput="render()">
+        <div class="filter-tabs">
+            <div class="tab active" onclick="setFilter('all', this)">全部任務</div>
+            <div class="tab" onclick="setFilter('today', this)">今天</div>
+            <div class="tab" onclick="setFilter('week', this)">本週</div>
+        </div>
     </div>
 
     <div class="progress-section">
-        <div class="progress-label">
-            <span>當前進度</span>
-            <span id="stat-text">0%</span>
-        </div>
+        <div class="progress-label"><span>完成率</span><span id="stat-text">0%</span></div>
         <div class="progress-track"><div id="progress-fill"></div></div>
     </div>
 
-    <div class="nav-tools">
-        <button class="nav-btn" onclick="exportCSV()">匯出 EXCEL</button>
-        <button class="nav-btn" onclick="document.getElementById('csv-file').click()">匯入 EXCEL</button>
-        <input type="file" id="csv-file" style="display:none" accept=".csv" onchange="importCSV(event)">
-    </div>
-
     <div class="input-area">
-        <input type="text" id="taskName" placeholder="輸入任務...">
+        <input type="text" id="taskName" placeholder="輸入新任務...">
         <div class="options-row">
             <select id="taskPrio">
-                <option value="3">緊急</option>
-                <option value="2" selected>普通</option>
-                <option value="1">稍後</option>
+                <option value="3">緊急</option><option value="2" selected>普通</option><option value="1">稍後</option>
             </select>
             <input type="datetime-local" id="taskTime">
         </div>
@@ -154,35 +107,42 @@
     </div>
 
     <ul id="taskList"></ul>
+
+    <div style="margin-top: 30px; display: flex; gap: 15px;">
+        <button class="nav-btn" onclick="exportCSV()" style="background:none; border:none; color:var(--secondary); font-size:11px; cursor:pointer;">📥 匯出 EXCEL</button>
+        <button class="nav-btn" onclick="document.getElementById('csv-file').click()" style="background:none; border:none; color:var(--secondary); font-size:11px; cursor:pointer;">📤 匯入 EXCEL</button>
+        <input type="file" id="csv-file" style="display:none" accept=".csv" onchange="importCSV(event)">
+    </div>
 </div>
 
 <script>
-    let tasks = JSON.parse(localStorage.getItem('minimalTasksFinal')) || [];
+    let tasks = JSON.parse(localStorage.getItem('minimalTasksSearchV2')) || [];
+    let currentFilter = 'all';
     const dayNames = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
 
     function showToday() {
         const now = new Date();
-        document.getElementById('current-date').innerText = 
-            `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${dayNames[now.getDay()]}`;
-    }
-
-    function formatTime(timeStr) {
-        if (!timeStr) return "尚未設定時間";
-        const d = new Date(timeStr);
-        const week = dayNames[d.getDay()];
-        return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} (${week}) ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+        document.getElementById('current-date').innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${dayNames[now.getDay()]}`;
     }
 
     function toggleTheme() {
         const body = document.body;
-        const isDark = body.getAttribute('data-theme') === 'dark';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     }
 
-    function saveAndRender() {
-        tasks.sort((a, b) => b.priority - a.priority);
-        localStorage.setItem('minimalTasksFinal', JSON.stringify(tasks));
+    function setFilter(filter, el) {
+        currentFilter = filter;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
         render();
+    }
+
+    function isThisWeek(date) {
+        const now = new Date();
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+        const target = new Date(date);
+        return target >= startOfWeek && target <= endOfWeek;
     }
 
     function render() {
@@ -190,25 +150,33 @@
         const query = document.getElementById('searchInput').value.toLowerCase();
         list.innerHTML = '';
 
-        // 過濾搜尋結果
-        const filteredTasks = tasks.filter(t => t.text.toLowerCase().includes(query));
-        
-        // 統計 (以全部任務為準)
-        const done = tasks.filter(t => t.completed).length;
-        const total = tasks.length;
-        const percent = total ? Math.round((done / total) * 100) : 0;
-        document.getElementById('progress-fill').style.width = percent + '%';
-        document.getElementById('stat-text').innerText = `${percent}% (${done}/${total})`;
+        const now = new Date().toISOString().split('T')[0];
 
-        filteredTasks.forEach(t => {
+        const filtered = tasks.filter(t => {
+            const matchesText = t.text.toLowerCase().includes(query);
+            const taskDate = t.time ? t.time.split('T')[0] : '';
+            
+            let matchesDate = true;
+            if (currentFilter === 'today') matchesDate = (taskDate === now);
+            if (currentFilter === 'week') matchesDate = t.time && isThisWeek(t.time);
+
+            return matchesText && matchesDate;
+        });
+
+        const done = tasks.filter(t => t.completed).length;
+        document.getElementById('progress-fill').style.width = (tasks.length ? (done/tasks.length)*100 : 0) + '%';
+        document.getElementById('stat-text').innerText = `${tasks.length ? Math.round((done/tasks.length)*100) : 0}% (${done}/${tasks.length})`;
+
+        filtered.forEach(t => {
             const li = document.createElement('li');
             if (t.completed) li.classList.add('completed');
-            const prioClass = t.priority == 3 ? 'high' : t.priority == 2 ? 'mid' : 'low';
-            
+            const d = t.time ? new Date(t.time) : null;
+            const timeInfo = d ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]}) ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` : '尚未設定時間';
+
             li.innerHTML = `
                 <div class="task-info" onclick="toggleTask(${t.id})">
-                    <div class="task-title"><span class="dot ${prioClass}"></span>${t.text}</div>
-                    <div class="task-meta">${formatTime(t.time)}</div>
+                    <div class="task-title"><span class="dot ${t.priority==3?'high':t.priority==2?'mid':'low'}"></span>${t.text}</div>
+                    <div class="task-meta">${timeInfo}</div>
                 </div>
                 <button class="del-link" onclick="delTask(${t.id})">×</button>
             `;
@@ -219,25 +187,24 @@
     document.getElementById('add-btn').addEventListener('click', () => {
         const text = document.getElementById('taskName').value.trim();
         if(!text) return;
-        tasks.push({
-            id: Date.now(),
-            text: text,
-            priority: document.getElementById('taskPrio').value,
-            time: document.getElementById('taskTime').value,
-            completed: false
-        });
+        tasks.push({ id: Date.now(), text, priority: document.getElementById('taskPrio').value, time: document.getElementById('taskTime').value, completed: false });
         document.getElementById('taskName').value = '';
-        saveAndRender();
+        save();
     });
 
-    window.toggleTask = (id) => { tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t); saveAndRender(); };
-    window.delTask = (id) => { if(confirm('確定移除？')) { tasks = tasks.filter(t => t.id !== id); saveAndRender(); } };
+    function save() {
+        tasks.sort((a, b) => b.priority - a.priority);
+        localStorage.setItem('minimalTasksSearchV2', JSON.stringify(tasks));
+        render();
+    }
+
+    window.toggleTask = (id) => { tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t); save(); };
+    window.delTask = (id) => { if(confirm('確定移除？')) { tasks = tasks.filter(t => t.id !== id); save(); } };
 
     function exportCSV() {
-        if (!tasks.length) return alert("清單為空");
         const date = new Date().toISOString().split('T')[0];
-        let csv = "\ufeff任務名稱,優先度,提醒時間,狀態\n";
-        tasks.forEach(t => csv += `"${t.text}",${t.priority},"${t.time}",${t.completed ? "已完成" : "未完成"}\n`);
+        let csv = "\ufeff任務名稱,優先度,時間,狀態\n";
+        tasks.forEach(t => csv += `"${t.text}",${t.priority},"${t.time}",${t.completed ? "已完成" : "執行中"}\n`);
         const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
@@ -254,7 +221,7 @@
                 return { id: Date.now()+Math.random(), text: p[0].replace(/"/g,''), priority: p[1], time: p[2].replace(/"/g,''), completed: p[3].includes('已完成') };
             });
             tasks = [...tasks, ...imported];
-            saveAndRender();
+            save();
         };
         reader.readAsText(e.target.files[0]);
     }
