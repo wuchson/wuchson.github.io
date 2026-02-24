@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>停車收費系統 V29</title>
+    <title>停車收費系統 V32</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -11,7 +11,6 @@
         .container { max-width: 500px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 12px; }
         
-        /* 費率設定區 */
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .config-group { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .config-group label { font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
@@ -37,6 +36,7 @@
         .btn-main { background: var(--primary); color: #fff; padding: 15px; width: 100%; font-size: 16px; }
         .btn-checkout { background: #fee2e2; color: var(--danger); padding: 10px 18px; }
         .btn-sub { background: #fff; border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; flex: 1; color: #64748b; }
+        .btn-danger-sub { background: #fff; border: 1px solid #fee2e2; padding: 10px; font-size: 12px; flex: 1; color: var(--danger); }
         
         .section-title { font-size: 14px; font-weight: bold; color: var(--primary); margin: 15px 0 8px 5px; }
         .hist-item { padding: 12px; border-bottom: 1px dashed #e2e8f0; font-size: 12px; }
@@ -46,7 +46,7 @@
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V29</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V32</h2>
 
     <div class="stats-grid">
         <div class="stat-box"><span class="stat-label">今日營收</span><span id="revD" class="stat-val">$0</span></div>
@@ -61,7 +61,7 @@
             <div class="config-group"><label>1時上限($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
             <div class="config-group"><label>單日最高($)</label><input type="number" id="rateMax" value="300" onchange="saveCfg()"></div>
         </div>
-        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center;">* 計費邏輯：每 24 小時為一循環，重新計算基本費與上限</p>
+        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center;">* 計費說明：滿 24 小時加收一日最高，餘時重新計費</p>
     </div>
 
     <div class="card">
@@ -83,17 +83,18 @@
         <div id="searchResults" style="max-height: 300px; overflow-y: auto;"></div>
     </div>
 
-    <div style="display:flex; gap:8px;">
+    <div style="display:flex; flex-wrap: wrap; gap:8px;">
         <button class="btn-sub" onclick="exportFullReport()">📥 匯出備份</button>
         <button class="btn-sub" onclick="document.getElementById('importFile').click()">📤 匯入還原</button>
+        <button class="btn-danger-sub" onclick="clearAllData()">🗑️ 清空資料</button>
         <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importComprehensiveCSV(event)">
     </div>
 </div>
 
 <script>
-    let pkList = JSON.parse(localStorage.getItem('pk_v29_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v29_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_v29_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 300 };
+    let pkList = JSON.parse(localStorage.getItem('pk_v32_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v32_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v32_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 300 };
     let currentMode = 'timer';
 
     function switchMode(m) {
@@ -108,57 +109,53 @@
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('pk_v29_cfg', JSON.stringify(config));
+        localStorage.setItem('pk_v32_cfg', JSON.stringify(config));
         renderAll();
     }
 
-    // --- 核心計費邏輯 V29：支援跨日循環 ---
+    // --- 精確計費邏輯 V32 ---
     function calculateFee(car) {
         if (car.mode === 'fixed') return car.fixedAmount || 0;
         
         const totalMins = Math.floor((Date.now() - car.time) / 60000);
         if (totalMins <= 0) return config.rBase;
 
-        const minsPerDay = 1440; // 24小時
-        const fullDays = Math.floor(totalMins / minsPerDay);
-        const remainingMins = totalMins % minsPerDay;
+        const minsPerDay = 1440; 
+        const fullDays = Math.floor(totalMins / minsPerDay); 
+        const remainingMins = totalMins % minsPerDay; 
 
-        // 1. 先計算所有完整天數的金額（每一天都取單日上限）
+        // 1. 滿整天的部分
         let totalFee = fullDays * config.rMax;
 
-        // 2. 計算最後一個循環（不足 24 小時）的費用
-        if (remainingMins > 0 || (fullDays === 0 && totalMins > 0)) {
-            let currentCycleFee = config.rBase; // 每個循環重新從基本費起跳
+        // 2. 剩餘時數重新計算 (包含不滿一天的情況)
+        if (remainingMins > 0) {
+            let currentCycleFee = config.rBase;
             const halfHours = Math.floor(remainingMins / 30);
             const minsInHalfHour = remainingMins % 30;
 
-            // 計算完整 30 分鐘塊
             for (let i = 1; i <= halfHours; i++) {
                 if (i % 2 !== 0) {
-                    // 每小時的前 30 分
+                    // 該小時的前 30 分
                     currentCycleFee = (Math.floor(currentCycleFee / config.r60) * config.r60) + config.r30;
                 } else {
-                    // 每小時的整點
+                    // 該小時的整點
                     currentCycleFee = (Math.floor((currentCycleFee - 1) / config.r60) + 1) * config.r60;
                 }
             }
 
-            // 計算剩餘分鐘
             if (minsInHalfHour > 0) {
                 const isSecondHalf = (halfHours % 2 !== 0);
                 const limit = isSecondHalf ? config.r60 : config.r30;
-                const currentHourBase = Math.floor(currentCycleFee / config.r60) * config.r60;
+                const hourBase = Math.floor(currentCycleFee / config.r60) * config.r60;
                 
                 currentCycleFee += minsInHalfHour;
-                
-                // 檢查是否超過該小時內的階段上限
-                if (currentCycleFee > (currentHourBase + limit)) {
-                    currentCycleFee = currentHourBase + limit;
-                }
+                if (currentCycleFee > (hourBase + limit)) currentCycleFee = hourBase + limit;
             }
             
-            // 此循環最高不得超過單日上限
+            // 餘時最高不得過單日上限
             totalFee += Math.min(currentCycleFee, config.rMax);
+        } else if (fullDays === 0 && totalMins > 0) {
+            totalFee = config.rBase;
         }
 
         return totalFee;
@@ -178,17 +175,13 @@
         pkList.forEach((car, originalIdx) => {
             if (car.plate.includes(query)) {
                 const diff = Math.floor((Date.now() - car.time) / 60000);
-                const d = Math.floor(diff/1440);
-                const h = Math.floor((diff%1440)/60);
-                const m = diff%60;
-                const durationStr = d > 0 ? `${d}天 ${h}時 ${m}分` : `${h}時 ${m}分`;
-
+                const d = Math.floor(diff/1440), h = Math.floor((diff%1440)/60), m = diff%60;
                 list.innerHTML += `
                     <div class="car-item">
                         <div>
                             <b>${car.plate}<span class="badge badge-in">場內</span></b>
                             <span class="time-label">🚦 進場: ${formatTime(car.time)}</span>
-                            <div style="font-size:11px;color:var(--primary);font-weight:bold;">⏱️ 已停: ${durationStr}</div>
+                            <div style="font-size:11px;color:var(--primary);font-weight:bold;">⏱️ 已停: ${d > 0 ? d+'天 ' : ''}${h}時 ${m}分</div>
                             <div class="fee-tag">$${calculateFee(car)}</div>
                         </div>
                         <button class="btn-checkout" onclick="checkOut(${originalIdx})">結帳</button>
@@ -210,12 +203,13 @@
 
         document.getElementById('countIn').innerText = pkList.length;
         updateStats();
-        localStorage.setItem('pk_v29_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v29_hist', JSON.stringify(pkHist));
+        localStorage.setItem('pk_v32_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v32_hist', JSON.stringify(pkHist));
     }
 
     function updateStats() {
-        const d = pkHist.filter(h => new Date(h.exitTime).toDateString() === new Date().toDateString()).reduce((s, h) => s + h.fee, 0);
+        const dStr = new Date().toDateString();
+        const d = pkHist.filter(h => new Date(h.exitTime).toDateString() === dStr).reduce((s, h) => s + h.fee, 0);
         const m = pkHist.filter(h => new Date(h.exitTime).getMonth() === new Date().getMonth()).reduce((s, h) => s + h.fee, 0);
         document.getElementById('revD').innerText = `$${d}`;
         document.getElementById('revM').innerText = `$${m}`;
@@ -238,16 +232,23 @@
         }
     }
 
+    function clearAllData() {
+        if (confirm("⚠️ 確定要清空所有資料嗎？建議先匯出備份！")) {
+            pkList = []; pkHist = []; renderAll();
+            alert("資料已清空");
+        }
+    }
+
     function exportFullReport() {
         const now = new Date();
-        const dateStr = `${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}_${String(now.getDate()).padStart(2, '0')}`;
+        const dateStr = `${now.getFullYear()}_${now.getMonth()+1}_${now.getDate()}`;
         let csv = "\ufeff車牌,進場時間,出場時間,金額,模式,狀態\n";
         pkList.forEach(c => { csv += `${c.plate},${new Date(c.time).toLocaleString()},--,${calculateFee(c)},${c.mode},場內\n`; });
         pkHist.forEach(h => { csv += `${h.plate},${new Date(h.entryTime).toLocaleString()},${new Date(h.exitTime).toLocaleString()},${h.fee},completed,已結帳\n`; });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `停車費_${dateStr}.csv`;
+        a.download = `停車報表_${dateStr}.csv`;
         a.click();
     }
 
@@ -256,39 +257,46 @@
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(ev) {
-            const lines = ev.target.result.split(/\r?\n/);
-            let nL = [], nH = [];
-            lines.forEach((line, i) => {
-                if (i === 0 || !line.trim()) return;
-                const cols = line.split(',');
-                if (cols.length >= 5) {
-                    const plate = cols[0].trim();
-                    const cleanDate = (s) => {
-                        const d = new Date(s.replace(/[上下]午/g, '').replace(/[年月]/g, '/').replace(/日/g, ''));
-                        return d.getTime();
-                    };
-                    const tE = cleanDate(cols[1]);
-                    const tX = cols[2].trim();
-                    const f = parseInt(cols[3].replace(/[^0-9]/g, '')) || 0;
-                    const m = cols[4].trim();
-                    if (plate && !isNaN(tE)) {
-                        if (tX === "--" || tX === "") nL.push({ plate, time: tE, mode: m, fixedAmount: (m==='fixed'?f:0) });
-                        else nH.push({ plate, entryTime: tE, exitTime: cleanDate(tX), fee: f });
+            try {
+                const lines = ev.target.result.split(/\r?\n/);
+                let nL = [], nH = [];
+                const parseDate = (s) => {
+                    if (!s || s === "--") return NaN;
+                    let clean = s.replace(/[上下]午/g, ' ').replace(/[年月]/g, '/').replace(/日/g, '').trim();
+                    let d = new Date(clean);
+                    if (isNaN(d.getTime())) d = new Date(clean.replace(/\//g, '-'));
+                    return d.getTime();
+                };
+                lines.forEach((line, i) => {
+                    if (i === 0 || !line.trim()) return;
+                    const cols = line.split(',');
+                    if (cols.length >= 5) {
+                        const plate = cols[0].trim();
+                        const tE = parseDate(cols[1]);
+                        const tX_str = cols[2].trim();
+                        const f = parseInt(cols[3].replace(/[^0-9]/g, '')) || 0;
+                        const m = cols[4].trim();
+                        if (plate && !isNaN(tE)) {
+                            if (tX_str === "--" || tX_str === "") nL.push({ plate, time: tE, mode: m, fixedAmount: (m==='fixed'?f:0) });
+                            else {
+                                const tX = parseDate(tX_str);
+                                if (!isNaN(tX)) nH.push({ plate, entryTime: tE, exitTime: tX, fee: f });
+                            }
+                        }
                     }
-                }
-            });
-            pkList = nL; pkHist = nH; renderAll();
+                });
+                pkList = nL; pkHist = nH; renderAll();
+                alert("匯入完成");
+            } catch (err) { alert("讀取錯誤"); }
+            e.target.value = '';
         };
         reader.readAsText(file);
     }
 
-    // 初始化設定值
     document.getElementById('rateBase').value = config.rBase;
     document.getElementById('rate30').value = config.r30;
     document.getElementById('rate60').value = config.r60;
     document.getElementById('rateMax').value = config.rMax;
-    
-    // 每分鐘更新一次介面
     setInterval(renderAll, 60000);
     renderAll();
 </script>
