@@ -42,95 +42,111 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         h1 { font-size: 24px; font-weight: 600; letter-spacing: 2px; margin: 0; }
+        .today-info { font-size: 13px; color: var(--secondary); margin-top: 5px; letter-spacing: 1px; }
+
+        /* 搜尋框設計 */
+        .search-container { margin-bottom: 30px; }
+        #searchInput {
+            width: 100%; border: none; background: rgba(0,0,0,0.03);
+            padding: 10px 15px; border-radius: 20px; font-size: 14px;
+            color: var(--text); outline: none; box-sizing: border-box;
+            transition: 0.3s;
+        }
+        #searchInput:focus { background: rgba(0,0,0,0.06); box-shadow: 0 0 0 1px var(--border); }
+        [data-theme="dark"] #searchInput { background: rgba(255,255,255,0.05); }
 
         /* 進度統計 */
         .progress-section { margin-bottom: 40px; }
-        .progress-label { display: flex; justify-content: space-between; font-size: 12px; letter-spacing: 1px; margin-bottom: 10px; color: var(--secondary); }
-        .progress-track { height: 1px; background: var(--border); position: relative; }
-        #progress-fill { height: 1.5px; background: var(--accent); width: 0%; transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; top: 0; left: 0; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 10px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .progress-track { height: 1.5px; background: var(--border); position: relative; }
+        #progress-fill { height: 1.5px; background: var(--accent); width: 0%; transition: width 0.7s ease; position: absolute; top: 0; left: 0; }
 
-        /* 功能選單 */
+        /* 工具選單 */
         .nav-tools { display: flex; gap: 15px; margin-bottom: 30px; }
-        .nav-btn { 
-            font-size: 12px; background: none; border: none; color: var(--secondary); 
-            cursor: pointer; padding: 0; transition: color 0.2s;
-        }
-        .nav-btn:hover { color: var(--accent); }
+        .nav-btn { font-size: 11px; background: none; border: none; color: var(--secondary); cursor: pointer; padding: 0; letter-spacing: 1px; }
+        .nav-btn:hover { color: var(--accent); text-decoration: underline; }
 
         /* 輸入區域 */
-        .input-area { margin-bottom: 40px; }
-        input[type="text"] {
+        .input-area { margin-bottom: 40px; border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
+        input[type="text"]#taskName {
             width: 100%; border: none; border-bottom: 1px solid var(--border);
-            padding: 12px 0; font-size: 16px; outline: none; background: transparent;
+            padding: 10px 0; font-size: 16px; outline: none; background: transparent;
             color: var(--text) !important; margin-bottom: 15px;
         }
-        input[type="text"]:focus { border-bottom-color: var(--accent); }
-
         .options-row { display: flex; gap: 10px; }
         select, input[type="datetime-local"] {
             flex: 1; border: 1px solid var(--border); background: transparent;
-            padding: 8px; font-size: 13px; color: var(--secondary); border-radius: 4px; outline: none;
+            padding: 8px; font-size: 12px; color: var(--secondary); border-radius: 6px; outline: none;
         }
-
         #add-btn {
             margin-top: 20px; width: 100%; padding: 12px; background: var(--accent);
-            color: var(--bg); border: none; font-size: 14px; letter-spacing: 4px;
-            cursor: pointer; font-weight: 500;
+            color: var(--bg); border: none; font-size: 13px; letter-spacing: 4px; cursor: pointer; border-radius: 6px;
         }
 
         /* 任務列表 */
-        ul { list-style: none; padding: 0; margin: 0; }
+        ul { list-style: none; padding: 0; }
         li {
-            padding: 18px 0; border-bottom: 1px solid var(--border);
+            padding: 20px 0; border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
+            animation: fadeIn 0.4s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
         .task-info { flex-grow: 1; cursor: pointer; }
-        .task-title { font-size: 16px; margin-bottom: 4px; }
+        .task-title { font-size: 16px; margin-bottom: 6px; font-weight: 500; display: flex; align-items: center; }
         .task-meta { font-size: 11px; color: var(--secondary); }
 
-        .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 10px; }
-        .high { background: #000; }
-        .mid { background: #999; }
-        .low { background: #eee; border: 1px solid #ddd; }
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 12px; }
+        .high { background: #ff4d4f; box-shadow: 0 0 5px rgba(255,77,79,0.4); }
+        .mid { background: #faad14; }
+        .low { background: #52c41a; }
 
-        .completed .task-title { color: var(--secondary); text-decoration: line-through; }
-        .del-link { background: none; border: none; color: #ddd; cursor: pointer; font-size: 18px; }
-        .del-link:hover { color: #ff4d4f; }
+        .completed { opacity: 0.35; filter: grayscale(1); }
+        .completed .task-title { text-decoration: line-through; }
+        .del-link { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; padding-left: 15px; }
+        .del-link:hover { color: var(--text); }
     </style>
 </head>
 <body data-theme="light">
 
 <div class="wrapper">
     <header>
-        <h1>任務清單</h1>
-        <button class="nav-btn" onclick="toggleTheme()" id="theme-toggle">切換深色模式</button>
+        <div>
+            <h1>Studio Tasks</h1>
+            <div class="today-info" id="current-date">...</div>
+        </div>
+        <button class="nav-btn" onclick="toggleTheme()" id="theme-toggle">切換模式</button>
     </header>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 搜尋任務內容..." oninput="render()">
+    </div>
 
     <div class="progress-section">
         <div class="progress-label">
-            <span>完成進度</span>
-            <span id="stat-text">0% (0/0)</span>
+            <span>當前進度</span>
+            <span id="stat-text">0%</span>
         </div>
         <div class="progress-track"><div id="progress-fill"></div></div>
     </div>
 
     <div class="nav-tools">
-        <button class="nav-btn" onclick="exportCSV()">匯出 Excel</button>
-        <button class="nav-btn" onclick="document.getElementById('csv-file').click()">匯入 Excel</button>
+        <button class="nav-btn" onclick="exportCSV()">匯出 EXCEL</button>
+        <button class="nav-btn" onclick="document.getElementById('csv-file').click()">匯入 EXCEL</button>
         <input type="file" id="csv-file" style="display:none" accept=".csv" onchange="importCSV(event)">
     </div>
 
     <div class="input-area">
-        <input type="text" id="taskName" placeholder="點擊這裡輸入新任務...">
+        <input type="text" id="taskName" placeholder="輸入任務...">
         <div class="options-row">
             <select id="taskPrio">
-                <option value="3">緊急優先</option>
-                <option value="2" selected>普通程度</option>
-                <option value="1">有空再做</option>
+                <option value="3">緊急</option>
+                <option value="2" selected>普通</option>
+                <option value="1">稍後</option>
             </select>
             <input type="datetime-local" id="taskTime">
         </div>
@@ -141,32 +157,50 @@
 </div>
 
 <script>
-    let tasks = JSON.parse(localStorage.getItem('minimalTasksData')) || [];
+    let tasks = JSON.parse(localStorage.getItem('minimalTasksFinal')) || [];
+    const dayNames = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+
+    function showToday() {
+        const now = new Date();
+        document.getElementById('current-date').innerText = 
+            `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${dayNames[now.getDay()]}`;
+    }
+
+    function formatTime(timeStr) {
+        if (!timeStr) return "尚未設定時間";
+        const d = new Date(timeStr);
+        const week = dayNames[d.getDay()];
+        return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} (${week}) ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    }
 
     function toggleTheme() {
         const body = document.body;
         const isDark = body.getAttribute('data-theme') === 'dark';
         body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        document.getElementById('theme-toggle').innerText = isDark ? '切換深色模式' : '切換淺色模式';
     }
 
     function saveAndRender() {
         tasks.sort((a, b) => b.priority - a.priority);
-        localStorage.setItem('minimalTasksData', JSON.stringify(tasks));
+        localStorage.setItem('minimalTasksFinal', JSON.stringify(tasks));
         render();
     }
 
     function render() {
         const list = document.getElementById('taskList');
+        const query = document.getElementById('searchInput').value.toLowerCase();
         list.innerHTML = '';
+
+        // 過濾搜尋結果
+        const filteredTasks = tasks.filter(t => t.text.toLowerCase().includes(query));
+        
+        // 統計 (以全部任務為準)
         const done = tasks.filter(t => t.completed).length;
         const total = tasks.length;
         const percent = total ? Math.round((done / total) * 100) : 0;
-        
         document.getElementById('progress-fill').style.width = percent + '%';
         document.getElementById('stat-text').innerText = `${percent}% (${done}/${total})`;
 
-        tasks.forEach(t => {
+        filteredTasks.forEach(t => {
             const li = document.createElement('li');
             if (t.completed) li.classList.add('completed');
             const prioClass = t.priority == 3 ? 'high' : t.priority == 2 ? 'mid' : 'low';
@@ -174,7 +208,7 @@
             li.innerHTML = `
                 <div class="task-info" onclick="toggleTask(${t.id})">
                     <div class="task-title"><span class="dot ${prioClass}"></span>${t.text}</div>
-                    <div class="task-meta">${t.time ? '提醒時間：' + t.time.replace('T', ' ') : '尚未設定時間'}</div>
+                    <div class="task-meta">${formatTime(t.time)}</div>
                 </div>
                 <button class="del-link" onclick="delTask(${t.id})">×</button>
             `;
@@ -196,27 +230,14 @@
         saveAndRender();
     });
 
-    window.toggleTask = (id) => { 
-        tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t); 
-        saveAndRender(); 
-    };
+    window.toggleTask = (id) => { tasks = tasks.map(t => t.id === id ? {...t, completed: !t.completed} : t); saveAndRender(); };
+    window.delTask = (id) => { if(confirm('確定移除？')) { tasks = tasks.filter(t => t.id !== id); saveAndRender(); } };
 
-    window.delTask = (id) => { 
-        if(confirm('確定要移除這項任務嗎？')) {
-            tasks = tasks.filter(t => t.id !== id); 
-            saveAndRender(); 
-        }
-    };
-
-    // 匯出 Excel (含當天日期檔名)
     function exportCSV() {
-        if (!tasks.length) return alert("目前沒有可匯出的任務。");
+        if (!tasks.length) return alert("清單為空");
         const date = new Date().toISOString().split('T')[0];
         let csv = "\ufeff任務名稱,優先度,提醒時間,狀態\n";
-        tasks.forEach(t => {
-            const status = t.completed ? "已完成" : "執行中";
-            csv += `"${t.text}",${t.priority},"${t.time}",${status}\n`;
-        });
+        tasks.forEach(t => csv += `"${t.text}",${t.priority},"${t.time}",${t.completed ? "已完成" : "未完成"}\n`);
         const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
@@ -224,32 +245,21 @@
         link.click();
     }
 
-    // 匯入 Excel
     function importCSV(e) {
         const reader = new FileReader();
         reader.onload = (f) => {
-            try {
-                const lines = f.target.result.split('\n').slice(1);
-                const imported = lines.filter(l => l.trim()).map(line => {
-                    const p = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                    return { 
-                        id: Date.now() + Math.random(), 
-                        text: p[0].replace(/"/g,''), 
-                        priority: p[1], 
-                        time: p[2].replace(/"/g,''), 
-                        completed: p[3].includes('已完成') 
-                    };
-                });
-                tasks = [...tasks, ...imported];
-                saveAndRender();
-                alert("匯入成功！");
-            } catch (err) {
-                alert("匯入失敗，請檢查 CSV 格式。");
-            }
+            const lines = f.target.result.split('\n').slice(1);
+            const imported = lines.filter(l => l.trim()).map(line => {
+                const p = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                return { id: Date.now()+Math.random(), text: p[0].replace(/"/g,''), priority: p[1], time: p[2].replace(/"/g,''), completed: p[3].includes('已完成') };
+            });
+            tasks = [...tasks, ...imported];
+            saveAndRender();
         };
         reader.readAsText(e.target.files[0]);
     }
 
+    showToday();
     render();
 </script>
 </body>
