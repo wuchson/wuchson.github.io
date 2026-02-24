@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>停車收費系統 V32</title>
+    <title>停車收費系統 V31</title>
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; --bg: #f1f5f9; --text: #0f172a; --white: #ffffff; }
         * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -46,7 +46,7 @@
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V32</h2>
+    <h2 style="text-align:center; color: var(--primary); margin: 10px 0;">🅿️ 停車收費系統 V31</h2>
 
     <div class="stats-grid">
         <div class="stat-box"><span class="stat-label">今日營收</span><span id="revD" class="stat-val">$0</span></div>
@@ -61,7 +61,7 @@
             <div class="config-group"><label>1時上限($)</label><input type="number" id="rate60" value="40" onchange="saveCfg()"></div>
             <div class="config-group"><label>單日最高($)</label><input type="number" id="rateMax" value="300" onchange="saveCfg()"></div>
         </div>
-        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center;">* 計費說明：滿 24 小時加收一日最高，餘時重新計費</p>
+        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center;">* 每 24 小時獨立循環計算</p>
     </div>
 
     <div class="card">
@@ -92,9 +92,9 @@
 </div>
 
 <script>
-    let pkList = JSON.parse(localStorage.getItem('pk_v32_list')) || [];
-    let pkHist = JSON.parse(localStorage.getItem('pk_v32_hist')) || [];
-    let config = JSON.parse(localStorage.getItem('pk_v32_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 300 };
+    let pkList = JSON.parse(localStorage.getItem('pk_v31_list')) || [];
+    let pkHist = JSON.parse(localStorage.getItem('pk_v31_hist')) || [];
+    let config = JSON.parse(localStorage.getItem('pk_v31_cfg')) || { rBase: 10, r30: 20, r60: 40, rMax: 300 };
     let currentMode = 'timer';
 
     function switchMode(m) {
@@ -109,36 +109,30 @@
         config.r30 = parseInt(document.getElementById('rate30').value) || 0;
         config.r60 = parseInt(document.getElementById('rate60').value) || 0;
         config.rMax = parseInt(document.getElementById('rateMax').value) || 0;
-        localStorage.setItem('pk_v32_cfg', JSON.stringify(config));
+        localStorage.setItem('pk_v31_cfg', JSON.stringify(config));
         renderAll();
     }
 
-    // --- 精確計費邏輯 V32 ---
     function calculateFee(car) {
         if (car.mode === 'fixed') return car.fixedAmount || 0;
-        
         const totalMins = Math.floor((Date.now() - car.time) / 60000);
         if (totalMins <= 0) return config.rBase;
 
-        const minsPerDay = 1440; 
-        const fullDays = Math.floor(totalMins / minsPerDay); 
-        const remainingMins = totalMins % minsPerDay; 
+        const minsPerDay = 1440;
+        const fullDays = Math.floor(totalMins / minsPerDay);
+        const remainingMins = totalMins % minsPerDay;
 
-        // 1. 滿整天的部分
         let totalFee = fullDays * config.rMax;
 
-        // 2. 剩餘時數重新計算 (包含不滿一天的情況)
-        if (remainingMins > 0) {
+        if (remainingMins > 0 || fullDays === 0) {
             let currentCycleFee = config.rBase;
             const halfHours = Math.floor(remainingMins / 30);
             const minsInHalfHour = remainingMins % 30;
 
             for (let i = 1; i <= halfHours; i++) {
                 if (i % 2 !== 0) {
-                    // 該小時的前 30 分
                     currentCycleFee = (Math.floor(currentCycleFee / config.r60) * config.r60) + config.r30;
                 } else {
-                    // 該小時的整點
                     currentCycleFee = (Math.floor((currentCycleFee - 1) / config.r60) + 1) * config.r60;
                 }
             }
@@ -146,18 +140,12 @@
             if (minsInHalfHour > 0) {
                 const isSecondHalf = (halfHours % 2 !== 0);
                 const limit = isSecondHalf ? config.r60 : config.r30;
-                const hourBase = Math.floor(currentCycleFee / config.r60) * config.r60;
-                
+                const currentHourBase = Math.floor(currentCycleFee / config.r60) * config.r60;
                 currentCycleFee += minsInHalfHour;
-                if (currentCycleFee > (hourBase + limit)) currentCycleFee = hourBase + limit;
+                if (currentCycleFee > (currentHourBase + limit)) currentCycleFee = currentHourBase + limit;
             }
-            
-            // 餘時最高不得過單日上限
             totalFee += Math.min(currentCycleFee, config.rMax);
-        } else if (fullDays === 0 && totalMins > 0) {
-            totalFee = config.rBase;
         }
-
         return totalFee;
     }
 
@@ -203,8 +191,8 @@
 
         document.getElementById('countIn').innerText = pkList.length;
         updateStats();
-        localStorage.setItem('pk_v32_list', JSON.stringify(pkList));
-        localStorage.setItem('pk_v32_hist', JSON.stringify(pkHist));
+        localStorage.setItem('pk_v31_list', JSON.stringify(pkList));
+        localStorage.setItem('pk_v31_hist', JSON.stringify(pkHist));
     }
 
     function updateStats() {
@@ -233,9 +221,11 @@
     }
 
     function clearAllData() {
-        if (confirm("⚠️ 確定要清空所有資料嗎？建議先匯出備份！")) {
-            pkList = []; pkHist = []; renderAll();
-            alert("資料已清空");
+        if (confirm("⚠️ 確定要清空「場內車輛」與「歷史紀錄」嗎？此動作不可撤回！")) {
+            pkList = [];
+            pkHist = [];
+            renderAll();
+            alert("資料已全部清空。");
         }
     }
 
@@ -285,14 +275,17 @@
                         }
                     }
                 });
-                pkList = nL; pkHist = nH; renderAll();
-                alert("匯入完成");
-            } catch (err) { alert("讀取錯誤"); }
+                if (nL.length > 0 || nH.length > 0) {
+                    pkList = nL; pkHist = nH; renderAll();
+                    alert(`匯入成功！場內：${nL.length}，歷史：${nH.length}`);
+                } else alert("匯入失敗：格式不正確");
+            } catch (err) { alert("讀取錯誤：" + err.message); }
             e.target.value = '';
         };
         reader.readAsText(file);
     }
 
+    // 初始化介面
     document.getElementById('rateBase').value = config.rBase;
     document.getElementById('rate30').value = config.r30;
     document.getElementById('rate60').value = config.r60;
