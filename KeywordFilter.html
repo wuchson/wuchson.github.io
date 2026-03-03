@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>關鍵字篩選器</title>
+    <title>關鍵字名稱提取器</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background-color: #f0f2f5; margin: 0; }
         .container { 
@@ -15,27 +15,28 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
-        h2 { color: #333; border-left: 5px solid #666; padding-left: 10px; margin: 0 0 15px 0; font-size: 1.5em; }
+        h2 { color: #333; border-left: 5px solid #007bff; padding-left: 10px; margin: 0 0 15px 0; font-size: 1.5em; }
         
         .intro {
-            background-color: #f8f9fa;
+            background-color: #e7f3ff;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 15px;
             font-size: 0.9em;
-            color: #555;
+            color: #0c5460;
             line-height: 1.5;
         }
 
-        /* 搜尋與按鈕佈局 */
         .control-group { 
             display: flex; 
             gap: 10px; 
             margin-bottom: 15px; 
+            flex-wrap: wrap;
         }
         
         #keywordInput { 
-            flex: 1; /* 讓輸入框佔滿剩餘空間 */
+            flex: 1;
+            min-width: 200px;
             padding: 12px; 
             font-size: 16px; 
             border: 2px solid #ddd; 
@@ -43,28 +44,30 @@
             outline: none;
         }
 
-        /* 按鈕基礎樣式 */
+        /* 按鈕樣式優化 */
         .btn {
-            padding: 0 20px;
+            padding: 0 15px;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;
-            white-space: nowrap;
-            transition: background 0.2s;
+            height: 45px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* 清空按鈕樣式 */
-        .clear-btn { background-color: #ff4d4f; }
-        .clear-btn:hover { background-color: #d9363e; }
+        .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
 
-        /* 下載按鈕樣式 */
+        .extract-btn { background-color: #007bff; }
+        .copy-btn { background-color: #6f42c1; } /* 紫色 */
         .download-btn { background-color: #28a745; }
-        .download-btn:hover { background-color: #218838; }
+        .clear-btn { background-color: #ff4d4f; }
 
-        /* 文章顯示區 */
         #displayArea { 
             width: 100%; 
             height: 60vh; 
@@ -75,7 +78,7 @@
             background: #fafafa; 
             white-space: pre-wrap; 
             word-wrap: break-word;
-            color: #444; /* 微調顏色使其更易閱讀 */
+            color: #444; 
             font-size: 16px; 
             outline: none;
             box-sizing: border-box;
@@ -89,59 +92,80 @@
             border-radius: 2px;
         }
         
-        .footer-hint { color: #999; font-size: 11px; margin-top: 10px; text-align: center; }
+        /* 複製成功的浮動提示 */
+        #copyToast {
+            visibility: hidden;
+            min-width: 150px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+        }
 
-        @media (max-width: 480px) {
-            h2 { font-size: 1.2em; }
-            .control-group { flex-direction: column; }
-            .btn { padding: 12px; }
+        #copyToast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
+
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+        @media (max-width: 600px) {
+            .control-group { display: grid; grid-template-columns: 1fr 1fr; }
+            #keywordInput { grid-column: span 2; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>關鍵字篩選器</h2>
+    <h2>關鍵字名稱提取器</h2>
 
     <div class="intro">
-        <strong>💡 功能簡介：</strong><br>
-        貼上文章後在上方搜尋，相同字詞將即時<strong>變色高亮</strong>。您可以點擊「下載檔案」將目前內容存為 TXT。
+        <strong>💡 操作流程：</strong><br>
+        1. 貼上全文 → 2. 輸入關鍵字 → 3. 點擊<strong>「提取名單」</strong> → 4. 點擊<strong>「一鍵複製」</strong>直接貼到 Excel 或記事本。
     </div>
     
     <div class="control-group">
-        <input type="text" id="keywordInput" placeholder="輸入關鍵字...">
+        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：我會參加直播)">
+        <button class="btn extract-btn" onclick="extractNames()">提取名單</button>
+        <button class="btn copy-btn" onclick="copyToClipboard()">一鍵複製</button>
         <button class="btn download-btn" onclick="downloadTXT()">下載檔案</button>
-        <button class="btn clear-btn" onclick="clearContent()">一鍵清空</button>
+        <button class="btn clear-btn" onclick="clearContent()">清空</button>
     </div>
 
     <div id="displayArea" contenteditable="true" placeholder="請在此貼上文章內容..."></div>
     
     <p class="footer-hint">
-        ※ 若內容過長可上下滑動檢視。下載時將儲存目前的原始文字。
+        ※ 提取名單後，若要恢復全文請點「清空」重新貼上。
     </p>
 </div>
+
+<div id="copyToast">已複製到剪貼簿！</div>
 
 <script>
     const keywordInput = document.getElementById('keywordInput');
     const displayArea = document.getElementById('displayArea');
+    const toast = document.getElementById('copyToast');
     let rawContent = "";
 
     // 監聽內容輸入
     displayArea.addEventListener('input', function() {
-        // 只有在沒有搜尋關鍵字的情況下，才更新原始內容快照
         if (keywordInput.value === "") {
             rawContent = displayArea.innerText;
         }
     });
 
-    // 監聽關鍵字輸入
+    // 監聽關鍵字高亮
     keywordInput.addEventListener('input', function() {
         const keyword = this.value;
-        // 如果 rawContent 為空但區塊內有字，先同步一次
         if (!rawContent && displayArea.innerText !== "") {
             rawContent = displayArea.innerText;
         }
-        
         if (!keyword) {
             displayArea.innerText = rawContent;
             return;
@@ -149,7 +173,6 @@
         highlight(keyword);
     });
 
-    // 高亮邏輯
     function highlight(key) {
         const safeKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp(`(${safeKey})`, 'gi');
@@ -157,38 +180,93 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 新增功能：下載另存 TXT ---
+    // --- 提取邏輯 ---
+    function extractNames() {
+        const keyword = keywordInput.value.trim();
+        if (!keyword) {
+            alert("請先輸入關鍵字！");
+            return;
+        }
+
+        const content = rawContent || displayArea.innerText;
+        const lines = content.split('\n').map(line => line.trim());
+        const nameList = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes(keyword)) {
+                let foundName = "";
+                for (let j = i - 1; j >= 0; j--) {
+                    if (lines[j] !== "") {
+                        foundName = lines[j];
+                        break; 
+                    }
+                }
+                if (foundName && !nameList.includes(foundName)) {
+                    nameList.push(foundName);
+                }
+            }
+        }
+
+        if (nameList.length === 0) {
+            alert("找不到對應的名稱，請檢查關鍵字！");
+            return;
+        }
+
+        const resultText = nameList.join('\n');
+        displayArea.innerText = resultText;
+        rawContent = resultText;
+        keywordInput.value = ""; 
+        showToast(`成功提取 ${nameList.length} 位名稱！`);
+    }
+
+    // --- 一鍵複製功能 ---
+    async function copyToClipboard() {
+        const text = displayArea.innerText;
+        if (!text.trim()) {
+            alert("目前沒有內容可以複製！");
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast("已複製到剪貼簿！");
+        } catch (err) {
+            // 備用方案 (針對較舊的瀏覽器)
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showToast("已複製到剪貼簿！");
+        }
+    }
+
+    // 顯示提示訊息
+    function showToast(msg) {
+        toast.innerText = msg;
+        toast.className = "show";
+        setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 2000);
+    }
+
     function downloadTXT() {
-        // 取得目前的文字內容（使用 innerText 會排除 <mark> 標籤）
         const textToSave = displayArea.innerText;
-        
         if (!textToSave.trim()) {
             alert("目前沒有內容可以下載！");
             return;
         }
-
-        // 建立 Blob 物件
         const blob = new Blob([textToSave], { type: "text/plain;charset=utf-8" });
         const url = window.URL.createObjectURL(blob);
-        
-        // 建立隱藏的下載連結
         const link = document.createElement("a");
         link.href = url;
-        
-        // 設定檔名（預設以時間命名）
         const timestamp = new Date().toISOString().slice(0, 10);
-        link.download = `文章備份_${timestamp}.txt`;
-        
-        // 執行下載
+        link.download = `名單備份_${timestamp}.txt`;
         document.body.appendChild(link);
         link.click();
-        
-        // 清理
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
     }
 
-    // 一鍵清空功能
     function clearContent() {
         if (confirm("確定要清空所有內容嗎？")) {
             keywordInput.value = "";
