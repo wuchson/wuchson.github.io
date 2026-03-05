@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 - 週期統計版</title>
+    <title>打卡系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -87,7 +87,7 @@
 
     <div id="page-make" class="page">
         <div class="card">
-            <h2 id="period-display">本期工時統計 (1日開始)</h2>
+            <h2 id="period-display">本期工時統計</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>部門</th><th>本期總時數</th></tr></thead>
@@ -129,12 +129,10 @@
     <div id="page-config" class="page">
         <div class="card">
             <h2>📅 結算週期設定</h2>
-            <label>每月結算起始日</label>
-            <select id="config-cycle-day" onchange="updateCycleSetting()">
-                <option value="1">每月 1 日開始</option>
-                <option value="15">每月 15 日開始</option>
-            </select>
-            <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;">* 系統會根據此日期自動計算本月累積工時</p>
+            <label>每月結算起始日 (1-31)</label>
+            <input type="number" id="config-cycle-day" min="1" max="31" placeholder="例如: 5">
+            <button class="primary-btn" onclick="updateCycleSetting()" style="margin-top:10px;">💾 套用結算日</button>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;">* 設定為 5 表示每月 5 號計算到下個月 4 號。</p>
         </div>
         <div class="card">
             <h2>🔐 密碼變更</h2>
@@ -187,9 +185,12 @@
     }
 
     function updateCycleSetting() {
-        cycleDay = parseInt(document.getElementById('config-cycle-day').value);
+        const val = parseInt(document.getElementById('config-cycle-day').value);
+        if(isNaN(val) || val < 1 || val > 31) return alert("請輸入有效的日期 (1-31)");
+        cycleDay = val;
         localStorage.setItem('hr_cycle_day', cycleDay);
-        alert("結算日已更新為 " + cycleDay + " 日");
+        alert(`✅ 結算日已成功設定為每月 ${cycleDay} 日`);
+        calculateStats(); // 立即重新計算
     }
 
     // --- 工時計算邏輯 ---
@@ -197,7 +198,12 @@
         const now = new Date();
         let startYear = now.getFullYear();
         let startMonth = now.getMonth();
-        if (now.getDate() < cycleDay) startMonth -= 1;
+        
+        // 如果今天還沒到結算日，表示當前週期是從上個月開始的
+        if (now.getDate() < cycleDay) {
+            startMonth -= 1;
+        }
+        
         const periodStart = new Date(startYear, startMonth, cycleDay, 0, 0, 0);
         
         document.getElementById('period-display').innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
@@ -205,13 +211,14 @@
         const stats = {};
         staffDb.forEach(s => stats[s.id] = { name: s.name, dept: s.dept || "-", totalMs: 0, lastIn: null });
 
-        // 過濾出週期內的紀錄並由舊到新排序
+        // 處理紀錄並統計
         const periodLogs = logs
             .filter(l => new Date(l.time) >= periodStart)
             .sort((a,b) => new Date(a.time) - new Date(b.time));
 
         periodLogs.forEach(l => {
-            const sId = staffDb.find(s => s.name === l.name)?.id || l.name;
+            const staff = staffDb.find(s => s.name === l.name);
+            const sId = staff ? staff.id : l.name;
             if(!stats[sId]) stats[sId] = { name: l.name, dept: "-", totalMs: 0, lastIn: null };
             
             if(l.type === "上班") {
@@ -231,7 +238,7 @@
         `).join('');
     }
 
-    // --- 繪圖邏輯 (1080x1728) ---
+    // --- 繪圖邏輯 ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
@@ -386,7 +393,7 @@
         }
     }
 
-    // --- 基礎設施 ---
+    // --- 班別與匯出 ---
     function addShift() {
         const name = document.getElementById('shift-name').value.trim();
         const start = document.getElementById('shift-start').value;
