@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>企業考勤系統 - 完整功能版</title>
+    <title>企業考勤系統 - 掃描修正穩定版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -17,20 +17,14 @@
         .page { display: none; }
         .page.active { display: block; }
         .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 15px; }
-        .management-grid { display: flex; flex-direction: column; gap: 15px; }
-        @media (min-width: 768px) { .management-grid { flex-direction: row; } .management-grid .card { flex: 1; } }
-        .canvas-container { text-align: center; background: #f1f5f9; padding: 20px 0; border-radius: 20px; }
-        #badge-canvas { width: 90%; max-width: 300px; height: auto; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.25); }
-        .form-group { margin-bottom: 12px; }
-        label { font-weight: bold; font-size: 14px; color: #64748b; display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        #badge-canvas { width: 100%; max-width: 300px; height: auto; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.25); }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .primary-btn { background: var(--primary); color: white; }
         .accent-btn { background: var(--accent); color: white; margin-top: 10px; }
-        .secondary-btn { background: #e2e8f0; color: #475569; margin-top: 10px; }
-        .list-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .list-table td { padding: 12px; border-bottom: 1px solid #eee; }
-        #reader { border-radius: 15px; overflow: hidden; }
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; }
+        .feedback-success { color: #10b981; background: #ecfdf5; padding: 15px; border-radius: 12px; margin-top: 10px; text-align: center; font-weight: bold; }
+        .log-list { font-size: 14px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -45,94 +39,136 @@
     <div id="page-scan" class="page active">
         <div class="card">
             <div id="reader"></div>
-            <div id="scan-feedback" style="text-align:center; padding:15px; font-weight:bold; font-size: 1.2rem;">Ready to Scan</div>
+            <div id="scan-feedback">正在啟動鏡頭...</div>
+            <div id="last-record" class="log-list"></div>
         </div>
     </div>
 
     <div id="page-make" class="page">
-        <div class="management-grid">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
             <div class="card">
-                <h2>工牌資訊編輯</h2>
-                <div class="form-group"><label>公司名稱 (白字大字)</label><input type="text" id="m-company" value="TECH SOLUTIONS"></div>
-                <div class="form-group"><label>員工 ID</label><input type="text" id="m-id" placeholder="EMP-001"></div>
-                <div class="form-group"><label>員工姓名</label><input type="text" id="m-name" placeholder="姓名"></div>
-                <div class="form-group"><label>部門</label><input type="text" id="m-dept" value="技術部"></div>
-                <div class="form-group"><label>班別</label><select id="m-shift-select"></select></div>
-                <div class="form-group"><label>上傳照片</label><input type="file" id="m-photo" accept="image/*" onchange="drawBadge()"></div>
-                <button class="primary-btn" onclick="saveAndDraw()">💾 儲存並更新預覽</button>
+                <h2>工牌編輯</h2>
+                <input type="text" id="m-company" value="TECH SOLUTIONS" placeholder="公司名稱">
+                <input type="text" id="m-id" placeholder="員工 ID (如 EMP001)">
+                <input type="text" id="m-name" placeholder="姓名">
+                <input type="text" id="m-dept" value="技術部" placeholder="部門">
+                <select id="m-shift-select"><option value="早班">早班</option><option value="中班">中班</option></select>
+                <input type="file" id="m-photo" accept="image/*" onchange="drawBadge()">
+                <button class="primary-btn" onclick="saveAndDraw()">儲存並更新</button>
+            </div>
+            <div class="card" style="text-align:center;">
+                <canvas id="badge-canvas" width="1080" height="1728"></canvas>
+                <button class="accent-btn" onclick="downloadBadge()">📥 下載高清工牌</button>
             </div>
             <div class="card">
-                <h2>1080x1728 高清預覽</h2>
-                <div class="canvas-container"><canvas id="badge-canvas" width="1080" height="1728"></canvas></div>
-                <button class="accent-btn" onclick="downloadBadge()">📥 下載高清 PNG</button>
+                <h2>現有員工清單</h2>
+                <div id="staff-body"></div>
             </div>
-        </div>
-        <div class="card">
-            <h2>員工清單 (可編輯/刪除)</h2>
-            <table class="list-table"><tbody id="staff-body"></tbody></table>
         </div>
     </div>
 
     <div id="page-config" class="page">
         <div class="card">
-            <h2>🔐 系統管理</h2>
-            <label>設定管理密碼 (預設 1234)</label>
-            <input type="password" id="new-pass" placeholder="輸入新密碼" style="margin-bottom:10px;">
-            <button class="primary-btn" onclick="updatePassword()">變更密碼</button>
-        </div>
-        <div class="card">
-            <h2>📊 資料同步與備份</h2>
-            <p style="font-size: 14px; color: #64748b;">您可以將資料匯出為 Excel，或從 Excel 匯入還原。</p>
-            <button class="accent-btn" onclick="fullExport()">📤 匯出備份 (Excel)</button>
-            
-            <button class="secondary-btn" onclick="document.getElementById('import-file').click()">📥 匯入還原 (Excel)</button>
+            <h2>🔐 備份與還原</h2>
+            <button class="accent-btn" onclick="fullExport()">📤 匯出資料 (Excel)</button>
+            <button class="primary-btn" style="margin-top:10px; background:#64748b;" onclick="document.getElementById('import-file').click()">📥 匯入資料 (Excel)</button>
             <input type="file" id="import-file" style="display:none;" accept=".xlsx" onchange="fullImport(this)">
         </div>
     </div>
 </div>
 
 <script>
-    let staffDb = JSON.parse(localStorage.getItem('staff_v23')) || [];
-    let shifts = [{name:"早班", start:"08:00", end:"17:00"}, {name:"中班", start:"16:00", end:"00:00"}, {name:"全日班", start:"09:00", end:"18:00"}];
-    let adminPass = localStorage.getItem('pass_v23') || "1234";
+    let staffDb = JSON.parse(localStorage.getItem('staff_v24')) || [];
+    let logDb = JSON.parse(localStorage.getItem('logs_v24')) || [];
+    let adminPass = localStorage.getItem('pass_v24') || "1234";
     let isAuthed = false;
-    let scanner;
+    let html5QrCode;
 
+    // --- 🔑 安全與權限 ---
     function checkAuth(target) {
         if(isAuthed) { showPage(target); return; }
-        const pw = prompt("請輸入管理密碼：");
+        const pw = prompt("請輸入密碼：");
         if(pw === adminPass) { isAuthed = true; showPage(target); }
-        else if(pw !== null) alert("密碼錯誤");
     }
 
-    function updatePassword() {
-        const np = document.getElementById('new-pass').value;
-        if(np) { adminPass = np; localStorage.setItem('pass_v23', adminPass); alert("密碼已更新"); }
+    // --- 📸 掃描核心功能 (修正版) ---
+    async function startScanner() {
+        const feedback = document.getElementById('scan-feedback');
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode("reader");
+        }
+        
+        // 如果已經在掃描，先停止
+        if (html5QrCode.isScanning) {
+            await html5QrCode.stop();
+        }
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+            // 成功掃描
+            handleCheckIn(decodedText);
+        }).catch(err => {
+            feedback.innerHTML = `<span style="color:red;">鏡頭啟動失敗：${err}</span><br><small>請確認是否已授予相機權限，且網址為 https</small>`;
+        });
     }
 
-    // --- 💎 修正排版：頭貼上下呼吸感 + QR 移高 ---
+    function handleCheckIn(id) {
+        const staff = staffDb.find(s => s.id === id);
+        const name = staff ? staff.name : "未知人員";
+        const time = new Date().toLocaleString();
+        
+        const newLog = { name, id, time };
+        logDb.unshift(newLog);
+        localStorage.setItem('logs_v24', JSON.stringify(logDb));
+        
+        const feedback = document.getElementById('scan-feedback');
+        feedback.innerHTML = `<div class="feedback-success">✅ 打卡成功！<br>${name} (${id})<br><small>${time}</small></div>`;
+        
+        renderLogs();
+        
+        // 短暫暫停後繼續
+        setTimeout(() => {
+            feedback.innerHTML = "等待下一個工牌...";
+        }, 3000);
+    }
+
+    // --- 🗺️ 頁面導覽 ---
+    function showPage(p) {
+        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.getElementById('nav-'+p).classList.add('active');
+        
+        if(p === 'scan') {
+            startScanner();
+        } else {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop();
+            }
+        }
+        if(p === 'make') renderStaff();
+    }
+
+    // --- 🎨 繪圖邏輯 (依照您的需求優化) ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
-        const comp = document.getElementById('m-company').value || "COMPANY NAME";
-        const id = (document.getElementById('m-id').value || "ID-0000").toUpperCase();
+        const comp = document.getElementById('m-company').value || "COMPANY";
+        const id = (document.getElementById('m-id').value || "EMP000").toUpperCase();
         const name = document.getElementById('m-name').value || "姓名";
+        const dept = document.getElementById('m-dept').value || "技術部";
         const shift = document.getElementById('m-shift-select').value;
-        const dept = document.getElementById('m-dept').value || "部門";
         const photoFile = document.getElementById('m-photo').files[0];
 
         const W = 1080, H = 1728, CX = W/2;
-
         ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, H);
-        const grad = ctx.createLinearGradient(0, 0, 0, H);
-        grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#1e293b');
-        ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-
+        
         // 公司名
         ctx.fillStyle = "white"; ctx.textAlign = "center";
         ctx.font = "bold 90px Arial"; ctx.fillText(comp, CX, 180);
 
-        // 大頭貼 (Y=580)
+        // 大頭貼
         const photoY = 580;
         ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 20;
         ctx.beginPath(); ctx.arc(CX, photoY, 310, 0, Math.PI*2); ctx.stroke();
@@ -145,126 +181,75 @@
             ctx.restore();
         }
 
-        // 文字資訊 (下移至 Y=1050)
+        // 姓名 ID
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, CX, 1050);
         ctx.fillStyle = "#3b82f6"; ctx.font = "bold 60px Arial"; ctx.fillText(dept + " • " + shift, CX, 1150);
         ctx.fillStyle = "#94a3b8"; ctx.font = "55px Arial"; ctx.fillText("ID: " + id, CX, 1225);
 
-        // QR Code 區塊 (移高至 Y=1280)
-        const qrBoxW = 750, qrBoxH = 380, qrBoxY = 1280;
-        ctx.fillStyle = "rgba(255,255,255,0.06)";
-        roundRect(ctx, CX - qrBoxW/2, qrBoxY, qrBoxW, qrBoxH, 40); ctx.fill();
-
+        // QR Code
+        const qrBoxY = 1280;
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 10.5, mCount = qr.getModuleCount();
-        const qrSize = mCount * cellSize, qrX = CX - qrSize/2, qrInnerY = qrBoxY + (qrBoxH - qrSize)/2;
+        const qrSize = mCount * cellSize, qrX = CX - qrSize/2, qrInnerY = qrBoxY + (380 - qrSize)/2;
         ctx.fillStyle = "white";
         for (let r = 0; r < mCount; r++) {
             for (let c = 0; c < mCount; c++) if (qr.isDark(r, c)) ctx.fillRect(qrX + c*cellSize, qrInnerY + r*cellSize, cellSize, cellSize);
         }
     }
 
-    function roundRect(ctx, x, y, w, h, r) {
-        ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
-    }
-
-    function showPage(p) {
-        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
-        document.getElementById('page-'+p).classList.add('active');
-        document.getElementById('nav-'+p).classList.add('active');
-        if(p === 'make') { updateShiftUI(); renderStaff(); }
-    }
-
-    // --- 員工管理 ---
+    // --- 💾 資料管理 ---
     function saveAndDraw() {
-        const id = document.getElementById('m-id').value.trim();
-        const name = document.getElementById('m-name').value.trim();
-        if(!id || !name) return alert("編號與姓名是必填的");
-        const data = {id, name, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value};
+        const id = document.getElementById('m-id').value;
+        const name = document.getElementById('m-name').value;
+        if(!id || !name) return alert("請輸入 ID 與姓名");
+        const data = { id, name, dept: document.getElementById('m-dept').value, shift: document.getElementById('m-shift-select').value, comp: document.getElementById('m-company').value };
         const idx = staffDb.findIndex(s => s.id === id);
         if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
-        localStorage.setItem('staff_v23', JSON.stringify(staffDb)); 
-        renderStaff(); drawBadge(); alert("儲存成功");
+        localStorage.setItem('staff_v24', JSON.stringify(staffDb));
+        renderStaff(); drawBadge();
     }
 
     function renderStaff() {
         document.getElementById('staff-body').innerHTML = staffDb.map(s => `
-            <tr>
-                <td><b>${s.name}</b><br><small>${s.id}</small></td>
-                <td style="text-align:right;">
-                    <button onclick="loadStaff('${s.id}')" style="width:auto; padding:5px 10px; margin-right:5px;">載入</button>
-                    <button onclick="deleteStaff('${s.id}')" style="width:auto; padding:5px 10px; background:#fee2e2; color:red;">刪除</button>
-                </td>
-            </tr>`).join('');
+            <div style="border-bottom:1px solid #eee; padding:10px; display:flex; justify-content:space-between;">
+                <span><b>${s.name}</b> (${s.id})</span>
+                <button onclick="deleteStaff('${s.id}')" style="width:auto; padding:5px; background:red; color:white;">刪除</button>
+            </div>
+        `).join('');
     }
 
-    function loadStaff(id) {
-        const s = staffDb.find(x => x.id === id);
-        document.getElementById('m-id').value = s.id;
-        document.getElementById('m-name').value = s.name;
-        document.getElementById('m-dept').value = s.dept;
-        document.getElementById('m-company').value = s.comp || "";
-        document.getElementById('m-shift-select').value = s.shift;
-        drawBadge();
-    }
+    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_v24', JSON.stringify(staffDb)); renderStaff(); } }
 
-    function deleteStaff(id) {
-        if(confirm("確定要刪除這位員工嗎？")) {
-            staffDb = staffDb.filter(s => s.id !== id);
-            localStorage.setItem('staff_v23', JSON.stringify(staffDb));
-            renderStaff();
-        }
-    }
-
-    // --- 匯入 / 匯出 核心邏輯 ---
     function fullExport() {
         const ws = XLSX.utils.json_to_sheet(staffDb);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "員工資料");
-        XLSX.writeFile(wb, "考勤系統備份.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Staff");
+        XLSX.writeFile(wb, "Backup.xlsx");
     }
 
     function fullImport(input) {
-        const file = input.files[0];
-        if(!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const importedData = XLSX.utils.sheet_to_json(firstSheet);
-                
-                if(importedData.length > 0) {
-                    if(confirm(`偵測到 ${importedData.length} 筆資料，是否要覆蓋現有員工名單？`)) {
-                        staffDb = importedData;
-                        localStorage.setItem('staff_v23', JSON.stringify(staffDb));
-                        renderStaff();
-                        alert("匯入成功！");
-                    }
-                } else {
-                    alert("檔案內無有效資料");
-                }
-            } catch(err) {
-                alert("檔案解析失敗，請確認是否為正確的備份 Excel 檔。");
-            }
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            staffDb = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            localStorage.setItem('staff_v24', JSON.stringify(staffDb));
+            alert("匯入成功！"); location.reload();
         };
-        reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(input.files[0]);
     }
 
-    function updateShiftUI() {
-        document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+    function renderLogs() {
+        document.getElementById('last-record').innerHTML = "<b>最近紀錄：</b><br>" + 
+            logDb.slice(0, 5).map(l => `• ${l.time} - ${l.name}`).join('<br>');
     }
 
     function downloadBadge() {
-        const a = document.createElement('a'); 
-        a.download = `ID_${document.getElementById('m-id').value || 'badge'}.png`;
-        a.href = document.getElementById('badge-canvas').toDataURL(); 
-        a.click();
+        const a = document.createElement('a'); a.download = `ID_${document.getElementById('m-id').value}.png`;
+        a.href = document.getElementById('badge-canvas').toDataURL(); a.click();
     }
 
-    window.onload = () => { updateShiftUI(); drawBadge(); };
+    window.onload = () => { startScanner(); drawBadge(); renderLogs(); };
 </script>
 </body>
 </html>
