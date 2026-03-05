@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>企業考勤系統 - QR修復穩定版</title>
+    <title>企業考勤系統 - 最終完備版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -19,20 +19,19 @@
         #page-scan.active { grid-template-columns: 1.2fr 0.8fr; }
         #page-make.active { grid-template-columns: 1fr 1fr; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2 { margin-top: 0; color: #1e293b; border-left: 5px solid var(--primary); padding-left: 10px; font-size: 1.4rem; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: bold; color: #475569; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { margin-top: 0; color: #1e293b; border-left: 5px solid var(--primary); padding-left: 10px; font-size: 1.2rem; margin-bottom: 15px; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .primary-btn { background: var(--primary); color: white; }
         .secondary-btn { background: var(--success); color: white; }
         .danger-btn { background: var(--danger); color: white; }
-        #reader { border-radius: 12px; overflow: hidden; border: 2px solid #e2e8f0; background: #000; min-height: 300px; }
-        #badge-canvas { width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); background: white; }
-        .scroll-box { max-height: 400px; overflow-y: auto; border: 1px solid #f1f5f9; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; font-size: 14px; }
-        th { background: #f8fafc; position: sticky; top: 0; }
+        .small-btn { width: auto; padding: 4px 8px; font-size: 12px; margin-left: 5px; }
+        #reader { border-radius: 12px; overflow: hidden; border: 2px solid #e2e8f0; background: #000; min-height: 250px; }
+        #badge-canvas { width: 100%; max-width: 280px; display: block; margin: 0 auto; border: 1px solid #ddd; background: #fff; }
+        .scroll-box { max-height: 350px; overflow-y: auto; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
         @media (max-width: 850px) { #page-scan.active, #page-make.active { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -40,17 +39,17 @@
 
 <nav>
     <button id="nav-scan" class="active" onclick="showPage('scan')">📸 掃描打卡</button>
-    <button id="nav-make" onclick="showPage('make')">🪪 工牌與員工管理</button>
+    <button id="nav-make" onclick="showPage('make')">🪪 員工與工牌管理</button>
 </nav>
 
 <div class="container">
     <div id="page-scan" class="page active">
         <div class="card">
-            <h2>考勤終端</h2>
+            <h2>打卡終端</h2>
             <div id="reader"></div>
-            <div id="scan-feedback" style="margin-top:15px; padding:20px; border-radius:8px; background:#f1f5f9; font-weight:bold; text-align:center; border: 2px dashed #cbd5e1;">等待掃描...</div>
-            <button id="continue-scan-btn" style="display:none; margin-top:10px;" class="primary-btn" onclick="startScanner()">🔄 點擊繼續掃描</button>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
+            <div id="scan-feedback" style="margin-top:10px; padding:15px; text-align:center; font-weight:bold; background:#f1f5f9; border-radius:8px;">等待掃描...</div>
+            <button id="continue-scan-btn" style="display:none; margin-top:10px;" class="primary-btn" onclick="startScanner()">🔄 繼續掃描下一位</button>
+            <div style="display:flex; gap:10px; margin-top:15px;">
                 <button class="secondary-btn" onclick="exportLogs()">📊 匯出報表</button>
                 <button class="danger-btn" onclick="clearLogs()">🗑️ 清空紀錄</button>
             </div>
@@ -59,7 +58,7 @@
             <h2>今日打卡清單</h2>
             <div class="scroll-box">
                 <table>
-                    <thead><tr><th>編號</th><th>姓名</th><th>狀態</th><th>時間</th><th>操作</th></tr></thead>
+                    <thead><tr><th>編號</th><th>姓名</th><th>時間</th><th>操作</th></tr></thead>
                     <tbody id="log-body"></tbody>
                 </table>
             </div>
@@ -70,22 +69,14 @@
         <div>
             <div class="card">
                 <h2>員工資料登錄</h2>
-                <label>員工編號</label>
-                <input type="text" id="m-id" placeholder="例如: EMP001">
-                <label>員工姓名</label>
-                <input type="text" id="m-name" placeholder="例如: 王大明">
-                <label>單位</label>
-                <input type="text" id="m-dept" placeholder="例如: 總務部" value="總務部">
-                <label>公司</label>
-                <input type="text" id="m-company" value="企業總部">
-                <label>大頭貼</label>
+                <input type="text" id="m-id" placeholder="員工編號 (如: EMP01)">
+                <input type="text" id="m-name" placeholder="員工姓名">
+                <input type="text" id="m-dept" placeholder="部門" value="生產部">
                 <input type="file" id="m-photo" accept="image/*">
-                <button class="primary-btn" onclick="saveAndDraw()">🎨 生成並儲存資料</button>
-                <button class="secondary-btn" style="margin-top:10px" onclick="downloadBadge()">💾 下載工牌圖片</button>
+                <button class="primary-btn" onclick="saveStaff()">💾 儲存資料並生成工牌</button>
             </div>
-            
             <div class="card">
-                <h2>已儲存員工名單</h2>
+                <h2>已存員工名單</h2>
                 <div class="scroll-box">
                     <table>
                         <thead><tr><th>編號</th><th>姓名</th><th>操作</th></tr></thead>
@@ -94,162 +85,151 @@
                 </div>
             </div>
         </div>
-
         <div class="card" style="text-align: center;">
             <h2>工牌預覽</h2>
-            <div id="qr-temp" style="display:none"></div> <canvas id="badge-canvas" width="300" height="480"></canvas>
+            <div id="qr-hidden" style="display:none"></div>
+            <canvas id="badge-canvas" width="300" height="480"></canvas>
+            <button class="secondary-btn" style="margin-top:10px" onclick="downloadBadge()">💾 下載此工牌</button>
         </div>
     </div>
 </div>
 
 <script>
-    let logs = JSON.parse(localStorage.getItem('hr_logs_v6')) || [];
-    let staffDb = JSON.parse(localStorage.getItem('staff_db_v6')) || []; 
+    let logs = JSON.parse(localStorage.getItem('hr_logs_v7')) || [];
+    let staffDb = JSON.parse(localStorage.getItem('staff_db_v7')) || [];
     let html5QrCode;
 
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById('page-' + pageId).classList.add('active');
-        document.getElementById('nav-' + pageId).classList.add('active');
-        if (pageId === 'scan') startScanner(); else stopScanner();
-        renderStaffTable();
+    function showPage(p) {
+        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.getElementById('nav-'+p).classList.add('active');
+        if(p==='scan') startScanner(); else stopScanner();
+        renderStaffTable(); renderLogs();
     }
 
-    // --- 掃描功能 ---
+    // --- 掃描邏輯 ---
     async function startScanner() {
-        document.getElementById('continue-scan-btn').style.display = "none";
-        document.getElementById('scan-feedback').style.background = "#f1f5f9";
-        document.getElementById('scan-feedback').innerText = "請對準 QR Code...";
-        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-        try { await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess); } catch (err) {}
+        document.getElementById('continue-scan-btn').style.display="none";
+        document.getElementById('scan-feedback').innerText="掃描中...";
+        if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        try { await html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:250}, onScanSuccess); } catch(e){}
     }
-    async function stopScanner() { if (html5QrCode && html5QrCode.isScanning) await html5QrCode.stop(); }
-    async function onScanSuccess(decodedID) {
+    async function stopScanner() { if(html5QrCode && html5QrCode.isScanning) await html5QrCode.stop(); }
+    async function onScanSuccess(id) {
         await stopScanner();
-        const staff = staffDb.find(s => s.id === decodedID);
-        const nameDisplay = staff ? staff.name : decodedID;
-        const type = logs.filter(l => l.id === decodedID && l.time.startsWith(new Date().toLocaleDateString())).length % 2 === 0 ? "🟢 上班" : "🔴 下班";
-        logs.unshift({ uid: Date.now(), id: decodedID, name: nameDisplay, type, time: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}` });
-        localStorage.setItem('hr_logs_v6', JSON.stringify(logs));
+        const staff = staffDb.find(s => s.id === id);
+        const name = staff ? staff.name : "未知編號";
+        const type = logs.filter(l => l.id === id && l.time.includes(new Date().toLocaleDateString())).length % 2 === 0 ? "🟢 上班" : "🔴 下班";
+        logs.unshift({ uid:Date.now(), id, name, type, time: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`});
+        localStorage.setItem('hr_logs_v7', JSON.stringify(logs));
         renderLogs();
-        document.getElementById('scan-feedback').innerHTML = `✅ ${nameDisplay}<br><span style="font-size:24px">${type}</span>`;
-        document.getElementById('continue-scan-btn').style.display = "block";
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${nameDisplay} ${type}`));
+        document.getElementById('scan-feedback').innerHTML = `✅ ${name}<br>${type}`;
+        document.getElementById('continue-scan-btn').style.display="block";
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(name + type));
     }
 
-    // --- 員工管理 ---
-    function saveAndDraw() {
+    // --- 員工管理 (含刪除) ---
+    function saveStaff() {
         const id = document.getElementById('m-id').value.trim().toUpperCase();
         const name = document.getElementById('m-name').value.trim();
         const dept = document.getElementById('m-dept').value.trim();
-        if (!id || !name) return alert("請填寫編號與姓名");
+        if(!id || !name) return alert("編號與姓名必填");
         const idx = staffDb.findIndex(s => s.id === id);
-        if (idx > -1) staffDb[idx] = { id, name, dept }; else staffDb.push({ id, name, dept });
-        localStorage.setItem('staff_db_v6', JSON.stringify(staffDb));
+        if(idx > -1) staffDb[idx] = {id, name, dept}; else staffDb.push({id, name, dept});
+        localStorage.setItem('staff_db_v7', JSON.stringify(staffDb));
         renderStaffTable();
         drawBadge();
     }
 
     function renderStaffTable() {
         document.getElementById('staff-body').innerHTML = staffDb.map(s => `
-            <tr><td>${s.id}</td><td>${s.name}</td>
-            <td><button class="primary-btn" style="width:auto;padding:2px 8px;" onclick="loadToForm('${s.id}')">選取</button></td></tr>
-        `).join('');
+            <tr>
+                <td>${s.id}</td><td>${s.name}</td>
+                <td>
+                    <button class="primary-btn small-btn" onclick="loadStaff('${s.id}')">選取</button>
+                    <button class="danger-btn small-btn" onclick="deleteStaff('${s.id}')">刪除</button>
+                </td>
+            </tr>`).join('');
     }
 
-    function loadToForm(id) {
-        const s = staffDb.find(item => item.id === id);
-        if (s) {
-            document.getElementById('m-id').value = s.id;
-            document.getElementById('m-name').value = s.name;
-            document.getElementById('m-dept').value = s.dept;
-            drawBadge();
+    function deleteStaff(id) {
+        if(confirm(`確定刪除編號 ${id} 的員工資料嗎？`)) {
+            staffDb = staffDb.filter(s => s.id !== id);
+            localStorage.setItem('staff_db_v7', JSON.stringify(staffDb));
+            renderStaffTable();
         }
     }
 
-    // --- 核心：修復 QR Code 不見的繪圖邏輯 ---
-    async function drawBadge() {
+    function loadStaff(id) {
+        const s = staffDb.find(x => x.id === id);
+        document.getElementById('m-id').value = s.id;
+        document.getElementById('m-name').value = s.name;
+        document.getElementById('m-dept').value = s.dept;
+        drawBadge();
+    }
+
+    // --- 工牌繪圖 (QR Code 修正) ---
+    function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
         const id = document.getElementById('m-id').value.toUpperCase();
         const name = document.getElementById('m-name').value;
         const dept = document.getElementById('m-dept').value;
-        const photoFile = document.getElementById('m-photo').files[0];
+        const photo = document.getElementById('m-photo').files[0];
 
-        // 1. 清空畫布
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, 300, 480);
-
-        // 2. 繪製藍色頂部
-        ctx.fillStyle = "#2563eb";
-        ctx.fillRect(0, 0, 300, 100);
-        ctx.fillStyle = "white";
-        ctx.font = "bold 20px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(document.getElementById('m-company').value, 150, 60);
-
-        // 3. 繪製文字資料
+        ctx.fillStyle = "white"; ctx.fillRect(0,0,300,480);
+        ctx.fillStyle = "#2563eb"; ctx.fillRect(0,0,300,100);
+        ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center";
+        ctx.fillText("STAFF ID CARD", 150, 60);
         ctx.fillStyle = "#64748b"; ctx.font = "16px Arial"; ctx.fillText(dept, 150, 290);
-        ctx.fillStyle = "#1e293b"; ctx.font = "bold 32px Arial"; ctx.fillText(name, 150, 335);
-        ctx.fillStyle = "#94a3b8"; ctx.font = "bold 14px Arial"; ctx.fillText(id, 150, 365);
+        ctx.fillStyle = "#1e293b"; ctx.font = "bold 30px Arial"; ctx.fillText(name, 150, 335);
 
-        // 4. 繪製大頭貼
-        if (photoFile) {
-            const img = await loadImage(URL.createObjectURL(photoFile));
-            ctx.save();
-            ctx.beginPath(); ctx.arc(150, 185, 75, 0, Math.PI * 2); ctx.clip();
-            ctx.drawImage(img, 75, 110, 150, 150);
-            ctx.restore();
-        } else {
-            ctx.fillStyle = "#f1f5f9"; ctx.beginPath(); ctx.arc(150, 185, 75, 0, Math.PI * 2); ctx.fill();
-        }
+        const renderQR = () => {
+            const qrDiv = document.getElementById('qr-hidden');
+            qrDiv.innerHTML = "";
+            new QRCode(qrDiv, { text: id, width: 100, height: 100 });
+            setTimeout(() => {
+                const img = qrDiv.querySelector('img');
+                if(img) ctx.drawImage(img, 100, 360, 100, 100);
+            }, 300);
+        };
 
-        // 5. 重要：先產生 QR Code 圖片，然後再畫到 Canvas 上
-        const qrContainer = document.getElementById('qr-temp');
-        qrContainer.innerHTML = ""; // 清空舊的
-        new QRCode(qrContainer, { text: id, width: 100, height: 100 });
-
-        // 等待 QR Code 圖片渲染完成
-        setTimeout(() => {
-            const qrImg = qrContainer.querySelector('img');
-            if (qrImg) {
-                ctx.drawImage(qrImg, 100, 375, 100, 100);
-            }
-        }, 300);
-    }
-
-    function loadImage(url) {
-        return new Promise((resolve) => {
+        if(photo) {
             const img = new Image();
-            img.onload = () => resolve(img);
-            img.src = url;
-        });
+            img.onload = () => {
+                ctx.save(); ctx.beginPath(); ctx.arc(150,185,75,0,Math.PI*2); ctx.clip();
+                ctx.drawImage(img, 75,110,150,150); ctx.restore();
+                renderQR();
+            };
+            img.src = URL.createObjectURL(photo);
+        } else {
+            ctx.fillStyle="#f1f5f9"; ctx.beginPath(); ctx.arc(150,185,75,0,Math.PI*2); ctx.fill();
+            renderQR();
+        }
     }
 
-    function downloadBadge() {
-        const link = document.createElement('a');
-        link.download = `ID_${document.getElementById('m-id').value}.png`;
-        link.href = document.getElementById('badge-canvas').toDataURL();
-        link.click();
-    }
-
+    // --- 紀錄管理 ---
     function renderLogs() {
         document.getElementById('log-body').innerHTML = logs.map(l => `
-            <tr><td>${l.id}</td><td><b>${l.name}</b></td><td>${l.type}</td><td>${l.time}</td>
-            <td><button class="danger-btn" style="width:auto;padding:2px 8px;" onclick="deleteLog(${l.uid})">刪</button></td></tr>
-        `).join('');
+            <tr><td>${l.id}</td><td>${l.name}</td><td>${l.time.split(' ')[1]}</td>
+            <td><button class="danger-btn small-btn" onclick="deleteLog(${l.uid})">刪除</button></td></tr>`).join('');
     }
-    function deleteLog(uid) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v6', JSON.stringify(logs)); renderLogs(); }
-    function clearLogs() { if(confirm("清空？")) { logs = []; localStorage.setItem('hr_logs_v6', JSON.stringify(logs)); renderLogs(); } }
+    function deleteLog(uid) { logs = logs.filter(x => x.uid !== uid); localStorage.setItem('hr_logs_v7', JSON.stringify(logs)); renderLogs(); }
+    function clearLogs() { if(confirm("清空？")) { logs=[]; localStorage.setItem('hr_logs_v7', JSON.stringify(logs)); renderLogs(); } }
     function exportLogs() {
         const ws = XLSX.utils.json_to_sheet(logs);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Attendance");
-        XLSX.writeFile(wb, `考勤報表_${new Date().toISOString().slice(0,10)}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Log");
+        XLSX.writeFile(wb, "考勤.xlsx");
     }
-
-    window.onload = () => { renderLogs(); renderStaffTable(); showPage('scan'); };
+    function downloadBadge() {
+        const a = document.createElement('a');
+        a.download = `ID_${document.getElementById('m-id').value}.png`;
+        a.href = document.getElementById('badge-canvas').toDataURL();
+        a.click();
+    }
+    window.onload = () => { showPage('scan'); };
 </script>
 </body>
 </html>
