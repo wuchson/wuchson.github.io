@@ -50,9 +50,9 @@
 <body>
 
 <nav>
-    <button id="nav-scan" class="active" onclick="showPage('scan')">📸 掃描打卡</button>
-    <button id="nav-make" onclick="showPage('make')">👤 成員與工牌</button>
-    <button id="nav-config" onclick="showPage('config')">⚙️ 班別設定</button>
+    <button id="nav-scan" class="active" onclick="showPage('scan')">📸 打卡</button>
+    <button id="nav-make" onclick="showPage('make')">👤 員工</button>
+    <button id="nav-config" onclick="showPage('config')">⚙️ 班別</button>
 </nav>
 
 <div class="container">
@@ -63,7 +63,7 @@
             <div id="scan-feedback" style="margin-top:20px; padding:20px; text-align:center; border-radius:15px; background:#f1f5f9; font-size:1.3rem; font-weight:bold; color:var(--primary);">等待掃描工牌...</div>
             <button id="continue-btn" style="display:none; margin-top:15px;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描下一位</button>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:25px;">
-                <button class="secondary-btn" onclick="exportExcel()">📊 匯出考勤報表</button>
+                <button class="secondary-btn" onclick="exportExcel()">📊 匯出報表</button>
                 <button class="secondary-btn" style="color:var(--danger)" onclick="clearLogs()">🗑️ 全部清空</button>
             </div>
         </div>
@@ -100,15 +100,15 @@
             <div class="import-box">
                 <input type="file" id="excel-import" accept=".xlsx, .xls">
                 <div style="display:flex; gap:10px; margin-top:15px">
-                    <button class="primary-btn" onclick="importExcel()">📤 開始匯入成員</button>
-                    <button class="secondary-btn" onclick="downloadTemplate()">📄 下載範例模板</button>
+                    <button class="primary-btn" onclick="importExcel()">📤 匯入</button>
+                    <button class="secondary-btn" onclick="downloadTemplate()">📄 模板</button>
                 </div>
             </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="management-grid">
             <div class="card">
-                <h2>手動編輯成員</h2>
+                <h2>編輯成員</h2>
                 <label>公司名稱</label>
                 <input type="text" id="m-company" value="企業管理中心">
                 <label>員工編號 (ID)</label>
@@ -121,13 +121,13 @@
                 <input type="text" id="m-dept" value="生產部">
                 <label>大頭貼</label>
                 <input type="file" id="m-photo" accept="image/*" onchange="drawBadge()">
-                <button class="primary-btn" onclick="saveAndDraw()">💾 儲存並更新</button>
+                <button class="primary-btn" onclick="saveAndDraw()">💾 儲存</button>
             </div>
             
             <div class="card">
-                <h2>時尚質感工牌預覽</h2>
+                <h2>工牌預覽</h2>
                 <canvas id="badge-canvas" width="300" height="480"></canvas>
-                <button class="accent-btn" onclick="downloadBadge()" style="margin-top:20px;">📥 下載此工牌 (PNG)</button>
+                <button class="accent-btn" onclick="downloadBadge()" style="margin-top:20px;">📥 下載</button>
             </div>
         </div>
 
