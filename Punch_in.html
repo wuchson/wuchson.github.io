@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 - 自動日期備份版</title>
+    <title>打卡系統 - 完整頭貼儲存版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -104,8 +104,10 @@
                 <div class="form-group"><label>員工姓名</label><input type="text" id="m-name" placeholder="輸入姓名"></div>
                 <div class="form-group"><label>所屬部門</label><input type="text" id="m-dept" value="技術部"></div>
                 <div class="form-group"><label>班別</label><select id="m-shift-select"></select></div>
-                <div class="form-group"><label>上傳大頭照</label><input type="file" id="m-photo" accept="image/*" onchange="drawBadge()"></div>
+                <div class="form-group"><label>上傳大頭照 (會自動存檔)</label><input type="file" id="m-photo" accept="image/*" onchange="processAndPreviewPhoto()"></div>
+                <input type="hidden" id="m-photo-base64">
                 <button class="primary-btn" onclick="saveAndDraw()">💾 儲存員工資料</button>
+                <button class="secondary-btn" onclick="clearForm()">🆕 清除表單</button>
             </div>
             <div class="card">
                 <h2>工牌預覽</h2>
@@ -163,6 +165,43 @@
     let isAuthed = false;
     let scanner;
     let currentStatus = "上班"; 
+
+    // --- 圖片處理與儲存核心 ---
+    function processAndPreviewPhoto() {
+        const file = document.getElementById('m-photo').files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // 使用 Canvas 壓縮圖片，避免 LocalStorage 爆炸
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 300;
+                const scale = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scale;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // 轉為低品質 JPG Base64 (約 10-20KB)
+                const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                document.getElementById('m-photo-base64').value = base64;
+                drawBadge(); // 即時更新預覽
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function clearForm() {
+        document.getElementById('m-id').value = "";
+        document.getElementById('m-name').value = "";
+        document.getElementById('m-photo-base64').value = "";
+        document.getElementById('m-photo').value = "";
+        drawBadge();
+    }
 
     // --- 介面控制 ---
     function setStatus(status) {
@@ -234,7 +273,6 @@
 
     // --- 核心邏輯：匯出與日期檔名 ---
     function fullExport() {
-        // 獲取當前日期
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -245,7 +283,6 @@
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
         
-        // 使用帶有日期的檔名
         XLSX.writeFile(wb, `考勤系統備份_${dateString}.xlsx`);
     }
 
@@ -258,7 +295,7 @@
         const name = document.getElementById('m-name').value || "姓名";
         const shift = document.getElementById('m-shift-select').value || "班別";
         const dept = document.getElementById('m-dept').value || "部門";
-        const photoFile = document.getElementById('m-photo').files[0];
+        const photoBase64 = document.getElementById('m-photo-base64').value;
 
         const grad = ctx.createLinearGradient(0, 0, 0, 1728);
         grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#1e293b');
@@ -270,8 +307,8 @@
         ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 20;
         ctx.beginPath(); ctx.arc(540, photoY, 310, 0, Math.PI*2); ctx.stroke();
         
-        if(photoFile) {
-            const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = URL.createObjectURL(photoFile); });
+        if(photoBase64) {
+            const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photoBase64; });
             ctx.save(); ctx.beginPath(); ctx.arc(540, photoY, 300, 0, Math.PI*2); ctx.clip();
             const ratio = Math.max(600/img.width, 600/img.height);
             ctx.drawImage(img, 540 - (img.width*ratio)/2, photoY - (img.height*ratio)/2, img.width*ratio, img.height*ratio);
@@ -318,15 +355,30 @@
         updateShiftUI(); renderLogs();
     }
 
-    // --- 員工管理與其餘功能 ---
+    // --- 員工管理 ---
     function saveAndDraw() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
+        const photo = document.getElementById('m-photo-base64').value;
+
         if(!id || !name) return alert("編號與姓名不能為空");
         const idx = staffDb.findIndex(s => s.id === id);
-        const data = {id, name, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value};
+        const data = {
+            id, name, photo,
+            shift: document.getElementById('m-shift-select').value, 
+            dept: document.getElementById('m-dept').value, 
+            comp: document.getElementById('m-company').value
+        };
+        
         if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
-        localStorage.setItem('staff_db_v20', JSON.stringify(staffDb)); 
+        
+        try {
+            localStorage.setItem('staff_db_v20', JSON.stringify(staffDb)); 
+            alert("✅ 儲存成功 (含相片)");
+        } catch(e) {
+            alert("❌ 空間不足！可能是相片太多或太大，請清理名單或使用更小的相片。");
+        }
+        
         renderStaff(); calculateStats(); drawBadge();
     }
 
@@ -354,12 +406,16 @@
 
     function loadStaff(id) {
         const s = staffDb.find(x => x.id === id);
-        document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name;
-        document.getElementById('m-company').value = s.comp || ""; document.getElementById('m-dept').value = s.dept; 
+        document.getElementById('m-id').value = s.id; 
+        document.getElementById('m-name').value = s.name;
+        document.getElementById('m-company').value = s.comp || ""; 
+        document.getElementById('m-dept').value = s.dept; 
         document.getElementById('m-shift-select').value = s.shift;
+        document.getElementById('m-photo-base64').value = s.photo || "";
         drawBadge();
     }
 
+    // --- 掃描與日誌 (保持不變) ---
     async function startScanner() {
         document.getElementById('continue-btn').style.display = "none";
         if(!scanner) scanner = new Html5Qrcode("reader");
