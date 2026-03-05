@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>企業考勤系統 - 掃描修正穩定版</title>
+    <title>企業 24H 考勤管理系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -16,15 +16,28 @@
         .container { max-width: 1100px; margin: 15px auto; padding: 0 12px; }
         .page { display: none; }
         .page.active { display: block; }
-        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 15px; }
+        .card { background: white; padding: 22px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 15px; }
+        h2 { font-size: 1.1rem; border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 15px; }
+        
+        /* 掃描區 */
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; }
+        #scan-feedback { margin-top:15px; padding:15px; text-align:center; border-radius:12px; font-weight:bold; background:#f1f5f9; }
+        
+        /* 表格排版 */
+        .list-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .list-table th { text-align: left; padding: 12px; border-bottom: 2px solid #f1f5f9; color: #94a3b8; }
+        .list-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+
+        /* 工牌預覽 */
+        .canvas-container { text-align: center; background: #f1f5f9; padding: 20px 0; border-radius: 20px; }
         #badge-canvas { width: 100%; max-width: 300px; height: auto; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.25); }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+
+        /* 按鈕樣式 */
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .primary-btn { background: var(--primary); color: white; }
         .accent-btn { background: var(--accent); color: white; margin-top: 10px; }
-        #reader { width: 100%; border-radius: 20px; overflow: hidden; background: #000; }
-        .feedback-success { color: #10b981; background: #ecfdf5; padding: 15px; border-radius: 12px; margin-top: 10px; text-align: center; font-weight: bold; }
-        .log-list { font-size: 14px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+        .secondary-btn { background: #e2e8f0; color: #475569; margin-top: 10px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -39,8 +52,17 @@
     <div id="page-scan" class="page active">
         <div class="card">
             <div id="reader"></div>
-            <div id="scan-feedback">正在啟動鏡頭...</div>
-            <div id="last-record" class="log-list"></div>
+            <div id="scan-feedback">正在啟動相機...</div>
+            <button id="continue-btn" style="display:none; margin-top: 10px;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描下一個</button>
+        </div>
+        <div class="card">
+            <h2>今日動態紀錄</h2>
+            <div style="overflow-x:auto;">
+                <table class="list-table">
+                    <thead><tr><th>姓名</th><th>時間</th><th>狀態</th></tr></thead>
+                    <tbody id="log-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -49,113 +71,92 @@
             <div class="card">
                 <h2>工牌編輯</h2>
                 <input type="text" id="m-company" value="TECH SOLUTIONS" placeholder="公司名稱">
-                <input type="text" id="m-id" placeholder="員工 ID (如 EMP001)">
+                <input type="text" id="m-id" placeholder="員工 ID">
                 <input type="text" id="m-name" placeholder="姓名">
-                <input type="text" id="m-dept" value="技術部" placeholder="部門">
-                <select id="m-shift-select"><option value="早班">早班</option><option value="中班">中班</option></select>
+                <input type="text" id="m-dept" value="技術部">
+                <select id="m-shift-select"><option value="早班">早班</option><option value="中班">中班</option><option value="晚班">晚班</option></select>
                 <input type="file" id="m-photo" accept="image/*" onchange="drawBadge()">
-                <button class="primary-btn" onclick="saveAndDraw()">儲存並更新</button>
+                <button class="primary-btn" onclick="saveAndDraw()">💾 儲存員工資料</button>
             </div>
             <div class="card" style="text-align:center;">
-                <canvas id="badge-canvas" width="1080" height="1728"></canvas>
-                <button class="accent-btn" onclick="downloadBadge()">📥 下載高清工牌</button>
+                <h2>工牌預覽</h2>
+                <div class="canvas-container"><canvas id="badge-canvas" width="1080" height="1728"></canvas></div>
+                <button class="accent-btn" onclick="downloadBadge()">📥 下載高清 PNG</button>
             </div>
             <div class="card">
-                <h2>現有員工清單</h2>
-                <div id="staff-body"></div>
+                <h2>員工清單</h2>
+                <table class="list-table"><tbody id="staff-body"></tbody></table>
             </div>
         </div>
     </div>
 
     <div id="page-config" class="page">
         <div class="card">
-            <h2>🔐 備份與還原</h2>
+            <h2>🔐 安全與備份</h2>
+            <input type="password" id="new-pass" placeholder="設定新密碼">
+            <button class="primary-btn" onclick="updatePassword()" style="margin-top:10px;">變更密碼</button>
+            <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
             <button class="accent-btn" onclick="fullExport()">📤 匯出資料 (Excel)</button>
-            <button class="primary-btn" style="margin-top:10px; background:#64748b;" onclick="document.getElementById('import-file').click()">📥 匯入資料 (Excel)</button>
+            <button class="secondary-btn" onclick="document.getElementById('import-file').click()">📥 匯入資料 (Excel)</button>
             <input type="file" id="import-file" style="display:none;" accept=".xlsx" onchange="fullImport(this)">
         </div>
     </div>
 </div>
 
 <script>
-    let staffDb = JSON.parse(localStorage.getItem('staff_v24')) || [];
-    let logDb = JSON.parse(localStorage.getItem('logs_v24')) || [];
-    let adminPass = localStorage.getItem('pass_v24') || "1234";
+    let staffDb = JSON.parse(localStorage.getItem('staff_final')) || [];
+    let logDb = JSON.parse(localStorage.getItem('logs_final')) || [];
+    let adminPass = localStorage.getItem('pass_final') || "1234";
     let isAuthed = false;
     let html5QrCode;
 
-    // --- 🔑 安全與權限 ---
     function checkAuth(target) {
         if(isAuthed) { showPage(target); return; }
-        const pw = prompt("請輸入密碼：");
+        const pw = prompt("請輸入管理密碼：");
         if(pw === adminPass) { isAuthed = true; showPage(target); }
     }
 
-    // --- 📸 掃描核心功能 (修正版) ---
+    // --- 📸 掃描與打卡邏輯 ---
     async function startScanner() {
-        const feedback = document.getElementById('scan-feedback');
-        if (!html5QrCode) {
-            html5QrCode = new Html5Qrcode("reader");
-        }
+        document.getElementById('continue-btn').style.display = "none";
+        document.getElementById('scan-feedback').innerText = "準備中...";
         
-        // 如果已經在掃描，先停止
-        if (html5QrCode.isScanning) {
-            await html5QrCode.stop();
-        }
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        if (html5QrCode.isScanning) await html5QrCode.stop();
 
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-            // 成功掃描
-            handleCheckIn(decodedText);
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (id) => {
+            const staff = staffDb.find(s => s.id === id);
+            const name = staff ? staff.name : id;
+            
+            // 紀錄打卡
+            const now = new Date();
+            const logEntry = { name, time: now.toLocaleTimeString(), date: now.toLocaleDateString(), type: "簽到" };
+            logDb.unshift(logEntry);
+            localStorage.setItem('logs_final', JSON.stringify(logDb));
+            
+            // 介面回饋
+            document.getElementById('scan-feedback').innerHTML = `<span style="color:#10b981;">✅ ${name} 打卡成功</span>`;
+            document.getElementById('continue-btn').style.display = "block";
+            renderLogs();
+            
+            // 暫停掃描直到點擊繼續
+            html5QrCode.stop();
         }).catch(err => {
-            feedback.innerHTML = `<span style="color:red;">鏡頭啟動失敗：${err}</span><br><small>請確認是否已授予相機權限，且網址為 https</small>`;
+            document.getElementById('scan-feedback').innerText = "鏡頭啟動失敗，請確認網址為 HTTPS 並授權相機。";
         });
     }
 
-    function handleCheckIn(id) {
-        const staff = staffDb.find(s => s.id === id);
-        const name = staff ? staff.name : "未知人員";
-        const time = new Date().toLocaleString();
-        
-        const newLog = { name, id, time };
-        logDb.unshift(newLog);
-        localStorage.setItem('logs_v24', JSON.stringify(logDb));
-        
-        const feedback = document.getElementById('scan-feedback');
-        feedback.innerHTML = `<div class="feedback-success">✅ 打卡成功！<br>${name} (${id})<br><small>${time}</small></div>`;
-        
-        renderLogs();
-        
-        // 短暫暫停後繼續
-        setTimeout(() => {
-            feedback.innerHTML = "等待下一個工牌...";
-        }, 3000);
+    function renderLogs() {
+        const body = document.getElementById('log-body');
+        body.innerHTML = logDb.slice(0, 10).map(l => `<tr><td>${l.name}</td><td>${l.time}</td><td><span style="color:#10b981;">成功</span></td></tr>`).join('');
     }
 
-    // --- 🗺️ 頁面導覽 ---
-    function showPage(p) {
-        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
-        document.getElementById('page-'+p).classList.add('active');
-        document.getElementById('nav-'+p).classList.add('active');
-        
-        if(p === 'scan') {
-            startScanner();
-        } else {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop();
-            }
-        }
-        if(p === 'make') renderStaff();
-    }
-
-    // --- 🎨 繪圖邏輯 (依照您的需求優化) ---
+    // --- 🎨 繪圖佈局 (您指定的最終位置) ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
-        const comp = document.getElementById('m-company').value || "COMPANY";
-        const id = (document.getElementById('m-id').value || "EMP000").toUpperCase();
+        const comp = document.getElementById('m-company').value || "TECH SOLUTIONS";
+        const id = (document.getElementById('m-id').value || "ID-000").toUpperCase();
         const name = document.getElementById('m-name').value || "姓名";
         const dept = document.getElementById('m-dept').value || "技術部";
         const shift = document.getElementById('m-shift-select').value;
@@ -163,16 +164,15 @@
 
         const W = 1080, H = 1728, CX = W/2;
         ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, H);
-        
-        // 公司名
-        ctx.fillStyle = "white"; ctx.textAlign = "center";
-        ctx.font = "bold 90px Arial"; ctx.fillText(comp, CX, 180);
 
-        // 大頭貼
+        // 公司名
+        ctx.fillStyle = "white"; ctx.font = "bold 90px Arial"; ctx.textAlign = "center";
+        ctx.fillText(comp, CX, 180);
+
+        // 大頭貼 (Y=580)
         const photoY = 580;
         ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 20;
         ctx.beginPath(); ctx.arc(CX, photoY, 310, 0, Math.PI*2); ctx.stroke();
-        
         if(photoFile) {
             const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = URL.createObjectURL(photoFile); });
             ctx.save(); ctx.beginPath(); ctx.arc(CX, photoY, 300, 0, Math.PI*2); ctx.clip();
@@ -181,49 +181,43 @@
             ctx.restore();
         }
 
-        // 姓名 ID
+        // 文字上移
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, CX, 1050);
         ctx.fillStyle = "#3b82f6"; ctx.font = "bold 60px Arial"; ctx.fillText(dept + " • " + shift, CX, 1150);
         ctx.fillStyle = "#94a3b8"; ctx.font = "55px Arial"; ctx.fillText("ID: " + id, CX, 1225);
 
-        // QR Code
+        // QR Code 移高 (Y=1280)
         const qrBoxY = 1280;
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
-        const cellSize = 10.5, mCount = qr.getModuleCount();
-        const qrSize = mCount * cellSize, qrX = CX - qrSize/2, qrInnerY = qrBoxY + (380 - qrSize)/2;
+        const cellSize = 10.5, mCount = qr.getModuleCount(), qrSize = mCount * cellSize;
+        const qrX = CX - qrSize/2, qrInnerY = qrBoxY + (380 - qrSize)/2;
         ctx.fillStyle = "white";
         for (let r = 0; r < mCount; r++) {
             for (let c = 0; c < mCount; c++) if (qr.isDark(r, c)) ctx.fillRect(qrX + c*cellSize, qrInnerY + r*cellSize, cellSize, cellSize);
         }
     }
 
-    // --- 💾 資料管理 ---
+    // --- 💾 資料管理與匯入 ---
     function saveAndDraw() {
-        const id = document.getElementById('m-id').value;
-        const name = document.getElementById('m-name').value;
-        if(!id || !name) return alert("請輸入 ID 與姓名");
+        const id = document.getElementById('m-id').value.trim();
+        const name = document.getElementById('m-name').value.trim();
+        if(!id || !name) return alert("請填寫 ID 與姓名");
         const data = { id, name, dept: document.getElementById('m-dept').value, shift: document.getElementById('m-shift-select').value, comp: document.getElementById('m-company').value };
         const idx = staffDb.findIndex(s => s.id === id);
         if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
-        localStorage.setItem('staff_v24', JSON.stringify(staffDb));
+        localStorage.setItem('staff_final', JSON.stringify(staffDb));
         renderStaff(); drawBadge();
     }
 
     function renderStaff() {
-        document.getElementById('staff-body').innerHTML = staffDb.map(s => `
-            <div style="border-bottom:1px solid #eee; padding:10px; display:flex; justify-content:space-between;">
-                <span><b>${s.name}</b> (${s.id})</span>
-                <button onclick="deleteStaff('${s.id}')" style="width:auto; padding:5px; background:red; color:white;">刪除</button>
-            </div>
-        `).join('');
+        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.name} (${s.id})</td><td style="text-align:right;"><button onclick="loadStaff('${s.id}')" style="width:auto;padding:5px;">載入</button> <button onclick="deleteStaff('${s.id}')" style="width:auto;padding:5px;background:red;color:white;">刪除</button></td></tr>`).join('');
     }
 
-    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_v24', JSON.stringify(staffDb)); renderStaff(); } }
+    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_final', JSON.stringify(staffDb)); renderStaff(); } }
 
     function fullExport() {
         const ws = XLSX.utils.json_to_sheet(staffDb);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Staff");
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Staff");
         XLSX.writeFile(wb, "Backup.xlsx");
     }
 
@@ -231,17 +225,27 @@
         const reader = new FileReader();
         reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            staffDb = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            localStorage.setItem('staff_v24', JSON.stringify(staffDb));
+            const wb = XLSX.read(data, {type: 'array'});
+            staffDb = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            localStorage.setItem('staff_final', JSON.stringify(staffDb));
             alert("匯入成功！"); location.reload();
         };
         reader.readAsArrayBuffer(input.files[0]);
     }
 
-    function renderLogs() {
-        document.getElementById('last-record').innerHTML = "<b>最近紀錄：</b><br>" + 
-            logDb.slice(0, 5).map(l => `• ${l.time} - ${l.name}`).join('<br>');
+    function showPage(p) {
+        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.getElementById('nav-'+p).classList.add('active');
+        if(p === 'scan') startScanner(); else if(html5QrCode) html5QrCode.stop();
+        if(p === 'make') renderStaff();
+    }
+
+    function loadStaff(id) {
+        const s = staffDb.find(x => x.id === id);
+        document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name;
+        document.getElementById('m-company').value = s.comp || ""; drawBadge();
     }
 
     function downloadBadge() {
@@ -249,7 +253,7 @@
         a.href = document.getElementById('badge-canvas').toDataURL(); a.click();
     }
 
-    window.onload = () => { startScanner(); drawBadge(); renderLogs(); };
+    window.onload = () => { renderLogs(); drawBadge(); startScanner(); };
 </script>
 </body>
 </html>
