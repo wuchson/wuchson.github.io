@@ -130,9 +130,8 @@
         <div class="card">
             <h2>📅 結算週期設定</h2>
             <label>每月結算起始日 (1-31)</label>
-            <input type="number" id="config-cycle-day" min="1" max="31" placeholder="例如: 5">
+            <input type="number" id="config-cycle-day" min="1" max="31" placeholder="例如: 1">
             <button class="primary-btn" onclick="updateCycleSetting()" style="margin-top:10px;">💾 套用結算日</button>
-            <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;">* 設定為 5 表示每月 5 號計算到下個月 4 號。</p>
         </div>
         <div class="card">
             <h2>🔐 密碼變更</h2>
@@ -141,7 +140,7 @@
         </div>
         <div class="card">
             <h2>📊 系統備份</h2>
-            <button class="accent-btn" onclick="fullExport()">📤 匯出全系統 Excel</button>
+            <button class="accent-btn" onclick="fullExport()">📤 匯出全系統 Excel (含日期檔名)</button>
             <button class="secondary-btn" onclick="document.getElementById('full-import-file').click()">📥 匯入還原資料</button>
             <input type="file" id="full-import-file" style="display:none" accept=".xlsx" onchange="fullImport(this)">
         </div>
@@ -165,6 +164,7 @@
     let scanner;
     let currentStatus = "上班"; 
 
+    // --- 介面控制 ---
     function setStatus(status) {
         currentStatus = status;
         document.getElementById('btn-in').classList.toggle('active-in', status === '上班');
@@ -189,21 +189,16 @@
         if(isNaN(val) || val < 1 || val > 31) return alert("請輸入有效的日期 (1-31)");
         cycleDay = val;
         localStorage.setItem('hr_cycle_day', cycleDay);
-        alert(`✅ 結算日已成功設定為每月 ${cycleDay} 日`);
-        calculateStats(); // 立即重新計算
+        alert(`✅ 結算日已更新為每月 ${cycleDay} 日`);
+        calculateStats();
     }
 
-    // --- 工時計算邏輯 ---
+    // --- 核心邏輯：工時統計 ---
     function calculateStats() {
         const now = new Date();
         let startYear = now.getFullYear();
         let startMonth = now.getMonth();
-        
-        // 如果今天還沒到結算日，表示當前週期是從上個月開始的
-        if (now.getDate() < cycleDay) {
-            startMonth -= 1;
-        }
-        
+        if (now.getDate() < cycleDay) startMonth -= 1;
         const periodStart = new Date(startYear, startMonth, cycleDay, 0, 0, 0);
         
         document.getElementById('period-display').innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
@@ -211,7 +206,6 @@
         const stats = {};
         staffDb.forEach(s => stats[s.id] = { name: s.name, dept: s.dept || "-", totalMs: 0, lastIn: null });
 
-        // 處理紀錄並統計
         const periodLogs = logs
             .filter(l => new Date(l.time) >= periodStart)
             .sort((a,b) => new Date(a.time) - new Date(b.time));
@@ -236,6 +230,23 @@
                 <td><span class="stat-badge">${(s.totalMs / 3600000).toFixed(1)} 小時</span></td>
             </tr>
         `).join('');
+    }
+
+    // --- 核心邏輯：匯出與日期檔名 ---
+    function fullExport() {
+        // 獲取當前日期
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const dateString = `${year}-${month}-${day}`;
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
+        
+        // 使用帶有日期的檔名
+        XLSX.writeFile(wb, `考勤系統備份_${dateString}.xlsx`);
     }
 
     // --- 繪圖邏輯 ---
@@ -295,6 +306,7 @@
         ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
     }
 
+    // --- 頁面跳轉 ---
     function showPage(p) {
         document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
@@ -306,7 +318,7 @@
         updateShiftUI(); renderLogs();
     }
 
-    // --- 員工管理 ---
+    // --- 員工管理與其餘功能 ---
     function saveAndDraw() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
@@ -348,7 +360,6 @@
         drawBadge();
     }
 
-    // --- 打卡邏輯 ---
     async function startScanner() {
         document.getElementById('continue-btn').style.display = "none";
         if(!scanner) scanner = new Html5Qrcode("reader");
@@ -393,7 +404,6 @@
         }
     }
 
-    // --- 班別與匯出 ---
     function addShift() {
         const name = document.getElementById('shift-name').value.trim();
         const start = document.getElementById('shift-start').value;
@@ -406,12 +416,6 @@
     function updateShiftUI() {
         document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v20', JSON.stringify(shifts));updateShiftUI();" style="width:auto;padding:5px 10px;background:#fee2e2;color:#ef4444;border-radius:5px;">×</button></td></tr>`).join('');
         document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-    }
-    function fullExport() {
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
-        XLSX.writeFile(wb, "考勤系統備份.xlsx");
     }
     function fullImport(input) {
         const file = input.files[0]; if(!file) return;
