@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 v2.5 - 秒級即時累計版</title>
+    <title>打卡系統 v2.6 - 完整備份強化版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -49,7 +49,6 @@
         .list-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f1f5f9; color: #94a3b8; }
         .list-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         
-        /* 即時數據樣式 */
         .stat-badge { background: #0f172a; color: #3b82f6; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; font-family: monospace; }
         .ot-badge { background: #fff1f2; color: #e11d48; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; font-family: monospace; }
         .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 1s infinite; }
@@ -92,7 +91,7 @@
 
     <div id="page-make" class="page">
         <div class="card">
-            <h2 id="period-display">本期工時統計 (秒級即時跳動中)</h2>
+            <h2 id="period-display">本期工時統計</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>部門</th><th>即時總累計 / 加班</th></tr></thead>
@@ -154,9 +153,9 @@
             <table class="list-table"><tbody id="shift-list-body"></tbody></table>
         </div>
         <div class="card">
-            <h2>📊 系統維護</h2>
+            <h2>📊 系統維護 (完整備份)</h2>
             <button class="accent-btn" onclick="fullExport()">📤 匯出全系統備份 (Excel)</button>
-            <button class="secondary-btn" onclick="document.getElementById('full-import-file').click()">📥 匯入還原備份</button>
+            <button class="secondary-btn" onclick="document.getElementById('full-import-file').click()">📥 匯入還原備份 (Excel)</button>
             <input type="file" id="full-import-file" style="display:none" accept=".xlsx" onchange="fullImport(this)">
             <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
             <input type="password" id="new-pass" placeholder="新管理密碼">
@@ -174,9 +173,9 @@
     let isAuthed = false;
     let scanner;
     let currentStatus = "上班"; 
-    let liveStatTimer = null; // 用於計時器的變數
+    let liveStatTimer = null;
 
-    // --- 核心更新：秒級即時跳動計算 ---
+    // --- 核心計算：秒級即時跳動 ---
     function calculateStats() {
         const now = new Date();
         let startYear = now.getFullYear();
@@ -203,12 +202,11 @@
             };
         });
 
-        // 排序紀錄
         const periodLogs = logs.filter(l => new Date(l.ts || l.time).getTime() >= periodStart.getTime())
                                .sort((a,b) => new Date(a.ts || a.time).getTime() - new Date(b.ts || b.time).getTime());
         
         periodLogs.forEach(l => {
-            const staff = staffDb.find(s => s.name === l.name || l.name.includes(s.id));
+            const staff = staffDb.find(s => s.id === l.sid || s.name === l.name);
             if(!staff || !stats[staff.id]) return;
             const sId = staff.id;
             const currentLogTs = new Date(l.ts || l.time).getTime();
@@ -227,7 +225,6 @@
             }
         });
 
-        // 即時跳動邏輯：累加當前還沒打下班卡的時間
         const currentTimeMs = now.getTime();
         Object.keys(stats).forEach(id => {
             if (stats[id].isWorkingNow && stats[id].lastInMs) {
@@ -239,7 +236,6 @@
             }
         });
 
-        // 渲染統計表格 (顯示小數點 4 位讓跳動明顯)
         document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
             <tr>
                 <td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">工作中</span>' : ''}</td>
@@ -252,29 +248,20 @@
         `).join('');
     }
 
-    // --- 頁面切換控制 ---
+    // --- 頁面控制 ---
     function showPage(p) {
-        // 清除之前的計時器
         if(liveStatTimer) clearInterval(liveStatTimer);
-
         document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
         document.getElementById('page-'+p).classList.add('active');
         document.getElementById('nav-'+p).classList.add('active');
         
-        if(p === 'scan') {
-            startScanner();
-        } else {
-            stopScanner();
-        }
-
+        if(p === 'scan') startScanner(); else stopScanner();
         if(p === 'make') {
             calculateStats();
             renderStaff();
             drawBadge();
-            // 每 1000 毫秒 (1秒) 更新一次數據，達成跳動效果
             liveStatTimer = setInterval(calculateStats, 1000); 
         }
-
         if(p === 'config') {
             document.getElementById('config-cycle-day').value = cycleDay;
             updateShiftUI();
@@ -282,7 +269,7 @@
         renderLogs();
     }
 
-    // --- QR 掃描與打卡 ---
+    // --- QR 掃描功能 ---
     async function startScanner() {
         document.getElementById('continue-btn').style.display = "none";
         if(!scanner) scanner = new Html5Qrcode("reader");
@@ -291,16 +278,14 @@
                 const staff = staffDb.find(s => s.id === id);
                 const name = staff ? staff.name : "未知(" + id + ")";
                 const now = new Date();
-                
-                // 儲存時加入 ts (timestamp) 確保計算精準
                 logs.unshift({ 
                     uid: Date.now(), 
+                    sid: id,
                     name, 
                     time: now.toLocaleString(), 
                     ts: now.toISOString(), 
                     type: currentStatus 
                 });
-                
                 localStorage.setItem('hr_logs_v25', JSON.stringify(logs)); 
                 renderLogs();
                 document.getElementById('scan-feedback').innerText = `✅ ${name} ${currentStatus}成功`;
@@ -309,22 +294,19 @@
             }); 
         } catch(e){}
     }
-    
     function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
-
     function setStatus(s) {
         currentStatus = s;
         document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
         document.getElementById('btn-out').classList.toggle('active-out', s === '下班');
     }
-
     function checkAuth(t) {
         if(isAuthed) { showPage(t); return; }
         const pw = prompt("🔐 請輸入管理密碼：");
         if(pw === adminPass) { isAuthed = true; showPage(t); } else if(pw !== null) alert("密碼錯誤");
     }
 
-    // --- 工牌預覽繪製 ---
+    // --- 繪製工牌 ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
@@ -335,7 +317,6 @@
         const dept = document.getElementById('m-dept').value || "技術部";
         const photoBase64 = document.getElementById('m-photo-base64').value;
 
-        // 背景
         const grad = ctx.createLinearGradient(0, 0, 0, 1728);
         grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#1e293b');
         ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1728);
@@ -361,10 +342,8 @@
 
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
         ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
-        ctx.fillStyle = "#3b82f6"; ctx.font = "bold 55px Arial";
-        ctx.fillText("STAFF ID: " + id, 540, 1280); 
+        ctx.fillStyle = "#3b82f6"; ctx.font = "bold 55px Arial"; ctx.fillText("STAFF ID: " + id, 540, 1280); 
 
-        // 生成 QR
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 10; const mCount = qr.getModuleCount();
         const startX = 540 - (mCount * cellSize) / 2;
@@ -440,26 +419,53 @@
         document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v25',JSON.stringify(shifts));updateShiftUI();">刪除</button></td></tr>`).join('');
         document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
     }
-
     function updateCycleSetting() { cycleDay = parseInt(document.getElementById('config-cycle-day').value); localStorage.setItem('hr_cycle_day', cycleDay); alert("已更新結算日"); }
     function updatePassword() { adminPass = document.getElementById('new-pass').value; localStorage.setItem('hr_pass_v25', adminPass); alert("密碼已修改"); }
     
+    // --- 強化後的匯出匯入 (包含所有設定) ---
     function fullExport() {
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
-        XLSX.writeFile(wb, `考勤系統備份_${new Date().toISOString().split('T')[0]}.xlsx`);
+        try {
+            const wb = XLSX.utils.book_new();
+            // 1. 員工名單
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單");
+            // 2. 打卡紀錄
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "打卡紀錄");
+            // 3. 系統核心設定 (班別、結算日、密碼)
+            const configData = [
+                { key: "shifts", value: JSON.stringify(shifts) },
+                { key: "cycleDay", value: cycleDay },
+                { key: "adminPass", value: adminPass }
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(configData), "系統設定");
+            
+            XLSX.writeFile(wb, `考勤系統備份_${new Date().toISOString().split('T')[0]}.xlsx`);
+        } catch (e) { alert("匯出失敗：" + e.message); }
     }
 
     function fullImport(input) {
         const f = input.files[0]; if(!f) return;
         const r = new FileReader(); r.onload = (e) => {
-            const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-            staffDb = XLSX.utils.sheet_to_json(wb.Sheets["員工"]);
-            logs = XLSX.utils.sheet_to_json(wb.Sheets["紀錄"]);
-            localStorage.setItem('staff_db_v25', JSON.stringify(staffDb));
-            localStorage.setItem('hr_logs_v25', JSON.stringify(logs));
-            location.reload();
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+                if (wb.Sheets["員工名單"]) {
+                    staffDb = XLSX.utils.sheet_to_json(wb.Sheets["員工名單"]);
+                    localStorage.setItem('staff_db_v25', JSON.stringify(staffDb));
+                }
+                if (wb.Sheets["打卡紀錄"]) {
+                    logs = XLSX.utils.sheet_to_json(wb.Sheets["打卡紀錄"]);
+                    localStorage.setItem('hr_logs_v25', JSON.stringify(logs));
+                }
+                if (wb.Sheets["系統設定"]) {
+                    const cfg = XLSX.utils.sheet_to_json(wb.Sheets["系統設定"]);
+                    cfg.forEach(item => {
+                        if(item.key === "shifts") { shifts = JSON.parse(item.value); localStorage.setItem('hr_shifts_v25', item.value); }
+                        if(item.key === "cycleDay") { cycleDay = parseInt(item.value); localStorage.setItem('hr_cycle_day', cycleDay); }
+                        if(item.key === "adminPass") { adminPass = item.value; localStorage.setItem('hr_pass_v25', adminPass); }
+                    });
+                }
+                alert("全系統資料與設定已成功還原！");
+                location.reload();
+            } catch(err) { alert("匯入失敗，請確認檔案格式正確。"); }
         }; r.readAsArrayBuffer(f);
     }
 
