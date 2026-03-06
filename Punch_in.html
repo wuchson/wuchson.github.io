@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 v2.1</title>
+    <title>打卡系統 v2.5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -31,13 +31,16 @@
         .status-btn { flex: 1; padding: 15px; border: 2px solid #e2e8f0; background: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .status-btn.active-in { border-color: var(--success); background: #ecfdf5; color: var(--success); }
         .status-btn.active-out { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+        .management-grid { display: flex; flex-direction: column; gap: 15px; }
+        @media (min-width: 768px) { .management-grid { flex-direction: row; align-items: flex-start; } .management-grid .card { flex: 1; } }
+        #badge-canvas { width: 90%; max-width: 300px; height: auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .list-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .list-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f1f5f9; color: #94a3b8; }
         .list-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; }
+        .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
         .stat-badge { background: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; margin: 2px; }
         .ot-badge { background: #fee2e2; color: #b91c1c; }
-        #badge-canvas { width: 100%; max-width: 300px; height: auto; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -61,7 +64,7 @@
             <button id="continue-btn" style="display:none;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描</button>
         </div>
         <div class="card">
-            <h2>今日即時紀錄 (前15筆)</h2>
+            <h2>今日即時紀錄</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>時間</th><th>狀態</th><th>操作</th></tr></thead>
@@ -76,67 +79,131 @@
             <h2 id="period-display">本期工時統計</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
-                    <thead><tr><th>姓名</th><th>部門</th><th>本期累計時數 (正/加)</th></tr></thead>
+                    <thead><tr><th>姓名</th><th>部門</th><th>累積工時 (一般/加班)</th></tr></thead>
                     <tbody id="stat-table-body"></tbody>
                 </table>
             </div>
         </div>
-        <div class="card">
-            <h2>員工資料編輯與工牌預覽</h2>
-            <div class="form-group"><label>員工 ID (必填)</label><input type="text" id="m-id"></div>
-            <div class="form-group"><label>姓名</label><input type="text" id="m-name"></div>
-            <div class="form-group"><label>部門</label><input type="text" id="m-dept"></div>
-            <div class="form-group"><label>班別</label><select id="m-shift-select"></select></div>
-            <div class="form-group"><label>大頭照</label><input type="file" id="m-photo" accept="image/*" onchange="processPhoto()"></div>
-            <input type="hidden" id="m-photo-base64">
-            <button class="primary-btn" onclick="saveStaff()">💾 儲存員工</button>
-            <div style="text-align:center; margin:15px 0;"><canvas id="badge-canvas" width="1080" height="1728"></canvas></div>
-            <button class="accent-btn" onclick="downloadBadge()">📥 下載工牌 PNG</button>
+        <div class="management-grid">
+            <div class="card">
+                <h2>編輯員工資料</h2>
+                <div class="form-group"><label>公司名稱</label><input type="text" id="m-company" value="卓越企業集團"></div>
+                <div class="form-group"><label>員工 ID</label><input type="text" id="m-id" placeholder="ID 不可重複"></div>
+                <div class="form-group"><label>姓名</label><input type="text" id="m-name"></div>
+                <div class="form-group"><label>部門</label><input type="text" id="m-dept" value="技術部"></div>
+                <div class="form-group"><label>班別 (影響加班計算)</label><select id="m-shift-select"></select></div>
+                <div class="form-group"><label>上傳大頭照</label><input type="file" id="m-photo" accept="image/*" onchange="processAndPreviewPhoto()"></div>
+                <input type="hidden" id="m-photo-base64">
+                <button class="primary-btn" onclick="saveAndDraw()">💾 儲存員工</button>
+                <button class="secondary-btn" onclick="clearForm()">🆕 清除</button>
+            </div>
+            <div class="card">
+                <h2>工牌預覽</h2>
+                <div style="text-align:center; background:#eee; padding:20px 0; border-radius:15px;"><canvas id="badge-canvas" width="1080" height="1728"></canvas></div>
+                <button class="accent-btn" onclick="downloadBadge()" style="margin-top:10px;">📥 下載 PNG</button>
+            </div>
         </div>
         <div class="card">
-            <h2>名單管理</h2>
+            <h2>員工名單</h2>
             <table class="list-table"><tbody id="staff-body"></tbody></table>
         </div>
     </div>
 
     <div id="page-config" class="page">
         <div class="card">
-            <h2>📅 結算日: 每月 <span id="display-cycle-day">1</span> 日</h2>
+            <h2>📅 結算週期 (每月第幾日開始)</h2>
             <input type="number" id="config-cycle-day" min="1" max="31">
-            <button class="primary-btn" onclick="updateCycle()">套用</button>
+            <button class="primary-btn" onclick="updateCycleSetting()" style="margin-top:10px;">💾 套用</button>
         </div>
         <div class="card">
-            <h2>⚙️ 班別配置 (時數基準)</h2>
-            <input type="text" id="shift-name" placeholder="名稱">
-            <div style="display:flex; gap:5px;"><input type="time" id="shift-start"> <input type="time" id="shift-end"></div>
+            <h2>⚙️ 班別與工時標準</h2>
+            <input type="text" id="shift-name" placeholder="名稱 (如: 日班)">
+            <div style="display:flex; gap:10px; margin:10px 0;"><input type="time" id="shift-start"> <input type="time" id="shift-end"></div>
             <button class="primary-btn" onclick="addShift()">＋ 新增班別</button>
             <table class="list-table"><tbody id="shift-list-body"></tbody></table>
         </div>
         <div class="card">
-            <h2>💾 備份</h2>
-            <button class="accent-btn" onclick="fullExport()">匯出備份</button>
+            <h2>📊 系統管理</h2>
+            <button class="accent-btn" onclick="fullExport()">📤 完整備份匯出</button>
+            <button class="secondary-btn" onclick="document.getElementById('full-import-file').click()">📥 還原備份</button>
+            <input type="file" id="full-import-file" style="display:none" accept=".xlsx" onchange="fullImport(this)">
+            <input type="password" id="new-pass" placeholder="新管理密碼" style="margin-top:20px;">
+            <button class="secondary-btn" onclick="updatePassword()">🔐 變更密碼</button>
         </div>
     </div>
 </div>
 
 <script>
+    // 數據結構
     let logs = JSON.parse(localStorage.getItem('hr_logs_v21')) || [];
     let staffDb = JSON.parse(localStorage.getItem('staff_db_v21')) || [];
     let shifts = JSON.parse(localStorage.getItem('hr_shifts_v21')) || [{name:"全日班", start:"09:00", end:"18:00"}];
-    let cycleDay = parseInt(localStorage.getItem('hr_cycle_day')) || 1;
     let adminPass = localStorage.getItem('hr_pass_v21') || "1234";
+    let cycleDay = parseInt(localStorage.getItem('hr_cycle_day')) || 1;
     let isAuthed = false, scanner, currentStatus = "上班";
 
-    // --- 核心打卡與紀錄 ---
+    // --- 核心：精確時數與加班計算 ---
+    function calculateStats() {
+        const now = new Date();
+        let sYear = now.getFullYear();
+        let sMonth = now.getMonth();
+        if (now.getDate() < cycleDay) sMonth--;
+        const periodStart = new Date(sYear, sMonth, cycleDay, 0, 0, 0);
+        
+        document.getElementById('period-display').innerText = `本期統計 (${periodStart.toLocaleDateString()} 起)`;
+        
+        const stats = {};
+        staffDb.forEach(s => {
+            stats[s.id] = { name: s.name, dept: s.dept||"-", regMs: 0, otMs: 0, lastIn: null, shift: shifts.find(sh=>sh.name===s.shift) };
+        });
+
+        // 僅處理本期且按時間排序
+        const pLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
+
+        pLogs.forEach(l => {
+            const sId = staffDb.find(s=>s.name===l.name)?.id || l.name;
+            if(!stats[sId]) return;
+
+            if(l.type === "上班") {
+                stats[sId].lastIn = new Date(l.time).getTime();
+            } else if(l.type === "下班" && stats[sId].lastIn) {
+                const workMs = new Date(l.time).getTime() - stats[sId].lastIn;
+                
+                // 計算該班別的標準工時 (預設8小時)
+                let stdMs = 8 * 3600000; 
+                if(stats[sId].shift) {
+                    const s = stats[sId].shift;
+                    stdMs = new Date(`2000/1/1 ${s.end}`) - new Date(`2000/1/1 ${s.start}`);
+                    if(stdMs < 0) stdMs += 86400000; // 處理跨夜班別
+                }
+
+                if(workMs > stdMs) {
+                    stats[sId].regMs += stdMs;
+                    stats[sId].otMs += (workMs - stdMs);
+                } else {
+                    stats[sId].regMs += workMs;
+                }
+                stats[sId].lastIn = null;
+            }
+        });
+
+        document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
+            <tr><td><b>${s.name}</b></td><td>${s.dept}</td>
+            <td><span class="stat-badge">正: ${(s.regMs/3600000).toFixed(1)}h</span>
+            ${s.otMs>0 ? `<span class="stat-badge ot-badge">加: ${(s.otMs/3600000).toFixed(1)}h</span>` : ''}</td></tr>
+        `).join('');
+    }
+
+    // --- 打卡功能 ---
     async function startScanner() {
         document.getElementById('continue-btn').style.display = "none";
         if(!scanner) scanner = new Html5Qrcode("reader");
         try {
             await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, (id) => {
                 const staff = staffDb.find(s => s.id === id);
-                const name = staff ? staff.name : "未知("+id+")";
-                // 使用 ISOString 確保跨裝置計算準確
-                logs.unshift({ uid: Date.now(), id, name, time: new Date().toISOString(), type: currentStatus });
+                const name = staff ? staff.name : id;
+                // 存檔統一用 ISOString
+                logs.unshift({ uid: Date.now(), name, time: new Date().toISOString(), type: currentStatus });
                 localStorage.setItem('hr_logs_v21', JSON.stringify(logs));
                 renderLogs();
                 const f = document.getElementById('scan-feedback');
@@ -151,49 +218,12 @@
 
     function renderLogs() {
         document.getElementById('log-body').innerHTML = logs.slice(0,15).map(l => {
-            const timeStr = new Date(l.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            return `<tr><td>${l.name}</td><td>${timeStr}</td><td><span style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</span></td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">🗑️</button></td></tr>`;
+            const t = new Date(l.time);
+            return `<tr><td>${l.name}</td><td>${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</td><td><span style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</span></td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">刪除</button></td></tr>`;
         }).join('');
     }
 
-    // --- 核心時數累計 (含加班) ---
-    function calculateStats() {
-        const now = new Date();
-        let sMonth = now.getMonth();
-        if (now.getDate() < cycleDay) sMonth--;
-        const periodStart = new Date(now.getFullYear(), sMonth, cycleDay, 0, 0, 0);
-        document.getElementById('period-display').innerText = `本期統計 (${periodStart.toLocaleDateString()} 起)`;
-        
-        const stats = {};
-        staffDb.forEach(s => stats[s.id] = { name:s.name, dept:s.dept||"-", regMs:0, otMs:0, lastIn:null, shift:shifts.find(sh=>sh.name===s.shift) });
-
-        const pLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
-        
-        pLogs.forEach(l => {
-            if(!stats[l.id]) return;
-            if(l.type === "上班") stats[l.id].lastIn = new Date(l.time).getTime();
-            else if(l.type === "下班" && stats[l.id].lastIn) {
-                const workMs = new Date(l.time).getTime() - stats[l.id].lastIn;
-                let stdMs = 8 * 3600000;
-                if(stats[l.id].shift) {
-                    const s = stats[l.id].shift;
-                    stdMs = (new Date(`2000/1/1 ${s.end}`) - new Date(`2000/1/1 ${s.start}`));
-                    if(stdMs < 0) stdMs += 86400000;
-                }
-                if(workMs > stdMs) { stats[l.id].regMs += stdMs; stats[l.id].otMs += (workMs - stdMs); }
-                else { stats[l.id].regMs += workMs; }
-                stats[l.id].lastIn = null;
-            }
-        });
-
-        document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
-            <tr><td><b>${s.name}</b></td><td>${s.dept}</td>
-            <td><span class="stat-badge">正: ${(s.regMs/3600000).toFixed(1)}h</span>
-            ${s.otMs > 0 ? `<span class="stat-badge ot-badge">加: ${(s.otMs/3600000).toFixed(1)}h</span>` : ''}</td></tr>
-        `).join('');
-    }
-
-    // --- 介面管理 ---
+    // --- 其餘功能與 UI 控制 ---
     function showPage(p) {
         document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
@@ -201,42 +231,32 @@
         document.getElementById('nav-'+p).classList.add('active');
         if(p === 'scan') startScanner(); else stopScanner();
         if(p === 'make') { calculateStats(); renderStaff(); updateShiftUI(); }
-        if(p === 'config') { updateShiftUI(); document.getElementById('display-cycle-day').innerText = cycleDay; }
+        if(p === 'config') document.getElementById('config-cycle-day').value = cycleDay;
         renderLogs();
+    }
+
+    function checkAuth(target) {
+        if(isAuthed) return showPage(target);
+        const pw = prompt("🔐 管理密碼：");
+        if(pw === adminPass) { isAuthed = true; showPage(target); }
+        else if(pw !== null) alert("密碼錯誤");
     }
 
     function setStatus(s) {
         currentStatus = s;
-        document.getElementById('btn-in').classList.toggle('active-in', s==='上班');
-        document.getElementById('btn-out').classList.toggle('active-out', s==='下班');
+        document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
+        document.getElementById('btn-out').classList.toggle('active-out', s === '下班');
     }
 
-    function checkAuth(t) {
-        if(isAuthed) return showPage(t);
-        const p = prompt("管理密碼:");
-        if(p === adminPass) { isAuthed=true; showPage(t); } else if(p!==null) alert("密碼錯誤");
-    }
-
-    function saveStaff() {
-        const id = document.getElementById('m-id').value;
-        const name = document.getElementById('m-name').value;
+    function saveAndDraw() {
+        const id = document.getElementById('m-id').value.trim();
+        const name = document.getElementById('m-name').value.trim();
         if(!id || !name) return alert("ID與姓名必填");
-        const data = { id, name, dept: document.getElementById('m-dept').value, shift: document.getElementById('m-shift-select').value, photo: document.getElementById('m-photo-base64').value };
-        const idx = staffDb.findIndex(s=>s.id === id);
-        if(idx>-1) staffDb[idx] = data; else staffDb.push(data);
+        const data = { id, name, photo: document.getElementById('m-photo-base64').value, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
+        const idx = staffDb.findIndex(s => s.id === id);
+        if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
         localStorage.setItem('staff_db_v21', JSON.stringify(staffDb));
-        alert("儲存成功"); renderStaff(); calculateStats(); drawBadge();
-    }
-
-    function renderStaff() {
-        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.name}</td><td><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">載入</button></td></tr>`).join('');
-    }
-
-    function loadStaff(id) {
-        const s = staffDb.find(x=>x.id===id);
-        document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name;
-        document.getElementById('m-dept').value = s.dept; document.getElementById('m-shift-select').value = s.shift;
-        document.getElementById('m-photo-base64').value = s.photo; drawBadge();
+        alert("✅ 儲存成功"); renderStaff(); calculateStats(); drawBadge();
     }
 
     function addShift() {
@@ -254,15 +274,37 @@
         document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
     }
 
-    function updateCycle() {
+    function updateCycleSetting() {
         cycleDay = parseInt(document.getElementById('config-cycle-day').value);
         localStorage.setItem('hr_cycle_day', cycleDay);
-        alert("結算日更新"); showPage('config');
+        alert("結算日已更新");
     }
 
-    function deleteLog(uid) { if(confirm("刪除此紀錄？")) { logs=logs.filter(l=>l.uid!==uid); localStorage.setItem('hr_logs_v21', JSON.stringify(logs)); renderLogs(); calculateStats(); } }
+    function deleteLog(uid) { if(confirm("刪除此紀錄？")) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v21', JSON.stringify(logs)); renderLogs(); calculateStats(); } }
 
-    function processPhoto() {
+    function renderStaff() {
+        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td><b>${s.name}</b></td><td><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">載入</button> <button class="danger-btn mini-btn" onclick="deleteStaff('${s.id}')">🗑️</button></td></tr>`).join('');
+    }
+
+    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_db_v21', JSON.stringify(staffDb)); renderStaff(); } }
+
+    function loadStaff(id) {
+        const s = staffDb.find(x => x.id === id);
+        document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name;
+        document.getElementById('m-dept').value = s.dept; document.getElementById('m-shift-select').value = s.shift;
+        document.getElementById('m-photo-base64').value = s.photo || ""; drawBadge();
+    }
+
+    function fullExport() {
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(shifts), "班別");
+        XLSX.writeFile(wb, `考勤系統備份_${new Date().toLocaleDateString()}.xlsx`);
+    }
+
+    // 工牌繪製與圖片處理 (保持原樣)
+    function processAndPreviewPhoto() {
         const file = document.getElementById('m-photo').files[0];
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -270,7 +312,7 @@
             img.onload = () => {
                 const cvs = document.createElement('canvas');
                 cvs.width = 300; cvs.height = 300;
-                cvs.getContext('2d').drawImage(img,0,0,300,300);
+                cvs.getContext('2d').drawImage(img, 0, 0, 300, 300);
                 document.getElementById('m-photo-base64').value = cvs.toDataURL('image/jpeg', 0.7);
                 drawBadge();
             };
@@ -281,31 +323,24 @@
 
     async function drawBadge() {
         const cvs = document.getElementById('badge-canvas'), ctx = cvs.getContext('2d');
-        const name = document.getElementById('m-name').value || "姓名", id = document.getElementById('m-id').value || "ID";
+        const name = document.getElementById('m-name').value || "姓名", id = (document.getElementById('m-id').value || "ID").toUpperCase();
         ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
-        ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.font = "bold 120px Arial"; ctx.fillText(name, 540, 1100);
-        ctx.font = "60px Arial"; ctx.fillStyle = "#94a3b8"; ctx.fillText(id, 540, 1200);
+        ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.font = "bold 120px Arial"; ctx.fillText(name, 540, 1050);
+        ctx.font = "60px Arial"; ctx.fillStyle = "#94a3b8"; ctx.fillText(id, 540, 1150);
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 12, mCount = qr.getModuleCount(), startX = 540 - (mCount*cellSize)/2;
         ctx.fillStyle = "white";
-        for(let r=0; r<mCount; r++) for(let c=0; c<mCount; c++) if(qr.isDark(r,c)) ctx.fillRect(startX+c*cellSize, 1300+r*cellSize, cellSize, cellSize);
+        for(let r=0; r<mCount; r++) for(let c=0; c<mCount; c++) if(qr.isDark(r,c)) ctx.fillRect(startX+c*cellSize, 1250+r*cellSize, cellSize, cellSize);
         const photo = document.getElementById('m-photo-base64').value;
         if(photo) {
             const img = new Image(); img.src = photo;
-            img.onload = () => { ctx.save(); ctx.beginPath(); ctx.arc(540, 600, 300, 0, Math.PI*2); ctx.clip(); ctx.drawImage(img, 240, 300, 600, 600); ctx.restore(); };
+            img.onload = () => { ctx.save(); ctx.beginPath(); ctx.arc(540, 550, 300, 0, Math.PI*2); ctx.clip(); ctx.drawImage(img, 240, 250, 600, 600); ctx.restore(); };
         }
     }
 
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
-
-    function fullExport() {
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
-        XLSX.writeFile(wb, `考勤備份_${new Date().toLocaleDateString()}.xlsx`);
-    }
-
-    window.onload = () => { renderLogs(); updateShiftUI(); };
+    function clearForm() { document.getElementById('m-id').value=""; document.getElementById('m-name').value=""; document.getElementById('m-photo-base64').value=""; drawBadge(); }
+    window.onload = () => { renderLogs(); updateShiftUI(); drawBadge(); };
 </script>
 </body>
 </html>
