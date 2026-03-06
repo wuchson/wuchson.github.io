@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 v2.3 - 即時累計版</title>
+    <title>打卡系統 v2.5 - 即時秒跳累計版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -51,10 +51,10 @@
         #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; }
         .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
         
-        .stat-badge { background: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
-        .ot-badge { background: #fff1f2; color: #e11d48; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
-        .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .stat-badge { background: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; font-family: monospace; }
+        .ot-badge { background: #fff1f2; color: #e11d48; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; font-family: monospace; }
+        .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -90,7 +90,7 @@
 
     <div id="page-make" class="page">
         <div class="card">
-            <h2 id="period-display">本期工時統計 (含即時累計)</h2>
+            <h2 id="period-display">本期工時統計 (即時更新中...)</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>部門</th><th>總工時 / 加班時數</th></tr></thead>
@@ -172,8 +172,9 @@
     let isAuthed = false;
     let scanner;
     let currentStatus = "上班"; 
+    let liveTimer = null; // 即時更新定時器
 
-    // --- 核心更新：支援上班中即時工時計算 ---
+    // --- 核心邏輯：計算統計 ---
     function calculateStats() {
         const now = new Date();
         let startYear = now.getFullYear();
@@ -181,52 +182,54 @@
         if (now.getDate() < cycleDay) startMonth -= 1;
         const periodStart = new Date(startYear, startMonth, cycleDay, 0, 0, 0);
         
-        document.getElementById('period-display').innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
+        const displayElem = document.getElementById('period-display');
+        if(displayElem) displayElem.innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
         
         const stats = {};
         staffDb.forEach(s => {
             const shiftInfo = shifts.find(sh => sh.name === s.shift) || shifts[0] || {start:"09:00", end:"18:00"};
-            const sTime = new Date(`2000/01/01 ${shiftInfo.start}`);
-            const eTime = new Date(`2000/01/01 ${shiftInfo.end}`);
-            
+            const sTimeParts = shiftInfo.start.split(':');
+            const eTimeParts = shiftInfo.end.split(':');
+            const stdMs = (parseInt(eTimeParts[0])*3600 + parseInt(eTimeParts[1])*60)*1000 - (parseInt(sTimeParts[0])*3600 + parseInt(sTimeParts[1])*60)*1000;
+
             stats[s.id] = { 
                 name: s.name, 
                 dept: s.dept || "-", 
                 totalMs: 0, 
                 overtimeMs: 0, 
-                stdDayMs: eTime - sTime,
-                lastIn: null,
+                stdDayMs: stdMs,
+                lastInTime: null,
                 isWorkingNow: false 
             };
         });
 
-        // 按時間排序紀錄
+        // 排序並處理歷史紀錄
         const periodLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
         
         periodLogs.forEach(l => {
-            const staff = staffDb.find(s => s.name === l.name || l.name.includes(s.id));
-            const sId = staff ? staff.id : null;
-            if(!sId || !stats[sId]) return;
+            const staff = staffDb.find(s => s.name === l.name || (l.name && l.name.includes(s.id)));
+            if(!staff || !stats[staff.id]) return;
+            const sId = staff.id;
 
             if(l.type === "上班") {
-                stats[sId].lastIn = new Date(l.time).getTime();
+                stats[sId].lastInTime = new Date(l.time).getTime();
                 stats[sId].isWorkingNow = true;
-            } else if(l.type === "下班" && stats[sId].lastIn) {
-                const sessionMs = new Date(l.time).getTime() - stats[sId].lastIn;
+            } else if(l.type === "下班" && stats[sId].lastInTime) {
+                const sessionMs = new Date(l.time).getTime() - stats[sId].lastInTime;
                 stats[sId].totalMs += sessionMs;
                 if(sessionMs > stats[sId].stdDayMs) {
                     stats[sId].overtimeMs += (sessionMs - stats[sId].stdDayMs);
                 }
-                stats[sId].lastIn = null;
+                stats[sId].lastInTime = null;
                 stats[sId].isWorkingNow = false;
             }
         });
 
-        // 即時累計邏輯：處理還沒打下班卡的人
-        const currentTimeMs = now.getTime();
+        // 即時累計邏輯：對正在上班的人加上「從打卡到現在」的時間
+        const currentTimeMs = Date.now();
         Object.keys(stats).forEach(id => {
-            if (stats[id].isWorkingNow && stats[id].lastIn) {
-                const liveSessionMs = currentTimeMs - stats[id].lastIn;
+            if (stats[id].isWorkingNow && stats[id].lastInTime) {
+                const liveSessionMs = currentTimeMs - stats[id].lastInTime;
                 stats[id].totalMs += liveSessionMs;
                 if(liveSessionMs > stats[id].stdDayMs) {
                     stats[id].overtimeMs += (liveSessionMs - stats[id].stdDayMs);
@@ -234,21 +237,36 @@
             }
         });
 
-        document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
+        const tbody = document.getElementById('stat-table-body');
+        if(!tbody) return;
+
+        tbody.innerHTML = Object.values(stats).map(s => `
             <tr>
-                <td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">上班中</span>' : ''}</td>
+                <td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">LIVE</span>' : ''}</td>
                 <td>${s.dept}</td>
                 <td>
-                    <span class="stat-badge">累計: ${(s.totalMs / 3600000).toFixed(2)} H</span>
-                    <span class="ot-badge">加班: ${(s.overtimeMs / 3600000).toFixed(2)} H</span>
+                    <span class="stat-badge">累計: ${(s.totalMs / 3600000).toFixed(4)} H</span>
+                    <span class="ot-badge">加班: ${(s.overtimeMs / 3600000).toFixed(4)} H</span>
                 </td>
             </tr>
         `).join('');
     }
 
-    // --- 工牌繪製 ---
+    // 啟動定時刷新 (每秒刷新一次，造成數字跳動感)
+    function startLiveUpdate() {
+        if(liveTimer) clearInterval(liveTimer);
+        liveTimer = setInterval(() => {
+            const activePage = document.querySelector('.page.active').id;
+            if(activePage === 'page-make') {
+                calculateStats();
+            }
+        }, 1000);
+    }
+
+    // --- 其他原有功能 ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
+        if(!canvas) return;
         const ctx = canvas.getContext('2d');
         const comp = document.getElementById('m-company').value || "卓越企業集團";
         const id = (document.getElementById('m-id').value || "EMP-001").toUpperCase();
@@ -334,7 +352,7 @@
         document.getElementById('page-'+p).classList.add('active');
         document.getElementById('nav-'+p).classList.add('active');
         if(p === 'scan') startScanner(); else stopScanner();
-        if(p === 'make') { calculateStats(); renderStaff(); drawBadge(); }
+        if(p === 'make') { calculateStats(); renderStaff(); drawBadge(); startLiveUpdate(); }
         if(p === 'config') { document.getElementById('config-cycle-day').value = cycleDay; updateShiftUI(); }
         renderLogs();
     }
@@ -423,4 +441,3 @@
 </script>
 </body>
 </html>
-用這改,給完整的,累計時數自動跳動
