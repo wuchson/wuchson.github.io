@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 v2.7</title>
+    <title>打卡系統 v2.8 - 加班優化版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #0f172a; --accent: #3b82f6; --danger: #ef4444; --success: #10b981; --bg: #f8fafc; }
+        :root { --primary: #0f172a; --accent: #3b82f6; --danger: #ef4444; --success: #10b981; --ot: #8b5cf6; --bg: #f8fafc; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); margin: 0; color: #334155; }
         
         nav { background: white; padding: 0.8rem; display: flex; justify-content: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
@@ -33,10 +33,13 @@
         .secondary-btn { background: #e2e8f0; color: #475569; }
         .danger-btn { background: #fee2e2; color: var(--danger); font-size: 13px; padding: 8px; }
 
-        .status-toggle { display: flex; gap: 10px; margin-bottom: 15px; }
-        .status-btn { flex: 1; padding: 15px; border: 2px solid #e2e8f0; background: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        /* 狀態按鈕樣式 */
+        .status-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .status-btn { padding: 15px; border: 2px solid #e2e8f0; background: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 15px; }
         .status-btn.active-in { border-color: var(--success); background: #ecfdf5; color: var(--success); }
         .status-btn.active-out { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+        .status-btn.active-ot-in { border-color: var(--ot); background: #f5f3ff; color: var(--ot); }
+        .status-btn.active-ot-out { border-color: #7c3aed; background: #ede9fe; color: #7c3aed; }
 
         .management-grid { display: flex; flex-direction: column; gap: 15px; }
         @media (min-width: 768px) {
@@ -52,6 +55,7 @@
         .stat-badge { background: #0f172a; color: #3b82f6; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; font-family: monospace; }
         .ot-badge { background: #fff1f2; color: #e11d48; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; font-family: monospace; }
         .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 1s infinite; }
+        .ot-tag { color: var(--ot); font-size: 11px; font-weight: bold; border: 1px solid var(--ot); padding: 1px 4px; border-radius: 4px; margin-left: 5px; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         
         #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; }
@@ -69,10 +73,12 @@
 <div class="container">
     <div id="page-scan" class="page active">
         <div class="card">
-            <h2>打卡狀態選擇</h2>
+            <h2>打卡模式切換</h2>
             <div class="status-toggle">
                 <button id="btn-in" class="status-btn active-in" onclick="setStatus('上班')">☀ 上班</button>
                 <button id="btn-out" class="status-btn" onclick="setStatus('下班')">🌙 下班</button>
+                <button id="btn-ot-in" class="status-btn" onclick="setStatus('加班上班')">🟣 加班上班</button>
+                <button id="btn-ot-out" class="status-btn" onclick="setStatus('加班下班')">🔮 加班下班</button>
             </div>
             <div id="reader"></div>
             <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請掃描員工 QR Code</div>
@@ -91,7 +97,7 @@
 
     <div id="page-make" class="page">
         <div class="card">
-            <h2 id="period-display">本期工時統計 (秒級即時跳動中)</h2>
+            <h2 id="period-display">本期工時統計 (秒級運算)</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>部門</th><th>即時總累計 / 加班</th></tr></thead>
@@ -165,17 +171,17 @@
 </div>
 
 <script>
-    let logs = JSON.parse(localStorage.getItem('hr_logs_v25')) || [];
-    let staffDb = JSON.parse(localStorage.getItem('staff_db_v25')) || [];
-    let shifts = JSON.parse(localStorage.getItem('hr_shifts_v25')) || [{name:"全日班", start:"09:00", end:"18:00"}];
-    let adminPass = localStorage.getItem('hr_pass_v25') || "1234";
+    let logs = JSON.parse(localStorage.getItem('hr_logs_v28')) || [];
+    let staffDb = JSON.parse(localStorage.getItem('staff_db_v28')) || [];
+    let shifts = JSON.parse(localStorage.getItem('hr_shifts_v28')) || [{name:"全日班", start:"09:00", end:"18:00"}];
+    let adminPass = localStorage.getItem('hr_pass_v28') || "1234";
     let cycleDay = parseInt(localStorage.getItem('hr_cycle_day')) || 1; 
     let isAuthed = false;
     let scanner;
     let currentStatus = "上班"; 
     let liveStatTimer = null;
 
-    // --- 核心更新：工時統計 ---
+    // --- 加班統計核心邏輯 ---
     function calculateStats() {
         const now = new Date();
         let startYear = now.getFullYear();
@@ -198,6 +204,7 @@
                 overtimeMs: 0, 
                 stdDayMs: eTime - sTime,
                 lastInMs: null,
+                lastInType: null,
                 isWorkingNow: false 
             };
         });
@@ -211,44 +218,74 @@
             const sId = staff.id;
             const currentLogTs = new Date(l.ts || l.time).getTime();
 
-            if(l.type === "上班") {
+            // 處理兩種「入勤」類型
+            if(l.type === "上班" || l.type === "加班上班") {
                 stats[sId].lastInMs = currentLogTs;
+                stats[sId].lastInType = l.type;
                 stats[sId].isWorkingNow = true;
-            } else if(l.type === "下班" && stats[sId].lastInMs) {
+            } 
+            // 處理下班
+            else if((l.type === "下班" || l.type === "加班下班") && stats[sId].lastInMs) {
                 const sessionMs = currentLogTs - stats[sId].lastInMs;
                 stats[sId].totalMs += sessionMs;
-                if(sessionMs > stats[sId].stdDayMs) {
-                    stats[sId].overtimeMs += (sessionMs - stats[sId].stdDayMs);
+                
+                if(stats[sId].lastInType === "加班上班") {
+                    // 專門加班模式：全計加班
+                    stats[sId].overtimeMs += sessionMs;
+                } else {
+                    // 正常上班模式：超過標工才算加班
+                    if(sessionMs > stats[sId].stdDayMs) {
+                        stats[sId].overtimeMs += (sessionMs - stats[sId].stdDayMs);
+                    }
                 }
                 stats[sId].lastInMs = null;
                 stats[sId].isWorkingNow = false;
             }
         });
 
+        // 即時跳動邏輯
         const currentTimeMs = now.getTime();
         Object.keys(stats).forEach(id => {
             if (stats[id].isWorkingNow && stats[id].lastInMs) {
                 const liveSessionMs = currentTimeMs - stats[id].lastInMs;
-                stats[id].totalMs += liveSessionMs;
-                if(liveSessionMs > stats[id].stdDayMs) {
-                    stats[id].overtimeMs += (liveSessionMs - stats[id].stdDayMs);
+                let currentTotal = stats[id].totalMs + liveSessionMs;
+                let currentOT = stats[id].overtimeMs;
+
+                if(stats[id].lastInType === "加班上班") {
+                    currentOT += liveSessionMs;
+                } else if(liveSessionMs > stats[id].stdDayMs) {
+                    currentOT += (liveSessionMs - stats[id].stdDayMs);
                 }
+
+                stats[id].displayTotal = (currentTotal / 3600000).toFixed(4);
+                stats[id].displayOT = (currentOT / 3600000).toFixed(4);
+            } else {
+                stats[id].displayTotal = (stats[id].totalMs / 3600000).toFixed(4);
+                stats[id].displayOT = (stats[id].overtimeMs / 3600000).toFixed(4);
             }
         });
 
         document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
             <tr>
-                <td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">工作中</span>' : ''}</td>
+                <td><b>${s.name}</b> ${s.isWorkingNow ? (s.lastInType==='加班上班'?'<span class="ot-tag">加班中</span>':'<span class="live-tag">工作中</span>') : ''}</td>
                 <td>${s.dept}</td>
                 <td>
-                    <span class="stat-badge">累計: ${(s.totalMs / 3600000).toFixed(4)} H</span>
-                    <span class="ot-badge">加班: ${(s.overtimeMs / 3600000).toFixed(4)} H</span>
+                    <span class="stat-badge">累計: ${s.displayTotal} H</span>
+                    <span class="ot-badge">加班: ${s.displayOT} H</span>
                 </td>
             </tr>
         `).join('');
     }
 
-    // --- 頁面控制 ---
+    // --- 頁面與控制 ---
+    function setStatus(s) {
+        currentStatus = s;
+        document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
+        document.getElementById('btn-out').classList.toggle('active-out', s === '下班');
+        document.getElementById('btn-ot-in').classList.toggle('active-ot-in', s === '加班上班');
+        document.getElementById('btn-ot-out').classList.toggle('active-ot-out', s === '加班下班');
+    }
+
     function showPage(p) {
         if(liveStatTimer) clearInterval(liveStatTimer);
         document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
@@ -258,7 +295,7 @@
         if(p === 'scan') startScanner(); else stopScanner();
         
         if(p === 'make') {
-            updateShiftUI(); // 重要：進入頁面立即同步選單
+            updateShiftUI();
             calculateStats();
             renderStaff();
             drawBadge();
@@ -271,7 +308,6 @@
         renderLogs();
     }
 
-    // --- 掃描與打卡 ---
     async function startScanner() {
         document.getElementById('continue-btn').style.display = "none";
         if(!scanner) scanner = new Html5Qrcode("reader");
@@ -288,27 +324,23 @@
                     ts: now.toISOString(), 
                     type: currentStatus 
                 });
-                localStorage.setItem('hr_logs_v25', JSON.stringify(logs)); 
+                localStorage.setItem('hr_logs_v28', JSON.stringify(logs)); 
                 renderLogs();
-                document.getElementById('scan-feedback').innerText = `✅ ${name} ${currentStatus}成功`;
+                document.getElementById('scan-feedback').innerHTML = `<span style="color:${currentStatus.includes('加班')?'#8b5cf6':'#10b981'}">✅ ${name} ${currentStatus}成功</span>`;
                 document.getElementById('continue-btn').style.display = "block";
                 stopScanner();
             }); 
         } catch(e){}
     }
     function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
-    function setStatus(s) {
-        currentStatus = s;
-        document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
-        document.getElementById('btn-out').classList.toggle('active-out', s === '下班');
-    }
+
+    // --- 資料維護 (其餘與 v2.7 相同) ---
     function checkAuth(t) {
         if(isAuthed) { showPage(t); return; }
         const pw = prompt("🔐 請輸入管理密碼：");
         if(pw === adminPass) { isAuthed = true; showPage(t); } else if(pw !== null) alert("密碼錯誤");
     }
 
-    // --- 工牌繪製 ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
@@ -378,7 +410,6 @@
         reader.readAsDataURL(file);
     }
 
-    // --- 資料操作 ---
     function saveAndDraw() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
@@ -386,7 +417,7 @@
         const data = { id, name, photo: document.getElementById('m-photo-base64').value, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
         const idx = staffDb.findIndex(s => s.id === id);
         if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
-        localStorage.setItem('staff_db_v25', JSON.stringify(staffDb));
+        localStorage.setItem('staff_db_v28', JSON.stringify(staffDb));
         alert("儲存成功"); renderStaff(); calculateStats();
     }
 
@@ -402,33 +433,30 @@
         drawBadge();
     }
 
-    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_db_v25', JSON.stringify(staffDb)); renderStaff(); } }
-    function renderLogs() { document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => `<tr><td>${l.name}</td><td>${l.time.split(' ')[1] || l.time}</td><td style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`).join(''); }
-    function deleteLog(uid) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v25', JSON.stringify(logs)); renderLogs(); }
+    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_db_v28', JSON.stringify(staffDb)); renderStaff(); } }
+    function renderLogs() { document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => `<tr><td>${l.name}</td><td>${l.time.split(' ')[1] || l.time}</td><td style="color:${l.type.includes('上班')?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`).join(''); }
+    function deleteLog(uid) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v28', JSON.stringify(logs)); renderLogs(); }
 
-    // --- 系統配置 ---
     function addShift() {
         const name = document.getElementById('shift-name').value;
         const start = document.getElementById('shift-start').value;
         const end = document.getElementById('shift-end').value;
         if(!name || !start || !end) return alert("請完整填寫");
         shifts.push({name, start, end});
-        localStorage.setItem('hr_shifts_v25', JSON.stringify(shifts));
+        localStorage.setItem('hr_shifts_v28', JSON.stringify(shifts));
         updateShiftUI();
     }
 
     function updateShiftUI() {
-        const shiftHtml = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v25',JSON.stringify(shifts));updateShiftUI();">刪除</button></td></tr>`).join('');
+        const shiftHtml = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v28',JSON.stringify(shifts));updateShiftUI();">刪除</button></td></tr>`).join('');
         document.getElementById('shift-list-body').innerHTML = shiftHtml;
-        
         const selectHtml = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
         document.getElementById('m-shift-select').innerHTML = selectHtml;
     }
 
     function updateCycleSetting() { cycleDay = parseInt(document.getElementById('config-cycle-day').value); localStorage.setItem('hr_cycle_day', cycleDay); alert("已更新結算日"); }
-    function updatePassword() { adminPass = document.getElementById('new-pass').value; localStorage.setItem('hr_pass_v25', adminPass); alert("密碼已修改"); }
+    function updatePassword() { adminPass = document.getElementById('new-pass').value; localStorage.setItem('hr_pass_v28', adminPass); alert("密碼已修改"); }
     
-    // --- 強化備份功能 ---
     function fullExport() {
         try {
             const wb = XLSX.utils.book_new();
@@ -445,14 +473,14 @@
         const r = new FileReader(); r.onload = (e) => {
             try {
                 const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-                if (wb.Sheets["員工名單"]) { staffDb = XLSX.utils.sheet_to_json(wb.Sheets["員工名單"]); localStorage.setItem('staff_db_v25', JSON.stringify(staffDb)); }
-                if (wb.Sheets["打卡紀錄"]) { logs = XLSX.utils.sheet_to_json(wb.Sheets["打卡紀錄"]); localStorage.setItem('hr_logs_v25', JSON.stringify(logs)); }
+                if (wb.Sheets["員工名單"]) { staffDb = XLSX.utils.sheet_to_json(wb.Sheets["員工名單"]); localStorage.setItem('staff_db_v28', JSON.stringify(staffDb)); }
+                if (wb.Sheets["打卡紀錄"]) { logs = XLSX.utils.sheet_to_json(wb.Sheets["打卡紀錄"]); localStorage.setItem('hr_logs_v28', JSON.stringify(logs)); }
                 if (wb.Sheets["系統設定"]) {
                     const cfg = XLSX.utils.sheet_to_json(wb.Sheets["系統設定"]);
                     cfg.forEach(item => {
-                        if(item.key === "shifts") { shifts = JSON.parse(item.value); localStorage.setItem('hr_shifts_v25', item.value); }
+                        if(item.key === "shifts") { shifts = JSON.parse(item.value); localStorage.setItem('hr_shifts_v28', item.value); }
                         if(item.key === "cycleDay") { cycleDay = parseInt(item.value); localStorage.setItem('hr_cycle_day', cycleDay); }
-                        if(item.key === "adminPass") { adminPass = item.value; localStorage.setItem('hr_pass_v25', adminPass); }
+                        if(item.key === "adminPass") { adminPass = item.value; localStorage.setItem('hr_pass_v28', adminPass); }
                     });
                 }
                 alert("還原成功！"); location.reload();
@@ -463,11 +491,7 @@
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
     function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => { const el = document.getElementById(i); if(el) el.value=""; }); drawBadge(); }
 
-    // 初始化執行
-    window.onload = () => { 
-        updateShiftUI(); // 先初始化班別
-        showPage('scan'); // 顯示掃描頁
-    };
+    window.onload = () => { updateShiftUI(); showPage('scan'); };
 </script>
 </body>
 </html>
