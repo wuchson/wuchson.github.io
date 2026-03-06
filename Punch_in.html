@@ -1,269 +1,426 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>打卡系統</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打卡系統</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #0f172a; --accent: #3b82f6; --danger: #ef4444; --success: #10b981; --bg: #f8fafc; }
+        body { font-family: 'PingFang TC', sans-serif; background: var(--bg); margin: 0; color: #334155; }
+        
+        nav { background: white; padding: 0.8rem; display: flex; justify-content: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        nav button { padding: 10px 15px; border: none; border-radius: 8px; background: #f1f5f9; cursor: pointer; font-weight: bold; font-size: 14px; color: #64748b; }
+        nav button.active { background: var(--primary); color: white; }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        .container { max-width: 1000px; margin: 10px auto; padding: 0 12px; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-<style>
-:root{--primary:#0f172a;--accent:#3b82f6;--danger:#ef4444;--success:#10b981;--bg:#f8fafc;}
-body{font-family:'PingFang TC',sans-serif;background:var(--bg);margin:0;color:#334155;}
-nav{background:white;padding:.8rem;display:flex;justify-content:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);position:sticky;top:0}
-nav button{padding:10px 15px;border:none;border-radius:8px;background:#f1f5f9;font-weight:bold}
-nav button.active{background:var(--primary);color:white}
-.container{max-width:1000px;margin:10px auto;padding:0 12px}
-.page{display:none}
-.page.active{display:block}
-.card{background:white;padding:22px;border-radius:20px;box-shadow:0 4px 15px rgba(0,0,0,.05);margin-bottom:15px}
-h2{font-size:1.1rem;margin-top:0;color:var(--primary);border-left:4px solid var(--accent);padding-left:10px}
-input,select{width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px}
-button{width:100%;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-bottom:8px}
-.primary-btn{background:var(--primary);color:white}
-.accent-btn{background:var(--accent);color:white}
-.secondary-btn{background:#e2e8f0}
-.danger-btn{background:#fee2e2;color:#ef4444;font-size:13px;padding:8px}
-.status-toggle{display:flex;gap:10px;margin-bottom:15px}
-.status-btn{flex:1;padding:15px;border:2px solid #e2e8f0;background:white;border-radius:12px}
-.status-btn.active-in{border-color:var(--success);background:#ecfdf5}
-.status-btn.active-out{border-color:var(--danger);background:#fef2f2}
-.list-table{width:100%;border-collapse:collapse;font-size:14px}
-.list-table th{padding:10px;border-bottom:2px solid #f1f5f9;color:#94a3b8}
-.list-table td{padding:12px;border-bottom:1px solid #f1f5f9}
-.stat-badge{background:#eff6ff;color:#1e40af;padding:4px 8px;border-radius:6px;font-weight:bold}
-</style>
+        .card { background: white; padding: 22px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        h2 { font-size: 1.1rem; margin-top: 0; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 15px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; font-weight: bold; color: #64748b; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-bottom: 8px; transition: 0.2s; }
+        .primary-btn { background: var(--primary); color: white; }
+        .accent-btn { background: var(--accent); color: white; }
+        .secondary-btn { background: #e2e8f0; color: #475569; }
+        .danger-btn { background: #fee2e2; color: var(--danger); font-size: 13px; padding: 8px; }
+
+        .status-toggle { display: flex; gap: 10px; margin-bottom: 15px; }
+        .status-btn { flex: 1; padding: 15px; border: 2px solid #e2e8f0; background: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .status-btn.active-in { border-color: var(--success); background: #ecfdf5; color: var(--success); }
+        .status-btn.active-out { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+
+        .management-grid { display: flex; flex-direction: column; gap: 15px; }
+        @media (min-width: 768px) {
+            .management-grid { flex-direction: row; align-items: flex-start; }
+            .management-grid .card { flex: 1; }
+        }
+
+        #badge-canvas { width: 90%; max-width: 300px; height: auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .list-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .list-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f1f5f9; color: #94a3b8; }
+        .list-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; }
+        .action-btns { display: flex; gap: 5px; }
+        .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
+        .stat-badge { background: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
 <nav>
-<button id="nav-scan" class="active" onclick="showPage('scan')">📸 掃描打卡</button>
-<button id="nav-make" onclick="showPage('make')">👤 員工管理</button>
+    <button id="nav-scan" class="active" onclick="showPage('scan')">📸 掃描打卡</button>
+    <button id="nav-make" onclick="checkAuth('make')">👤 員工管理 🔒</button>
+    <button id="nav-config" onclick="checkAuth('config')">⚙️ 系統設定 🔒</button>
 </nav>
 
 <div class="container">
+    <div id="page-scan" class="page active">
+        <div class="card">
+            <h2>打卡狀態選擇</h2>
+            <div class="status-toggle">
+                <button id="btn-in" class="status-btn active-in" onclick="setStatus('上班')">☀ 上班</button>
+                <button id="btn-out" class="status-btn" onclick="setStatus('下班')">🌙 下班</button>
+            </div>
+            <div id="reader"></div>
+            <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請掃描員工 QR Code</div>
+            <button id="continue-btn" style="display:none;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描</button>
+        </div>
+        <div class="card">
+            <h2>今日即時紀錄</h2>
+            <div style="overflow-x:auto;">
+                <table class="list-table">
+                    <thead><tr><th>姓名</th><th>時間</th><th>狀態</th><th>操作</th></tr></thead>
+                    <tbody id="log-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-<div id="page-scan" class="page active">
-<div class="card">
+    <div id="page-make" class="page">
+        <div class="card">
+            <h2 id="period-display">本期工時統計</h2>
+            <div style="overflow-x:auto;">
+                <table class="list-table">
+                    <thead><tr><th>姓名</th><th>部門</th><th>本期總時數</th></tr></thead>
+                    <tbody id="stat-table-body"></tbody>
+                </table>
+            </div>
+        </div>
 
-<h2>打卡狀態</h2>
+        <div class="management-grid">
+            <div class="card">
+                <h2>編輯員工資料</h2>
+                <div class="form-group"><label>公司名稱</label><input type="text" id="m-company" value="卓越企業集團"></div>
+                <div class="form-group"><label>員工編號 (ID)</label><input type="text" id="m-id" placeholder="ID 不可重複"></div>
+                <div class="form-group"><label>員工姓名</label><input type="text" id="m-name" placeholder="輸入姓名"></div>
+                <div class="form-group"><label>所屬部門</label><input type="text" id="m-dept" value="技術部"></div>
+                <div class="form-group"><label>班別</label><select id="m-shift-select"></select></div>
+                <div class="form-group"><label>上傳大頭照 (會自動存檔)</label><input type="file" id="m-photo" accept="image/*" onchange="processAndPreviewPhoto()"></div>
+                <input type="hidden" id="m-photo-base64">
+                <button class="primary-btn" onclick="saveAndDraw()">💾 儲存員工資料</button>
+                <button class="secondary-btn" onclick="clearForm()">🆕 清除表單</button>
+            </div>
+            <div class="card">
+                <h2>工牌預覽</h2>
+                <div style="text-align:center; background:#eee; padding:20px 0; border-radius:15px; margin:10px 0;">
+                    <canvas id="badge-canvas" width="1080" height="1728"></canvas>
+                </div>
+                <button class="accent-btn" onclick="downloadBadge()">📥 下載高清 PNG</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>員工名單管理</h2>
+            <div style="overflow-x:auto;">
+                <table class="list-table">
+                    <thead><tr><th>ID</th><th>姓名</th><th>操作</th></tr></thead>
+                    <tbody id="staff-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-<div class="status-toggle">
-<button id="btn-in" class="status-btn active-in" onclick="setStatus('上班')">☀ 上班</button>
-<button id="btn-out" class="status-btn" onclick="setStatus('下班')">🌙 下班</button>
-</div>
-
-<div id="reader"></div>
-
-<div id="scan-feedback" style="margin-top:15px;padding:15px;text-align:center;background:#f1f5f9;border-radius:12px;font-weight:bold">
-請掃描員工 QR Code
-</div>
-
-<button id="continue-btn" style="display:none" class="accent-btn" onclick="startScanner()">🔄 繼續掃描</button>
-
-</div>
-
-<div class="card">
-<h2>今日紀錄</h2>
-
-<table class="list-table">
-<thead>
-<tr>
-<th>姓名</th>
-<th>時間</th>
-<th>狀態</th>
-</tr>
-</thead>
-
-<tbody id="log-body"></tbody>
-
-</table>
-</div>
-</div>
-
-<div id="page-make" class="page">
-<div class="card">
-
-<h2 id="period-display">本期工時統計</h2>
-
-<table class="list-table">
-
-<thead>
-<tr>
-<th>姓名</th>
-<th>部門</th>
-<th>工時</th>
-</tr>
-</thead>
-
-<tbody id="stat-table-body"></tbody>
-
-</table>
-
-</div>
-</div>
-
+    <div id="page-config" class="page">
+        <div class="card">
+            <h2>📅 結算週期設定</h2>
+            <label>每月結算起始日 (1-31)</label>
+            <input type="number" id="config-cycle-day" min="1" max="31" placeholder="例如: 1">
+            <button class="primary-btn" onclick="updateCycleSetting()" style="margin-top:10px;">💾 套用結算日</button>
+        </div>
+        <div class="card">
+            <h2>🔐 密碼變更</h2>
+            <input type="password" id="new-pass" placeholder="輸入新管理密碼">
+            <button class="secondary-btn" onclick="updatePassword()" style="margin-top:10px;">💾 儲存新密碼</button>
+        </div>
+        <div class="card">
+            <h2>📊 系統備份</h2>
+            <button class="accent-btn" onclick="fullExport()">📤 匯出全系統備份 (含設定與密碼)</button>
+            <button class="secondary-btn" onclick="document.getElementById('full-import-file').click()">📥 匯入還原備份</button>
+            <input type="file" id="full-import-file" style="display:none" accept=".xlsx" onchange="fullImport(this)">
+        </div>
+        <div class="card">
+            <h2>⚙️ 班別配置</h2>
+            <input type="text" id="shift-name" placeholder="班別名稱">
+            <div style="display:flex; gap:10px; margin-bottom:10px;"><input type="time" id="shift-start"> <input type="time" id="shift-end"></div>
+            <button class="primary-btn" onclick="addShift()">＋ 新增班別</button>
+            <table class="list-table"><tbody id="shift-list-body"></tbody></table>
+        </div>
+    </div>
 </div>
 
 <script>
+    let logs = JSON.parse(localStorage.getItem('hr_logs_v20')) || [];
+    let staffDb = JSON.parse(localStorage.getItem('staff_db_v20')) || [];
+    let shifts = JSON.parse(localStorage.getItem('hr_shifts_v20')) || [{name:"全日班", start:"09:00", end:"18:00"}];
+    let adminPass = localStorage.getItem('hr_pass_v20') || "1234";
+    let cycleDay = parseInt(localStorage.getItem('hr_cycle_day')) || 1; 
+    let isAuthed = false;
+    let scanner;
+    let currentStatus = "上班"; 
 
-let logs = JSON.parse(localStorage.getItem('hr_logs_v20')) || [];
-let staffDb = JSON.parse(localStorage.getItem('staff_db_v20')) || [];
-let cycleDay = 1;
+    // --- 圖片處理 ---
+    function processAndPreviewPhoto() {
+        const file = document.getElementById('m-photo').files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 300;
+                const scale = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                document.getElementById('m-photo-base64').value = base64;
+                drawBadge();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 
-let scanner;
-let currentStatus="上班";
+    function clearForm() {
+        document.getElementById('m-id').value = "";
+        document.getElementById('m-name').value = "";
+        document.getElementById('m-photo-base64').value = "";
+        document.getElementById('m-photo').value = "";
+        drawBadge();
+    }
 
-function setStatus(s){
-currentStatus=s;
-document.getElementById('btn-in').classList.toggle('active-in',s==="上班");
-document.getElementById('btn-out').classList.toggle('active-out',s==="下班");
-}
+    // --- 權限與設定 ---
+    function setStatus(status) {
+        currentStatus = status;
+        document.getElementById('btn-in').classList.toggle('active-in', status === '上班');
+        document.getElementById('btn-out').classList.toggle('active-out', status === '下班');
+    }
 
-function showPage(p){
-document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
-document.getElementById('page-'+p).classList.add('active');
-if(p==="scan")startScanner();else stopScanner();
-if(p==="make")calculateStats();
-renderLogs();
-}
+    function checkAuth(target) {
+        if(isAuthed) { showPage(target); return; }
+        const pw = prompt("🔐 管理員授權：");
+        if(pw === adminPass) { isAuthed = true; showPage(target); }
+        else if(pw !== null) alert("❌ 密碼錯誤");
+    }
 
-async function startScanner(){
+    function updatePassword() {
+        const np = document.getElementById('new-pass').value;
+        if(np.length < 4) return alert("密碼太短");
+        adminPass = np; localStorage.setItem('hr_pass_v20', adminPass); alert("✅ 密碼已更新");
+    }
 
-document.getElementById('continue-btn').style.display="none";
+    function updateCycleSetting() {
+        const val = parseInt(document.getElementById('config-cycle-day').value);
+        if(isNaN(val) || val < 1 || val > 31) return alert("請輸入有效的日期 (1-31)");
+        cycleDay = val;
+        localStorage.setItem('hr_cycle_day', cycleDay);
+        alert(`✅ 結算日已更新為每月 ${cycleDay} 日`);
+        calculateStats();
+    }
 
-if(!scanner)scanner=new Html5Qrcode("reader");
+    // --- 核心備份功能 (升級版) ---
+    function fullExport() {
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0];
 
-try{
+        const wb = XLSX.utils.book_new();
+        
+        // 1. 員工資料
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
+        // 2. 打卡紀錄
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
+        // 3. 班別設定
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(shifts), "班別配置");
+        // 4. 系統核心設定 (密碼與結算日)
+        const sysSettings = [{ key: "adminPass", value: adminPass }, { key: "cycleDay", value: cycleDay }];
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sysSettings), "系統設定");
+        
+        XLSX.writeFile(wb, `考勤全系統備份_${dateString}.xlsx`);
+    }
 
-await scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(id)=>{
+    function fullImport(input) {
+        const file = input.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+                
+                // 還原員工與紀錄
+                staffDb = XLSX.utils.sheet_to_json(wb.Sheets["員工"]) || [];
+                logs = XLSX.utils.sheet_to_json(wb.Sheets["紀錄"]) || [];
+                
+                // 還原班別
+                if(wb.Sheets["班別配置"]) {
+                    shifts = XLSX.utils.sheet_to_json(wb.Sheets["班別配置"]);
+                }
 
-const staff=staffDb.find(s=>s.id===id);
-const name=staff?staff.name:id;
+                // 還原系統設定 (密碼與結算日)
+                if(wb.Sheets["系統設定"]) {
+                    const settings = XLSX.utils.sheet_to_json(wb.Sheets["系統設定"]);
+                    settings.forEach(s => {
+                        if(s.key === "adminPass") adminPass = String(s.value);
+                        if(s.key === "cycleDay") cycleDay = parseInt(s.value);
+                    });
+                }
 
-logs.unshift({
-uid:Date.now(),
-name,
-time:Date.now(),
-type:currentStatus
-});
+                // 儲存至 LocalStorage
+                localStorage.setItem('staff_db_v20', JSON.stringify(staffDb));
+                localStorage.setItem('hr_logs_v20', JSON.stringify(logs));
+                localStorage.setItem('hr_shifts_v20', JSON.stringify(shifts));
+                localStorage.setItem('hr_pass_v20', adminPass);
+                localStorage.setItem('hr_cycle_day', cycleDay);
 
-localStorage.setItem('hr_logs_v20',JSON.stringify(logs));
+                alert("✅ 全系統還原成功！");
+                location.reload();
+            } catch(err) { 
+                console.error(err);
+                alert("❌ 匯入失敗，請檢查檔案格式"); 
+            }
+        }; 
+        reader.readAsArrayBuffer(file);
+    }
 
-renderLogs();
+    // --- 其他邏輯 ---
+    function calculateStats() {
+        const now = new Date();
+        let startYear = now.getFullYear();
+        let startMonth = now.getMonth();
+        if (now.getDate() < cycleDay) startMonth -= 1;
+        const periodStart = new Date(startYear, startMonth, cycleDay, 0, 0, 0);
+        document.getElementById('period-display').innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
+        const stats = {};
+        staffDb.forEach(s => stats[s.id] = { name: s.name, dept: s.dept || "-", totalMs: 0, lastIn: null });
+        const periodLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
+        periodLogs.forEach(l => {
+            const staff = staffDb.find(s => s.name === l.name);
+            const sId = staff ? staff.id : l.name;
+            if(!stats[sId]) stats[sId] = { name: l.name, dept: "-", totalMs: 0, lastIn: null };
+            if(l.type === "上班") stats[sId].lastIn = new Date(l.time).getTime();
+            else if(l.type === "下班" && stats[sId].lastIn) {
+                stats[sId].totalMs += (new Date(l.time).getTime() - stats[sId].lastIn);
+                stats[sId].lastIn = null;
+            }
+        });
+        document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `<tr><td><b>${s.name}</b></td><td>${s.dept}</td><td><span class="stat-badge">${(s.totalMs / 3600000).toFixed(1)} 小時</span></td></tr>`).join('');
+    }
 
-const f=document.getElementById('scan-feedback');
+    async function drawBadge() {
+        const canvas = document.getElementById('badge-canvas');
+        const ctx = canvas.getContext('2d');
+        const comp = document.getElementById('m-company').value || "COMPANY";
+        const id = (document.getElementById('m-id').value || "ID-000").toUpperCase();
+        const name = document.getElementById('m-name').value || "姓名";
+        const shift = document.getElementById('m-shift-select').value || "班別";
+        const dept = document.getElementById('m-dept').value || "部門";
+        const photoBase64 = document.getElementById('m-photo-base64').value;
+        const grad = ctx.createLinearGradient(0, 0, 0, 1728);
+        grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1728);
+        ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; 
+        ctx.fillText(comp, 540, 180);
+        const photoY = 600;
+        ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 20;
+        ctx.beginPath(); ctx.arc(540, photoY, 310, 0, Math.PI*2); ctx.stroke();
+        if(photoBase64) {
+            const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photoBase64; });
+            ctx.save(); ctx.beginPath(); ctx.arc(540, photoY, 300, 0, Math.PI*2); ctx.clip();
+            const ratio = Math.max(600/img.width, 600/img.height);
+            ctx.drawImage(img, 540 - (img.width*ratio)/2, photoY - (img.height*ratio)/2, img.width*ratio, img.height*ratio);
+            ctx.restore();
+        } else { ctx.fillStyle = "#475569"; ctx.beginPath(); ctx.arc(540, photoY, 300, 0, Math.PI*2); ctx.fill(); }
+        ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
+        ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
+        ctx.fillStyle = "white"; ctx.font = "bold 50px Arial"; ctx.fillText(id, 540, 1260);
+        const qrBlockY = 1350; ctx.fillStyle = "rgba(255,255,255,0.06)";
+        roundRect(ctx, 190, qrBlockY, 700, 300, 40); ctx.fill();
+        const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
+        const cellSize = 10.5; const mCount = qr.getModuleCount();
+        const startX = 540 - (mCount * cellSize) / 2;
+        ctx.fillStyle = "white"; const qrTop = qrBlockY + (300 - (mCount * cellSize)) / 2; 
+        for (let r = 0; r < mCount; r++) { for (let c = 0; c < mCount; c++) if (qr.isDark(r, c)) ctx.fillRect(startX + c * cellSize, qrTop + r * cellSize, cellSize, cellSize); }
+    }
 
-f.innerText=`✅ ${name} ${currentStatus}成功`;
+    function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
 
-document.getElementById('continue-btn').style.display="block";
+    function showPage(p) {
+        document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.getElementById('nav-'+p).classList.add('active');
+        if(p === 'scan') startScanner(); else stopScanner();
+        if(p === 'make') { calculateStats(); renderStaff(); }
+        if(p === 'config') document.getElementById('config-cycle-day').value = cycleDay;
+        updateShiftUI(); renderLogs();
+    }
 
-stopScanner();
+    function saveAndDraw() {
+        const id = document.getElementById('m-id').value.trim();
+        const name = document.getElementById('m-name').value.trim();
+        if(!id || !name) return alert("編號與姓名不能為空");
+        const idx = staffDb.findIndex(s => s.id === id);
+        const data = { id, name, photo: document.getElementById('m-photo-base64').value, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
+        if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
+        try { localStorage.setItem('staff_db_v20', JSON.stringify(staffDb)); alert("✅ 儲存成功"); } catch(e) { alert("❌ 空間不足！"); }
+        renderStaff(); calculateStats(); drawBadge();
+    }
 
-});
+    function renderStaff() {
+        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td><b>${s.name}</b></td><td><div class="action-btns"><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">載入</button><button class="danger-btn mini-btn" onclick="deleteStaff('${s.id}')">🗑️</button></div></td></tr>`).join('');
+    }
 
-}catch(e){}
+    function deleteStaff(id) { if(confirm(`確定刪除？`)) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_db_v20', JSON.stringify(staffDb)); renderStaff(); } }
 
-}
+    function loadStaff(id) {
+        const s = staffDb.find(x => x.id === id);
+        document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name;
+        document.getElementById('m-company').value = s.comp || ""; document.getElementById('m-dept').value = s.dept; 
+        document.getElementById('m-shift-select').value = s.shift; document.getElementById('m-photo-base64').value = s.photo || "";
+        drawBadge();
+    }
 
-function stopScanner(){
-if(scanner&&scanner.isScanning)scanner.stop();
-}
-
-function renderLogs(){
-
-document.getElementById('log-body').innerHTML=
-logs.slice(0,15).map(l=>`
-
-<tr>
-<td>${l.name}</td>
-<td>${new Date(l.time).toLocaleTimeString()}</td>
-<td style="color:${l.type==='上班'?'#10b981':'#ef4444'};font-weight:bold">
-${l.type}
-</td>
-</tr>
-
-`).join('');
-
-}
-
-function calculateStats(){
-
-const stats={};
-
-staffDb.forEach(s=>{
-stats[s.id]={name:s.name,dept:s.dept||"-",normal:0,overtime:0,lastIn:null};
-});
-
-const sorted=[...logs].sort((a,b)=>a.time-b.time);
-
-sorted.forEach(l=>{
-
-const staff=staffDb.find(s=>s.name===l.name);
-if(!staff)return;
-
-const stat=stats[staff.id];
-
-if(l.type==="上班"){
-stat.lastIn=l.time;
-}
-
-if(l.type==="下班"&&stat.lastIn){
-
-const hours=(l.time-stat.lastIn)/3600000;
-
-if(hours<=8){
-
-stat.normal+=hours;
-
-}else{
-
-stat.normal+=8;
-stat.overtime+=hours-8;
-
-}
-
-stat.lastIn=null;
-
-}
-
-});
-
-document.getElementById('stat-table-body').innerHTML=
-Object.values(stats).map(s=>{
-
-const total=s.normal+s.overtime;
-
-return`
-<tr>
-<td><b>${s.name}</b></td>
-<td>${s.dept}</td>
-<td>
-
-<span class="stat-badge">${total.toFixed(1)} 小時</span>
-
-<br>
-
-<small>
-正常:${s.normal.toFixed(1)} / 加班:${s.overtime.toFixed(1)}
-</small>
-
-</td>
-</tr>
-`;
-
-}).join('');
-
-}
-
-window.onload=()=>{
-showPage('scan');
-};
-
+    async function startScanner() {
+        document.getElementById('continue-btn').style.display = "none";
+        if(!scanner) scanner = new Html5Qrcode("reader");
+        try { await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, (id) => {
+            const staff = staffDb.find(s => s.id === id);
+            const name = staff ? staff.name : id;
+            logs.unshift({ uid: Date.now(), name, time: new Date().toLocaleString(), type: currentStatus });
+            localStorage.setItem('hr_logs_v20', JSON.stringify(logs)); 
+            renderLogs();
+            const f = document.getElementById('scan-feedback');
+            f.innerText = `✅ ${name} ${currentStatus}成功`;
+            f.style.background = currentStatus === "上班" ? "#d1fae5" : "#fee2e2";
+            document.getElementById('continue-btn').style.display = "block";
+            stopScanner();
+        }); } catch(e){}
+    }
+    function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
+    function renderLogs() { document.getElementById('log-body').innerHTML = logs.slice(0,15).map(l => `<tr><td>${l.name}</td><td>${l.time.split(' ')[1] || l.time}</td><td><span style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</span></td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">刪除</button></td></tr>`).join(''); }
+    function deleteLog(uid) { if(confirm("確定刪除紀錄？")) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v20', JSON.stringify(logs)); renderLogs(); } }
+    function addShift() {
+        const name = document.getElementById('shift-name').value.trim();
+        const start = document.getElementById('shift-start').value;
+        const end = document.getElementById('shift-end').value;
+        if(!name || !start || !end) return alert("請填寫完整資訊");
+        shifts.push({name, start, end});
+        localStorage.setItem('hr_shifts_v20', JSON.stringify(shifts));
+        updateShiftUI();
+    }
+    function updateShiftUI() {
+        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v20', JSON.stringify(shifts));updateShiftUI();" style="width:auto;padding:5px 10px;background:#fee2e2;color:#ef4444;border-radius:5px;">×</button></td></tr>`).join('');
+        document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+    }
+    function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
+    window.onload = () => { showPage('scan'); drawBadge(); };
 </script>
-
 </body>
 </html>
