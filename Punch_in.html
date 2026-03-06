@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 v2.5</title>
+    <title>打卡系統 v2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -37,8 +37,7 @@
         .list-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .list-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f1f5f9; color: #94a3b8; }
         .list-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; }
-        .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
+        #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; min-height: 250px; }
         .stat-badge { background: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; margin: 2px; }
         .ot-badge { background: #fee2e2; color: #b91c1c; }
     </style>
@@ -87,14 +86,14 @@
         <div class="management-grid">
             <div class="card">
                 <h2>編輯員工資料</h2>
-                <div class="form-group"><label>公司名稱</label><input type="text" id="m-company" value="卓越企業集團"></div>
-                <div class="form-group"><label>員工 ID</label><input type="text" id="m-id" placeholder="ID 不可重複"></div>
-                <div class="form-group"><label>姓名</label><input type="text" id="m-name"></div>
-                <div class="form-group"><label>部門</label><input type="text" id="m-dept" value="技術部"></div>
-                <div class="form-group"><label>班別 (影響加班計算)</label><select id="m-shift-select"></select></div>
-                <div class="form-group"><label>上傳大頭照</label><input type="file" id="m-photo" accept="image/*" onchange="processAndPreviewPhoto()"></div>
+                <div class="form-group"><label>公司名稱</label><input type="text" id="m-company" value="卓越企業集團" oninput="drawBadge()"></div>
+                <div class="form-group"><label>員工 ID</label><input type="text" id="m-id" oninput="drawBadge()"></div>
+                <div class="form-group"><label>姓名</label><input type="text" id="m-name" oninput="drawBadge()"></div>
+                <div class="form-group"><label>部門</label><input type="text" id="m-dept" value="技術部" oninput="drawBadge()"></div>
+                <div class="form-group"><label>班別</label><select id="m-shift-select" onchange="drawBadge()"></select></div>
+                <div class="form-group"><label>大頭照</label><input type="file" id="m-photo" accept="image/*" onchange="processAndPreviewPhoto()"></div>
                 <input type="hidden" id="m-photo-base64">
-                <button class="primary-btn" onclick="saveAndDraw()">💾 儲存員工</button>
+                <button class="primary-btn" onclick="saveStaff()">💾 儲存員工</button>
                 <button class="secondary-btn" onclick="clearForm()">🆕 清除</button>
             </div>
             <div class="card">
@@ -111,13 +110,13 @@
 
     <div id="page-config" class="page">
         <div class="card">
-            <h2>📅 結算週期 (每月第幾日開始)</h2>
+            <h2>📅 結算日設定</h2>
             <input type="number" id="config-cycle-day" min="1" max="31">
             <button class="primary-btn" onclick="updateCycleSetting()" style="margin-top:10px;">💾 套用</button>
         </div>
         <div class="card">
-            <h2>⚙️ 班別與工時標準</h2>
-            <input type="text" id="shift-name" placeholder="名稱 (如: 日班)">
+            <h2>⚙️ 班別配置</h2>
+            <input type="text" id="shift-name" placeholder="名稱">
             <div style="display:flex; gap:10px; margin:10px 0;"><input type="time" id="shift-start"> <input type="time" id="shift-end"></div>
             <button class="primary-btn" onclick="addShift()">＋ 新增班別</button>
             <table class="list-table"><tbody id="shift-list-body"></tbody></table>
@@ -127,14 +126,11 @@
             <button class="accent-btn" onclick="fullExport()">📤 完整備份匯出</button>
             <button class="secondary-btn" onclick="document.getElementById('full-import-file').click()">📥 還原備份</button>
             <input type="file" id="full-import-file" style="display:none" accept=".xlsx" onchange="fullImport(this)">
-            <input type="password" id="new-pass" placeholder="新管理密碼" style="margin-top:20px;">
-            <button class="secondary-btn" onclick="updatePassword()">🔐 變更密碼</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 數據結構
     let logs = JSON.parse(localStorage.getItem('hr_logs_v21')) || [];
     let staffDb = JSON.parse(localStorage.getItem('staff_db_v21')) || [];
     let shifts = JSON.parse(localStorage.getItem('hr_shifts_v21')) || [{name:"全日班", start:"09:00", end:"18:00"}];
@@ -142,59 +138,14 @@
     let cycleDay = parseInt(localStorage.getItem('hr_cycle_day')) || 1;
     let isAuthed = false, scanner, currentStatus = "上班";
 
-    // --- 核心：精確時數與加班計算 ---
-    function calculateStats() {
-        const now = new Date();
-        let sYear = now.getFullYear();
-        let sMonth = now.getMonth();
-        if (now.getDate() < cycleDay) sMonth--;
-        const periodStart = new Date(sYear, sMonth, cycleDay, 0, 0, 0);
-        
-        document.getElementById('period-display').innerText = `本期統計 (${periodStart.toLocaleDateString()} 起)`;
-        
-        const stats = {};
-        staffDb.forEach(s => {
-            stats[s.id] = { name: s.name, dept: s.dept||"-", regMs: 0, otMs: 0, lastIn: null, shift: shifts.find(sh=>sh.name===s.shift) };
-        });
+    // --- 初始化：開啟網頁即啟動掃描器 ---
+    window.onload = () => {
+        updateShiftUI();
+        renderLogs();
+        drawBadge();
+        startScanner(); // 啟動掃描
+    };
 
-        // 僅處理本期且按時間排序
-        const pLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
-
-        pLogs.forEach(l => {
-            const sId = staffDb.find(s=>s.name===l.name)?.id || l.name;
-            if(!stats[sId]) return;
-
-            if(l.type === "上班") {
-                stats[sId].lastIn = new Date(l.time).getTime();
-            } else if(l.type === "下班" && stats[sId].lastIn) {
-                const workMs = new Date(l.time).getTime() - stats[sId].lastIn;
-                
-                // 計算該班別的標準工時 (預設8小時)
-                let stdMs = 8 * 3600000; 
-                if(stats[sId].shift) {
-                    const s = stats[sId].shift;
-                    stdMs = new Date(`2000/1/1 ${s.end}`) - new Date(`2000/1/1 ${s.start}`);
-                    if(stdMs < 0) stdMs += 86400000; // 處理跨夜班別
-                }
-
-                if(workMs > stdMs) {
-                    stats[sId].regMs += stdMs;
-                    stats[sId].otMs += (workMs - stdMs);
-                } else {
-                    stats[sId].regMs += workMs;
-                }
-                stats[sId].lastIn = null;
-            }
-        });
-
-        document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
-            <tr><td><b>${s.name}</b></td><td>${s.dept}</td>
-            <td><span class="stat-badge">正: ${(s.regMs/3600000).toFixed(1)}h</span>
-            ${s.otMs>0 ? `<span class="stat-badge ot-badge">加: ${(s.otMs/3600000).toFixed(1)}h</span>` : ''}</td></tr>
-        `).join('');
-    }
-
-    // --- 打卡功能 ---
     async function startScanner() {
         document.getElementById('continue-btn').style.display = "none";
         if(!scanner) scanner = new Html5Qrcode("reader");
@@ -202,7 +153,6 @@
             await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, (id) => {
                 const staff = staffDb.find(s => s.id === id);
                 const name = staff ? staff.name : id;
-                // 存檔統一用 ISOString
                 logs.unshift({ uid: Date.now(), name, time: new Date().toISOString(), type: currentStatus });
                 localStorage.setItem('hr_logs_v21', JSON.stringify(logs));
                 renderLogs();
@@ -212,27 +162,103 @@
                 document.getElementById('continue-btn').style.display = "block";
                 stopScanner();
             });
-        } catch(e){}
+        } catch(e) { console.log("Scanner start failed", e); }
     }
+
     function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
 
-    function renderLogs() {
-        document.getElementById('log-body').innerHTML = logs.slice(0,15).map(l => {
-            const t = new Date(l.time);
-            return `<tr><td>${l.name}</td><td>${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</td><td><span style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</span></td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">刪除</button></td></tr>`;
-        }).join('');
-    }
-
-    // --- 其餘功能與 UI 控制 ---
     function showPage(p) {
         document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(e => e.classList.remove('active'));
         document.getElementById('page-'+p).classList.add('active');
         document.getElementById('nav-'+p).classList.add('active');
+        
         if(p === 'scan') startScanner(); else stopScanner();
-        if(p === 'make') { calculateStats(); renderStaff(); updateShiftUI(); }
+        if(p === 'make') { calculateStats(); renderStaff(); updateShiftUI(); drawBadge(); }
         if(p === 'config') document.getElementById('config-cycle-day').value = cycleDay;
-        renderLogs();
+    }
+
+    // --- 工牌繪製：修復部門與班別顯示 ---
+    async function drawBadge() {
+        const cvs = document.getElementById('badge-canvas'), ctx = cvs.getContext('2d');
+        const comp = document.getElementById('m-company').value || "卓越企業集團";
+        const name = document.getElementById('m-name').value || "姓名";
+        const id = (document.getElementById('m-id').value || "ID").toUpperCase();
+        const dept = document.getElementById('m-dept').value || "部門";
+        const shift = document.getElementById('m-shift-select').value || "班別";
+
+        // 背景
+        ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
+        
+        // 公司名稱
+        ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial";
+        ctx.fillText(comp, 540, 150);
+
+        // 姓名
+        ctx.fillStyle = "white"; ctx.font = "bold 120px Arial"; ctx.fillText(name, 540, 1000);
+        
+        // 部門與班別 (修正顯示點)
+        ctx.font = "60px Arial"; ctx.fillStyle = "#94a3b8";
+        ctx.fillText(`${dept} • ${shift}`, 540, 1100);
+        
+        // ID
+        ctx.font = "bold 50px Arial"; ctx.fillStyle = "#3b82f6";
+        ctx.fillText(id, 540, 1180);
+
+        // QR Code
+        const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
+        const cellSize = 12, mCount = qr.getModuleCount(), startX = 540 - (mCount*cellSize)/2;
+        ctx.fillStyle = "white";
+        for(let r=0; r<mCount; r++) for(let c=0; c<mCount; c++) if(qr.isDark(r,c)) ctx.fillRect(startX+c*cellSize, 1280+r*cellSize, cellSize, cellSize);
+
+        // 照片
+        const photo = document.getElementById('m-photo-base64').value;
+        if(photo) {
+            const img = new Image(); img.src = photo;
+            img.onload = () => {
+                ctx.save(); ctx.beginPath(); ctx.arc(540, 500, 320, 0, Math.PI*2); ctx.clip();
+                ctx.drawImage(img, 220, 180, 640, 640); ctx.restore();
+            };
+        } else {
+            ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(540, 500, 320, 0, Math.PI*2); ctx.fill();
+        }
+    }
+
+    // --- 時數統計邏輯 (保留加班累計) ---
+    function calculateStats() {
+        const now = new Date();
+        let sMonth = now.getMonth();
+        if (now.getDate() < cycleDay) sMonth--;
+        const periodStart = new Date(now.getFullYear(), sMonth, cycleDay, 0, 0, 0);
+        document.getElementById('period-display').innerText = `本期統計 (${periodStart.toLocaleDateString()} 起)`;
+        const stats = {};
+        staffDb.forEach(s => stats[s.id] = { name: s.name, dept: s.dept||"-", regMs: 0, otMs: 0, lastIn: null, shift: shifts.find(sh=>sh.name===s.shift) });
+        const pLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
+        pLogs.forEach(l => {
+            const sId = staffDb.find(s=>s.name===l.name)?.id || l.name;
+            if(!stats[sId]) return;
+            if(l.type === "上班") stats[sId].lastIn = new Date(l.time).getTime();
+            else if(l.type === "下班" && stats[sId].lastIn) {
+                const workMs = new Date(l.time).getTime() - stats[sId].lastIn;
+                let stdMs = 8 * 3600000;
+                if(stats[sId].shift) {
+                    const s = stats[sId].shift;
+                    stdMs = new Date(`2000/1/1 ${s.end}`) - new Date(`2000/1/1 ${s.start}`);
+                    if(stdMs < 0) stdMs += 86400000;
+                }
+                if(workMs > stdMs) { stats[sId].regMs += stdMs; stats[sId].otMs += (workMs - stdMs); }
+                else { stats[sId].regMs += workMs; }
+                stats[sId].lastIn = null;
+            }
+        });
+        document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `<tr><td><b>${s.name}</b></td><td>${s.dept}</td><td><span class="stat-badge">正: ${(s.regMs/3600000).toFixed(1)}h</span>${s.otMs>0?`<span class="stat-badge ot-badge">加: ${(s.otMs/3600000).toFixed(1)}h</span>`:''}</td></tr>`).join('');
+    }
+
+    // --- 其他輔助功能 ---
+    function setStatus(s) {
+        currentStatus = s;
+        document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
+        document.getElementById('btn-out').classList.toggle('active-out', s === '下班');
     }
 
     function checkAuth(target) {
@@ -242,13 +268,7 @@
         else if(pw !== null) alert("密碼錯誤");
     }
 
-    function setStatus(s) {
-        currentStatus = s;
-        document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
-        document.getElementById('btn-out').classList.toggle('active-out', s === '下班');
-    }
-
-    function saveAndDraw() {
+    function saveStaff() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
         if(!id || !name) return alert("ID與姓名必填");
@@ -256,37 +276,8 @@
         const idx = staffDb.findIndex(s => s.id === id);
         if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
         localStorage.setItem('staff_db_v21', JSON.stringify(staffDb));
-        alert("✅ 儲存成功"); renderStaff(); calculateStats(); drawBadge();
+        alert("✅ 儲存成功"); renderStaff(); calculateStats();
     }
-
-    function addShift() {
-        const name = document.getElementById('shift-name').value;
-        const start = document.getElementById('shift-start').value;
-        const end = document.getElementById('shift-end').value;
-        if(!name || !start || !end) return alert("請填寫完整");
-        shifts.push({name, start, end});
-        localStorage.setItem('hr_shifts_v21', JSON.stringify(shifts));
-        updateShiftUI();
-    }
-
-    function updateShiftUI() {
-        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v21',JSON.stringify(shifts));updateShiftUI();">×</button></td></tr>`).join('');
-        document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-    }
-
-    function updateCycleSetting() {
-        cycleDay = parseInt(document.getElementById('config-cycle-day').value);
-        localStorage.setItem('hr_cycle_day', cycleDay);
-        alert("結算日已更新");
-    }
-
-    function deleteLog(uid) { if(confirm("刪除此紀錄？")) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v21', JSON.stringify(logs)); renderLogs(); calculateStats(); } }
-
-    function renderStaff() {
-        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td><b>${s.name}</b></td><td><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">載入</button> <button class="danger-btn mini-btn" onclick="deleteStaff('${s.id}')">🗑️</button></td></tr>`).join('');
-    }
-
-    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_db_v21', JSON.stringify(staffDb)); renderStaff(); } }
 
     function loadStaff(id) {
         const s = staffDb.find(x => x.id === id);
@@ -295,23 +286,29 @@
         document.getElementById('m-photo-base64').value = s.photo || ""; drawBadge();
     }
 
-    function fullExport() {
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(shifts), "班別");
-        XLSX.writeFile(wb, `考勤系統備份_${new Date().toLocaleDateString()}.xlsx`);
+    function renderStaff() {
+        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td><b>${s.name}</b></td><td><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">載入</button></td></tr>`).join('');
     }
 
-    // 工牌繪製與圖片處理 (保持原樣)
+    function renderLogs() {
+        document.getElementById('log-body').innerHTML = logs.slice(0,15).map(l => {
+            const t = new Date(l.time);
+            return `<tr><td>${l.name}</td><td>${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</td><td><span style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</span></td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">刪除</button></td></tr>`;
+        }).join('');
+    }
+
+    function updateShiftUI() {
+        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v21',JSON.stringify(shifts));updateShiftUI();">×</button></td></tr>`).join('');
+        document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+    }
+
     function processAndPreviewPhoto() {
         const file = document.getElementById('m-photo').files[0];
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                const cvs = document.createElement('canvas');
-                cvs.width = 300; cvs.height = 300;
+                const cvs = document.createElement('canvas'); cvs.width = 300; cvs.height = 300;
                 cvs.getContext('2d').drawImage(img, 0, 0, 300, 300);
                 document.getElementById('m-photo-base64').value = cvs.toDataURL('image/jpeg', 0.7);
                 drawBadge();
@@ -321,26 +318,9 @@
         reader.readAsDataURL(file);
     }
 
-    async function drawBadge() {
-        const cvs = document.getElementById('badge-canvas'), ctx = cvs.getContext('2d');
-        const name = document.getElementById('m-name').value || "姓名", id = (document.getElementById('m-id').value || "ID").toUpperCase();
-        ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
-        ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.font = "bold 120px Arial"; ctx.fillText(name, 540, 1050);
-        ctx.font = "60px Arial"; ctx.fillStyle = "#94a3b8"; ctx.fillText(id, 540, 1150);
-        const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
-        const cellSize = 12, mCount = qr.getModuleCount(), startX = 540 - (mCount*cellSize)/2;
-        ctx.fillStyle = "white";
-        for(let r=0; r<mCount; r++) for(let c=0; c<mCount; c++) if(qr.isDark(r,c)) ctx.fillRect(startX+c*cellSize, 1250+r*cellSize, cellSize, cellSize);
-        const photo = document.getElementById('m-photo-base64').value;
-        if(photo) {
-            const img = new Image(); img.src = photo;
-            img.onload = () => { ctx.save(); ctx.beginPath(); ctx.arc(540, 550, 300, 0, Math.PI*2); ctx.clip(); ctx.drawImage(img, 240, 250, 600, 600); ctx.restore(); };
-        }
-    }
-
+    function deleteLog(uid) { if(confirm("刪除此紀錄？")) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v21', JSON.stringify(logs)); renderLogs(); calculateStats(); } }
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
     function clearForm() { document.getElementById('m-id').value=""; document.getElementById('m-name').value=""; document.getElementById('m-photo-base64').value=""; drawBadge(); }
-    window.onload = () => { renderLogs(); updateShiftUI(); drawBadge(); };
 </script>
 </body>
 </html>
