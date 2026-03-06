@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 v2.3</title>
+    <title>打卡系統 v2.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -53,8 +53,6 @@
         
         .stat-badge { background: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
         .ot-badge { background: #fff1f2; color: #e11d48; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
-        .online-dot { color: var(--success); font-size: 12px; font-weight: normal; margin-left: 5px; animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -78,7 +76,7 @@
             <button id="continue-btn" style="display:none;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描</button>
         </div>
         <div class="card">
-            <h2>今日即時紀錄 (最近 10 筆)</h2>
+            <h2>今日即時紀錄</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>時間</th><th>狀態</th><th>操作</th></tr></thead>
@@ -93,7 +91,7 @@
             <h2 id="period-display">本期工時統計</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
-                    <thead><tr><th>姓名</th><th>部門</th><th>總工時 / 加班時數 (即時)</th></tr></thead>
+                    <thead><tr><th>姓名</th><th>部門</th><th>總工時 / 加班時數</th></tr></thead>
                     <tbody id="stat-table-body"></tbody>
                 </table>
             </div>
@@ -164,16 +162,16 @@
 </div>
 
 <script>
-    let logs = JSON.parse(localStorage.getItem('hr_logs_v23')) || [];
-    let staffDb = JSON.parse(localStorage.getItem('staff_db_v23')) || [];
-    let shifts = JSON.parse(localStorage.getItem('hr_shifts_v23')) || [{name:"全日班", start:"09:00", end:"18:00"}];
-    let adminPass = localStorage.getItem('hr_pass_v23') || "1234";
+    let logs = JSON.parse(localStorage.getItem('hr_logs_v20')) || [];
+    let staffDb = JSON.parse(localStorage.getItem('staff_db_v20')) || [];
+    let shifts = JSON.parse(localStorage.getItem('hr_shifts_v20')) || [{name:"全日班", start:"09:00", end:"18:00"}];
+    let adminPass = localStorage.getItem('hr_pass_v20') || "1234";
     let cycleDay = parseInt(localStorage.getItem('hr_cycle_day')) || 1; 
     let isAuthed = false;
     let scanner;
     let currentStatus = "上班"; 
 
-    // --- 核心功能：工時即時累計 ---
+    // --- 工時計算：含上班累計與加班累計 ---
     function calculateStats() {
         const now = new Date();
         let startYear = now.getFullYear();
@@ -195,56 +193,44 @@
                 totalMs: 0, 
                 overtimeMs: 0, 
                 stdDayMs: eTime - sTime,
-                lastIn: null,
-                isOnline: false
+                lastIn: null 
             };
         });
 
         const periodLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
         
         periodLogs.forEach(l => {
-            const staff = staffDb.find(s => s.name === l.name || s.id === l.name);
+            const staff = staffDb.find(s => s.name === l.name);
             const sId = staff ? staff.id : l.name;
             if(!stats[sId]) return;
 
             if(l.type === "上班") {
                 stats[sId].lastIn = new Date(l.time).getTime();
-                stats[sId].isOnline = true;
             } else if(l.type === "下班" && stats[sId].lastIn) {
                 const sessionMs = new Date(l.time).getTime() - stats[sId].lastIn;
                 stats[sId].totalMs += sessionMs;
+                
+                // 加班計算：若單次上班時長超過班別規定的標準時長
                 if(sessionMs > stats[sId].stdDayMs) {
                     stats[sId].overtimeMs += (sessionMs - stats[sId].stdDayMs);
                 }
                 stats[sId].lastIn = null;
-                stats[sId].isOnline = false;
-            }
-        });
-
-        // 處理正在上班中的即時工時
-        Object.keys(stats).forEach(id => {
-            if(stats[id].isOnline && stats[id].lastIn) {
-                const liveMs = now.getTime() - stats[id].lastIn;
-                stats[id].totalMs += liveMs;
-                if(liveMs > stats[id].stdDayMs) {
-                    stats[id].overtimeMs += (liveMs - stats[id].stdDayMs);
-                }
             }
         });
 
         document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
             <tr>
-                <td><b>${s.name}</b>${s.isOnline ? '<span class="online-dot">● 在職中</span>' : ''}</td>
+                <td><b>${s.name}</b></td>
                 <td>${s.dept}</td>
                 <td>
-                    <span class="stat-badge">累計: ${(s.totalMs / 3600000).toFixed(2)} H</span>
-                    <span class="ot-badge">加班: ${(s.overtimeMs / 3600000).toFixed(2)} H</span>
+                    <span class="stat-badge">累計: ${(s.totalMs / 3600000).toFixed(1)} H</span>
+                    <span class="ot-badge">加班: ${(s.overtimeMs / 3600000).toFixed(1)} H</span>
                 </td>
             </tr>
         `).join('');
     }
 
-    // --- 工牌繪製功能 ---
+    // --- 工牌繪製：修正員工編號顯示 ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
@@ -255,13 +241,16 @@
         const dept = document.getElementById('m-dept').value || "技術部";
         const photoBase64 = document.getElementById('m-photo-base64').value;
 
+        // 背景
         const grad = ctx.createLinearGradient(0, 0, 0, 1728);
         grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#1e293b');
         ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1728);
         
+        // 公司名
         ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; 
         ctx.fillText(comp, 540, 180);
 
+        // 照片區域
         const photoY = 600;
         ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 20;
         ctx.beginPath(); ctx.arc(540, photoY, 310, 0, Math.PI*2); ctx.stroke();
@@ -278,14 +267,20 @@
             ctx.fillStyle = "#475569"; ctx.beginPath(); ctx.arc(540, photoY, 300, 0, Math.PI*2); ctx.fill();
         }
 
+        // 姓名與部門
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
         ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
-        ctx.fillStyle = "#3b82f6"; ctx.font = "bold 55px Arial"; ctx.fillText("STAFF ID: " + id, 540, 1280); 
+        
+        // --- 核心修正：顯示員工編號 ---
+        ctx.fillStyle = "#3b82f6"; ctx.font = "bold 55px Arial";
+        ctx.fillText("STAFF ID: " + id, 540, 1280); 
 
+        // QR Code
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 10; const mCount = qr.getModuleCount();
         const startX = 540 - (mCount * cellSize) / 2;
         const qrTop = 1380;
+
         ctx.fillStyle = "white";
         for (let r = 0; r < mCount; r++) { 
             for (let c = 0; c < mCount; c++) {
@@ -294,7 +289,28 @@
         }
     }
 
-    // --- 介面控制與掃描 ---
+    // --- 照片處理 ---
+    function processAndPreviewPhoto() {
+        const file = document.getElementById('m-photo').files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX = 400;
+                const scale = Math.min(MAX/img.width, MAX/img.height);
+                canvas.width = img.width * scale; canvas.height = img.height * scale;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                document.getElementById('m-photo-base64').value = canvas.toDataURL('image/jpeg', 0.8);
+                drawBadge();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // --- 其他邏輯與系統維護 ---
     function setStatus(s) {
         currentStatus = s;
         document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
@@ -317,25 +333,6 @@
         renderLogs();
     }
 
-    async function startScanner() {
-        document.getElementById('continue-btn').style.display = "none";
-        if(!scanner) scanner = new Html5Qrcode("reader");
-        try { await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, (id) => {
-            const staff = staffDb.find(s => s.id === id);
-            const name = staff ? staff.name : "未知(" + id + ")";
-            logs.unshift({ uid: Date.now(), name, time: new Date().toLocaleString(), type: currentStatus });
-            localStorage.setItem('hr_logs_v23', JSON.stringify(logs)); 
-            renderLogs();
-            document.getElementById('scan-feedback').innerText = `✅ ${name} ${currentStatus}成功`;
-            document.getElementById('continue-btn').style.display = "block";
-            stopScanner();
-        }); } catch(e){}
-    }
-    function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
-
-    function renderLogs() { document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => `<tr><td>${l.name}</td><td>${l.time.split(' ')[1] || l.time}</td><td style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`).join(''); }
-    function deleteLog(uid) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v23', JSON.stringify(logs)); renderLogs(); }
-
     function saveAndDraw() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
@@ -343,7 +340,7 @@
         const data = { id, name, photo: document.getElementById('m-photo-base64').value, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
         const idx = staffDb.findIndex(s => s.id === id);
         if(idx > -1) staffDb[idx] = data; else staffDb.push(data);
-        localStorage.setItem('staff_db_v23', JSON.stringify(staffDb));
+        localStorage.setItem('staff_db_v20', JSON.stringify(staffDb));
         alert("儲存成功"); renderStaff(); calculateStats();
     }
 
@@ -358,7 +355,27 @@
         document.getElementById('m-shift-select').value = s.shift; document.getElementById('m-photo-base64').value = s.photo;
         drawBadge();
     }
-    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_db_v23', JSON.stringify(staffDb)); renderStaff(); } }
+
+    function deleteStaff(id) { if(confirm("確定刪除？")) { staffDb = staffDb.filter(s => s.id !== id); localStorage.setItem('staff_db_v20', JSON.stringify(staffDb)); renderStaff(); } }
+
+    async function startScanner() {
+        document.getElementById('continue-btn').style.display = "none";
+        if(!scanner) scanner = new Html5Qrcode("reader");
+        try { await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, (id) => {
+            const staff = staffDb.find(s => s.id === id);
+            const name = staff ? staff.name : "未知(" + id + ")";
+            logs.unshift({ uid: Date.now(), name, time: new Date().toLocaleString(), type: currentStatus });
+            localStorage.setItem('hr_logs_v20', JSON.stringify(logs)); 
+            renderLogs();
+            document.getElementById('scan-feedback').innerText = `✅ ${name} ${currentStatus}成功`;
+            document.getElementById('continue-btn').style.display = "block";
+            stopScanner();
+        }); } catch(e){}
+    }
+    function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
+
+    function renderLogs() { document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => `<tr><td>${l.name}</td><td>${l.time.split(' ')[1] || l.time}</td><td style="color:${l.type==='上班'?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`).join(''); }
+    function deleteLog(uid) { logs = logs.filter(l => l.uid !== uid); localStorage.setItem('hr_logs_v20', JSON.stringify(logs)); renderLogs(); }
 
     function addShift() {
         const name = document.getElementById('shift-name').value;
@@ -366,58 +383,35 @@
         const end = document.getElementById('shift-end').value;
         if(!name || !start || !end) return alert("請完整填寫");
         shifts.push({name, start, end});
-        localStorage.setItem('hr_shifts_v23', JSON.stringify(shifts));
+        localStorage.setItem('hr_shifts_v20', JSON.stringify(shifts));
         updateShiftUI();
     }
     function updateShiftUI() {
-        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v23',JSON.stringify(shifts));updateShiftUI();">刪除</button></td></tr>`).join('');
+        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);localStorage.setItem('hr_shifts_v20',JSON.stringify(shifts));updateShiftUI();">刪除</button></td></tr>`).join('');
         document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
     }
 
     function updateCycleSetting() { cycleDay = parseInt(document.getElementById('config-cycle-day').value); localStorage.setItem('hr_cycle_day', cycleDay); alert("已更新結算日"); }
-    function updatePassword() { adminPass = document.getElementById('new-pass').value; localStorage.setItem('hr_pass_v23', adminPass); alert("密碼已修改"); }
-    
+    function updatePassword() { adminPass = document.getElementById('new-pass').value; localStorage.setItem('hr_pass_v20', adminPass); alert("密碼已修改"); }
     function fullExport() {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工");
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "紀錄");
-        XLSX.writeFile(wb, `考勤系統備份_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.writeFile(wb, `考勤備份_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
-
     function fullImport(input) {
         const f = input.files[0]; if(!f) return;
         const r = new FileReader(); r.onload = (e) => {
             const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
             staffDb = XLSX.utils.sheet_to_json(wb.Sheets["員工"]);
             logs = XLSX.utils.sheet_to_json(wb.Sheets["紀錄"]);
-            localStorage.setItem('staff_db_v23', JSON.stringify(staffDb));
-            localStorage.setItem('hr_logs_v23', JSON.stringify(logs));
+            localStorage.setItem('staff_db_v20', JSON.stringify(staffDb));
+            localStorage.setItem('hr_logs_v20', JSON.stringify(logs));
             location.reload();
         }; r.readAsArrayBuffer(f);
     }
-
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
     function clearForm() { ['m-id','m-name','m-photo-base64'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
-    
-    function processAndPreviewPhoto() {
-        const file = document.getElementById('m-photo').files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX = 400;
-                const scale = Math.min(MAX/img.width, MAX/img.height);
-                canvas.width = img.width * scale; canvas.height = img.height * scale;
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                document.getElementById('m-photo-base64').value = canvas.toDataURL('image/jpeg', 0.8);
-                drawBadge();
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
 
     window.onload = () => { showPage('scan'); };
 </script>
