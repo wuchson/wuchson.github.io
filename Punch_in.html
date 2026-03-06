@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡系統 v2.2</title>
+    <title>打卡系統 v2.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -53,6 +53,8 @@
         
         .stat-badge { background: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
         .ot-badge { background: #fff1f2; color: #e11d48; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
+        .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -88,7 +90,7 @@
 
     <div id="page-make" class="page">
         <div class="card">
-            <h2 id="period-display">本期工時統計</h2>
+            <h2 id="period-display">本期工時統計 (含即時累計)</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>部門</th><th>總工時 / 加班時數</th></tr></thead>
@@ -171,7 +173,7 @@
     let scanner;
     let currentStatus = "上班"; 
 
-    // --- 工時計算：含上班累計與加班累計 ---
+    // --- 核心更新：支援上班中即時工時計算 ---
     function calculateStats() {
         const now = new Date();
         let startYear = now.getFullYear();
@@ -193,44 +195,58 @@
                 totalMs: 0, 
                 overtimeMs: 0, 
                 stdDayMs: eTime - sTime,
-                lastIn: null 
+                lastIn: null,
+                isWorkingNow: false 
             };
         });
 
+        // 按時間排序紀錄
         const periodLogs = logs.filter(l => new Date(l.time) >= periodStart).sort((a,b) => new Date(a.time) - new Date(b.time));
         
         periodLogs.forEach(l => {
-            const staff = staffDb.find(s => s.name === l.name);
-            const sId = staff ? staff.id : l.name;
-            if(!stats[sId]) return;
+            const staff = staffDb.find(s => s.name === l.name || l.name.includes(s.id));
+            const sId = staff ? staff.id : null;
+            if(!sId || !stats[sId]) return;
 
             if(l.type === "上班") {
                 stats[sId].lastIn = new Date(l.time).getTime();
+                stats[sId].isWorkingNow = true;
             } else if(l.type === "下班" && stats[sId].lastIn) {
                 const sessionMs = new Date(l.time).getTime() - stats[sId].lastIn;
                 stats[sId].totalMs += sessionMs;
-                
-                // 加班計算：若單次上班時長超過班別規定的標準時長
                 if(sessionMs > stats[sId].stdDayMs) {
                     stats[sId].overtimeMs += (sessionMs - stats[sId].stdDayMs);
                 }
                 stats[sId].lastIn = null;
+                stats[sId].isWorkingNow = false;
+            }
+        });
+
+        // 即時累計邏輯：處理還沒打下班卡的人
+        const currentTimeMs = now.getTime();
+        Object.keys(stats).forEach(id => {
+            if (stats[id].isWorkingNow && stats[id].lastIn) {
+                const liveSessionMs = currentTimeMs - stats[id].lastIn;
+                stats[id].totalMs += liveSessionMs;
+                if(liveSessionMs > stats[id].stdDayMs) {
+                    stats[id].overtimeMs += (liveSessionMs - stats[id].stdDayMs);
+                }
             }
         });
 
         document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => `
             <tr>
-                <td><b>${s.name}</b></td>
+                <td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">上班中</span>' : ''}</td>
                 <td>${s.dept}</td>
                 <td>
-                    <span class="stat-badge">累計: ${(s.totalMs / 3600000).toFixed(1)} H</span>
-                    <span class="ot-badge">加班: ${(s.overtimeMs / 3600000).toFixed(1)} H</span>
+                    <span class="stat-badge">累計: ${(s.totalMs / 3600000).toFixed(2)} H</span>
+                    <span class="ot-badge">加班: ${(s.overtimeMs / 3600000).toFixed(2)} H</span>
                 </td>
             </tr>
         `).join('');
     }
 
-    // --- 工牌繪製：修正員工編號顯示 ---
+    // --- 工牌繪製 ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas');
         const ctx = canvas.getContext('2d');
@@ -241,16 +257,13 @@
         const dept = document.getElementById('m-dept').value || "技術部";
         const photoBase64 = document.getElementById('m-photo-base64').value;
 
-        // 背景
         const grad = ctx.createLinearGradient(0, 0, 0, 1728);
         grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#1e293b');
         ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1728);
         
-        // 公司名
         ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; 
         ctx.fillText(comp, 540, 180);
 
-        // 照片區域
         const photoY = 600;
         ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.lineWidth = 20;
         ctx.beginPath(); ctx.arc(540, photoY, 310, 0, Math.PI*2); ctx.stroke();
@@ -267,20 +280,15 @@
             ctx.fillStyle = "#475569"; ctx.beginPath(); ctx.arc(540, photoY, 300, 0, Math.PI*2); ctx.fill();
         }
 
-        // 姓名與部門
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
         ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
-        
-        // --- 核心修正：顯示員工編號 ---
         ctx.fillStyle = "#3b82f6"; ctx.font = "bold 55px Arial";
         ctx.fillText("STAFF ID: " + id, 540, 1280); 
 
-        // QR Code
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 10; const mCount = qr.getModuleCount();
         const startX = 540 - (mCount * cellSize) / 2;
         const qrTop = 1380;
-
         ctx.fillStyle = "white";
         for (let r = 0; r < mCount; r++) { 
             for (let c = 0; c < mCount; c++) {
@@ -289,7 +297,6 @@
         }
     }
 
-    // --- 照片處理 ---
     function processAndPreviewPhoto() {
         const file = document.getElementById('m-photo').files[0];
         if (!file) return;
@@ -310,7 +317,6 @@
         reader.readAsDataURL(file);
     }
 
-    // --- 其他邏輯與系統維護 ---
     function setStatus(s) {
         currentStatus = s;
         document.getElementById('btn-in').classList.toggle('active-in', s === '上班');
