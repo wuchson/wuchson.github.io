@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.4.2</title>
+    <title>雲端打卡系統 v3.4.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #0f172a; --accent: #3b82f6; --danger: #ef4444; --success: #10b981; --ot: #8b5cf6; --bg: #f8fafc; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); margin: 0; color: #334155; }
@@ -46,14 +46,13 @@
         .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; font-weight: bold; color: var(--accent); }
         .management-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .import-box { border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 12px; background: #f8fafc; margin-bottom: 15px; }
         @media (max-width: 768px) { .management-grid { grid-template-columns: 1fr; } }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div id="loader">☁️ 處理中...</div>
+<div id="loader">☁️ 雲端同步中...</div>
 
 <nav>
     <button id="nav-scan" class="active" onclick="showPage('scan')">📸 打卡</button>
@@ -91,15 +90,6 @@
     </div>
 
     <div id="page-make" class="page">
-        <div class="card">
-            <h2>📥 批量匯入員工 (Excel)</h2>
-            <div class="import-box">
-                <p style="font-size: 13px; color: #64748b; margin-top:0;">欄位需包含：<b>id, name, shift, dept, comp</b></p>
-                <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importEmployees(this)">
-                <button class="accent-btn" onclick="document.getElementById('import-excel').click()">📂 選擇 Excel 檔案並匯入</button>
-            </div>
-        </div>
-
         <div class="card">
             <h2 id="period-display">本期工時統計</h2>
             <div style="overflow-x:auto;">
@@ -176,71 +166,11 @@
 </div>
 
 <script>
+    // --- 基礎設定 ---
     const API_URL = "https://script.google.com/macros/s/AKfycbwlEtOWUfs-0u8vClyIxROSscYG6u0gF6UU2hf3WDQR5AVNy9_kx1JOyNvEMn8hfEU9DA/exec";
 
     let logs = [], staffDb = [], shifts = [], cycleDay = 1, adminPass = "1234";
     let isAuthed = false, scanner = null, currentStatus = "上班", liveStatTimer = null;
-
-    // --- 核心匯出功能 (修正版) ---
-    function fullExport() {
-        if (typeof XLSX === 'undefined') return alert("Excel 函式庫尚未載入，請稍候或檢查網路");
-        try {
-            const wb = XLSX.utils.book_new(); 
-            // 匯出員工名單
-            const staffWs = XLSX.utils.json_to_sheet(staffDb);
-            XLSX.utils.book_append_sheet(wb, staffWs, "員工名單"); 
-            // 匯出打卡紀錄
-            const logWs = XLSX.utils.json_to_sheet(logs);
-            XLSX.utils.book_append_sheet(wb, logWs, "打卡紀錄");
-            
-            XLSX.writeFile(wb, `考勤備份_${new Date().toLocaleDateString()}.xlsx`);
-        } catch (e) {
-            alert("匯出出錯：" + e.message);
-        }
-    }
-
-    // --- 核心匯入功能 (新增) ---
-    function importEmployees(input) {
-        const file = input.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            toggleLoader(true);
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                if (jsonData.length === 0) throw new Error("Excel 內無資料");
-
-                let count = 0;
-                for (let item of jsonData) {
-                    if (!item.id || !item.name) continue;
-                    await postToCloud({
-                        action: 'saveStaff',
-                        data: {
-                            id: String(item.id),
-                            name: String(item.name),
-                            shift: item.shift || (shifts[0] ? shifts[0].name : "全日班"),
-                            dept: item.dept || "技術部",
-                            comp: item.comp || "伊黛爾內衣",
-                            photo: ""
-                        }
-                    });
-                    count++;
-                }
-                alert(`成功匯入 ${count} 筆員工資料！`);
-                await syncFromCloud();
-            } catch (err) {
-                alert("匯入失敗：" + err.message);
-            }
-            input.value = ""; 
-            toggleLoader(false);
-        };
-        reader.readAsArrayBuffer(file);
-    }
 
     // --- 初始化與同步 ---
     async function syncFromCloud() {
@@ -288,16 +218,26 @@
         }
     }
 
-    // --- 班別新增功能 ---
+    // --- 班別新增功能 (補回缺失的函式) ---
     async function addShift() {
         const nameInput = document.getElementById('shift-name');
         const startInput = document.getElementById('shift-start');
         const endInput = document.getElementById('shift-end');
+
         const name = nameInput.value.trim();
         const start = startInput.value;
         const end = endInput.value;
-        if (!name || !start || !end) return alert("請完整填寫班別");
-        if (shifts.some(s => s.name === name)) return alert("班別名稱已存在");
+
+        if (!name || !start || !end) {
+            alert("請完整填寫班別名稱、開始與結束時間");
+            return;
+        }
+
+        if (shifts.some(s => s.name === name)) {
+            alert("班別名稱已存在");
+            return;
+        }
+
         shifts.push({ name, start, end });
         toggleLoader(true);
         try {
@@ -309,31 +249,43 @@
         toggleLoader(false);
     }
 
-    // --- 員工管理 ---
+    // --- 員工管理：編輯載入 (解決班別跳掉問題) ---
     function loadStaff(id) { 
         const s = staffDb.find(x => String(x.id) === String(id)); 
         if (!s) return;
+
         document.getElementById('m-id').value = s.id; 
         document.getElementById('m-name').value = s.name; 
         document.getElementById('m-dept').value = s.dept || "技術部"; 
         document.getElementById('m-company').value = s.comp || "伊黛爾內衣";
         document.getElementById('m-photo-base64').value = s.photo || ""; 
+
+        // 班別賦值
         const shiftSelect = document.getElementById('m-shift-select');
+        // 先嘗試立即賦值
         shiftSelect.value = s.shift;
-        setTimeout(() => { shiftSelect.value = s.shift; drawBadge(); }, 100);
+
+        // 雙重保險延遲賦值
+        setTimeout(() => {
+            shiftSelect.value = s.shift;
+            drawBadge();
+        }, 100);
     }
 
+    // --- 儲存員工 ---
     async function saveToCloud() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
         const shift = document.getElementById('m-shift-select').value;
         if(!id || !name) return alert("編號與姓名必填");
+        
         const data = { 
             id, name, shift,
             photo: document.getElementById('m-photo-base64').value, 
             dept: document.getElementById('m-dept').value, 
             comp: document.getElementById('m-company').value 
         };
+        
         toggleLoader(true);
         await postToCloud({ action: 'saveStaff', data: data });
         await syncFromCloud();
@@ -383,7 +335,7 @@
         document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]);
     }
 
-    // --- UI 渲染 ---
+    // --- 渲染 UI 函式 ---
     function renderLogs() {
         document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => {
             const timeStr = new Date(l.ts || l.time).toLocaleTimeString('zh-TW', { hour12: false });
@@ -399,13 +351,15 @@
         const listBody = document.getElementById('shift-list-body');
         const select = document.getElementById('m-shift-select');
         listBody.innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button class="danger-btn mini-btn" onclick="deleteShift(${i})">刪除</button></td></tr>`).join('');
+        
+        // 渲染下拉選單時保留目前選取的項目
         const currentVal = select.value;
         select.innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
         if(currentVal) select.value = currentVal;
     }
 
     async function deleteShift(i) {
-        if(!confirm("確定刪除？")) return;
+        if(!confirm("確定刪除此班別？")) return;
         shifts.splice(i,1);
         await updateConfig('shifts', JSON.stringify(shifts));
     }
@@ -415,8 +369,10 @@
         const canvas = document.getElementById('badge-canvas'), ctx = canvas.getContext('2d');
         const comp = document.getElementById('m-company').value, id = (document.getElementById('m-id').value || "ID").toUpperCase();
         const name = document.getElementById('m-name').value, shift = document.getElementById('m-shift-select').value, dept = document.getElementById('m-dept').value, photo = document.getElementById('m-photo-base64').value;
+        
         ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
         ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; ctx.fillText(comp, 540, 180);
+        
         if(photo) {
             try {
                 const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photo; });
@@ -427,12 +383,14 @@
         }
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
         ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
+        
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 10, startX = 540 - (qr.getModuleCount()*cellSize)/2; 
         ctx.fillStyle = "white";
         for (let r = 0; r < qr.getModuleCount(); r++) { for (let c = 0; c < qr.getModuleCount(); c++) { if (qr.isDark(r, c)) ctx.fillRect(startX + c*cellSize, 1380 + r*cellSize, cellSize, cellSize); } }
     }
 
+    // --- 照片處理 ---
     function processAndPreviewPhoto() {
         const file = document.getElementById('m-photo').files[0];
         if(!file) return;
@@ -446,7 +404,7 @@
         }; reader.readAsDataURL(file);
     }
 
-    // --- 工時計算 ---
+    // --- 工時計算邏輯 ---
     function calculateStats() {
         const now = new Date();
         let startMonth = now.getMonth();
@@ -480,15 +438,24 @@
         }).join('');
     }
 
+    // --- 共用工具 ---
     function formatTime(ms) { let s = Math.floor(ms / 1000); return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`; }
     async function postToCloud(payload) { return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); }
     function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
+    
     async function updateConfig(key, value) { toggleLoader(true); await postToCloud({ action: 'updateConfig', key, value }); await syncFromCloud(); alert("同步成功"); }
     async function deleteStaff(id) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({ action: 'deleteStaff', id }); await syncFromCloud(); } }
     async function deleteLog(uid) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({action:'deleteLog', uid}); await syncFromCloud(); } }
     
+    function fullExport() {
+        const wb = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單"); 
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "打卡紀錄");
+        XLSX.writeFile(wb, `備份_${new Date().toLocaleDateString()}.xlsx`);
+    }
+
     window.onload = syncFromCloud;
 </script>
 </body>
