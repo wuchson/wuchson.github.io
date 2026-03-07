@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.3</title>
+    <title>雲端打卡系統 v3.4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -165,11 +165,13 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwlEtOWUfs-0u8vClyIxROSscYG6u0gF6UU2hf3WDQR5AVNy9_kx1JOyNvEMn8hfEU9DA/exec"; // <--- 記得替換成您的最新網址
+    // --- 基礎設定 ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbwlEtOWUfs-0u8vClyIxROSscYG6u0gF6UU2hf3WDQR5AVNy9_kx1JOyNvEMn8hfEU9DA/exec"; // <--- ⚠️ 記得替換成您的網址
 
     let logs = [], staffDb = [], shifts = [], cycleDay = 1, adminPass = "1234";
     let isAuthed = false, scanner = null, currentStatus = "上班", liveStatTimer = null;
 
+    // --- 初始化與同步 ---
     async function syncFromCloud() {
         toggleLoader(true);
         try {
@@ -179,9 +181,7 @@
             staffDb = data.staff || [];
             shifts = data.shifts || [{name:"全日班", start:"09:00", end:"18:00"}];
             cycleDay = parseInt(data.cycleDay) || 1;
-            
-            // 核心修正：強制轉換雲端密碼為字串，避免 0 誤判
-            adminPass = data.adminPass ? String(data.adminPass) : "1234";
+            adminPass = data.adminPass ? String(data.adminPass) : "1234"; // 強制字串化解決打0問題
             
             document.getElementById('config-cycle-day').value = cycleDay;
             renderLogs();
@@ -191,30 +191,81 @@
         toggleLoader(false);
     }
 
-    // 核心修正：加入嚴格比對
+    // --- 權限驗證 (修正密碼問題) ---
     function checkAuth(t) {
         if(isAuthed) { showPage(t); return; }
         const pw = prompt("🔐 請輸入管理密碼：");
         if(pw === null) return;
         
-        // 使用 String() 包裹確保兩邊都是字串型態
+        // 使用 String 強制轉型比對，確保 0 或 空值 不會誤判
         if(String(pw) === String(adminPass)) { 
             isAuthed = true; 
             showPage(t); 
         } 
         else {
-            alert("密碼錯誤！(提示：若未設定密碼，請試試 1234 或 0)");
+            alert("密碼錯誤！");
         }
     }
 
-    // --- 以下功能維持原樣不變 ---
-
-    async function postToCloud(payload) {
-        return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    // --- 頁面切換 ---
+    function showPage(p) {
+        if(liveStatTimer) clearInterval(liveStatTimer);
+        document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.getElementById('nav-'+p).classList.add('active');
+        stopScanner();
+        if(p === 'make') { 
+            calculateStats(); 
+            liveStatTimer = setInterval(calculateStats, 1000); 
+        }
     }
 
-    function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+    // --- 員工管理核心修正：編輯載入 (解決班別跳掉問題) ---
+    function loadStaff(id) { 
+        const s = staffDb.find(x => String(x.id) === String(id)); 
+        if (!s) return;
 
+        // 填入文字資料
+        document.getElementById('m-id').value = s.id; 
+        document.getElementById('m-name').value = s.name; 
+        document.getElementById('m-dept').value = s.dept || "技術部"; 
+        document.getElementById('m-company').value = s.comp || "伊黛爾內衣";
+        document.getElementById('m-photo-base64').value = s.photo || ""; 
+
+        // 處理班別選單：使用延遲與強選邏輯
+        const shiftSelect = document.getElementById('m-shift-select');
+        if (s.shift) {
+            shiftSelect.value = s.shift;
+        }
+
+        // 雙重保險：如果 DOM 還沒反應過來，100ms 後再設一次
+        setTimeout(() => {
+            shiftSelect.value = s.shift;
+            drawBadge(); // 畫工牌
+        }, 100);
+    }
+
+    // --- 儲存員工 ---
+    async function saveToCloud() {
+        const id = document.getElementById('m-id').value.trim();
+        const name = document.getElementById('m-name').value.trim();
+        const shift = document.getElementById('m-shift-select').value;
+        if(!id || !name) return alert("編號與姓名必填");
+        
+        const data = { 
+            id, name, shift,
+            photo: document.getElementById('m-photo-base64').value, 
+            dept: document.getElementById('m-dept').value, 
+            comp: document.getElementById('m-company').value 
+        };
+        
+        toggleLoader(true);
+        await postToCloud({ action: 'saveStaff', data: data });
+        await syncFromCloud();
+        alert("員工資料已更新");
+    }
+
+    // --- 掃描與打卡 ---
     async function startScanner() {
         document.getElementById('reader-placeholder').style.display = "none";
         document.getElementById('continue-btn').style.display = "none";
@@ -240,25 +291,14 @@
             }); 
         } catch(e) {
             document.getElementById('reader-placeholder').style.display = "flex";
-            document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機，請檢查權限設定";
+            document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機";
         }
     }
 
     function stopScanner() { 
         if(scanner && scanner.isScanning) {
-            scanner.stop().then(() => {
-                document.getElementById('reader-placeholder').style.display = "flex";
-            });
+            scanner.stop().then(() => { document.getElementById('reader-placeholder').style.display = "flex"; });
         }
-    }
-
-    function showPage(p) {
-        if(liveStatTimer) clearInterval(liveStatTimer);
-        document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
-        document.getElementById('page-'+p).classList.add('active');
-        document.getElementById('nav-'+p).classList.add('active');
-        stopScanner();
-        if(p === 'make') { calculateStats(); liveStatTimer = setInterval(calculateStats, 1000); }
     }
 
     function setStatus(s) {
@@ -268,36 +308,68 @@
         document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]);
     }
 
+    // --- 渲染與工具函式 ---
     function renderLogs() {
         document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => {
-            const dateObj = new Date(l.ts || l.time);
-            const timeStr = dateObj.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            const timeStr = new Date(l.ts || l.time).toLocaleTimeString('zh-TW', { hour12: false });
             return `<tr><td>${l.name}</td><td>${timeStr}</td><td style="color:${l.type.includes('上班')?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`;
         }).join('');
     }
 
-    async function saveToCloud() {
-        const id = document.getElementById('m-id').value.trim();
-        const name = document.getElementById('m-name').value.trim();
-        if(!id || !name) return alert("編號與姓名必填");
-        const data = { id, name, photo: document.getElementById('m-photo-base64').value, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
-        toggleLoader(true);
-        await postToCloud({ action: 'saveStaff', data: data });
-        await syncFromCloud();
-        alert("雲端儲存成功");
+    function renderStaff() { 
+        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td>${s.name}</td><td><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">編輯</button> <button class="danger-btn mini-btn" onclick="deleteStaff('${s.id}')">刪除</button></td></tr>`).join(''); 
+    }
+    
+    function updateShiftUI() {
+        const listBody = document.getElementById('shift-list-body');
+        const select = document.getElementById('m-shift-select');
+        listBody.innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button class="danger-btn mini-btn" onclick="deleteShift(${i})">刪除</button></td></tr>`).join('');
+        select.innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
     }
 
-    async function deleteStaff(id) {
-        if(!confirm("確定刪除員工？")) return;
-        toggleLoader(true);
-        await postToCloud({ action: 'deleteStaff', id: id });
-        await syncFromCloud();
+    async function deleteShift(i) {
+        shifts.splice(i,1);
+        await updateConfig('shifts', JSON.stringify(shifts));
     }
 
-    function formatTime(ms) {
-        if (ms < 0) ms = 0;
-        let s = Math.floor(ms / 1000);
-        return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`;
+    // --- 工牌繪製 ---
+    async function drawBadge() {
+        const canvas = document.getElementById('badge-canvas'), ctx = canvas.getContext('2d');
+        const comp = document.getElementById('m-company').value, id = (document.getElementById('m-id').value || "ID").toUpperCase();
+        const name = document.getElementById('m-name').value, shift = document.getElementById('m-shift-select').value, dept = document.getElementById('m-dept').value, photo = document.getElementById('m-photo-base64').value;
+        
+        ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
+        ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; ctx.fillText(comp, 540, 180);
+        
+        if(photo) {
+            try {
+                const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photo; });
+                ctx.save(); ctx.beginPath(); ctx.arc(540, 600, 300, 0, Math.PI*2); ctx.clip();
+                const ratio = Math.max(600/img.width, 600/img.height);
+                ctx.drawImage(img, 540 - (img.width*ratio)/2, 600 - (img.height*ratio)/2, img.width*ratio, img.height*ratio); ctx.restore();
+            } catch(e){}
+        }
+        ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
+        ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
+        
+        const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
+        const cellSize = 10, startX = 540 - (qr.getModuleCount()*cellSize)/2; 
+        ctx.fillStyle = "white";
+        for (let r = 0; r < qr.getModuleCount(); r++) { for (let c = 0; c < qr.getModuleCount(); c++) { if (qr.isDark(r, c)) ctx.fillRect(startX + c*cellSize, 1380 + r*cellSize, cellSize, cellSize); } }
+    }
+
+    // --- 其他輔助功能 ---
+    function processAndPreviewPhoto() {
+        const file = document.getElementById('m-photo').files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image(); img.onload = () => {
+                const cvs = document.createElement('canvas'); const scale = Math.min(400/img.width, 400/img.height);
+                cvs.width = img.width*scale; cvs.height = img.height*scale; cvs.getContext('2d').drawImage(img, 0,0,cvs.width,cvs.height);
+                document.getElementById('m-photo-base64').value = cvs.toDataURL('image/jpeg', 0.8); drawBadge();
+            }; img.src = e.target.result;
+        }; reader.readAsDataURL(file);
     }
 
     function calculateStats() {
@@ -333,95 +405,21 @@
         }).join('');
     }
 
-    async function updateConfig(key, value) {
-        toggleLoader(true); await postToCloud({ action: 'updateConfig', key, value }); await syncFromCloud(); alert("設定已同步");
-    }
-
-    async function addShift() {
-        const name = document.getElementById('shift-name').value, start = document.getElementById('shift-start').value, end = document.getElementById('shift-end').value;
-        if(!name || !start || !end) return alert("請填寫完整");
-        shifts.push({name, start, end}); await updateConfig('shifts', JSON.stringify(shifts));
-        document.getElementById('shift-name').value = "";
-    }
-
-    async function drawBadge() {
-        const canvas = document.getElementById('badge-canvas'), ctx = canvas.getContext('2d');
-        const comp = document.getElementById('m-company').value, id = (document.getElementById('m-id').value || "ID").toUpperCase();
-        const name = document.getElementById('m-name').value, shift = document.getElementById('m-shift-select').value, dept = document.getElementById('m-dept').value, photo = document.getElementById('m-photo-base64').value;
-        ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
-        ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; ctx.fillText(comp, 540, 180);
-        if(photo) {
-            try {
-                const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photo; });
-                ctx.save(); ctx.beginPath(); ctx.arc(540, 600, 300, 0, Math.PI*2); ctx.clip();
-                const ratio = Math.max(600/img.width, 600/img.height);
-                ctx.drawImage(img, 540 - (img.width*ratio)/2, 600 - (img.height*ratio)/2, img.width*ratio, img.height*ratio); ctx.restore();
-            } catch(e){}
-        }
-        ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
-        ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
-        const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
-        const cellSize = 10, startX = 540 - (qr.getModuleCount()*cellSize)/2; 
-        ctx.fillStyle = "white";
-        for (let r = 0; r < qr.getModuleCount(); r++) { for (let c = 0; c < qr.getModuleCount(); c++) { if (qr.isDark(r, c)) ctx.fillRect(startX + c*cellSize, 1380 + r*cellSize, cellSize, cellSize); } }
-    }
-
-    function processAndPreviewPhoto() {
-        const file = document.getElementById('m-photo').files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image(); img.onload = () => {
-                const cvs = document.createElement('canvas'); const scale = Math.min(400/img.width, 400/img.height);
-                cvs.width = img.width*scale; cvs.height = img.height*scale; cvs.getContext('2d').drawImage(img, 0,0,cvs.width,cvs.height);
-                document.getElementById('m-photo-base64').value = cvs.toDataURL('image/jpeg', 0.8); drawBadge();
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-    }
-
-    function renderStaff() { 
-        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td>${s.name}</td><td><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">編輯</button> <button class="danger-btn mini-btn" onclick="deleteStaff('${s.id}')">刪除</button></td></tr>`).join(''); 
-    }
+    function formatTime(ms) { let s = Math.floor(ms / 1000); return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`; }
+    async function postToCloud(payload) { return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); }
+    function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+    function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
+    function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
     
-    function updateShiftUI() {
-        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button class="danger-btn mini-btn" onclick="shifts.splice(${i},1);updateConfig('shifts',JSON.stringify(shifts))">刪除</button></td></tr>`).join('');
-        document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-    }
-    
-    function loadStaff(id) { 
-        const s = staffDb.find(x => String(x.id) === String(id)); 
-        document.getElementById('m-id').value = s.id; 
-        document.getElementById('m-name').value = s.name; 
-        document.getElementById('m-dept').value = s.dept; 
-        document.getElementById('m-photo-base64').value = s.photo || ""; 
-        drawBadge(); 
-    }
-    
-    function clearForm() { 
-        ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); 
-        drawBadge(); 
-    }
-    
-    function downloadBadge() { 
-        const a = document.createElement('a'); 
-        a.download=`ID_${document.getElementById('m-id').value}.png`; 
-        a.href=document.getElementById('badge-canvas').toDataURL(); 
-        a.click(); 
-    }
+    async function updateConfig(key, value) { toggleLoader(true); await postToCloud({ action: 'updateConfig', key, value }); await syncFromCloud(); alert("同步成功"); }
+    async function deleteStaff(id) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({ action: 'deleteStaff', id }); await syncFromCloud(); } }
+    async function deleteLog(uid) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({action:'deleteLog', uid}); await syncFromCloud(); } }
     
     function fullExport() {
         const wb = XLSX.utils.book_new(); 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單"); 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "打卡紀錄");
-        XLSX.writeFile(wb, `雲端備份_${new Date().toLocaleDateString()}.xlsx`);
-    }
-    
-    async function deleteLog(uid) { 
-        if(confirm("確定刪除紀錄？")) { 
-            toggleLoader(true); 
-            await postToCloud({action:'deleteLog', uid}); 
-            await syncFromCloud(); 
-        } 
+        XLSX.writeFile(wb, `備份_${new Date().toLocaleDateString()}.xlsx`);
     }
 
     window.onload = syncFromCloud;
