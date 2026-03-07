@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.1</title>
+    <title>雲端打卡系統 v3.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -41,7 +41,8 @@
         .normal-badge { background: #f0fdf4; color: #16a34a; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: block; margin-bottom: 4px; font-family: monospace; white-space: nowrap; border: 1px solid #bbf7d0; }
         .ot-badge { background: #fff1f2; color: #e11d48; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: block; font-family: monospace; white-space: nowrap; border: 1px solid #fecdd3; }
         .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 1s infinite; }
-        #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; min-height: 300px; }
+        #reader { border-radius: 15px; overflow: hidden; background: #1e293b; width: 100%; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+        #reader-placeholder { color: white; text-align: center; padding: 20px; width: 100%; }
         .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; font-weight: bold; color: var(--accent); }
         .management-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -68,8 +69,14 @@
                 <button id="btn-ot-in" class="status-btn" onclick="setStatus('加班上班')">🟣 加班上班</button>
                 <button id="btn-ot-out" class="status-btn" onclick="setStatus('加班下班')">🔮 加班下班</button>
             </div>
-            <div id="reader"></div>
-            <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請掃描員工 QR Code</div>
+            
+            <div id="reader">
+                <div id="reader-placeholder">
+                    <button class="primary-btn" onclick="startScanner()" style="width: auto; padding: 15px 30px;">📷 點擊開啟相機掃描</button>
+                </div>
+            </div>
+            
+            <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請開啟相機進行掃描</div>
             <button id="continue-btn" style="display:none; margin-top: 10px;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描下一位</button>
         </div>
         <div class="card">
@@ -160,7 +167,7 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwlEtOWUfs-0u8vClyIxROSscYG6u0gF6UU2hf3WDQR5AVNy9_kx1JOyNvEMn8hfEU9DA/exec";
 
     let logs = [], staffDb = [], shifts = [], cycleDay = 1, adminPass = "1234";
-    let isAuthed = false, scanner, currentStatus = "上班", liveStatTimer = null;
+    let isAuthed = false, scanner = null, currentStatus = "上班", liveStatTimer = null;
 
     async function syncFromCloud() {
         toggleLoader(true);
@@ -172,6 +179,7 @@
             shifts = data.shifts || [{name:"全日班", start:"09:00", end:"18:00"}];
             cycleDay = parseInt(data.cycleDay) || 1;
             adminPass = data.adminPass || "1234";
+            document.getElementById('config-cycle-day').value = cycleDay;
             renderLogs();
             updateShiftUI();
             renderStaff();
@@ -185,14 +193,18 @@
 
     function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
 
-    // --- 修改後的掃描邏輯 ---
+    // --- 關鍵修正：相機控制邏輯 ---
     async function startScanner() {
+        // 先顯示掃描容器，隱藏佔位按鈕
+        document.getElementById('reader-placeholder').style.display = "none";
         document.getElementById('continue-btn').style.display = "none";
-        document.getElementById('scan-feedback').innerHTML = "請掃描員工 QR Code";
+        document.getElementById('scan-feedback').innerHTML = "⏳ 相機啟動中...";
+        
         if(!scanner) scanner = new Html5Qrcode("reader");
+        
         try { 
             await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, async (id) => {
-                // 1. 偵測到 ID，立刻關掉相機 (防止重疊打卡)
+                // 1. 偵測到 ID，立刻關掉相機，回歸安全狀態
                 stopScanner();
                 
                 const staff = staffDb.find(s => s.id === id);
@@ -200,7 +212,7 @@
                 const now = new Date();
                 const newLog = { uid: Date.now(), sid: id, name, time: now.toLocaleString(), ts: now.toISOString(), type: currentStatus };
                 
-                // 2. UI 更新並顯示同步中
+                // 2. UI 更新
                 document.getElementById('scan-feedback').innerHTML = `⏳ 正在同步 ${name} 的紀錄...`;
                 logs.unshift(newLog);
                 renderLogs();
@@ -208,32 +220,36 @@
                 // 3. 雲端同步
                 await postToCloud({ action: 'addLog', data: newLog });
                 
-                // 4. 打卡成功反饋，並顯示繼續按鈕
+                // 4. 打卡成功反饋，顯示「繼續掃描」按鈕
                 document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success); font-size:1.2rem;">✅ ${name} ${currentStatus}成功</span>`;
                 document.getElementById('continue-btn').style.display = "block";
             }); 
-        } catch(e){}
+        } catch(e) {
+            document.getElementById('reader-placeholder').style.display = "flex";
+            document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機，請檢查權限設定";
+        }
     }
 
-    function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
+    function stopScanner() { 
+        if(scanner && scanner.isScanning) {
+            scanner.stop().then(() => {
+                document.getElementById('reader-placeholder').style.display = "flex";
+            });
+        }
+    }
 
-    // --- 導覽邏輯 ---
     function showPage(p) {
         if(liveStatTimer) clearInterval(liveStatTimer);
         document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
         document.getElementById('page-'+p).classList.add('active');
         document.getElementById('nav-'+p).classList.add('active');
         
-        if(p === 'scan') {
-            startScanner(); 
-        } else {
-            stopScanner();
-        }
+        // 切換頁面時「關閉」相機，避免黑屏與效能問題
+        stopScanner();
         
         if(p === 'make') { calculateStats(); liveStatTimer = setInterval(calculateStats, 1000); }
     }
 
-    // 只有管理與設定需要驗證
     function checkAuth(t) {
         if(isAuthed) { showPage(t); return; }
         const pw = prompt("🔐 請輸入管理密碼：");
@@ -248,7 +264,7 @@
         document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]);
     }
 
-    // --- 以下為 V3.0 的原始功能，完全保留 ---
+    // --- 以下為 V3.1 保留的完整功能 ---
     async function saveToCloud() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
@@ -262,9 +278,9 @@
 
     async function deleteStaff(id) {
         if(!confirm("確定刪除員工？")) return;
-        staffDb = staffDb.filter(s => s.id !== id);
-        renderStaff();
-        await postToCloud({ action: 'syncAll', staff: staffDb });
+        toggleLoader(true);
+        await postToCloud({ action: 'deleteStaff', id: id });
+        await syncFromCloud();
     }
 
     function formatTime(ms) {
@@ -321,10 +337,12 @@
         ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
         ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; ctx.fillText(comp, 540, 180);
         if(photo) {
-            const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photo; });
-            ctx.save(); ctx.beginPath(); ctx.arc(540, 600, 300, 0, Math.PI*2); ctx.clip();
-            const ratio = Math.max(600/img.width, 600/img.height);
-            ctx.drawImage(img, 540 - (img.width*ratio)/2, 600 - (img.height*ratio)/2, img.width*ratio, img.height*ratio); ctx.restore();
+            try {
+                const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photo; });
+                ctx.save(); ctx.beginPath(); ctx.arc(540, 600, 300, 0, Math.PI*2); ctx.clip();
+                const ratio = Math.max(600/img.width, 600/img.height);
+                ctx.drawImage(img, 540 - (img.width*ratio)/2, 600 - (img.height*ratio)/2, img.width*ratio, img.height*ratio); ctx.restore();
+            } catch(e){}
         }
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
         ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
@@ -335,6 +353,7 @@
 
     function processAndPreviewPhoto() {
         const file = document.getElementById('m-photo').files[0];
+        if(!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image(); img.onload = () => {
@@ -351,13 +370,14 @@
         document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button onclick="shifts.splice(${i},1);updateConfig('shifts',JSON.stringify(shifts))">刪除</button></td></tr>`).join('');
         document.getElementById('m-shift-select').innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
     }
-    function loadStaff(id) { const s = staffDb.find(x => x.id === id); document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name; document.getElementById('m-dept').value = s.dept; document.getElementById('m-photo-base64').value = s.photo; drawBadge(); }
+    function loadStaff(id) { const s = staffDb.find(x => x.id === id); document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name; document.getElementById('m-dept').value = s.dept; document.getElementById('m-photo-base64').value = s.photo || ""; drawBadge(); }
     function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
     function fullExport() {
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logs), "打卡紀錄");
         XLSX.writeFile(wb, `雲端備份_${new Date().toLocaleDateString()}.xlsx`);
     }
+    async function deleteLog(uid) { if(confirm("確定刪除紀錄？")) { toggleLoader(true); await postToCloud({action:'deleteLog', uid}); await syncFromCloud(); } }
 
     window.onload = syncFromCloud;
 </script>
