@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.0</title>
+    <title>雲端打卡系統 v3.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -41,9 +41,8 @@
         .normal-badge { background: #f0fdf4; color: #16a34a; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: block; margin-bottom: 4px; font-family: monospace; white-space: nowrap; border: 1px solid #bbf7d0; }
         .ot-badge { background: #fff1f2; color: #e11d48; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: block; font-family: monospace; white-space: nowrap; border: 1px solid #fecdd3; }
         .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 1s infinite; }
-        .ot-tag { color: var(--ot); font-size: 11px; font-weight: bold; border: 1px solid var(--ot); padding: 1px 4px; border-radius: 4px; margin-left: 5px; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; }
+        #reader { border-radius: 15px; overflow: hidden; background: #000; width: 100%; min-height: 250px; }
         .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; font-weight: bold; color: var(--accent); }
     </style>
@@ -70,7 +69,7 @@
             </div>
             <div id="reader"></div>
             <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請掃描員工 QR Code</div>
-            <button id="continue-btn" style="display:none;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描</button>
+            <button id="continue-btn" style="display:none; margin-top:15px;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描下一位</button>
         </div>
         <div class="card">
             <h2>今日即時紀錄 (雲端同步)</h2>
@@ -157,13 +156,11 @@
 </div>
 
 <script>
-    // === 雲端 URL 設定 (填入你的 GAS 網址) ===
     const API_URL = "https://script.google.com/macros/s/AKfycbwlEtOWUfs-0u8vClyIxROSscYG6u0gF6UU2hf3WDQR5AVNy9_kx1JOyNvEMn8hfEU9DA/exec";
 
     let logs = [], staffDb = [], shifts = [], cycleDay = 1, adminPass = "1234";
     let isAuthed = false, scanner, currentStatus = "上班", liveStatTimer = null;
 
-    // --- 核心：雲端同步邏輯 ---
     async function syncFromCloud() {
         toggleLoader(true);
         try {
@@ -179,7 +176,7 @@
             updateShiftUI();
             renderStaff();
             if(document.getElementById('page-make').classList.contains('active')) calculateStats();
-        } catch(e) { alert("連線雲端失敗，請檢查 API 網址或網路"); }
+        } catch(e) { console.error(e); }
         toggleLoader(false);
     }
 
@@ -189,33 +186,82 @@
 
     function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
 
-    // --- 打卡與掃描 ---
+    // --- 修改後的打卡邏輯 ---
     async function startScanner() {
+        // 重設 UI
         document.getElementById('continue-btn').style.display = "none";
+        document.getElementById('scan-feedback').innerHTML = "請掃描員工 QR Code";
+        document.getElementById('scan-feedback').style.background = "#f1f5f9";
+
         if(!scanner) scanner = new Html5Qrcode("reader");
+        
         try { 
             await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, async (id) => {
+                // 1. 立即停止掃描，防止連續觸發
+                stopScanner(); 
+                
                 const staff = staffDb.find(s => s.id === id);
                 const name = staff ? staff.name : "未知(" + id + ")";
                 const now = new Date();
                 const newLog = { uid: Date.now(), sid: id, name, time: now.toLocaleString(), ts: now.toISOString(), type: currentStatus };
                 
-                // UI 優先反應
+                document.getElementById('scan-feedback').innerHTML = `☁️ 正在同步 ${name} 的紀錄...`;
+                
+                // 2. UI 優先顯示
                 logs.unshift(newLog);
                 renderLogs();
                 
-                // 雲端同步
-                await postToCloud({ action: 'addLog', data: newLog });
-                
-                document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success)">✅ ${name} 同步成功</span>`;
+                // 3. 雲端同步
+                try {
+                    await postToCloud({ action: 'addLog', data: newLog });
+                    document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success)">✅ ${name} 打卡成功！</span>`;
+                    document.getElementById('scan-feedback').style.background = "#ecfdf5";
+                } catch(err) {
+                    document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--danger)">❌ 雲端同步失敗，請檢查網路</span>`;
+                }
+
+                // 4. 顯示繼續按鈕
                 document.getElementById('continue-btn').style.display = "block";
-                stopScanner();
             }); 
-        } catch(e){}
+        } catch(e){
+            console.error("相機啟動失敗", e);
+        }
     }
 
-    function stopScanner() { if(scanner && scanner.isScanning) scanner.stop(); }
+    function stopScanner() {
+        if(scanner && scanner.isScanning) {
+            scanner.stop().catch(err => console.error("停止相機出錯", err));
+        }
+    }
 
+    function showPage(p) {
+        if(liveStatTimer) clearInterval(liveStatTimer);
+        document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.getElementById('nav-'+p).classList.add('active');
+        
+        // 進入打卡頁面直接啟動
+        if(p === 'scan') {
+            startScanner();
+        } else {
+            stopScanner();
+        }
+
+        if(p === 'make') { 
+            calculateStats(); 
+            liveStatTimer = setInterval(calculateStats, 1000); 
+        }
+    }
+
+    // 只對管理與設定進行驗證
+    function checkAuth(t) {
+        if(isAuthed) { showPage(t); return; }
+        const pw = prompt("🔐 此區域受保護，請輸入管理密碼：");
+        if(pw === adminPass) { isAuthed = true; showPage(t); } 
+        else if(pw !== null) alert("密碼錯誤");
+    }
+
+    // --- 其餘輔助函式 (保持不變) ---
     async function deleteLog(uid) {
         if(!confirm("確定刪除此紀錄？")) return;
         logs = logs.filter(l => l.uid !== uid);
@@ -223,20 +269,11 @@
         await postToCloud({ action: 'deleteLog', uid: uid });
     }
 
-    // --- 員工管理 ---
     async function saveToCloud() {
         const id = document.getElementById('m-id').value.trim();
         const name = document.getElementById('m-name').value.trim();
         if(!id || !name) return alert("編號與姓名必填");
-        
-        const data = { 
-            id, name, 
-            photo: document.getElementById('m-photo-base64').value, 
-            shift: document.getElementById('m-shift-select').value, 
-            dept: document.getElementById('m-dept').value, 
-            comp: document.getElementById('m-company').value 
-        };
-
+        const data = { id, name, photo: document.getElementById('m-photo-base64').value, shift: document.getElementById('m-shift-select').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
         toggleLoader(true);
         await postToCloud({ action: 'saveStaff', data: data });
         await syncFromCloud();
@@ -244,14 +281,12 @@
     }
 
     async function deleteStaff(id) {
-        if(!confirm("確定刪除員工？(此動作僅影響名單，不影響已存打卡紀錄)")) return;
+        if(!confirm("確定刪除員工？")) return;
         staffDb = staffDb.filter(s => s.id !== id);
         renderStaff();
-        // 這邊簡化為直接同步名單
         await postToCloud({ action: 'syncAll', staff: staffDb });
     }
 
-    // --- 工時計算邏輯 (V3.0 核心) ---
     function formatTime(ms) {
         if (ms < 0) ms = 0;
         let totalSeconds = Math.floor(ms / 1000);
@@ -268,7 +303,6 @@
         if (now.getDate() < cycleDay) startMonth -= 1;
         const periodStart = new Date(startYear, startMonth, cycleDay, 0, 0, 0);
         document.getElementById('period-display').innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
-        
         const stats = {};
         staffDb.forEach(s => {
             const shiftInfo = shifts.find(sh => sh.name === s.shift) || shifts[0] || {start:"09:00", end:"18:00"};
@@ -276,46 +310,34 @@
             const eTime = new Date(`2000/01/01 ${shiftInfo.end}`);
             stats[s.id] = { name: s.name, dept: s.dept || "-", totalMs: 0, overtimeMs: 0, stdDayMs: eTime - sTime, lastInMs: null, lastInType: null, isWorkingNow: false };
         });
-
-        const periodLogs = logs.filter(l => new Date(l.ts || l.time).getTime() >= periodStart.getTime())
-                               .sort((a,b) => new Date(a.ts || a.time).getTime() - new Date(b.ts || b.time).getTime());
-        
+        const periodLogs = logs.filter(l => new Date(l.ts || l.time).getTime() >= periodStart.getTime()).sort((a,b) => new Date(a.ts || a.time).getTime() - new Date(b.ts || b.time).getTime());
         periodLogs.forEach(l => {
-            const sId = l.sid;
-            if(!stats[sId]) return;
+            const sId = l.sid; if(!stats[sId]) return;
             const currentLogTs = new Date(l.ts || l.time).getTime();
-            if(l.type === "上班" || l.type === "加班上班") {
-                stats[sId].lastInMs = currentLogTs;
-                stats[sId].lastInType = l.type;
-                stats[sId].isWorkingNow = true;
-            } else if((l.type === "下班" || l.type === "加班下班") && stats[sId].lastInMs) {
+            if(l.type.includes("上班")) { stats[sId].lastInMs = currentLogTs; stats[sId].lastInType = l.type; stats[sId].isWorkingNow = true; }
+            else if(l.type.includes("下班") && stats[sId].lastInMs) {
                 const sessionMs = currentLogTs - stats[sId].lastInMs;
                 stats[sId].totalMs += sessionMs;
                 if(stats[sId].lastInType === "加班上班") stats[sId].overtimeMs += sessionMs;
                 else if(sessionMs > stats[sId].stdDayMs) stats[sId].overtimeMs += (sessionMs - stats[sId].stdDayMs);
-                stats[sId].lastInMs = null;
-                stats[sId].isWorkingNow = false;
+                stats[sId].lastInMs = null; stats[sId].isWorkingNow = false;
             }
         });
-
         const currentTimeMs = now.getTime();
         document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => {
             let currentTotal = s.totalMs, currentOT = s.overtimeMs;
             if (s.isWorkingNow && s.lastInMs) {
-                const liveMs = currentTimeMs - s.lastInMs;
-                currentTotal += liveMs;
+                const liveMs = currentTimeMs - s.lastInMs; currentTotal += liveMs;
                 if(s.lastInType === "加班上班") currentOT += liveMs;
                 else if(liveMs > s.stdDayMs) currentOT += (liveMs - s.stdDayMs);
             }
-            let currentNormal = currentTotal - currentOT;
             return `<tr><td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">工作中</span>':''}</td><td>${s.dept}</td><td>
                 <span class="stat-badge">總累計: ${formatTime(currentTotal)}</span>
-                <span class="normal-badge">正常班: ${formatTime(currentNormal)}</span>
+                <span class="normal-badge">正常班: ${formatTime(currentTotal - currentOT)}</span>
                 <span class="ot-badge">加　班: ${formatTime(currentOT)}</span></td></tr>`;
         }).join('');
     }
 
-    // --- UI 與 設定 ---
     function setStatus(s) {
         currentStatus = s;
         ['in','out','ot-in','ot-out'].forEach(id => document.getElementById('btn-'+id).classList.remove('active-in','active-out','active-ot-in','active-ot-out'));
@@ -323,46 +345,21 @@
         document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]);
     }
 
-    function showPage(p) {
-        if(liveStatTimer) clearInterval(liveStatTimer);
-        document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
-        document.getElementById('page-'+p).classList.add('active');
-        document.getElementById('nav-'+p).classList.add('active');
-        if(p === 'scan') startScanner(); else stopScanner();
-        if(p === 'make') { calculateStats(); liveStatTimer = setInterval(calculateStats, 1000); }
-    }
-
-    function checkAuth(t) {
-        if(isAuthed) { showPage(t); return; }
-        const pw = prompt("🔐 請輸入管理密碼：");
-        if(pw === adminPass) { isAuthed = true; showPage(t); } else if(pw !== null) alert("密碼錯誤");
-    }
-
-    async function updateConfig(key, value) {
-        toggleLoader(true);
-        await postToCloud({ action: 'updateConfig', key, value });
-        await syncFromCloud();
-        alert("設定已同步");
-    }
-
+    async function updateConfig(key, value) { toggleLoader(true); await postToCloud({ action: 'updateConfig', key, value }); await syncFromCloud(); alert("設定已同步"); }
     async function addShift() {
         const name = document.getElementById('shift-name').value;
         const start = document.getElementById('shift-start').value;
         const end = document.getElementById('shift-end').value;
         if(!name || !start || !end) return alert("請填寫完整");
-        shifts.push({name, start, end});
-        await updateConfig('shifts', JSON.stringify(shifts));
+        shifts.push({name, start, end}); await updateConfig('shifts', JSON.stringify(shifts));
     }
 
-    // --- Canvas 與 輔助功能 (同 V3.0) ---
     async function drawBadge() {
         const canvas = document.getElementById('badge-canvas'), ctx = canvas.getContext('2d');
         const comp = document.getElementById('m-company').value || "卓越企業", id = (document.getElementById('m-id').value || "ID").toUpperCase();
         const name = document.getElementById('m-name').value || "姓名", shift = document.getElementById('m-shift-select').value || "班別", dept = document.getElementById('m-dept').value || "部門", photo = document.getElementById('m-photo-base64').value;
-        
         ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
         ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; ctx.fillText(comp, 540, 180);
-        
         if(photo) {
             const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photo; });
             ctx.save(); ctx.beginPath(); ctx.arc(540, 600, 300, 0, Math.PI*2); ctx.clip();
@@ -372,7 +369,6 @@
         }
         ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
         ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
-        
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 10, startX = 540 - (qr.getModuleCount()*cellSize)/2; ctx.fillStyle = "white";
         for (let r = 0; r < qr.getModuleCount(); r++) { for (let c = 0; c < qr.getModuleCount(); c++) { if (qr.isDark(r, c)) ctx.fillRect(startX + c*cellSize, 1380 + r*cellSize, cellSize, cellSize); } }
@@ -401,7 +397,6 @@
     function loadStaff(id) { const s = staffDb.find(x => x.id === id); document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name; document.getElementById('m-dept').value = s.dept; document.getElementById('m-photo-base64').value = s.photo; drawBadge(); }
     function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
-    
     function fullExport() {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單");
