@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.4</title>
+    <title>雲端打卡系統 v3.4.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -70,13 +70,11 @@
                 <button id="btn-ot-in" class="status-btn" onclick="setStatus('加班上班')">🟣 加班上班</button>
                 <button id="btn-ot-out" class="status-btn" onclick="setStatus('加班下班')">🔮 加班下班</button>
             </div>
-            
             <div id="reader">
                 <div id="reader-placeholder">
                     <button class="primary-btn" onclick="startScanner()" style="width: auto; padding: 15px 30px;">📷 點擊開啟相機掃描</button>
                 </div>
             </div>
-            
             <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請開啟相機進行掃描</div>
             <button id="continue-btn" style="display:none; margin-top: 10px;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描下一位</button>
         </div>
@@ -151,7 +149,10 @@
                 </div>
                 <button class="primary-btn" onclick="addShift()">＋ 新增班別</button>
             </div>
-            <table class="list-table"><tbody id="shift-list-body"></tbody></table>
+            <table class="list-table">
+                <thead><tr><th>班別名稱</th><th>時間範圍</th><th>操作</th></tr></thead>
+                <tbody id="shift-list-body"></tbody>
+            </table>
         </div>
         <div class="card">
             <h2>📊 系統維護</h2>
@@ -166,7 +167,7 @@
 
 <script>
     // --- 基礎設定 ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbwlEtOWUfs-0u8vClyIxROSscYG6u0gF6UU2hf3WDQR5AVNy9_kx1JOyNvEMn8hfEU9DA/exec"; // <--- ⚠️ 記得替換成您的網址
+    const API_URL = "https://script.google.com/macros/s/AKfycbwlEtOWUfs-0u8vClyIxROSscYG6u0gF6UU2hf3WDQR5AVNy9_kx1JOyNvEMn8hfEU9DA/exec";
 
     let logs = [], staffDb = [], shifts = [], cycleDay = 1, adminPass = "1234";
     let isAuthed = false, scanner = null, currentStatus = "上班", liveStatTimer = null;
@@ -181,7 +182,7 @@
             staffDb = data.staff || [];
             shifts = data.shifts || [{name:"全日班", start:"09:00", end:"18:00"}];
             cycleDay = parseInt(data.cycleDay) || 1;
-            adminPass = data.adminPass ? String(data.adminPass) : "1234"; // 強制字串化解決打0問題
+            adminPass = data.adminPass ? String(data.adminPass) : "1234";
             
             document.getElementById('config-cycle-day').value = cycleDay;
             renderLogs();
@@ -191,18 +192,15 @@
         toggleLoader(false);
     }
 
-    // --- 權限驗證 (修正密碼問題) ---
+    // --- 權限驗證 ---
     function checkAuth(t) {
         if(isAuthed) { showPage(t); return; }
         const pw = prompt("🔐 請輸入管理密碼：");
         if(pw === null) return;
-        
-        // 使用 String 強制轉型比對，確保 0 或 空值 不會誤判
         if(String(pw) === String(adminPass)) { 
             isAuthed = true; 
             showPage(t); 
-        } 
-        else {
+        } else {
             alert("密碼錯誤！");
         }
     }
@@ -220,28 +218,57 @@
         }
     }
 
-    // --- 員工管理核心修正：編輯載入 (解決班別跳掉問題) ---
+    // --- 班別新增功能 (補回缺失的函式) ---
+    async function addShift() {
+        const nameInput = document.getElementById('shift-name');
+        const startInput = document.getElementById('shift-start');
+        const endInput = document.getElementById('shift-end');
+
+        const name = nameInput.value.trim();
+        const start = startInput.value;
+        const end = endInput.value;
+
+        if (!name || !start || !end) {
+            alert("請完整填寫班別名稱、開始與結束時間");
+            return;
+        }
+
+        if (shifts.some(s => s.name === name)) {
+            alert("班別名稱已存在");
+            return;
+        }
+
+        shifts.push({ name, start, end });
+        toggleLoader(true);
+        try {
+            await postToCloud({ action: 'updateConfig', key: 'shifts', value: JSON.stringify(shifts) });
+            nameInput.value = ""; startInput.value = ""; endInput.value = "";
+            await syncFromCloud();
+            alert("班別新增成功！");
+        } catch (e) { alert("儲存失敗"); }
+        toggleLoader(false);
+    }
+
+    // --- 員工管理：編輯載入 (解決班別跳掉問題) ---
     function loadStaff(id) { 
         const s = staffDb.find(x => String(x.id) === String(id)); 
         if (!s) return;
 
-        // 填入文字資料
         document.getElementById('m-id').value = s.id; 
         document.getElementById('m-name').value = s.name; 
         document.getElementById('m-dept').value = s.dept || "技術部"; 
         document.getElementById('m-company').value = s.comp || "伊黛爾內衣";
         document.getElementById('m-photo-base64').value = s.photo || ""; 
 
-        // 處理班別選單：使用延遲與強選邏輯
+        // 班別賦值
         const shiftSelect = document.getElementById('m-shift-select');
-        if (s.shift) {
-            shiftSelect.value = s.shift;
-        }
+        // 先嘗試立即賦值
+        shiftSelect.value = s.shift;
 
-        // 雙重保險：如果 DOM 還沒反應過來，100ms 後再設一次
+        // 雙重保險延遲賦值
         setTimeout(() => {
             shiftSelect.value = s.shift;
-            drawBadge(); // 畫工牌
+            drawBadge();
         }, 100);
     }
 
@@ -308,7 +335,7 @@
         document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]);
     }
 
-    // --- 渲染與工具函式 ---
+    // --- 渲染 UI 函式 ---
     function renderLogs() {
         document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => {
             const timeStr = new Date(l.ts || l.time).toLocaleTimeString('zh-TW', { hour12: false });
@@ -324,10 +351,15 @@
         const listBody = document.getElementById('shift-list-body');
         const select = document.getElementById('m-shift-select');
         listBody.innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button class="danger-btn mini-btn" onclick="deleteShift(${i})">刪除</button></td></tr>`).join('');
+        
+        // 渲染下拉選單時保留目前選取的項目
+        const currentVal = select.value;
         select.innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+        if(currentVal) select.value = currentVal;
     }
 
     async function deleteShift(i) {
+        if(!confirm("確定刪除此班別？")) return;
         shifts.splice(i,1);
         await updateConfig('shifts', JSON.stringify(shifts));
     }
@@ -358,7 +390,7 @@
         for (let r = 0; r < qr.getModuleCount(); r++) { for (let c = 0; c < qr.getModuleCount(); c++) { if (qr.isDark(r, c)) ctx.fillRect(startX + c*cellSize, 1380 + r*cellSize, cellSize, cellSize); } }
     }
 
-    // --- 其他輔助功能 ---
+    // --- 照片處理 ---
     function processAndPreviewPhoto() {
         const file = document.getElementById('m-photo').files[0];
         if(!file) return;
@@ -372,6 +404,7 @@
         }; reader.readAsDataURL(file);
     }
 
+    // --- 工時計算邏輯 ---
     function calculateStats() {
         const now = new Date();
         let startMonth = now.getMonth();
@@ -405,6 +438,7 @@
         }).join('');
     }
 
+    // --- 共用工具 ---
     function formatTime(ms) { let s = Math.floor(ms / 1000); return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`; }
     async function postToCloud(payload) { return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); }
     function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
