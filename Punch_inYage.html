@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.6.0</title>
+    <title>雲端打卡系統 v3.6.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #0f172a; --accent: #3b82f6; --danger: #ef4444; --success: #10b981; --ot: #8b5cf6; --warning: #f59e0b; --bg: #f8fafc; }
+        :root { --primary: #0f172a; --accent: #3b82f6; --danger: #ef4444; --success: #10b981; --ot: #8b5cf6; --bg: #f8fafc; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); margin: 0; color: #334155; }
         nav { background: white; padding: 0.8rem; display: flex; justify-content: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         nav button { padding: 10px 15px; border: none; border-radius: 8px; background: #f1f5f9; cursor: pointer; font-weight: bold; font-size: 14px; color: #64748b; }
@@ -40,9 +40,8 @@
         .stat-badge { background: #0f172a; color: #3b82f6; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: block; margin-bottom: 4px; font-family: monospace; white-space: nowrap; }
         .normal-badge { background: #f0fdf4; color: #16a34a; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: block; margin-bottom: 4px; font-family: monospace; white-space: nowrap; border: 1px solid #bbf7d0; }
         .ot-badge { background: #fff1f2; color: #e11d48; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: block; font-family: monospace; white-space: nowrap; border: 1px solid #fecdd3; }
-        .late-tag { background: #fff7ed; color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 11px; border: 1px solid #ffedd5; font-weight: bold; }
-        .leave-tag { background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 4px; font-size: 11px; border: 1px solid #e2e8f0; font-weight: bold; }
         .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 1s infinite; }
+        .late-tag { color: var(--danger); background: #fee2e2; padding: 2px 4px; border-radius: 4px; font-size: 11px; margin-left: 5px; }
         #reader { border-radius: 15px; overflow: hidden; background: #1e293b; width: 100%; min-height: 300px; display: flex; align-items: center; justify-content: center; }
         #reader-placeholder { color: white; text-align: center; padding: 20px; width: 100%; }
         .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
@@ -93,24 +92,6 @@
 
     <div id="page-make" class="page">
         <div class="card">
-            <h2>🏖️ 請假 / 公假登記</h2>
-            <div class="management-grid">
-                <div class="form-group"><label>員工 ID</label><input type="text" id="leave-id" placeholder="輸入 ID"></div>
-                <div class="form-group"><label>日期</label><input type="date" id="leave-date"></div>
-            </div>
-            <div class="form-group">
-                <label>假別</label>
-                <select id="leave-type">
-                    <option value="事假">事假</option>
-                    <option value="病假">病假</option>
-                    <option value="特休">特休</option>
-                    <option value="公假">公假</option>
-                </select>
-            </div>
-            <button class="primary-btn" onclick="submitLeave()">💾 登記請假</button>
-        </div>
-
-        <div class="card">
             <h2 id="period-display">本期工時統計</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
@@ -159,10 +140,10 @@
                 <input type="number" id="config-cycle-day" min="1" max="31">
             </div>
             <div class="form-group">
-                <label>遲到寬限期 (分鐘)</label>
-                <input type="number" id="config-grace-min" value="5">
+                <label>遲到寬限 (分鐘)</label>
+                <input type="number" id="config-grace-min" min="0">
             </div>
-            <button class="primary-btn" onclick="saveSystemConfig()">💾 套用設定</button>
+            <button class="primary-btn" onclick="saveSystemConfigs()">💾 儲存並套用設定</button>
         </div>
         <div class="card">
             <h2>⚙️ 班別設定</h2>
@@ -223,7 +204,7 @@
             staffDb = data.staff || [];
             shifts = data.shifts || [{name:"全日班", start:"09:00", end:"18:00"}];
             cycleDay = parseInt(data.cycleDay) || 1;
-            graceMin = parseInt(data.graceMin) || 5;
+            graceMin = parseInt(data.graceMin) || 5; // 從雲端獲取寬限值
             adminPass = data.adminPass ? String(data.adminPass) : "1234";
             
             document.getElementById('config-cycle-day').value = cycleDay;
@@ -235,55 +216,60 @@
         toggleLoader(false);
     }
 
-    // 新增：遲到檢查邏輯
-    function checkIsLate(timeStr, shiftName) {
+    // 儲存所有系統設定
+    async function saveSystemConfigs() {
+        const cDay = document.getElementById('config-cycle-day').value;
+        const gMin = document.getElementById('config-grace-min').value;
+        toggleLoader(true);
+        await postToCloud({ action: 'updateConfig', key: 'cycleDay', value: cDay });
+        await postToCloud({ action: 'updateConfig', key: 'graceMin', value: gMin });
+        await syncFromCloud();
+        alert("設定已儲存並同步到雲端");
+    }
+
+    function checkIsLate(now, shiftName) {
+        if (currentStatus !== "上班") return "";
         const shift = shifts.find(s => s.name === shiftName);
         if (!shift) return "";
-        const [sh, sm] = shift.start.split(':').map(Number);
-        const checkTime = new Date(timeStr);
-        const limitTime = new Date(checkTime);
-        limitTime.setHours(sh, sm, 0, 0);
         
-        // 判定：打卡時間 > (上班時間 + 寬限期)
-        if (checkTime.getTime() > (limitTime.getTime() + graceMin * 60000)) {
+        const [sh, sm] = shift.start.split(':').map(Number);
+        const limit = new Date(now);
+        limit.setHours(sh, sm, 0, 0);
+        
+        // 超過班別時間 + 寬限分鐘 = 遲到
+        if (now.getTime() > (limit.getTime() + graceMin * 60000)) {
             return " (遲到)";
         }
         return "";
     }
 
-    async function saveSystemConfig() {
-        toggleLoader(true);
-        const cDay = document.getElementById('config-cycle-day').value;
-        const gMin = document.getElementById('config-grace-min').value;
-        await postToCloud({ action: 'updateConfig', key: 'cycleDay', value: cDay });
-        await postToCloud({ action: 'updateConfig', key: 'graceMin', value: gMin });
-        await syncFromCloud();
-        alert("設定成功");
+    async function startScanner() {
+        document.getElementById('reader-placeholder').style.display = "none";
+        document.getElementById('continue-btn').style.display = "none";
+        document.getElementById('scan-feedback').innerHTML = "⏳ 相機啟動中...";
+        if(!scanner) scanner = new Html5Qrcode("reader");
+        try { 
+            await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, async (id) => {
+                stopScanner();
+                const staff = staffDb.find(s => String(s.id) === String(id));
+                const name = staff ? staff.name : "未知(" + id + ")";
+                const now = new Date();
+                
+                // 判定遲到
+                let typeFinal = currentStatus;
+                if (staff) typeFinal += checkIsLate(now, staff.shift);
+                
+                const newLog = { uid: Date.now(), sid: id, name, time: now.toLocaleString('zh-TW', {hour12: false}), ts: now.toISOString(), type: typeFinal };
+                document.getElementById('scan-feedback').innerHTML = `⏳ 正在同步 ${name}...`;
+                logs.unshift(newLog); renderLogs();
+                await postToCloud({ action: 'addLog', data: newLog });
+                document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success); font-size:1.2rem;">✅ ${name} ${typeFinal}成功</span>`;
+                document.getElementById('continue-btn').style.display = "block";
+            }); 
+        } catch(e) { document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機"; }
     }
 
-    // 新增：請假提交
-    async function submitLeave() {
-        const id = document.getElementById('leave-id').value.trim();
-        const date = document.getElementById('leave-date').value;
-        const type = document.getElementById('leave-type').value;
-        if (!id || !date) return alert("請完整填寫 ID 與日期");
-        
-        const staff = staffDb.find(s => String(s.id) === String(id));
-        const name = staff ? staff.name : "未知(" + id + ")";
-        const leaveLog = {
-            uid: Date.now(),
-            sid: id,
-            name: name,
-            time: date + " 00:00:00",
-            ts: new Date(date).toISOString(),
-            type: `【${type}】`
-        };
-
-        toggleLoader(true);
-        await postToCloud({ action: 'addLog', data: leaveLog });
-        await syncFromCloud();
-        alert("請假登記成功");
-    }
+    // --- 以下為原本 v3.5.0 的其餘功能函數，保持不變 ---
 
     function checkAuth(t) {
         if(isAuthed) { showPage(t); return; }
@@ -339,34 +325,6 @@
         await syncFromCloud();
     }
 
-    async function startScanner() {
-        document.getElementById('reader-placeholder').style.display = "none";
-        document.getElementById('continue-btn').style.display = "none";
-        document.getElementById('scan-feedback').innerHTML = "⏳ 相機啟動中...";
-        if(!scanner) scanner = new Html5Qrcode("reader");
-        try { 
-            await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, async (id) => {
-                stopScanner();
-                const staff = staffDb.find(s => String(s.id) === String(id));
-                const name = staff ? staff.name : "未知(" + id + ")";
-                const now = new Date();
-                
-                // 自動遲到判定
-                let typeFinal = currentStatus;
-                if(currentStatus === "上班" && staff) {
-                    typeFinal += checkIsLate(now.toISOString(), staff.shift);
-                }
-
-                const newLog = { uid: Date.now(), sid: id, name, time: now.toLocaleString('zh-TW', {hour12: false}), ts: now.toISOString(), type: typeFinal };
-                document.getElementById('scan-feedback').innerHTML = `⏳ 正在同步 ${name}...`;
-                logs.unshift(newLog); renderLogs();
-                await postToCloud({ action: 'addLog', data: newLog });
-                document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success); font-size:1.2rem;">✅ ${name} ${typeFinal}成功</span>`;
-                document.getElementById('continue-btn').style.display = "block";
-            }); 
-        } catch(e) { document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機"; }
-    }
-
     function stopScanner() { if(scanner && scanner.isScanning) scanner.stop().then(()=>document.getElementById('reader-placeholder').style.display="flex"); }
 
     function setStatus(s) {
@@ -377,14 +335,11 @@
     }
 
     function renderLogs() {
-        document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => {
+        document.getElementById('log-body').innerHTML = logs.slice(0,15).map(l => {
             const d = new Date(l.ts || l.time);
-            const timeStr = d.toLocaleString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false });
-            let statusHtml = l.type;
-            if(l.type.includes('遲到')) statusHtml = `${l.type} <span class="late-tag">遲到</span>`;
-            if(l.type.includes('【')) statusHtml = `<span class="leave-tag">${l.type}</span>`;
-            
-            return `<tr><td>${l.name}</td><td style="font-size:12px;">${timeStr}</td><td style="font-weight:bold;">${statusHtml}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`;
+            const timeStr = d.toLocaleString('zh-TW', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false });
+            const isLate = l.type.includes("遲到");
+            return `<tr><td>${l.name}</td><td style="font-size:12px;">${timeStr}</td><td style="color:${l.type.includes('上班')?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}${isLate ? '<span class="late-tag">遲到</span>':''}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`;
         }).join('');
     }
 
@@ -471,39 +426,22 @@
         const shiftInfo = shifts.find(sh => sh.name === staff.shift) || shifts[0] || {start:"09:00", end:"18:00"};
         const sParts = shiftInfo.start.split(':'), eParts = shiftInfo.end.split(':');
         const stdMs = (parseInt(eParts[0])*3600 + parseInt(eParts[1])*60)*1000 - (parseInt(sParts[0])*3600 + parseInt(sParts[1])*60)*1000;
-        
-        let totalMs = 0, otMs = 0, lastInMs = null, lastInType = null, lateCount = 0, leaveCount = 0;
+        let totalMs = 0, otMs = 0, lastInMs = null, lastInType = null;
         const sLogs = logs.filter(l => String(l.sid) === String(id) && new Date(l.ts || l.time) >= periodStart).sort((a, b) => new Date(a.ts || a.time) - new Date(b.ts || b.time));
-        
         sLogs.forEach(l => {
             const ts = new Date(l.ts || l.time).getTime();
-            if(l.type.includes("上班")) { 
-                lastInMs = ts; lastInType = l.type; 
-                if(l.type.includes("遲到")) lateCount++;
-            }
+            if(l.type.includes("上班")) { lastInMs = ts; lastInType = l.type; }
             else if(l.type.includes("下班") && lastInMs) {
                 const session = ts - lastInMs; totalMs += session;
                 if(lastInType === "加班上班") otMs += session; else if(session > stdMs) otMs += (session - stdMs);
                 lastInMs = null;
             }
-            else if(l.type.includes("【")) {
-                leaveCount++;
-            }
         });
-
         document.getElementById('summary-title').innerText = `📊 ${staff.name} 的月報表`;
-        document.getElementById('summary-stats-grid').innerHTML = `
-            <div style="background:#f1f5f9; padding:12px; border-radius:12px; border-left:4px solid var(--primary);"><div style="font-size:12px; color:#64748b;">總累積工時</div><div style="font-weight:bold;">${formatTime(totalMs)}</div></div>
-            <div style="background:#fff1f2; padding:12px; border-radius:12px; border-left:4px solid var(--danger);"><div style="font-size:12px; color:#e11d48;">遲到次數</div><div style="font-weight:bold; color:#e11d48;">${lateCount} 次</div></div>
-            <div style="background:#f0fdf4; padding:12px; border-radius:12px; border-left:4px solid var(--success);"><div style="font-size:12px; color:#16a34a;">請假天數</div><div style="font-weight:bold; color:#16a34a;">${leaveCount} 天</div></div>
-            <div style="background:#fefce8; padding:12px; border-radius:12px; border-left:4px solid #facc15;"><div style="font-size:12px; color:#a16207;">本期總加班</div><div style="font-weight:bold; color:#a16207;">${formatTime(otMs)}</div></div>
-        `;
+        document.getElementById('summary-stats-grid').innerHTML = `<div style="background:#f1f5f9; padding:12px; border-radius:12px; border-left:4px solid var(--primary);"><div style="font-size:12px; color:#64748b;">總累積工時</div><div style="font-weight:bold;">${formatTime(totalMs)}</div></div><div style="background:#fff1f2; padding:12px; border-radius:12px; border-left:4px solid var(--danger);"><div style="font-size:12px; color:#e11d48;">本期總加班</div><div style="font-weight:bold; color:#e11d48;">${formatTime(otMs)}</div></div>`;
         document.getElementById('summary-detail-body').innerHTML = [...sLogs].reverse().map(l => {
             const d = new Date(l.ts || l.time);
-            let displayType = l.type;
-            if(l.type.includes('遲到')) displayType = `<span style="color:#f97316;">${l.type}</span>`;
-            if(l.type.includes('【')) displayType = `<span style="color:#64748b;">${l.type}</span>`;
-            return `<tr><td><small>${d.toLocaleDateString()}</small><br>${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false})}</td><td style="font-weight:bold;">${displayType}</td></tr>`;
+            return `<tr><td><small>${d.toLocaleDateString()}</small><br>${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false})}</td><td style="color:${l.type.includes('上班')?'#10b981':'#ef4444'}; font-weight:bold;">${l.type}</td></tr>`;
         }).join('');
         document.getElementById('summary-modal').style.display = 'block';
     }
