@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.7.0</title>
+    <title>雲端打卡系統 v3.7.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -102,7 +102,6 @@
                 </table>
             </div>
         </div>
-
         <div class="management-grid">
             <div class="card">
                 <h2>編輯員工資料</h2>
@@ -124,26 +123,15 @@
                 <button class="accent-btn" onclick="downloadBadge()">📥 下載高清 PNG</button>
             </div>
         </div>
-
         <div class="card" style="border: 2px solid var(--leave);">
-             <h2>📝 員工請假登記</h2>
+            <h2>📝 員工請假登記</h2>
             <div class="management-grid">
-                <div class="form-group">
-                    <label>選擇員工</label>
-                    <select id="leave-staff-select"></select>
-                </div>
-                <div class="form-group">
-                    <label>請假日期</label>
-                    <input type="date" id="leave-date">
-                </div>
+                <div class="form-group"><label>選擇員工</label><select id="leave-staff-select"></select></div>
+                <div class="form-group"><label>請假日期</label><input type="date" id="leave-date"></div>
             </div>
             <div class="management-grid">
-                <div class="form-group">
-                    <label>請假時數 (小時)</label>
-                    <input type="number" id="leave-hours" value="8" step="0.5">
-                </div>
-                <div class="form-group">
-                    <label>假別</label>
+                <div class="form-group"><label>請假時數 (小時)</label><input type="number" id="leave-hours" value="8" step="0.5"></div>
+                <div class="form-group"><label>假別</label>
                     <select id="leave-type">
                         <option value="事假">事假</option>
                         <option value="病假">病假</option>
@@ -154,7 +142,6 @@
             </div>
             <button class="leave-btn" onclick="submitLeave()">➕ 登記請假紀錄</button>
         </div>
-
         <div class="card">
             <h2>雲端員工名單</h2>
             <div style="overflow-x:auto;">
@@ -169,14 +156,8 @@
     <div id="page-config" class="page">
         <div class="card">
             <h2>📅 考勤參數設定</h2>
-            <div class="form-group">
-                <label>每月結算起始日 (1-31)</label>
-                <input type="number" id="config-cycle-day" min="1" max="31">
-            </div>
-            <div class="form-group">
-                <label>遲到寬限 (分鐘)</label>
-                <input type="number" id="config-grace-min" min="0">
-            </div>
+            <div class="form-group"><label>每月結算起始日 (1-31)</label><input type="number" id="config-cycle-day" min="1" max="31"></div>
+            <div class="form-group"><label>遲到寬限 (分鐘)</label><input type="number" id="config-grace-min" min="0"></div>
             <button class="primary-btn" onclick="saveSystemConfigs()">💾 儲存並套用設定</button>
         </div>
         <div class="card">
@@ -184,9 +165,7 @@
             <div class="form-group">
                 <input type="text" id="shift-name" placeholder="班別名稱">
                 <div style="display:flex; gap:10px; margin:10px 0;">
-                    <input type="time" id="shift-start"> 
-                    <span style="align-self:center;">至</span>
-                    <input type="time" id="shift-end">
+                    <input type="time" id="shift-start"> <span>至</span> <input type="time" id="shift-end">
                 </div>
                 <button class="primary-btn" onclick="addShift()">＋ 新增班別</button>
             </div>
@@ -240,13 +219,9 @@
             cycleDay = parseInt(data.cycleDay) || 1;
             graceMin = parseInt(data.graceMin) || 5;
             adminPass = data.adminPass ? String(data.adminPass) : "1234";
-            
             document.getElementById('config-cycle-day').value = cycleDay;
             document.getElementById('config-grace-min').value = graceMin;
-            renderLogs();
-            updateShiftUI();
-            renderStaff();
-            updateLeaveUI();
+            renderLogs(); updateShiftUI(); renderStaff(); updateLeaveUI();
         } catch(e) { console.error("同步失敗:", e); }
         toggleLoader(false);
     }
@@ -262,14 +237,25 @@
         return "";
     }
 
+    // ⭐ 修正後的 startScanner 函式
     async function startScanner() {
+        // 先釋放舊有實體與介面
+        if (scanner) {
+            try { await scanner.clear(); } catch (e) {}
+            scanner = null;
+        }
+        
         document.getElementById('reader-placeholder').style.display = "none";
         document.getElementById('continue-btn').style.display = "none";
         document.getElementById('scan-feedback').innerHTML = "⏳ 相機啟動中...";
-        if(!scanner) scanner = new Html5Qrcode("reader");
+        
+        // 重新初始化
+        scanner = new Html5Qrcode("reader");
+
         try { 
             await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, async (id) => {
-                stopScanner();
+                await scanner.stop(); // 掃到就停，避免重複觸發
+                
                 const staff = staffDb.find(s => String(s.id) === String(id));
                 const name = staff ? staff.name : "未知(" + id + ")";
                 const now = new Date();
@@ -277,24 +263,27 @@
                 if (staff) typeFinal += checkIsLate(now, staff.shift);
                 
                 const newLog = { 
-                    uid: Date.now(), 
-                    sid: id, 
-                    name, 
+                    uid: Date.now(), sid: id, name, 
                     time: now.toLocaleString('zh-TW', {hour12: false}), 
-                    ts: now.toISOString(), 
-                    type: typeFinal 
+                    ts: now.toISOString(), type: typeFinal 
                 };
                 
                 document.getElementById('scan-feedback').innerHTML = `⏳ 正在同步 ${name}...`;
                 logs.unshift(newLog); 
                 renderLogs();
+                
                 await postToCloud({ action: 'addLog', data: newLog });
                 document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success); font-size:1.2rem;">✅ ${name} ${typeFinal}成功</span>`;
                 document.getElementById('continue-btn').style.display = "block";
+                document.getElementById('reader-placeholder').style.display = "flex";
             }); 
-        } catch(e) { document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機"; }
+        } catch(e) { 
+            document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機";
+            document.getElementById('reader-placeholder').style.display = "flex";
+        }
     }
 
+    // 以下為原有的其餘邏輯，保持不變
     function updateLeaveUI() {
         const select = document.getElementById('leave-staff-select');
         select.innerHTML = staffDb.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join('');
@@ -308,15 +297,7 @@
         const hours = document.getElementById('leave-hours').value;
         const type = document.getElementById('leave-type').value;
         if(!date || !hours) return alert("請填寫日期與時數");
-
-        const leaveLog = {
-            uid: Date.now(),
-            sid: sid,
-            name: staff.name,
-            time: `${date} 00:00:00`,
-            ts: new Date(date).toISOString(),
-            type: `請假:${type}(${hours}h)`
-        };
+        const leaveLog = { uid: Date.now(), sid: sid, name: staff.name, time: `${date} 00:00:00`, ts: new Date(date).toISOString(), type: `請假:${type}(${hours}h)` };
         toggleLoader(true);
         await postToCloud({ action: 'addLog', data: leaveLog });
         await syncFromCloud();
@@ -328,7 +309,6 @@
         let startMonth = now.getMonth(); if (now.getDate() < cycleDay) startMonth -= 1;
         const periodStart = new Date(now.getFullYear(), startMonth, cycleDay, 0, 0, 0);
         document.getElementById('period-display').innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
-        
         const stats = {};
         staffDb.forEach(s => {
             const shiftInfo = shifts.find(sh => sh.name === s.shift) || shifts[0] || {start:"09:00", end:"18:00"};
@@ -336,7 +316,6 @@
             const stdMs = (parseInt(eParts[0])*3600 + parseInt(eParts[1])*60)*1000 - (parseInt(sParts[0])*3600 + parseInt(sParts[1])*60)*1000;
             stats[s.id] = { name: s.name, dept: s.dept || "-", totalMs: 0, overtimeMs: 0, leaveHrs: 0, stdDayMs: stdMs, lastInMs: null, lastInType: null, isWorkingNow: false };
         });
-
         const pLogs = logs.filter(l => new Date(l.ts || l.time).getTime() >= periodStart.getTime()).sort((a,b) => new Date(a.ts || a.time).getTime() - new Date(b.ts || b.time).getTime());
         pLogs.forEach(l => {
             const sId = l.sid; if(!stats[sId]) return;
@@ -361,12 +340,7 @@
                 if(s.lastInType==="加班上班") ot += live; 
                 else if(live > s.stdDayMs) ot += (live - s.stdDayMs); 
             }
-            return `<tr><td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">工作中</span>':''}</td><td>${s.dept}</td><td>
-                <span class="stat-badge">總計: ${formatTime(total)}</span>
-                <span class="normal-badge">正常: ${formatTime(total-ot)}</span>
-                <span class="ot-badge">加班: ${formatTime(ot)}</span>
-                ${s.leaveHrs > 0 ? `<span class="leave-badge">請假: ${s.leaveHrs}h</span>` : ''}
-            </td></tr>`;
+            return `<tr><td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">工作中</span>':''}</td><td>${s.dept}</td><td><span class="stat-badge">總計: ${formatTime(total)}</span><span class="normal-badge">正常: ${formatTime(total-ot)}</span><span class="ot-badge">加班: ${formatTime(ot)}</span>${s.leaveHrs > 0 ? `<span class="leave-badge">請假: ${s.leaveHrs}h</span>` : ''}</td></tr>`;
         }).join('');
     }
 
@@ -374,8 +348,7 @@
         if(isAuthed) { showPage(t); return; }
         const pw = prompt("🔐 請輸入管理密碼：");
         if(pw === null) return;
-        if(String(pw) === String(adminPass)) { isAuthed = true; showPage(t); } 
-        else { alert("密碼錯誤！"); }
+        if(String(pw) === String(adminPass)) { isAuthed = true; showPage(t); } else { alert("密碼錯誤！"); }
     }
 
     function showPage(p) {
@@ -384,10 +357,7 @@
         document.getElementById('page-'+p).classList.add('active');
         document.getElementById('nav-'+p).classList.add('active');
         stopScanner();
-        if(p === 'make') { 
-            calculateStats();
-            liveStatTimer = setInterval(calculateStats, 1000); 
-        }
+        if(p === 'make') { calculateStats(); liveStatTimer = setInterval(calculateStats, 1000); }
     }
 
     async function saveSystemConfigs() {
@@ -403,18 +373,8 @@
     function renderLogs() {
         document.getElementById('log-body').innerHTML = logs.slice(0,15).map(l => {
             const d = new Date(l.ts || l.time);
-            // 修改點：包含完整日期與時間 
-            const timeStr = d.toLocaleString('zh-TW', { 
-                year: 'numeric', 
-                month: '2-digit', 
-                day: '2-digit', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit', 
-                hour12: false 
-            });
-            const isLate = l.type.includes("遲到");
-            const isLeave = l.type.includes("請假");
+            const timeStr = d.toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            const isLate = l.type.includes("遲到"), isLeave = l.type.includes("請假");
             const color = isLeave ? '#f59e0b' : (l.type.includes('上班')?'#10b981':'#ef4444');
             return `<tr><td>${l.name}</td><td style="font-size:12px;">${timeStr}</td><td style="color:${color}; font-weight:bold;">${l.type}${isLate ? '<span class="late-tag">遲到</span>':''}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`;
         }).join('');
@@ -445,18 +405,15 @@
                 ctx.drawImage(img, 540 - (img.width*ratio)/2, 600 - (img.height*ratio)/2, img.width*ratio, img.height*ratio); ctx.restore();
             } catch(e){}
         }
-        ctx.fillStyle = "white";
-        ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
-        ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial";
-        ctx.fillText(dept + " • " + shift, 540, 1180);
+        ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
+        ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
         const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
         const cellSize = 10, startX = 540 - (qr.getModuleCount()*cellSize)/2; ctx.fillStyle = "white";
         for (let r = 0; r < qr.getModuleCount(); r++) { for (let c = 0; c < qr.getModuleCount(); c++) { if (qr.isDark(r, c)) ctx.fillRect(startX + c*cellSize, 1380 + r*cellSize, cellSize, cellSize); } }
     }
 
     function processAndPreviewPhoto() {
-        const file = document.getElementById('m-photo').files[0];
-        if(!file) return;
+        const file = document.getElementById('m-photo').files[0]; if(!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
@@ -471,8 +428,7 @@
     }
 
     function showStaffSummary(id) {
-        const staff = staffDb.find(s => String(s.id) === String(id));
-        if (!staff) return;
+        const staff = staffDb.find(s => String(s.id) === String(id)); if (!staff) return;
         const now = new Date();
         let startMonth = now.getMonth(); if (now.getDate() < cycleDay) startMonth -= 1;
         const periodStart = new Date(now.getFullYear(), startMonth, cycleDay, 0, 0, 0);
@@ -483,31 +439,19 @@
         const sLogs = logs.filter(l => String(l.sid) === String(id) && new Date(l.ts || l.time) >= periodStart).sort((a, b) => new Date(a.ts || a.time) - new Date(b.ts || b.time));
         sLogs.forEach(l => {
             const ts = new Date(l.ts || l.time).getTime();
-            if(l.type.startsWith("請假")) {
-                leaveHrs += parseFloat(l.type.match(/\((.*)h\)/)[1]) || 0;
-            } else if(l.type.includes("上班")) { 
-                lastInMs = ts; lastInType = l.type; 
-            } else if(l.type.includes("下班") && lastInMs) {
+            if(l.type.startsWith("請假")) { leaveHrs += parseFloat(l.type.match(/\((.*)h\)/)[1]) || 0; } 
+            else if(l.type.includes("上班")) { lastInMs = ts; lastInType = l.type; } 
+            else if(l.type.includes("下班") && lastInMs) {
                 const session = ts - lastInMs; totalMs += session;
                 if(lastInType === "加班上班") otMs += session; else if(session > stdMs) otMs += (session - stdMs);
                 lastInMs = null;
             }
         });
-
         document.getElementById('summary-title').innerText = `📊 ${staff.name} 的月報表`;
-        document.getElementById('summary-stats-grid').innerHTML = `
-            <div style="background:#f1f5f9; padding:12px; border-radius:12px; border-left:4px solid var(--primary);">
-                <div style="font-size:12px; color:#64748b;">總工時</div><div style="font-weight:bold;">${formatTime(totalMs)}</div>
-            </div>
-            <div style="background:#fff7ed; padding:12px; border-radius:12px; border-left:4px solid var(--leave);">
-                <div style="font-size:12px; color:#c2410c;">請假總時數</div><div style="font-weight:bold; color:#c2410c;">${leaveHrs} 小時</div>
-            </div>`;
-            
+        document.getElementById('summary-stats-grid').innerHTML = `<div style="background:#f1f5f9; padding:12px; border-radius:12px; border-left:4px solid var(--primary);"><div style="font-size:12px; color:#64748b;">總工時</div><div style="font-weight:bold;">${formatTime(totalMs)}</div></div><div style="background:#fff7ed; padding:12px; border-radius:12px; border-left:4px solid var(--leave);"><div style="font-size:12px; color:#c2410c;">請假總時數</div><div style="font-weight:bold; color:#c2410c;">${leaveHrs} 小時</div></div>`;
         document.getElementById('summary-detail-body').innerHTML = [...sLogs].reverse().map(l => {
             const d = new Date(l.ts || l.time);
-            const isLate = l.type.includes("遲到");
-            return `<tr><td><small>${d.toLocaleDateString()}</small><br>${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false})}</td>
-            <td style="color:${l.type.includes('上班')?'#10b981': (l.type.includes('請假') ? '#f59e0b' : '#ef4444')}; font-weight:bold;">${l.type}${isLate ? ' <span class="late-tag">遲到</span>':''}</td></tr>`;
+            return `<tr><td><small>${d.toLocaleDateString()}</small><br>${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false})}</td><td style="color:${l.type.includes('上班')?'#10b981': (l.type.includes('請假') ? '#f59e0b' : '#ef4444')}; font-weight:bold;">${l.type}${l.type.includes("遲到") ? ' <span class="late-tag">遲到</span>':''}</td></tr>`;
         }).join('');
         document.getElementById('summary-modal').style.display = 'block';
     }
@@ -518,7 +462,8 @@
     function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
-    function stopScanner() { if(scanner && scanner.isScanning) scanner.stop().then(()=>document.getElementById('reader-placeholder').style.display="flex"); }
+    function stopScanner() { if(scanner && scanner.isScanning) { scanner.stop().then(()=>document.getElementById('reader-placeholder').style.display="flex"); } }
+    
     function setStatus(s) {
         currentStatus = s;
         ['in','out','ot-in','ot-out'].forEach(id => document.getElementById('btn-'+id).classList.remove('active-in','active-out','active-ot-in','active-ot-out'));
@@ -532,15 +477,9 @@
     async function deleteShift(i) { if(!confirm("確定刪除？")) return; shifts.splice(i,1); await updateConfig('shifts', JSON.stringify(shifts)); }
     
     function loadStaff(id) { 
-        const s = staffDb.find(x => String(x.id) === String(id));
-        if (!s) return;
-        document.getElementById('m-id').value = s.id; 
-        document.getElementById('m-name').value = s.name; 
-        document.getElementById('m-dept').value = s.dept || "技術部"; 
-        document.getElementById('m-company').value = s.comp || "伊黛爾內衣";
-        document.getElementById('m-photo-base64').value = s.photo || ""; 
-        const select = document.getElementById('m-shift-select');
-        select.value = s.shift;
+        const s = staffDb.find(x => String(x.id) === String(id)); if (!s) return;
+        document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name; document.getElementById('m-dept').value = s.dept || "技術部"; document.getElementById('m-company').value = s.comp || "伊黛爾內衣"; document.getElementById('m-photo-base64').value = s.photo || ""; 
+        const select = document.getElementById('m-shift-select'); select.value = s.shift;
         setTimeout(() => { select.value = s.shift; drawBadge(); }, 100);
     }
 
@@ -548,16 +487,12 @@
         const id = document.getElementById('m-id').value.trim(), name = document.getElementById('m-name').value.trim();
         if(!id || !name) return alert("編號與姓名必填");
         const data = { id, name, shift: document.getElementById('m-shift-select').value, photo: document.getElementById('m-photo-base64').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
-        toggleLoader(true);
-        await postToCloud({ action: 'saveStaff', data: data });
-        await syncFromCloud();
+        toggleLoader(true); await postToCloud({ action: 'saveStaff', data: data }); await syncFromCloud();
     }
 
     function fullExport() {
         const exportLogs = logs.map(l => ({ '日期時間': new Date(l.ts || l.time).toLocaleString('zh-TW', {hour12: false}), '姓名': l.name, '編號': l.sid, '動作': l.type }));
-        const wb = XLSX.utils.book_new(); 
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單"); 
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportLogs), "打卡紀錄");
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportLogs), "打卡紀錄");
         XLSX.writeFile(wb, `備份_${new Date().toLocaleDateString()}.xlsx`);
     }
 
