@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.7.1</title>
+    <title>雲端打卡系統 v3.7.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -45,11 +45,9 @@
         .live-tag { color: var(--success); font-size: 11px; font-weight: bold; border: 1px solid var(--success); padding: 1px 4px; border-radius: 4px; margin-left: 5px; animation: pulse 1s infinite; }
         .late-tag { color: var(--danger); background: #fee2e2; padding: 2px 4px; border-radius: 4px; font-size: 11px; margin-left: 5px; border: 1px solid var(--danger); }
         #reader { border-radius: 15px; overflow: hidden; background: #1e293b; width: 100%; min-height: 300px; display: flex; align-items: center; justify-content: center; }
-        #reader-placeholder { color: white; text-align: center; padding: 20px; width: 100%; }
+        #reader-placeholder { color: white; text-align: center; padding: 20px; width: 100%; display: flex; justify-content: center; }
         .mini-btn { padding: 6px 10px; font-size: 12px; margin-bottom: 0; width: auto; }
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; font-weight: bold; color: var(--accent); }
-        .management-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 768px) { .management-grid { grid-template-columns: 1fr; } }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -78,11 +76,11 @@
                     <button class="primary-btn" onclick="startScanner()" style="width: auto; padding: 15px 30px;">📷 點擊開啟相機掃描</button>
                 </div>
             </div>
-            <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請開啟相機進行掃描</div>
+            <div id="scan-feedback" style="margin-top:15px; padding:15px; text-align:center; border-radius:12px; background:#f1f5f9; font-weight:bold;">請選擇狀態後開啟相機</div>
             <button id="continue-btn" style="display:none; margin-top: 10px;" class="accent-btn" onclick="startScanner()">🔄 繼續掃描下一位</button>
         </div>
         <div class="card">
-            <h2>今日即時紀錄 (雲端同步)</h2>
+            <h2>今日即時紀錄</h2>
             <div style="overflow-x:auto;">
                 <table class="list-table">
                     <thead><tr><th>姓名</th><th>日期時間</th><th>狀態</th><th>操作</th></tr></thead>
@@ -102,7 +100,7 @@
                 </table>
             </div>
         </div>
-        <div class="management-grid">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="mgmt-grid">
             <div class="card">
                 <h2>編輯員工資料</h2>
                 <div class="form-group"><label>公司名稱</label><input type="text" id="m-company" value="伊黛爾內衣" oninput="drawBadge()"></div>
@@ -122,25 +120,6 @@
                 </div>
                 <button class="accent-btn" onclick="downloadBadge()">📥 下載高清 PNG</button>
             </div>
-        </div>
-        <div class="card" style="border: 2px solid var(--leave);">
-            <h2>📝 員工請假登記</h2>
-            <div class="management-grid">
-                <div class="form-group"><label>選擇員工</label><select id="leave-staff-select"></select></div>
-                <div class="form-group"><label>請假日期</label><input type="date" id="leave-date"></div>
-            </div>
-            <div class="management-grid">
-                <div class="form-group"><label>請假時數 (小時)</label><input type="number" id="leave-hours" value="8" step="0.5"></div>
-                <div class="form-group"><label>假別</label>
-                    <select id="leave-type">
-                        <option value="事假">事假</option>
-                        <option value="病假">病假</option>
-                        <option value="特休">特休</option>
-                        <option value="公假">公假</option>
-                    </select>
-                </div>
-            </div>
-            <button class="leave-btn" onclick="submitLeave()">➕ 登記請假紀錄</button>
         </div>
         <div class="card">
             <h2>雲端員工名單</h2>
@@ -185,20 +164,11 @@
     </div>
 </div>
 
-<div id="summary-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; overflow-y:auto; padding: 20px 10px;">
-    <div class="card" style="max-width:600px; margin:0 auto; position:relative; background: white;">
-        <button onclick="closeSummary()" style="position:absolute; right:15px; top:15px; width:40px; background:#f1f5f9; border-radius:50%; border:none; height:40px; cursor:pointer;">✕</button>
-        <h2 id="summary-title" style="margin-bottom:20px;">員工月度總結</h2>
-        <div id="summary-stats-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;"></div>
-        <h3 style="font-size:1rem; color:var(--primary);">🗓️ 本期紀錄明細</h3>
-        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px;">
-            <table class="list-table">
-                <thead style="position: sticky; top: 0; background: #f8fafc;">
-                    <tr><th>日期時間</th><th>動作/假別</th></tr>
-                </thead>
-                <tbody id="summary-detail-body"></tbody>
-            </table>
-        </div>
+<div id="summary-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; padding: 20px 10px;">
+    <div class="card" style="max-width:500px; margin:0 auto; background: white;">
+        <h2 id="summary-title">報表</h2>
+        <div id="summary-stats-grid"></div>
+        <button onclick="closeSummary()" class="secondary-btn">關閉</button>
     </div>
 </div>
 
@@ -221,249 +191,68 @@
             adminPass = data.adminPass ? String(data.adminPass) : "1234";
             document.getElementById('config-cycle-day').value = cycleDay;
             document.getElementById('config-grace-min').value = graceMin;
-            renderLogs(); updateShiftUI(); renderStaff(); updateLeaveUI();
+            renderLogs(); updateShiftUI(); renderStaff();
         } catch(e) { console.error("同步失敗:", e); }
         toggleLoader(false);
     }
 
-    function checkIsLate(now, shiftName) {
-        if (currentStatus !== "上班") return "";
-        const shift = shifts.find(s => s.name === shiftName);
-        if (!shift) return "";
-        const [sh, sm] = shift.start.split(':').map(Number);
-        const limit = new Date(now);
-        limit.setHours(sh, sm, 0, 0);
-        if (now.getTime() > (limit.getTime() + graceMin * 60000)) return " (遲到)";
-        return "";
-    }
-
-    // ⭐ 修正後的 startScanner 函式
+    // ⭐ 優化後的掃描啟動函數
     async function startScanner() {
-        // 先釋放舊有實體與介面
+        // 1. 如果已經有 scanner 在運行，必須先徹底清除
         if (scanner) {
-            try { await scanner.clear(); } catch (e) {}
+            try {
+                await scanner.stop();
+                await scanner.clear();
+            } catch (e) {
+                console.log("清理掃描器中...");
+            }
             scanner = null;
         }
-        
+
+        // 2. UI 狀態切換
         document.getElementById('reader-placeholder').style.display = "none";
         document.getElementById('continue-btn').style.display = "none";
-        document.getElementById('scan-feedback').innerHTML = "⏳ 相機啟動中...";
-        
-        // 重新初始化
-        scanner = new Html5Qrcode("reader");
+        document.getElementById('scan-feedback').innerHTML = "⏳ 正在啟動鏡頭...";
 
-        try { 
-            await scanner.start({facingMode:"environment"}, {fps:10, qrbox:250}, async (id) => {
-                await scanner.stop(); // 掃到就停，避免重複觸發
-                
-                const staff = staffDb.find(s => String(s.id) === String(id));
-                const name = staff ? staff.name : "未知(" + id + ")";
-                const now = new Date();
-                let typeFinal = currentStatus;
-                if (staff) typeFinal += checkIsLate(now, staff.shift);
-                
-                const newLog = { 
-                    uid: Date.now(), sid: id, name, 
-                    time: now.toLocaleString('zh-TW', {hour12: false}), 
-                    ts: now.toISOString(), type: typeFinal 
-                };
-                
-                document.getElementById('scan-feedback').innerHTML = `⏳ 正在同步 ${name}...`;
-                logs.unshift(newLog); 
-                renderLogs();
-                
-                await postToCloud({ action: 'addLog', data: newLog });
-                document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success); font-size:1.2rem;">✅ ${name} ${typeFinal}成功</span>`;
-                document.getElementById('continue-btn').style.display = "block";
-                document.getElementById('reader-placeholder').style.display = "flex";
-            }); 
-        } catch(e) { 
-            document.getElementById('scan-feedback').innerHTML = "❌ 無法開啟相機";
-            document.getElementById('reader-placeholder').style.display = "flex";
-        }
-    }
+        // 3. 延遲 300ms 確保硬體資源釋放，防止二次啟動失效
+        setTimeout(async () => {
+            scanner = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-    // 以下為原有的其餘邏輯，保持不變
-    function updateLeaveUI() {
-        const select = document.getElementById('leave-staff-select');
-        select.innerHTML = staffDb.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join('');
-        document.getElementById('leave-date').valueAsDate = new Date();
-    }
-
-    async function submitLeave() {
-        const sid = document.getElementById('leave-staff-select').value;
-        const staff = staffDb.find(s => s.id == sid);
-        const date = document.getElementById('leave-date').value;
-        const hours = document.getElementById('leave-hours').value;
-        const type = document.getElementById('leave-type').value;
-        if(!date || !hours) return alert("請填寫日期與時數");
-        const leaveLog = { uid: Date.now(), sid: sid, name: staff.name, time: `${date} 00:00:00`, ts: new Date(date).toISOString(), type: `請假:${type}(${hours}h)` };
-        toggleLoader(true);
-        await postToCloud({ action: 'addLog', data: leaveLog });
-        await syncFromCloud();
-        alert("請假登記成功");
-    }
-
-    function calculateStats() {
-        const now = new Date();
-        let startMonth = now.getMonth(); if (now.getDate() < cycleDay) startMonth -= 1;
-        const periodStart = new Date(now.getFullYear(), startMonth, cycleDay, 0, 0, 0);
-        document.getElementById('period-display').innerText = `本期工時統計 (${periodStart.toLocaleDateString()} 起)`;
-        const stats = {};
-        staffDb.forEach(s => {
-            const shiftInfo = shifts.find(sh => sh.name === s.shift) || shifts[0] || {start:"09:00", end:"18:00"};
-            const sParts = shiftInfo.start.split(':'), eParts = shiftInfo.end.split(':');
-            const stdMs = (parseInt(eParts[0])*3600 + parseInt(eParts[1])*60)*1000 - (parseInt(sParts[0])*3600 + parseInt(sParts[1])*60)*1000;
-            stats[s.id] = { name: s.name, dept: s.dept || "-", totalMs: 0, overtimeMs: 0, leaveHrs: 0, stdDayMs: stdMs, lastInMs: null, lastInType: null, isWorkingNow: false };
-        });
-        const pLogs = logs.filter(l => new Date(l.ts || l.time).getTime() >= periodStart.getTime()).sort((a,b) => new Date(a.ts || a.time).getTime() - new Date(b.ts || b.time).getTime());
-        pLogs.forEach(l => {
-            const sId = l.sid; if(!stats[sId]) return;
-            const ts = new Date(l.ts || l.time).getTime();
-            if(l.type.startsWith("請假")) {
-                const h = parseFloat(l.type.match(/\((.*)h\)/)[1]) || 0;
-                stats[sId].leaveHrs += h;
-            } else if(l.type.includes("上班")) { 
-                stats[sId].lastInMs = ts; stats[sId].lastInType = l.type; stats[sId].isWorkingNow = true; 
-            } else if(l.type.includes("下班") && stats[sId].lastInMs) {
-                const session = ts - stats[sId].lastInMs; stats[sId].totalMs += session;
-                if(stats[sId].lastInType === "加班上班") stats[sId].overtimeMs += session;
-                else if(session > stats[sId].stdDayMs) stats[sId].overtimeMs += (session - stats[sId].stdDayMs);
-                stats[sId].lastInMs = null; stats[sId].isWorkingNow = false;
-            }
-        });
-        document.getElementById('stat-table-body').innerHTML = Object.values(stats).map(s => {
-            let total = s.totalMs, ot = s.overtimeMs;
-            if(s.isWorkingNow) { 
-                const live = now.getTime() - s.lastInMs; 
-                total += live; 
-                if(s.lastInType==="加班上班") ot += live; 
-                else if(live > s.stdDayMs) ot += (live - s.stdDayMs); 
-            }
-            return `<tr><td><b>${s.name}</b> ${s.isWorkingNow ? '<span class="live-tag">工作中</span>':''}</td><td>${s.dept}</td><td><span class="stat-badge">總計: ${formatTime(total)}</span><span class="normal-badge">正常: ${formatTime(total-ot)}</span><span class="ot-badge">加班: ${formatTime(ot)}</span>${s.leaveHrs > 0 ? `<span class="leave-badge">請假: ${s.leaveHrs}h</span>` : ''}</td></tr>`;
-        }).join('');
-    }
-
-    function checkAuth(t) {
-        if(isAuthed) { showPage(t); return; }
-        const pw = prompt("🔐 請輸入管理密碼：");
-        if(pw === null) return;
-        if(String(pw) === String(adminPass)) { isAuthed = true; showPage(t); } else { alert("密碼錯誤！"); }
-    }
-
-    function showPage(p) {
-        if(liveStatTimer) clearInterval(liveStatTimer);
-        document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
-        document.getElementById('page-'+p).classList.add('active');
-        document.getElementById('nav-'+p).classList.add('active');
-        stopScanner();
-        if(p === 'make') { calculateStats(); liveStatTimer = setInterval(calculateStats, 1000); }
-    }
-
-    async function saveSystemConfigs() {
-        const cDay = document.getElementById('config-cycle-day').value;
-        const gMin = document.getElementById('config-grace-min').value;
-        toggleLoader(true);
-        await postToCloud({ action: 'updateConfig', key: 'cycleDay', value: cDay });
-        await postToCloud({ action: 'updateConfig', key: 'graceMin', value: gMin });
-        await syncFromCloud();
-        alert("設定已儲存");
-    }
-
-    function renderLogs() {
-        document.getElementById('log-body').innerHTML = logs.slice(0,15).map(l => {
-            const d = new Date(l.ts || l.time);
-            const timeStr = d.toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            const isLate = l.type.includes("遲到"), isLeave = l.type.includes("請假");
-            const color = isLeave ? '#f59e0b' : (l.type.includes('上班')?'#10b981':'#ef4444');
-            return `<tr><td>${l.name}</td><td style="font-size:12px;">${timeStr}</td><td style="color:${color}; font-weight:bold;">${l.type}${isLate ? '<span class="late-tag">遲到</span>':''}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`;
-        }).join('');
-    }
-
-    function renderStaff() { 
-        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td>${s.name}</td><td><div style="display:flex; gap:4px;"><button class="accent-btn mini-btn" onclick="showStaffSummary('${s.id}')">📊 總結</button><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">編輯</button><button class="danger-btn mini-btn" onclick="deleteStaff('${s.id}')">刪除</button></div></td></tr>`).join('');
-    }
-    
-    function updateShiftUI() {
-        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button class="danger-btn mini-btn" onclick="deleteShift(${i})">刪除</button></td></tr>`).join('');
-        const select = document.getElementById('m-shift-select'), cur = select.value;
-        select.innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-        if(cur) select.value = cur;
-    }
-
-    async function drawBadge() {
-        const canvas = document.getElementById('badge-canvas'), ctx = canvas.getContext('2d');
-        const comp = document.getElementById('m-company').value, id = (document.getElementById('m-id').value || "ID").toUpperCase();
-        const name = document.getElementById('m-name').value, shift = document.getElementById('m-shift-select').value, dept = document.getElementById('m-dept').value, photo = document.getElementById('m-photo-base64').value;
-        ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
-        ctx.fillStyle = "#3b82f6"; ctx.textAlign = "center"; ctx.font = "bold 60px Arial"; ctx.fillText(comp, 540, 180);
-        if(photo) {
             try {
-                const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = photo; });
-                ctx.save(); ctx.beginPath(); ctx.arc(540, 600, 300, 0, Math.PI*2); ctx.clip();
-                const ratio = Math.max(600/img.width, 600/img.height);
-                ctx.drawImage(img, 540 - (img.width*ratio)/2, 600 - (img.height*ratio)/2, img.width*ratio, img.height*ratio); ctx.restore();
-            } catch(e){}
-        }
-        ctx.fillStyle = "white"; ctx.font = "bold 130px Arial"; ctx.fillText(name, 540, 1080);
-        ctx.fillStyle = "#94a3b8"; ctx.font = "60px Arial"; ctx.fillText(dept + " • " + shift, 540, 1180);
-        const qr = qrcode(0, 'H'); qr.addData(id); qr.make();
-        const cellSize = 10, startX = 540 - (qr.getModuleCount()*cellSize)/2; ctx.fillStyle = "white";
-        for (let r = 0; r < qr.getModuleCount(); r++) { for (let c = 0; c < qr.getModuleCount(); c++) { if (qr.isDark(r, c)) ctx.fillRect(startX + c*cellSize, 1380 + r*cellSize, cellSize, cellSize); } }
-    }
+                await scanner.start({ facingMode: "environment" }, config, async (id) => {
+                    // 掃描成功立即停止相機，避免重複掃描
+                    await scanner.stop();
+                    await scanner.clear();
+                    
+                    const staff = staffDb.find(s => String(s.id) === String(id));
+                    const name = staff ? staff.name : "未知(" + id + ")";
+                    const now = new Date();
+                    let typeFinal = currentStatus;
+                    
+                    const newLog = { 
+                        uid: Date.now(), sid: id, name, 
+                        time: now.toLocaleString('zh-TW', {hour12: false}), 
+                        ts: now.toISOString(), type: typeFinal 
+                    };
 
-    function processAndPreviewPhoto() {
-        const file = document.getElementById('m-photo').files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const cvs = document.createElement('canvas');
-                const scale = Math.min(400/img.width, 400/img.height);
-                cvs.width = img.width*scale; cvs.height = img.height*scale; cvs.getContext('2d').drawImage(img, 0,0,cvs.width,cvs.height);
-                document.getElementById('m-photo-base64').value = cvs.toDataURL('image/jpeg', 0.8); drawBadge();
-            };
-            img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-    }
+                    document.getElementById('scan-feedback').innerHTML = `✅ 正在同步 ${name} 的紀錄...`;
+                    logs.unshift(newLog);
+                    renderLogs();
 
-    function showStaffSummary(id) {
-        const staff = staffDb.find(s => String(s.id) === String(id)); if (!staff) return;
-        const now = new Date();
-        let startMonth = now.getMonth(); if (now.getDate() < cycleDay) startMonth -= 1;
-        const periodStart = new Date(now.getFullYear(), startMonth, cycleDay, 0, 0, 0);
-        const shiftInfo = shifts.find(sh => sh.name === staff.shift) || shifts[0] || {start:"09:00", end:"18:00"};
-        const sParts = shiftInfo.start.split(':'), eParts = shiftInfo.end.split(':');
-        const stdMs = (parseInt(eParts[0])*3600 + parseInt(eParts[1])*60)*1000 - (parseInt(sParts[0])*3600 + parseInt(sParts[1])*60)*1000;
-        let totalMs = 0, otMs = 0, leaveHrs = 0, lastInMs = null, lastInType = null;
-        const sLogs = logs.filter(l => String(l.sid) === String(id) && new Date(l.ts || l.time) >= periodStart).sort((a, b) => new Date(a.ts || a.time) - new Date(b.ts || b.time));
-        sLogs.forEach(l => {
-            const ts = new Date(l.ts || l.time).getTime();
-            if(l.type.startsWith("請假")) { leaveHrs += parseFloat(l.type.match(/\((.*)h\)/)[1]) || 0; } 
-            else if(l.type.includes("上班")) { lastInMs = ts; lastInType = l.type; } 
-            else if(l.type.includes("下班") && lastInMs) {
-                const session = ts - lastInMs; totalMs += session;
-                if(lastInType === "加班上班") otMs += session; else if(session > stdMs) otMs += (session - stdMs);
-                lastInMs = null;
+                    await postToCloud({ action: 'addLog', data: newLog });
+                    
+                    document.getElementById('scan-feedback').innerHTML = `<span style="color:var(--success); font-size:1.2rem;">OK! ${name} ${typeFinal}成功</span>`;
+                    document.getElementById('continue-btn').style.display = "block";
+                    document.getElementById('reader-placeholder').style.display = "flex";
+                });
+            } catch (err) {
+                document.getElementById('scan-feedback').innerHTML = "❌ 無法啟動相機，請確認授權。";
+                document.getElementById('reader-placeholder').style.display = "flex";
             }
-        });
-        document.getElementById('summary-title').innerText = `📊 ${staff.name} 的月報表`;
-        document.getElementById('summary-stats-grid').innerHTML = `<div style="background:#f1f5f9; padding:12px; border-radius:12px; border-left:4px solid var(--primary);"><div style="font-size:12px; color:#64748b;">總工時</div><div style="font-weight:bold;">${formatTime(totalMs)}</div></div><div style="background:#fff7ed; padding:12px; border-radius:12px; border-left:4px solid var(--leave);"><div style="font-size:12px; color:#c2410c;">請假總時數</div><div style="font-weight:bold; color:#c2410c;">${leaveHrs} 小時</div></div>`;
-        document.getElementById('summary-detail-body').innerHTML = [...sLogs].reverse().map(l => {
-            const d = new Date(l.ts || l.time);
-            return `<tr><td><small>${d.toLocaleDateString()}</small><br>${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false})}</td><td style="color:${l.type.includes('上班')?'#10b981': (l.type.includes('請假') ? '#f59e0b' : '#ef4444')}; font-weight:bold;">${l.type}${l.type.includes("遲到") ? ' <span class="late-tag">遲到</span>':''}</td></tr>`;
-        }).join('');
-        document.getElementById('summary-modal').style.display = 'block';
+        }, 300);
     }
 
-    function closeSummary() { document.getElementById('summary-modal').style.display = 'none'; }
-    function formatTime(ms) { let s = Math.floor(ms / 1000); return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`; }
-    async function postToCloud(payload) { return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); }
-    function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
-    function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
-    function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
-    function stopScanner() { if(scanner && scanner.isScanning) { scanner.stop().then(()=>document.getElementById('reader-placeholder').style.display="flex"); } }
-    
     function setStatus(s) {
         currentStatus = s;
         ['in','out','ot-in','ot-out'].forEach(id => document.getElementById('btn-'+id).classList.remove('active-in','active-out','active-ot-in','active-ot-out'));
@@ -471,29 +260,67 @@
         document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]);
     }
 
-    async function updateConfig(key, value) { toggleLoader(true); await postToCloud({ action: 'updateConfig', key, value }); await syncFromCloud(); alert("同步成功"); }
-    async function deleteStaff(id) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({ action: 'deleteStaff', id }); await syncFromCloud(); } }
-    async function deleteLog(uid) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({action:'deleteLog', uid}); await syncFromCloud(); } }
-    async function deleteShift(i) { if(!confirm("確定刪除？")) return; shifts.splice(i,1); await updateConfig('shifts', JSON.stringify(shifts)); }
+    function renderLogs() {
+        document.getElementById('log-body').innerHTML = logs.slice(0,10).map(l => {
+            const color = l.type.includes('上班') ? '#10b981' : '#ef4444';
+            return `<tr><td>${l.name}</td><td style="font-size:12px;">${l.time}</td><td style="color:${color}; font-weight:bold;">${l.type}</td><td><button class="danger-btn mini-btn" onclick="deleteLog(${l.uid})">×</button></td></tr>`;
+        }).join('');
+    }
+
+    function renderStaff() { 
+        document.getElementById('staff-body').innerHTML = staffDb.map(s => `<tr><td>${s.id}</td><td>${s.name}</td><td><button class="primary-btn mini-btn" onclick="loadStaff('${s.id}')">編輯</button></td></tr>`).join('');
+    }
+
+    function updateShiftUI() {
+        const select = document.getElementById('m-shift-select');
+        select.innerHTML = shifts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+        document.getElementById('shift-list-body').innerHTML = shifts.map((s,i)=>`<tr><td>${s.name}</td><td>${s.start}-${s.end}</td><td><button class="danger-btn mini-btn" onclick="deleteShift(${i})">刪除</button></td></tr>`).join('');
+    }
+
+    async function postToCloud(payload) { return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); }
+    function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
     
-    function loadStaff(id) { 
-        const s = staffDb.find(x => String(x.id) === String(id)); if (!s) return;
-        document.getElementById('m-id').value = s.id; document.getElementById('m-name').value = s.name; document.getElementById('m-dept').value = s.dept || "技術部"; document.getElementById('m-company').value = s.comp || "伊黛爾內衣"; document.getElementById('m-photo-base64').value = s.photo || ""; 
-        const select = document.getElementById('m-shift-select'); select.value = s.shift;
-        setTimeout(() => { select.value = s.shift; drawBadge(); }, 100);
+    function showPage(p) {
+        document.querySelectorAll('.page, nav button').forEach(e => e.classList.remove('active'));
+        document.getElementById('page-'+p).classList.add('active');
+        document.getElementById('nav-'+p).classList.add('active');
+        if (scanner) { scanner.stop(); }
+    }
+
+    function checkAuth(t) {
+        const pw = prompt("🔐 管理密碼：");
+        if(String(pw) === String(adminPass)) { isAuthed = true; showPage(t); } 
+        else { alert("密碼錯誤"); }
     }
 
     async function saveToCloud() {
-        const id = document.getElementById('m-id').value.trim(), name = document.getElementById('m-name').value.trim();
-        if(!id || !name) return alert("編號與姓名必填");
-        const data = { id, name, shift: document.getElementById('m-shift-select').value, photo: document.getElementById('m-photo-base64').value, dept: document.getElementById('m-dept').value, comp: document.getElementById('m-company').value };
-        toggleLoader(true); await postToCloud({ action: 'saveStaff', data: data }); await syncFromCloud();
+        const data = { 
+            id: document.getElementById('m-id').value, 
+            name: document.getElementById('m-name').value,
+            shift: document.getElementById('m-shift-select').value,
+            dept: document.getElementById('m-dept').value,
+            photo: document.getElementById('m-photo-base64').value
+        };
+        toggleLoader(true);
+        await postToCloud({ action: 'saveStaff', data });
+        await syncFromCloud();
     }
 
-    function fullExport() {
-        const exportLogs = logs.map(l => ({ '日期時間': new Date(l.ts || l.time).toLocaleString('zh-TW', {hour12: false}), '姓名': l.name, '編號': l.sid, '動作': l.type }));
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staffDb), "員工名單"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportLogs), "打卡紀錄");
-        XLSX.writeFile(wb, `備份_${new Date().toLocaleDateString()}.xlsx`);
+    function drawBadge() {
+        const canvas = document.getElementById('badge-canvas'), ctx = canvas.getContext('2d');
+        ctx.fillStyle = "#0f172a"; ctx.fillRect(0,0,1080,1728);
+        ctx.fillStyle = "white"; ctx.font = "bold 100px Arial"; ctx.textAlign = "center";
+        ctx.fillText(document.getElementById('m-name').value || "姓名", 540, 1100);
+        // QR Code
+        const qr = qrcode(0, 'H'); qr.addData(document.getElementById('m-id').value || "000"); qr.make();
+        const cellSize = 12, size = qr.getModuleCount() * cellSize;
+        const x = (1080 - size) / 2, y = 1300;
+        ctx.fillStyle = "white";
+        for (let r = 0; r < qr.getModuleCount(); r++) {
+            for (let c = 0; c < qr.getModuleCount(); c++) {
+                if (qr.isDark(r, c)) ctx.fillRect(x + c*cellSize, y + r*cellSize, cellSize, cellSize);
+            }
+        }
     }
 
     window.onload = syncFromCloud;
