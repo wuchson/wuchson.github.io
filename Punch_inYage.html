@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲端打卡系統 v3.7.2</title>
+    <title>雲端打卡系統 v3.8.1 - 修正版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -168,7 +168,6 @@
     let logs = [], staffDb = [], shifts = [], cycleDay = 1, graceMin = 5, adminPass = "1234";
     let isAuthed = false, scanner = null, currentStatus = "上班", liveStatTimer = null;
 
-    // 同步功能 [cite: 263, 264, 265, 266, 267]
     async function syncFromCloud() {
         toggleLoader(true);
         try {
@@ -183,7 +182,7 @@
             document.getElementById('config-cycle-day').value = cycleDay;
             document.getElementById('config-grace-min').value = graceMin;
             document.getElementById('search-date').valueAsDate = new Date();
-            initExportYearSelect(); // 初始化匯出年份選單
+            initExportYearSelect();
             renderLogs();
             updateShiftUI();
             renderStaff();
@@ -192,7 +191,6 @@
         toggleLoader(false);
     }
 
-    // 新增：初始化年度選單
     function initExportYearSelect() {
         const select = document.getElementById('export-year-select');
         if (!select) return;
@@ -202,31 +200,59 @@
         select.innerHTML = options;
     }
 
-    // 核心修正：匯出功能，移除超長照片字串以解決崩潰問題
+    // --- 關鍵修正：補足新增班別邏輯 ---
+    async function addShift() {
+        const name = document.getElementById('shift-name').value.trim();
+        const start = document.getElementById('shift-start').value;
+        const end = document.getElementById('shift-end').value;
+
+        if (!name || !start || !end) return alert("請填寫完整的班別名稱與時間範圍");
+        if (shifts.some(s => s.name === name)) return alert("此班別名稱已存在");
+
+        // 1. 更新本地陣列 [cite: 341]
+        const newShift = { name, start, end };
+        shifts.push(newShift);
+
+        // 2. 同步至雲端 
+        toggleLoader(true);
+        try {
+            await postToCloud({ 
+                action: 'updateConfig', 
+                key: 'shifts', 
+                value: JSON.stringify(shifts) 
+            });
+            // 清空欄位 [cite: 332]
+            document.getElementById('shift-name').value = "";
+            document.getElementById('shift-start').value = "";
+            document.getElementById('shift-end').value = "";
+            await syncFromCloud(); // 重新整理以更新所有 UI 選單 
+            alert("班別新增成功並同步雲端");
+        } catch (e) {
+            alert("儲存失敗：" + e.message);
+        }
+        toggleLoader(false);
+    }
+
+    // 保留原始匯出功能 (剔除照片防止崩潰) 
     async function exportYearlyLogs() {
         const selectedYear = document.getElementById('export-year-select').value;
         toggleLoader(true);
         try {
-            // 篩選指定年度紀錄 [cite: 347]
             const filteredLogs = logs.filter(l => {
                 const logDate = new Date(l.ts || l.time);
                 return logDate.getFullYear().toString() === selectedYear;
             });
-
             if (filteredLogs.length === 0) {
                 alert(`${selectedYear} 年度無任何打卡紀錄`);
                 toggleLoader(false);
                 return;
             }
-
             const exportLogs = filteredLogs.map(l => ({
                 '日期時間': new Date(l.ts || l.time).toLocaleString('zh-TW', {hour12: false}),
                 '姓名': l.name,
                 '編號': l.sid,
                 '動作': l.type
             }));
-
-            // 修正關鍵：剔除照片資料，防止超過 Excel 32767 字數限制
             const exportStaff = staffDb.map(s => {
                 const { photo, ...staffWithoutPhoto } = s; 
                 return {
@@ -237,23 +263,19 @@
                     '公司': staffWithoutPhoto.comp
                 };
             });
-
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportStaff), "員工名單");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportLogs), "打卡紀錄");
-            
-            // 檔案命名：打卡紀錄+當前日期 [cite: 347]
             const now = new Date();
             const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
             XLSX.writeFile(wb, `打卡紀錄_${selectedYear}年度_${dateStr}.xlsx`);
         } catch (err) {
-            console.error(err);
             alert("匯出發生錯誤：" + err.message);
         }
         toggleLoader(false);
     }
 
-    // --- 剩餘所有原始功能函式保持不變 [cite: 268-346, 348] ---
+    // 其餘原始功能函式保持不變 [cite: 274-344]
     function renderLogs() { const todayStr = new Date().toLocaleDateString('zh-TW'); const todayLogs = logs.filter(l => new Date(l.ts || l.time).toLocaleDateString('zh-TW') === todayStr); displayLogTable(todayLogs, "今日尚無打卡紀錄"); }
     function renderLogsByDate() { const searchVal = document.getElementById('search-date').value; if (!searchVal) return alert("請選擇日期"); const targetDate = new Date(searchVal).toLocaleDateString('zh-TW'); const filteredLogs = logs.filter(l => new Date(l.ts || l.time).toLocaleDateString('zh-TW') === targetDate); displayLogTable(filteredLogs, `${targetDate} 尚無紀錄`); }
     function resetToToday() { document.getElementById('search-date').valueAsDate = new Date(); renderLogs(); }
@@ -278,7 +300,12 @@
     function clearForm() { ['m-id','m-name','m-photo-base64','m-photo'].forEach(i => document.getElementById(i).value=""); drawBadge(); }
     function downloadBadge() { const a = document.createElement('a'); a.download=`ID_${document.getElementById('m-id').value}.png`; a.href=document.getElementById('badge-canvas').toDataURL(); a.click(); }
     function stopScanner() { if(scanner && scanner.isScanning) scanner.stop().then(()=>document.getElementById('reader-placeholder').style.display="flex"); }
-    function setStatus(s) { currentStatus = s; ['in','out','ot-in','ot-out'].forEach(id => document.getElementById('btn-'+id).classList.remove('active-in','active-out','active-ot-in','active-ot-out')); const btnMap = {'上班':'in','下班':'out','加班上班':'ot-in','加班下班':'ot-out'}; document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]); }
+    function setStatus(s) { 
+        currentStatus = s; 
+        ['in','out','ot-in','ot-out'].forEach(id => document.getElementById('btn-'+id).classList.remove('active-in','active-out','active-ot-in','active-ot-out')); 
+        const btnMap = {'上班':'in','下班':'out','加班上班':'ot-in','加班下班':'ot-out'}; 
+        document.getElementById('btn-'+btnMap[s]).classList.add('active-'+btnMap[s]);
+    }
     async function updateConfig(key, value) { toggleLoader(true); await postToCloud({ action: 'updateConfig', key, value }); await syncFromCloud(); alert("同步成功"); }
     async function deleteStaff(id) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({ action: 'deleteStaff', id }); await syncFromCloud(); } }
     async function deleteLog(uid) { if(confirm("確定刪除？")) { toggleLoader(true); await postToCloud({action:'deleteLog', uid}); await syncFromCloud(); } }
