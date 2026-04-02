@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>長度單位換算器</title>
     <style>
-        /* 基礎設定 */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             margin: 0; 
             padding: 20px 10px; 
             background-color: #f0f2f5; 
-            color: #333;
         }
-
-        /* 容器設定 */
         .container { 
             max-width: 600px; 
             margin: auto; 
@@ -24,109 +20,78 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
             box-sizing: border-box; 
         }
-
-        h2 { 
-            text-align: center; 
-            margin-top: 0; 
-            margin-bottom: 10px; 
-            font-size: 24px;
-            color: #1a1a1a;
+        h2 { text-align: center; margin: 0 0 10px 0; color: #1a1a1a; }
+        .intro { text-align: center; color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.4; }
+        
+        .section-title { 
+            grid-column: 1 / -1; 
+            font-size: 12px; 
+            color: #999; 
+            text-transform: uppercase; 
+            margin-top: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
 
-        .intro { 
-            text-align: center; 
-            color: #666; 
-            font-size: 14px; 
-            line-height: 1.5;
-            margin-bottom: 25px; 
-        }
-
-        /* 響應式網格：預設手機為單欄 */
         .unit-grid { 
             display: grid; 
             grid-template-columns: 1fr; 
             gap: 15px; 
         }
+        @media (min-width: 480px) { .unit-grid { grid-template-columns: 1fr 1fr; } }
 
-        /* 當螢幕寬度大於 480px 時切換為雙欄 */
-        @media (min-width: 480px) {
-            .unit-grid { 
-                grid-template-columns: 1fr 1fr; 
-            }
-        }
-
-        /* 輸入組樣式 */
-        .input-group { 
-            display: flex; 
-            flex-direction: column; 
-        }
-
-        label { 
-            margin-bottom: 6px; 
-            font-weight: 600; 
-            font-size: 13px; 
-            color: #555; 
-            display: flex;
-            justify-content: space-between;
-        }
-
-        label span {
-            color: #999;
-            font-weight: normal;
-        }
-
+        .input-group { display: flex; flex-direction: column; }
+        label { margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #555; display: flex; justify-content: space-between; }
+        label span { color: #aaa; font-weight: normal; }
+        
         input { 
             padding: 12px; 
             border: 2px solid #eee; 
             border-radius: 8px; 
-            font-size: 16px; /* 防止 iOS 輸入時自動放大 */
+            font-size: 16px; 
             width: 100%; 
             box-sizing: border-box; 
-            transition: border-color 0.2s;
+            transition: all 0.2s;
             -webkit-appearance: none;
         }
-
-        input:focus { 
-            border-color: #4CAF50; 
-            outline: none; 
-            background-color: #f9fff9; 
-        }
-
-        .footer { 
-            margin-top: 25px; 
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-            font-size: 12px; 
-            color: #aaa; 
-            text-align: center; 
-        }
+        input:focus { border-color: #4CAF50; outline: none; background-color: #f9fff9; border-width: 2px; }
+        
+        .footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #bbb; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>長度換算 Length Converter</h2>
-    <p class="intro">
-        支援公制與英制單位，輸入數值即可自動同步換算。<br>
-        Instant conversion between Metric and Imperial units.
-    </p>
+    <p class="intro">支援公制與英制單位，輸入數值即可自動同步換算。<br>Instant Metric & Imperial conversion.</p>
 
     <div class="unit-grid">
+        <div class="section-title">公制單位 Metric System</div>
         <div class="input-group">
             <label>公里 <span>Kilometers (km)</span></label>
             <input type="number" id="km" placeholder="0" oninput="convert(this)">
         </div>
         <div class="input-group">
-            <label>英里 <span>Miles (mi)</span></label>
-            <input type="number" id="mi" placeholder="0" oninput="convert(this)">
-        </div>
-        <div class="input-group">
-            <label>海里 <span>Nautical Miles (nmi)</span></label>
-            <input type="number" id="nmi" placeholder="0" oninput="convert(this)">
-        </div>
-        <div class="input-group">
             <label>公尺 <span>Meters (m)</span></label>
             <input type="number" id="m" placeholder="0" oninput="convert(this)">
+        </div>
+        <div class="input-group">
+            <label>公分 <span>Centimeters (cm)</span></label>
+            <input type="number" id="cm" placeholder="0" oninput="convert(this)">
+        </div>
+        <div class="input-group">
+            <label>公釐 <span>Millimeters (mm)</span></label>
+            <input type="number" id="mm" placeholder="0" oninput="convert(this)">
+        </div>
+        <div class="input-group">
+            <label>奈米 <span>Nanometers (nm)</span></label>
+            <input type="number" id="nm" placeholder="0" oninput="convert(this)">
+        </div>
+
+        <div class="section-title">英制單位 Imperial System</div>
+        <div class="input-group">
+            <label>英里 <span>Miles (mi)</span></label>
+            <input type="number" id="mi" placeholder="0" oninput="convert(this)">
         </div>
         <div class="input-group">
             <label>碼 <span>Yards (yd)</span></label>
@@ -140,33 +105,29 @@
             <label>英寸 <span>Inches (in)</span></label>
             <input type="number" id="in" placeholder="0" oninput="convert(this)">
         </div>
+
+        <div class="section-title">其他 Others</div>
         <div class="input-group">
-            <label>公分 <span>Centimeters (cm)</span></label>
-            <input type="number" id="cm" placeholder="0" oninput="convert(this)">
-        </div>
-        <div class="input-group">
-            <label>奈米 <span>Nanometers (nm)</span></label>
-            <input type="number" id="nm" placeholder="0" oninput="convert(this)">
+            <label>海里 <span>Nautical Miles (nmi)</span></label>
+            <input type="number" id="nmi" placeholder="0" oninput="convert(this)">
         </div>
     </div>
 
-    <div class="footer">
-        © 長度單位自動換算工具
-    </div>
+    <div class="footer">© 單位換算工具 Unit Conversion Tool</div>
 </div>
 
 <script>
-    // 換算率 (以公尺 m 為基準)
     const factors = {
         km: 1000,
-        mi: 1609.344,
-        nmi: 1852,
         m: 1,
+        cm: 0.01,
+        mm: 0.001,
+        nm: 1e-9,
+        mi: 1609.344,
         yd: 0.9144,
         ft: 0.3048,
         in: 0.0254,
-        cm: 0.01,
-        nm: 1e-9
+        nmi: 1852
     };
 
     function convert(input) {
@@ -186,9 +147,8 @@
         Object.keys(factors).forEach(key => {
             if (key !== id) {
                 const result = meters / factors[key];
-                // 限制有效位數，避免長數字撐開輸入框
-                const formatted = Number(result.toPrecision(10));
-                document.getElementById(key).value = formatted;
+                // 使用 toPrecision(10) 處理精度，Number() 去除多餘的 0
+                document.getElementById(key).value = Number(result.toPrecision(10));
             }
         });
     }
