@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全方位重量單位換算器</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #d35400;
+            --bg: #f0f2f5;
+            --metric: #e8f4fd;
+            --taiwan: #fef9e7;
+            --jewelry: #f4ecf7;
+            --imperial: #ebf5fb;
+        }
+
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); width: 100%; max-width: 900px; }
+        h2 { text-align: center; color: var(--primary); margin-bottom: 25px; border-bottom: 3px solid var(--accent); display: inline-block; width: 100%; padding-bottom: 10px; }
+        
+        .section { margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 15px; border-radius: 8px; }
+        .sec-metric { background: var(--metric); }
+        .sec-taiwan { background: var(--taiwan); }
+        .sec-jewelry { background: var(--jewelry); }
+        .sec-imperial { background: var(--imperial); }
+
+        .section-title { grid-column: 1 / -1; font-weight: bold; color: #444; margin-bottom: 5px; font-size: 0.95rem; display: flex; justify-content: space-between; }
+        .field { display: flex; flex-direction: column; }
+        label { font-size: 0.8rem; color: #555; margin-bottom: 3px; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; transition: all 0.2s; }
+        input:focus { border-color: var(--accent); background: #fff; outline: none; box-shadow: 0 0 5px rgba(211, 84, 0, 0.3); }
+        
+        .hint { font-size: 0.7rem; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚖️ 重量單位即時換算器</h2>
+
+    <div class="section sec-metric">
+        <div class="section-title">公制 (Metric System)</div>
+        <div class="field"><label>公噸 (t)</label><input type="number" id="t"></div>
+        <div class="field"><label>公斤 (kg)</label><input type="number" id="kg"></div>
+        <div class="field"><label>公克 (g)</label><input type="number" id="g"></div>
+        <div class="field"><label>毫克 (mg)</label><input type="number" id="mg"></div>
+    </div>
+
+    <div class="section sec-taiwan">
+        <div class="section-title">中式/台制 (Traditional) <span class="hint">*台灣 1兩=37.5g | 大陸 1兩=50g</span></div>
+        <div class="field"><label>台斤 (Jin)</label><input type="number" id="tw_jin"></div>
+        <div class="field"><label>台兩 (Tael)</label><input type="number" id="tw_liang"></div>
+        <div class="field"><label>錢 (Mace)</label><input type="number" id="tw_qian"></div>
+        <div class="field"><label>分 (Candareen)</label><input type="number" id="tw_fen"></div>
+        <div class="field"><label>厘 (Point)</label><input type="number" id="tw_li"></div>
+        <div class="field"><label>市斤 (大陸 500g)</label><input type="number" id="cn_jin"></div>
+        <div class="field"><label>市兩 (大陸 50g)</label><input type="number" id="cn_liang"></div>
+    </div>
+
+    <div class="section sec-jewelry">
+        <div class="section-title">珠寶與貴金屬 (Precious Metals)</div>
+        <div class="field"><label>克拉 (ct)</label><input type="number" id="ct"></div>
+        <div class="field"><label>金衡盎司 (oz t)</label><input type="number" id="ozt"></div>
+        <div class="field"><label>格令 (gr)</label><input type="number" id="gr"></div>
+    </div>
+
+    <div class="section sec-imperial">
+        <div class="section-title">英美制 (Imperial / US)</div>
+        <div class="field"><label>常衡盎司 (oz)</label><input type="number" id="oz"></div>
+        <div class="field"><label>磅 (lb)</label><input type="number" id="lb"></div>
+        <div class="field"><label>英石 (st)</label><input type="number" id="st"></div>
+        <div class="field"><label>英噸 (Long Ton)</label><input type="number" id="l_ton"></div>
+        <div class="field"><label>美噸 (Short Ton)</label><input type="number" id="s_ton"></div>
+    </div>
+</div>
+
+<script>
+    // 所有單位相對於「公克 (g)」的精確比例
+    const ratios = {
+        // 公制
+        g: 1,
+        t: 1000000,
+        kg: 1000,
+        mg: 0.001,
+        // 台制/中式
+        tw_jin: 600,
+        tw_liang: 37.5,
+        tw_qian: 3.75,
+        tw_fen: 0.375,
+        tw_li: 0.0375,
+        cn_jin: 500,
+        cn_liang: 50,
+        // 珠寶
+        ct: 0.2,
+        ozt: 31.1034768,
+        gr: 0.06479891,
+        // 英美
+        oz: 28.349523125,
+        lb: 453.59237,
+        st: 6350.29318,
+        l_ton: 1016046.9088,
+        s_ton: 907184.74
+    };
+
+    const inputs = document.querySelectorAll('input');
+
+    inputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            const id = e.target.id;
+            const val = parseFloat(e.target.value);
+
+            if (isNaN(val)) {
+                inputs.forEach(i => i.value = "");
+                return;
+            }
+
+            // 以公克為基準進行計算
+            const baseGrams = val * ratios[id];
+
+            inputs.forEach(ipt => {
+                if (ipt.id !== id) {
+                    const result = baseGrams / ratios[ipt.id];
+                    
+                    // 優化顯示：如果數字太小用科學符號，否則保留最多 6 位小數並去掉結尾多餘的 0
+                    if (result < 0.00001 && result > 0) {
+                        ipt.value = result.toExponential(4);
+                    } else {
+                        ipt.value = parseFloat(result.toFixed(6));
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
