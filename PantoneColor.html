@@ -3,36 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantone 智能取色系統</title>
+    <title>Pantone 專業取色系統</title>
     <style>
-        :root { --dark: #2d3436; --light: #f5f6fa; --accent: #0984e3; }
+        :root { --dark: #2d3436; --light: #f5f6fa; --accent: #d63031; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--light); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 20px; }
-        .upload-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border: 2px dashed var(--accent); cursor: pointer; }
+        .upload-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border: 2px dashed #b2bec3; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { border-color: var(--accent); background: #fffafb; }
         .workspace { display: flex; gap: 30px; max-width: 1200px; width: 100%; justify-content: center; flex-wrap: wrap; }
-        .canvas-container { background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 600px; position: relative; }
+        .canvas-container { background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 650px; }
         canvas { max-width: 100%; cursor: crosshair; display: block; border-radius: 4px; }
-        .panel { width: 320px; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .swatch-preview { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 10px; background: #fafafa; border-radius: 10px; }
-        .swatch-circle { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #eee; }
-        .pantone-card { border: 2px solid #eee; border-radius: 12px; overflow: hidden; background: white; transition: transform 0.2s; }
-        .card-color { height: 150px; width: 100%; }
+        .panel { width: 340px; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .swatch-preview { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; border: 1px solid #eee; }
+        .swatch-circle { width: 65px; height: 65px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .pantone-card { border: 1px solid #ddd; border-radius: 12px; overflow: hidden; background: white; cursor: pointer; }
+        .card-color { height: 160px; width: 100%; position: relative; }
+        .similarity-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 3px 8px; border-radius: 5px; font-size: 10px; }
         .card-detail { padding: 20px; }
-        .brand { font-size: 11px; font-weight: bold; color: #999; margin-bottom: 5px; }
-        .color-code { font-size: 24px; font-weight: 900; display: block; color: var(--dark); }
-        .color-name { font-size: 16px; color: #636e72; }
-        .toast { position: fixed; bottom: 20px; background: var(--dark); color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 1000; }
+        .brand { font-size: 11px; font-weight: bold; color: #b2bec3; margin-bottom: 5px; }
+        .color-code { font-size: 26px; font-weight: 900; display: block; color: var(--dark); letter-spacing: -1px; }
+        .color-name { font-size: 15px; color: #636e72; margin-top: 5px; }
+        .toast { position: fixed; bottom: 30px; background: var(--dark); color: white; padding: 12px 25px; border-radius: 50px; display: none; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Pantone 智能取色器</h1>
-    <p>上傳圖片並點擊，自動比對最接近的色卡</p>
+    <h1>Pantone 專業取色器</h1>
+    <p>點擊圖片區域，系統將比對最精確的 Pantone 色號</p>
 </div>
 
 <div class="upload-box" onclick="document.getElementById('imgInput').click()">
-    <span id="uploadText">點擊此處上傳圖片</span>
+    <strong id="uploadText">＋ 上傳您的設計稿或照片</strong>
     <input type="file" id="imgInput" accept="image/*" style="display:none">
 </div>
 
@@ -45,62 +47,73 @@
         <div class="swatch-preview">
             <div id="targetSwatch" class="swatch-circle" style="background: #eee;"></div>
             <div>
-                <small style="color:#999">選取的色彩</small>
-                <div id="targetHex" style="font-weight: bold; font-family: monospace; font-size: 1.2em;">#------</div>
+                <small style="color:#999; font-size: 11px; text-transform: uppercase;">Picked Color</small>
+                <div id="targetHex" style="font-weight: bold; font-family: monospace; font-size: 1.3em; color: var(--dark);">#------</div>
             </div>
         </div>
 
         <div id="resultBox" style="display: none;">
-            <p style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">最接近的 Pantone 色號：</p>
             <div class="pantone-card" id="copyBtn">
-                <div id="resSwatch" class="card-color"></div>
+                <div id="resSwatch" class="card-color">
+                    <div id="similarity" class="similarity-badge"></div>
+                </div>
                 <div class="card-detail">
                     <div class="brand">PANTONE<sup>®</sup></div>
                     <div id="resCode" class="color-code">----</div>
                     <div id="resName" class="color-name">----</div>
                 </div>
             </div>
-            <p style="font-size: 11px; color: #b2bec3; text-align: center; margin-top: 15px;">提示：點擊色卡可複製 HEX 碼</p>
+            <p style="font-size: 11px; color: #b2bec3; text-align: center; margin-top: 15px;">點擊色卡複製 HEX 碼</p>
         </div>
     </div>
 </div>
 
-<div id="toast" class="toast">已複製色號到剪貼簿！</div>
+<div id="toast" class="toast">已複製 HEX 碼到剪貼簿</div>
 
 <script>
-    // 內建資料庫：包含年度色、經典色、常用色系
+    // 加強版資料庫：針對大地色、灰色、膚色、深色系進行細分
     const pantoneDB = [
-        // 近年年度代表色 (Color of the Year)
-        {code: "13-1023", name: "Peach Fuzz", hex: "#FFBE98"},
-        {code: "18-1750", name: "Viva Magenta", hex: "#BB2649"},
-        {code: "17-3938", name: "Very Peri", hex: "#6667AB"},
-        {code: "13-0647", name: "Illuminating", hex: "#F5DF4D"},
+        // 大地色、咖啡色、米色、木質色系 (加強)
+        {code: "16-1315", name: "Muffin", hex: "#ad8b75"},
+        {code: "17-1128", name: "Indian Tan", hex: "#a17a61"},
+        {code: "18-1140", name: "Cadet", hex: "#97755d"},
+        {code: "16-1120", name: "Sand", hex: "#b29d81"},
+        {code: "15-1215", name: "Sesame", hex: "#c2ab9a"},
+        {code: "18-1148", name: "Oak", hex: "#8e6d51"},
+        {code: "19-1218", name: "Potting Soil", hex: "#4b3d33"},
+        {code: "17-1310", name: "Timber Wolf", hex: "#958c83"},
+        {code: "16-1412", name: "Pristine", hex: "#e2d2ca"},
+        {code: "17-1118", name: "Gingerbread", hex: "#8c6a56"},
+        {code: "18-1031", name: "Toffee", hex: "#755139"},
+        {code: "15-1213", name: "Sand Dollar", hex: "#decdbe"},
+        {code: "16-1320", name: "Nougat", hex: "#ad8d77"},
+        {code: "18-1244", name: "Ginger Spice", hex: "#b65d3a"},
+        {code: "19-1122", name: "Cocoa Brown", hex: "#4c3024"},
+        {code: "18-1022", name: "Zebra Sage", hex: "#8d8070"},
+        {code: "17-1312", name: "Brushed Nickel", hex: "#938782"},
+        {code: "19-0912", name: "Chocolate Plum", hex: "#3c2e2c"},
+        
+        // 灰色與中性色系 (細分)
         {code: "17-5104", name: "Ultimate Gray", hex: "#939597"},
-        {code: "19-4052", name: "Classic Blue", hex: "#0F4C81"},
-        {code: "16-1546", name: "Living Coral", hex: "#FF6F61"},
-        {code: "18-3838", name: "Ultra Violet", hex: "#5F4B8B"},
+        {code: "14-4107", name: "Quiet Gray", hex: "#b7bab9"},
+        {code: "18-4005", name: "Steel Gray", hex: "#717173"},
+        {code: "19-3906", name: "Dark Shadow", hex: "#4f4f51"},
+        {code: "16-3802", name: "Ash", hex: "#a1a0a1"},
+        {code: "13-4403", name: "Silver Birch", hex: "#d1d3d4"},
         
-        // 經典常用色
-        {code: "11-0601", name: "Bright White", hex: "#F4F5F0"},
-        {code: "19-0303", name: "Jet Black", hex: "#2D2C2F"},
-        {code: "18-1438", name: "Marsala", hex: "#955251"},
-        {code: "15-0343", name: "Greenery", hex: "#88B04B"},
-        {code: "13-1520", name: "Rose Quartz", hex: "#F7CAC9"},
-        {code: "15-3919", name: "Serenity", hex: "#92A8D1"},
-        {code: "18-3224", name: "Radiant Orchid", hex: "#B163A3"},
-        {code: "17-5641", name: "Emerald", hex: "#009473"},
-        {code: "17-1463", name: "Tangerine Tango", hex: "#DD4124"},
-        {code: "18-2120", name: "Honeysuckle", hex: "#D65076"},
-        {code: "15-5519", name: "Turquoise", hex: "#45B1E8"},
-        {code: "14-0848", name: "Mimosa", hex: "#FFB915"},
-        {code: "18-3943", name: "Blue Iris", hex: "#5A5B9F"},
-        {code: "19-1557", name: "Chili Pepper", hex: "#9B1B30"},
-        
-        // 補充常用調性
-        {code: "19-1664", name: "True Red", hex: "#BF1932"},
-        {code: "12-0815", name: "Vanilla Custard", hex: "#E3D5CA"},
-        {code: "19-4029", name: "Navy Peony", hex: "#223A5E"},
-        {code: "16-1343", name: "Russet Orange", hex: "#E47127"}
+        // 經典色與年度色
+        {code: "19-4052", name: "Classic Blue", hex: "#0f4c81"},
+        {code: "13-1023", name: "Peach Fuzz", hex: "#ffbe98"},
+        {code: "18-1750", name: "Viva Magenta", hex: "#bb2649"},
+        {code: "17-3938", name: "Very Peri", hex: "#6667ab"},
+        {code: "13-0647", name: "Illuminating", hex: "#f5df4d"},
+        {code: "11-0601", name: "Bright White", hex: "#f4f5f0"},
+        {code: "19-0303", name: "Jet Black", hex: "#2d2c2f"},
+        {code: "15-0343", name: "Greenery", hex: "#88b04b"},
+        {code: "16-1546", name: "Living Coral", hex: "#ff6f61"},
+        {code: "19-1557", name: "Chili Pepper", hex: "#9b1b30"},
+        {code: "15-5519", name: "Turquoise", hex: "#45b1e8"},
+        {code: "18-3838", name: "Ultra Violet", hex: "#5f4b8b"}
     ];
 
     const canvas = document.getElementById('canvas');
@@ -114,12 +127,12 @@
         reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
-                const maxW = 600;
+                const maxW = 650;
                 const scale = img.width > maxW ? maxW / img.width : 1;
                 canvas.width = img.width * scale;
                 canvas.height = img.height * scale;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                document.getElementById('uploadText').innerText = "已載入: " + file.name;
+                document.getElementById('uploadText').innerText = "已載入圖片，請點擊取色";
             };
             img.src = event.target.result;
         };
@@ -156,8 +169,12 @@
         });
 
         if(match) {
+            // 計算相似度 (0-441 是 RGB 最大距離)
+            const similarity = Math.max(0, 100 - (min / 441 * 100)).toFixed(1);
+            
             document.getElementById('resultBox').style.display = 'block';
             document.getElementById('resSwatch').style.backgroundColor = match.hex;
+            document.getElementById('similarity').innerText = "相似度 " + similarity + "%";
             document.getElementById('resCode').innerText = match.code;
             document.getElementById('resName').innerText = match.name;
             
