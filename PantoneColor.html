@@ -3,27 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantone 專業級取色系統 (LAB 演算法)</title>
+    <title>Pantone 專業級視覺對色系統</title>
     <style>
-        :root { --dark: #2d3436; --light: #f5f6fa; --accent: #1e272e; }
-        body { font-family: 'PingFang TC', sans-serif; background: var(--light); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .workspace { display: flex; gap: 30px; max-width: 1200px; width: 100%; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-        .canvas-container { background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 650px; }
-        canvas { max-width: 100%; cursor: crosshair; display: block; border-radius: 4px; }
-        .panel { width: 350px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .swatch-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .color-compare { display: flex; height: 100px; border-radius: 12px; overflow: hidden; border: 1px solid #eee; }
-        .compare-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
-        .pantone-card { border: 2px solid #2d3436; border-radius: 15px; overflow: hidden; margin-top: 10px; }
-        .card-detail { padding: 20px; background: #fff; }
-        .color-code { font-size: 28px; font-weight: 900; margin: 5px 0; }
-        .similarity-label { font-size: 12px; padding: 4px 10px; background: #2d3436; color: #fff; border-radius: 20px; display: inline-block; margin-bottom: 10px; }
+        :root { --dark: #2d3436; --light: #f5f6fa; --accent: #0984e3; --border: #dfe6e9; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--light); margin: 0; padding: 20px; color: var(--dark); display: flex; flex-direction: column; align-items: center; }
+        
+        .header { text-align: center; margin-bottom: 20px; }
+        .workspace { display: flex; gap: 30px; max-width: 1200px; width: 100%; justify-content: center; flex-wrap: wrap; }
+        
+        /* 圖片區域 */
+        .canvas-container { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 650px; }
+        canvas { max-width: 100%; cursor: crosshair; display: block; border-radius: 8px; background: #eee; }
+        
+        /* 控制面板 */
+        .panel { width: 360px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        
+        /* 即時對比區 */
+        .compare-bar { display: flex; height: 120px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 20px; position: relative; }
+        .compare-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 10px; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .vs-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: #636e72; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* 主色卡 */
+        .main-card { border: 2px solid var(--dark); border-radius: 15px; overflow: hidden; margin-bottom: 20px; }
+        .card-swatch { height: 160px; width: 100%; transition: background 0.3s; }
+        .card-info { padding: 15px; background: white; }
+        .brand { font-size: 11px; color: #999; font-weight: bold; }
+        .color-code { font-size: 26px; font-weight: 900; margin: 4px 0; display: block; }
+
+        /* 候選色清單 */
+        .candidate-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block; }
+        .candidate-list { display: flex; gap: 8px; flex-wrap: wrap; }
+        .candidate-item { width: 58px; height: 70px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: 0.2s; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
+        .candidate-item:hover { transform: translateY(-3px); }
+        .candidate-item.active { border-color: var(--dark); transform: scale(1.05); }
+        .c-swatch { height: 45px; width: 100%; }
+        .c-label { font-size: 9px; text-align: center; padding: 2px; font-weight: bold; }
+
+        input[type="file"] { margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<h1>Pantone 專業取色器 (LAB 模式)</h1>
-<input type="file" id="imgInput" accept="image/*" style="margin-bottom: 20px;">
+<div class="header">
+    <h1>Pantone 視覺對色系統</h1>
+    <p>點擊圖片取色，並從下方「候選色」中挑選肉眼最接近的一個</p>
+    <input type="file" id="imgInput" accept="image/*">
+</div>
 
 <div class="workspace">
     <div class="canvas-container">
@@ -31,30 +56,30 @@
     </div>
 
     <div class="panel">
-        <div class="swatch-group">
-            <div class="color-compare">
-                <div id="boxPicked" class="compare-box" style="background: #eee;">PICKED</div>
-                <div id="boxMatch" class="compare-box" style="background: #ccc;">MATCH</div>
-            </div>
-            <div id="hexDisplay" style="text-align: center; font-family: monospace; font-weight: bold;">#------</div>
+        <div class="compare-bar">
+            <div id="boxPicked" class="compare-box" style="background: #eee;">圖片取色</div>
+            <div class="vs-label">VS</div>
+            <div id="boxMatch" class="compare-box" style="background: #ddd;">色卡結果</div>
         </div>
 
-        <div id="resultBox" style="display: none;">
-            <div id="simValue" class="similarity-label">相似度: --%</div>
-            <div class="pantone-card">
-                <div id="resSwatch" style="height: 180px;"></div>
-                <div class="card-detail">
-                    <div style="color: #999; font-size: 12px; font-weight: bold;">PANTONE®</div>
-                    <div id="resCode" class="color-code">----</div>
-                    <div id="resName" style="color: #636e72;">----</div>
+        <div id="resultArea" style="display: none;">
+            <div class="main-card">
+                <div id="mainSwatch" class="card-swatch"></div>
+                <div class="card-info">
+                    <span class="brand">PANTONE®</span>
+                    <span id="resCode" class="color-code">----</span>
+                    <span id="resName" style="color: #636e72;">----</span>
                 </div>
             </div>
+
+            <span class="candidate-title">🔍 肉眼接近色挑選：</span>
+            <div id="candidateList" class="candidate-list"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // 數據庫進一步擴充（針對大地色精確細分）
+    // 擴展數據庫 - 針對大地色、灰色、膚色進行強化
     const pantoneDB = [
         {code: "16-1120", name: "Sand", hex: "#B29D81"},
         {code: "16-1320", name: "Nougat", hex: "#AD8D77"},
@@ -65,38 +90,38 @@
         {code: "15-1116", name: "Safari", hex: "#BB9E7C"},
         {code: "14-1118", name: "Beige", hex: "#D4BEA3"},
         {code: "16-1110", name: "Dovetail", hex: "#A59784"},
-        {code: "17-1118", name: "Gingerbread", hex: "#8C6A56"},
+        {code: "17-1312", name: "Brushed Nickel", hex: "#938782"},
+        {code: "15-1215", name: "Sesame", hex: "#C2AB9A"},
+        {code: "18-1140", name: "Cadet", hex: "#97755D"},
+        {code: "18-1022", name: "Zebra Sage", hex: "#8D8070"},
         {code: "11-0601", name: "Bright White", hex: "#F4F5F0"},
         {code: "19-0303", name: "Jet Black", hex: "#2D2C2F"},
         {code: "19-4052", name: "Classic Blue", hex: "#0F4C81"},
-        // 可以繼續添加數千個...
+        {code: "18-1750", name: "Viva Magenta", hex: "#BB2649"},
+        {code: "13-1023", name: "Peach Fuzz", hex: "#FFBE98"}
     ];
 
-    // --- 色彩科學核心：LAB 轉換與比對 ---
-
+    // --- 色彩科學：LAB 轉換演算法 ---
     function rgbToLab(r, g, b) {
         r /= 255; g /= 255; b /= 255;
         r = (r > 0.04045) ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
         g = (g > 0.04045) ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
         b = (b > 0.04045) ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
-        
         let x = (r * 0.4124 + g * 0.3576 + b * 0.1805) * 100;
         let y = (r * 0.2126 + g * 0.7152 + b * 0.0722) * 100;
         let z = (r * 0.0193 + g * 0.1192 + b * 0.9505) * 100;
-
         x /= 95.047; y /= 100.000; z /= 108.883;
-        x = (x > 0.008856) ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
-        y = (y > 0.008856) ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
-        z = (z > 0.008856) ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
-
+        x = (x > 0.008856) ? Math.pow(x, 1/3) : (7.787 * x) + (16/116);
+        y = (y > 0.008856) ? Math.pow(y, 1/3) : (7.787 * y) + (16/116);
+        z = (z > 0.008856) ? Math.pow(z, 1/3) : (7.787 * z) + (16/116);
         return { l: (116 * y) - 16, a: 500 * (x - y), b: 200 * (y - z) };
     }
 
-    function deltaE(lab1, lab2) {
+    function getDeltaE(lab1, lab2) {
         return Math.sqrt(Math.pow(lab1.l - lab2.l, 2) + Math.pow(lab1.a - lab2.a, 2) + Math.pow(lab1.b - lab2.b, 2));
     }
 
-    // --- 介面邏輯 ---
+    // --- 圖片處理 ---
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -113,37 +138,60 @@
         reader.readAsDataURL(e.target.files[0]);
     };
 
+    // --- 取色與挑選邏輯 ---
     canvas.onclick = (e) => {
         const rect = canvas.getBoundingClientRect();
         const x = (e.clientX - rect.left) * (canvas.width / rect.width);
         const y = (e.clientY - rect.top) * (canvas.height / rect.height);
         const p = ctx.getImageData(x, y, 1, 1).data;
+        const hex = "#" + [p[0], p[1], p[2]].map(val => val.toString(16).padStart(2, '0')).join('');
         const pickedLab = rgbToLab(p[0], p[1], p[2]);
-        const hex = "#" + [p[0], p[1], p[2]].map(x => x.toString(16).padStart(2, '0')).join('');
 
         document.getElementById('boxPicked').style.background = hex;
-        document.getElementById('hexDisplay').innerText = hex.toUpperCase();
+        document.getElementById('resultArea').style.display = 'block';
 
-        let minE = Infinity;
-        let match = null;
-
-        pantoneDB.forEach(color => {
-            const cRgb = hexToRgb(color.hex);
-            const cLab = rgbToLab(cRgb.r, cRgb.g, cRgb.b);
-            const diff = deltaE(pickedLab, cLab);
-            if (diff < minE) { minE = diff; match = color; }
-        });
-
-        if (match) {
-            const sim = Math.max(0, 100 - minE).toFixed(1);
-            document.getElementById('resultBox').style.display = 'block';
-            document.getElementById('boxMatch').style.background = match.hex;
-            document.getElementById('resSwatch').style.background = match.hex;
-            document.getElementById('simValue').innerText = `感知相似度: ${sim}%`;
-            document.getElementById('resCode').innerText = match.code;
-            document.getElementById('resName').innerText = match.name;
-        }
+        findBestCandidates(pickedLab);
     };
+
+    function findBestCandidates(targetLab) {
+        // 1. 計算所有顏色距離並排序
+        let list = pantoneDB.map(color => {
+            const rgb = hexToRgb(color.hex);
+            const lab = rgbToLab(rgb.r, rgb.g, rgb.b);
+            return { ...color, diff: getDeltaE(targetLab, lab) };
+        }).sort((a, b) => a.diff - b.diff);
+
+        // 2. 取前 5 名
+        const top5 = list.slice(0, 5);
+        renderCandidates(top5);
+        updateMainCard(top5[0]); // 預設選第一名
+    }
+
+    function renderCandidates(items) {
+        const container = document.getElementById('candidateList');
+        container.innerHTML = '';
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = `candidate-item ${index === 0 ? 'active' : ''}`;
+            div.innerHTML = `
+                <div class="c-swatch" style="background: ${item.hex}"></div>
+                <div class="c-label">${item.code}</div>
+            `;
+            div.onclick = () => {
+                document.querySelectorAll('.candidate-item').forEach(el => el.classList.remove('active'));
+                div.classList.add('active');
+                updateMainCard(item);
+            };
+            container.appendChild(div);
+        });
+    }
+
+    function updateMainCard(color) {
+        document.getElementById('boxMatch').style.background = color.hex;
+        document.getElementById('mainSwatch').style.background = color.hex;
+        document.getElementById('resCode').innerText = color.code;
+        document.getElementById('resName').innerText = color.name;
+    }
 
     function hexToRgb(hex) {
         const r = parseInt(hex.substring(1, 3), 16);
@@ -152,5 +200,6 @@
         return { r, g, b };
     }
 </script>
+
 </body>
 </html>
