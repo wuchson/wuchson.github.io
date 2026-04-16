@@ -64,7 +64,7 @@
     let pantoneDB = [];
     
     // 讀取 JSON
-    fetch('./pantone-colors.json')
+    fetch('./pantone-full.json')
         .then(res => res.json())
         .then(json => {
             if (json.names && json.values) {
