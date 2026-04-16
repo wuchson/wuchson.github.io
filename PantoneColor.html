@@ -2,9 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Pantone 專業對色系統 (C卡+TCX 整合版)</title>
+    <title>Pantone 專業對色系統 (C卡+TCX 顯示強化版)</title>
     <style>
-        :root { --dark: #2d3436; --light: #f5f6fa; }
+        :root { --dark: #2d3436; --light: #f5f6fa; --accent: #0984e3; }
         body { font-family: 'PingFang TC', sans-serif; background: var(--light); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 20px; }
         .status-bar { padding: 10px 25px; border-radius: 30px; font-size: 14px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
@@ -23,20 +23,21 @@
         .candidate-item.active { border-color: var(--dark); transform: scale(1.05); }
         .c-swatch { height: 45px; width: 100%; }
         .c-name { font-size: 9px; font-weight: bold; height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.1; padding: 0 4px; }
+        .search-btn { display: inline-block; margin-top: 10px; padding: 5px 12px; background: var(--accent); color: white; border-radius: 5px; text-decoration: none; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <h1>Pantone 專業對色系統</h1>
-    <div id="status" class="status-bar">讀取資料中...</div>
+    <div id="status" class="status-bar">正在加載 C卡與 TCX 資料庫...</div>
     <input type="file" id="imgInput" accept="image/*">
 </div>
 
 <div class="workspace">
     <div class="canvas-area">
         <canvas id="canvas"></canvas>
-        <p style="font-size: 12px; color: #999;">點擊圖片取色後，系統會自動在 C卡與 TCX 庫中搜尋</p>
+        <p style="font-size: 12px; color: #999;">點擊圖片取色，系統會跨庫搜尋最接近的色標</p>
     </div>
     
     <div class="panel">
@@ -49,9 +50,10 @@
             <div class="main-card">
                 <div id="mainSwatch" class="card-swatch"></div>
                 <div class="card-info">
-                    <div id="libTitle" style="font-size: 10px; color:#999; font-weight: bold;">PANTONE®</div>
+                    <div id="libTitle" style="font-size: 10px; color:#999; font-weight: bold; text-transform: uppercase;">PANTONE®</div>
                     <div id="resCode" style="font-size: 20px; font-weight: 900; margin: 2px 0;">----</div>
                     <div id="resHex" style="color: #636e72; font-size: 14px; font-family: monospace;">#------</div>
+                    <a id="searchLink" href="#" target="_blank" class="search-btn" style="display:none;">查看 TCX 色號編碼</a>
                 </div>
             </div>
             <div id="candidateGrid" class="candidate-grid"></div>
@@ -62,7 +64,7 @@
 <script>
     let pantoneDB = [];
     
-    // 對應你目前上傳的兩份檔案名稱
+    // 同時讀取你上傳的兩份關鍵 JSON
     const config = [
         { file: './pantone-full.json', type: 'LAB' },
         { file: './pantone-colors.json', type: 'HEX' }
@@ -74,25 +76,27 @@
                 const res = await fetch(item.file);
                 const data = await res.json();
                 
-                if (item.type === 'LAB') { // 處理 pantone-full.json
+                if (item.type === 'LAB') {
                     data.colors.forEach(c => {
                         const lab = { l: c.components[0], a: c.components[1], b: c.components[2] };
                         pantoneDB.push({ name: c.name, lab, hex: labToHex(lab.l, lab.a, lab.b), lib: 'Solid Coated (C)' });
                     });
-                } else { // 處理 pantone-colors.json (TCX)
+                } else {
                     data.names.forEach((n, i) => {
                         const hex = data.values[i];
                         const rgb = hexToRgb(hex);
-                        pantoneDB.push({ name: n.toUpperCase(), lab: rgbToLab(rgb.r, rgb.g, rgb.b), hex, lib: 'FHI TCX SERIES' });
+                        // 將名稱中的連字號轉為空格，更符合搜尋習慣
+                        const cleanName = n.replace(/-/g, ' ');
+                        pantoneDB.push({ name: cleanName.toUpperCase(), lab: rgbToLab(rgb.r, rgb.g, rgb.b), hex, lib: 'FHI TCX SERIES' });
                     });
                 }
             } catch (e) { console.error("加載失敗:", item.file); }
         }
-        document.getElementById('status').innerText = `✅ 已就緒：共載入 ${pantoneDB.length} 個色號 (C卡 + TCX)`;
+        document.getElementById('status').innerText = `✅ 就緒：已整合 ${pantoneDB.length} 個色號 (C卡 + TCX)`;
         document.getElementById('status').className = "status-bar ready";
     }
 
-    // --- 互動與色彩轉換核心 ---
+    // --- 畫布邏輯 ---
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     document.getElementById('imgInput').onchange = (e) => {
@@ -148,12 +152,18 @@
         document.getElementById('resCode').innerText = m.name;
         document.getElementById('resHex').innerText = m.hex.toUpperCase();
         document.getElementById('libTitle').innerText = m.lib;
+        
+        const btn = document.getElementById('searchLink');
+        if (m.lib === 'FHI TCX SERIES') {
+            btn.style.display = 'inline-block';
+            btn.href = `https://www.pantone.com/color-finder?q=${encodeURIComponent(m.name)}`;
+        } else {
+            btn.style.display = 'none';
+        }
     }
 
-    // 工具函數
-    function hexToRgb(h) {
-        return { r: parseInt(h.substring(1,3),16), g: parseInt(h.substring(3,5),16), b: parseInt(h.substring(5,7),16) };
-    }
+    // --- 色彩科學公式 (Lab/RGB/HEX) ---
+    function hexToRgb(h) { return { r: parseInt(h.substring(1,3),16), g: parseInt(h.substring(3,5),16), b: parseInt(h.substring(5,7),16) }; }
     function labToHex(l, a, b) {
         let y = (l + 16) / 116, x = a / 500 + y, z = y - b / 200;
         [x, y, z] = [x, y, z].map(v => v > 0.206893 ? v ** 3 : (v - 16/116)/7.787);
