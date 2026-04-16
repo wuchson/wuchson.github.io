@@ -3,59 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantone 專業對色系統</title>
+    <title>Pantone 視覺對色系統</title>
     <style>
-        :root { --dark: #2d3436; --light: #f5f6fa; --accent: #d63031; }
+        :root { --dark: #2d3436; --light: #f5f6fa; --accent: #d63031; --blue: #0984e3; }
         body { font-family: 'PingFang TC', sans-serif; background: var(--light); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 20px; }
-        .status { font-size: 12px; padding: 5px 15px; border-radius: 20px; margin-bottom: 10px; font-weight: bold; }
+        .status { font-size: 12px; padding: 6px 15px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; transition: 0.3s; }
         .status-loading { background: #ffeaa7; color: #d35400; }
         .status-ok { background: #55efc4; color: #00b894; }
+        
         .workspace { display: flex; gap: 30px; max-width: 1200px; width: 100%; justify-content: center; flex-wrap: wrap; }
         .canvas-container { background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 650px; }
-        canvas { max-width: 100%; cursor: crosshair; display: block; border-radius: 4px; }
+        canvas { max-width: 100%; cursor: crosshair; display: block; border-radius: 4px; background: #eee; }
+        
         .panel { width: 350px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .compare-bar { display: flex; height: 100px; border-radius: 12px; overflow: hidden; border: 1px solid #eee; margin-bottom: 20px; }
-        .box { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .compare-bar { display: flex; height: 100px; border-radius: 12px; overflow: hidden; border: 1px solid #eee; margin-bottom: 20px; position: relative; }
+        .box { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .vs { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: white; border-radius: 50%; width: 26px; height: 26px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
         .main-card { border: 2px solid var(--dark); border-radius: 15px; overflow: hidden; margin-bottom: 20px; }
         .card-swatch { height: 150px; width: 100%; }
         .card-info { padding: 15px; background: white; }
+        
         .candidate-list { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-        .candidate-item { width: 58px; height: 75px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: 0.2s; background: #fff; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .candidate-item.active { border-color: var(--dark); transform: scale(1.05); }
+        .candidate-item { width: 58px; height: 75px; border-radius: 6px; border: 2px solid #eee; cursor: pointer; transition: 0.2s; background: #fff; overflow: hidden; }
+        .candidate-item:hover { transform: translateY(-2px); }
+        .candidate-item.active { border-color: var(--dark); transform: scale(1.08); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .c-swatch { height: 45px; width: 100%; }
-        .c-label { font-size: 9px; text-align: center; padding: 2px; font-weight: bold; white-space: nowrap; overflow: hidden; }
+        .c-label { font-size: 8px; text-align: center; padding: 2px; font-weight: bold; overflow: hidden; white-space: nowrap; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Pantone 視覺對色系統</h1>
-    <div id="loadStatus" class="status status-loading">正在讀取 pantone-colors.json...</div>
+    <h1>Pantone 專業對色系統</h1>
+    <div id="loadStatus" class="status status-loading">正在從 GitHub 讀取資料庫...</div>
     <input type="file" id="imgInput" accept="image/*">
 </div>
 
 <div class="workspace">
-    <div class="canvas-container">
-        <canvas id="canvas"></canvas>
-    </div>
-
+    <div class="canvas-container"><canvas id="canvas"></canvas></div>
     <div class="panel">
         <div class="compare-bar">
-            <div id="boxPicked" class="box" style="background: #eee;">PICKED</div>
-            <div id="boxMatch" class="box" style="background: #ddd;">MATCH</div>
+            <div id="boxPicked" class="box" style="background: #eee; color: #999;">PICKED</div>
+            <div class="vs">VS</div>
+            <div id="boxMatch" class="box" style="background: #ddd; color: #999;">MATCH</div>
         </div>
-
         <div id="resultArea" style="display: none;">
             <div class="main-card">
                 <div id="mainSwatch" class="card-swatch"></div>
                 <div class="card-info">
                     <div style="font-size: 11px; color:#999; font-weight: bold;">PANTONE®</div>
-                    <div id="resCode" style="font-size: 24px; font-weight: 900; margin: 4px 0;">----</div>
-                    <div id="resName" style="color: #636e72; font-size: 14px;">----</div>
+                    <div id="resCode" style="font-size: 20px; font-weight: 900; margin: 4px 0;">----</div>
+                    <div id="resHex" style="color: #636e72; font-size: 14px; font-family: monospace;">#------</div>
                 </div>
             </div>
-            <div style="font-size: 14px; font-weight: bold;">🔍 肉眼推薦候選色：</div>
+            <div style="font-size: 14px; font-weight: bold;">🔍 肉眼推薦候選色 (Top 6)：</div>
             <div id="candidateList" class="candidate-list"></div>
         </div>
     </div>
@@ -65,50 +68,29 @@
     let pantoneDB = [];
     const statusEl = document.getElementById('loadStatus');
 
-    // --- 1. 載入並解析 JSON ---
-    fetch('pantone-colors.json')
+    // --- 1. 從 GitHub 同目錄讀取 JSON ---
+    fetch('./pantone-colors.json')
         .then(res => res.json())
-        .then(data => {
-            // 自動展平 JSON 結構 (因為檔案中有多個類別)
-            for (let category in data) {
-                if (Array.isArray(data[category])) {
-                    data[category].forEach(item => {
-                        // 預計算 LAB 值以提升點擊反應速度
-                        const rgb = hexToRgb(item.hex);
-                        const lab = rgbToLab(rgb.r, rgb.g, rgb.b);
-                        pantoneDB.push({ ...item, lab });
-                    });
-                }
+        .then(json => {
+            // 解析資料格式
+            if (json.names && json.values) {
+                json.names.forEach((name, i) => {
+                    const hex = json.values[i];
+                    const rgb = hexToRgb(hex);
+                    const lab = rgbToLab(rgb.r, rgb.g, rgb.b);
+                    pantoneDB.push({ name, hex, lab });
+                });
             }
-            statusEl.innerText = `資料庫就緒：共 ${pantoneDB.length} 個色號`;
+            statusEl.innerText = `✅ 資料庫就緒：${pantoneDB.length} 個顏色`;
             statusEl.className = "status status-ok";
         })
         .catch(err => {
-            statusEl.innerText = "讀取失敗！請確保檔案放在伺服器環境 (如 Live Server)";
-            statusEl.className = "status status-loading";
+            statusEl.innerText = "❌ 讀取失敗：請確認 pantone-colors.json 存在於相同目錄";
+            statusEl.style.background = "#ff7675";
+            console.error(err);
         });
 
-    // --- 2. 色彩科學 (LAB 演算法) ---
-    function rgbToLab(r, g, b) {
-        r /= 255; g /= 255; b /= 255;
-        r = (r > 0.04045) ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
-        g = (g > 0.04045) ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
-        b = (b > 0.04045) ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
-        let x = (r * 0.4124 + g * 0.3576 + b * 0.1805) * 100;
-        let y = (r * 0.2126 + g * 0.7152 + b * 0.0722) * 100;
-        let z = (r * 0.0193 + g * 0.1192 + b * 0.9505) * 100;
-        x /= 95.047; y /= 100.000; z /= 108.883;
-        x = (x > 0.008856) ? Math.pow(x, 1/3) : (7.787 * x) + (16/116);
-        y = (y > 0.008856) ? Math.pow(y, 1/3) : (7.787 * y) + (16/116);
-        z = (z > 0.008856) ? Math.pow(z, 1/3) : (7.787 * z) + (16/116);
-        return { l: (116 * y) - 16, a: 500 * (x - y), b: 200 * (y - z) };
-    }
-
-    function deltaE(lab1, lab2) {
-        return Math.sqrt(Math.pow(lab1.l - lab2.l, 2) + Math.pow(lab1.a - lab2.a, 2) + Math.pow(lab1.b - lab2.b, 2));
-    }
-
-    // --- 3. 圖片邏輯 ---
+    // --- 2. 圖片處理邏輯 ---
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -117,14 +99,18 @@
         reader.onload = (ev) => {
             const img = new Image();
             img.onload = () => {
-                canvas.width = img.width; canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
+                const maxW = 650;
+                const scale = img.width > maxW ? maxW / img.width : 1;
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             };
             img.src = ev.target.result;
         };
         reader.readAsDataURL(e.target.files[0]);
     };
 
+    // --- 3. 核心取色與比對 ---
     canvas.onclick = (e) => {
         if (pantoneDB.length === 0) return;
         const rect = canvas.getBoundingClientRect();
@@ -137,10 +123,9 @@
         document.getElementById('boxPicked').style.background = hex;
         document.getElementById('resultArea').style.display = 'block';
 
-        // 搜尋最接近的 6 個候選色
-        let matches = pantoneDB.map(item => ({
-            ...item,
-            diff: deltaE(pickedLab, item.lab)
+        let matches = pantoneDB.map(color => ({
+            ...color,
+            diff: deltaE(pickedLab, color.lab)
         })).sort((a, b) => a.diff - b.diff).slice(0, 6);
 
         renderUI(matches);
@@ -149,7 +134,6 @@
     function renderUI(matches) {
         const listEl = document.getElementById('candidateList');
         listEl.innerHTML = '';
-        
         matches.forEach((m, i) => {
             const div = document.createElement('div');
             div.className = `candidate-item ${i === 0 ? 'active' : ''}`;
@@ -167,8 +151,28 @@
     function updateMain(m) {
         document.getElementById('boxMatch').style.background = m.hex;
         document.getElementById('mainSwatch').style.background = m.hex;
-        document.getElementById('resCode').innerText = m.name; // 該 JSON 的名稱即代碼
-        document.getElementById('resName').innerText = m.hex.toUpperCase();
+        document.getElementById('resCode').innerText = m.name.toUpperCase();
+        document.getElementById('resHex').innerText = m.hex.toUpperCase();
+    }
+
+    // --- 4. 專業色彩演算法 (RGB -> LAB) ---
+    function rgbToLab(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        r = (r > 0.04045) ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+        g = (g > 0.04045) ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+        b = (b > 0.04045) ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+        let x = (r * 0.4124 + g * 0.3576 + b * 0.1805) * 100;
+        let y = (r * 0.2126 + g * 0.7152 + b * 0.0722) * 100;
+        let z = (r * 0.0193 + g * 0.1192 + b * 0.9505) * 100;
+        x /= 95.047; y /= 100.000; z /= 108.883;
+        x = (x > 0.008856) ? Math.pow(x, 1/3) : (7.787 * x) + (16/116);
+        y = (y > 0.008856) ? Math.pow(y, 1/3) : (7.787 * y) + (16/116);
+        z = (z > 0.008856) ? Math.pow(z, 1/3) : (7.787 * z) + (16/116);
+        return { l: (116 * y) - 16, a: 500 * (x - y), b: 200 * (y - z) };
+    }
+
+    function deltaE(lab1, lab2) {
+        return Math.sqrt(Math.pow(lab1.l - lab2.l, 2) + Math.pow(lab1.a - lab2.a, 2) + Math.pow(lab1.b - lab2.b, 2));
     }
 
     function hexToRgb(hex) {
