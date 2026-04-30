@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雲端工作提醒</title>
+    <style>
+        :root {
+            --bg: #ffffff; --text: #1a1a1a; --accent: #000000; --border: #e5e5e5; --secondary: #888888;
+        }
+        [data-theme="dark"] {
+            --bg: #121212; --text: #ffffff; --accent: #ffffff; --border: #2a2a2a; --secondary: #a0a0a0;
+        }
+        body {
+            font-family: "PingFang TC", "Noto Sans TC", sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; display: flex; justify-content: center; min-height: 100vh; transition: 0.4s;
+        }
+        .wrapper { width: 100%; max-width: 480px; padding: 60px 24px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        h1 { font-size: 24px; font-weight: 600; letter-spacing: 2px; margin: 0; }
+        .today-info { font-size: 13px; color: var(--secondary); margin-top: 5px; }
+
+        .filter-section { margin-bottom: 30px; }
+        #searchInput {
+            width: 100%; border: none; background: rgba(0,0,0,0.03);
+            padding: 12px 15px; border-radius: 10px; font-size: 14px;
+            color: var(--text); outline: none; box-sizing: border-box;
+        }
+        [data-theme="dark"] #searchInput { background: rgba(255,255,255,0.05); }
+        .filter-tabs { display: flex; gap: 10px; margin-top: 12px; }
+        .tab { 
+            font-size: 11px; padding: 4px 12px; border: 1px solid var(--border); 
+            border-radius: 15px; cursor: pointer; color: var(--secondary); transition: 0.2s;
+        }
+        .tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+        .progress-section { margin-bottom: 40px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 10px; color: var(--secondary); }
+        .progress-track { height: 1.5px; background: var(--border); position: relative; }
+        #progress-fill { height: 1.5px; background: var(--accent); width: 0%; transition: 0.7s ease; position: absolute; top: 0; left: 0; }
+
+        .input-area { margin-bottom: 40px; border: 1px solid var(--border); padding: 20px; border-radius: 12px; }
+        input[type="text"]#taskName {
+            width: 100%; border: none; border-bottom: 1px solid var(--border);
+            padding: 10px 0; font-size: 16px; outline: none; background: transparent; color: var(--text); margin-bottom: 15px;
+        }
+        .options-row { display: flex; gap: 10px; }
+        select, input[type="datetime-local"] {
+            flex: 1; border: 1px solid var(--border); background: transparent; padding: 8px; font-size: 12px; color: var(--secondary); border-radius: 6px;
+        }
+        #add-btn {
+            margin-top: 20px; width: 100%; padding: 12px; background: var(--accent);
+            color: var(--bg); border: none; font-size: 13px; letter-spacing: 4px; cursor: pointer; border-radius: 6px;
+        }
+        #add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        ul { list-style: none; padding: 0; }
+        li { padding: 18px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .task-info { flex-grow: 1; cursor: pointer; }
+        .task-title { font-size: 16px; margin-bottom: 6px; font-weight: 500; }
+        .task-meta { font-size: 11px; color: var(--secondary); }
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 12px; }
+        .high { background: #ff4d4f; } .mid { background: #faad14; } .low { background: #52c41a; }
+        .completed { opacity: 0.35; filter: grayscale(1); }
+        .completed .task-title { text-decoration: line-through; }
+        .del-link { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; }
+
+        #sync-status { font-size: 10px; text-align: center; color: var(--secondary); margin-top: 10px; }
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="wrapper">
+    <header>
+        <div>
+            <h1>任務清單</h1>
+            <div class="today-info" id="current-date">載入中...</div>
+        </div>
+        <button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; color:var(--secondary); font-size:11px;">切換模式</button>
+    </header>
+
+    <div class="filter-section">
+        <input type="text" id="searchInput" placeholder="搜尋關鍵字..." oninput="render()">
+        <div class="filter-tabs">
+            <div class="tab active" onclick="setFilter('all', this)">全部</div>
+            <div class="tab" onclick="setFilter('today', this)">今天</div>
+            <div class="tab" onclick="setFilter('week', this)">本週</div>
+        </div>
+    </div>
+
+    <div class="progress-section">
+        <div class="progress-label"><span>完成率</span><span id="stat-text">0%</span></div>
+        <div class="progress-track"><div id="progress-fill"></div></div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="taskName" placeholder="輸入新任務...">
+        <div class="options-row">
+            <select id="taskPrio">
+                <option value="3">緊急</option><option value="2" selected>普通</option><option value="1">稍後</option>
+            </select>
+            <input type="datetime-local" id="taskTime">
+        </div>
+        <button id="add-btn">新增任務</button>
+    </div>
+
+    <ul id="taskList"></ul>
+    <div id="sync-status">雲端同步中...</div>
+</div>
+
+<script>
+    // --- 配置區 ---
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzXjuCC6EnGUJjouvgdRIgsalSIsfD92TqbSZCIzwhf1iMcJyEqdWcdgvT_KW6gz_js/exec'; 
+
+    let tasks = [];
+    let currentFilter = 'all';
+    const dayNames = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+
+    // 初始化：從 GAS 讀取資料
+    async function init() {
+        showToday();
+        updateSyncStatus("正在從雲端獲取資料...");
+        try {
+            const response = await fetch(GAS_URL);
+            const data = await response.json();
+            tasks = data || [];
+            updateSyncStatus("雲端連線成功");
+        } catch (e) {
+            console.error(e);
+            updateSyncStatus("雲端讀取失敗，使用本地存檔");
+            tasks = JSON.parse(localStorage.getItem('minimalTasksSearchV2')) || [];
+        }
+        render();
+    }
+
+    function showToday() {
+        const now = new Date();
+        document.getElementById('current-date').innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${dayNames[now.getDay()]}`;
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function setFilter(filter, el) {
+        currentFilter = filter;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        render();
+    }
+
+    function isThisWeek(dateStr) {
+        if(!dateStr) return false;
+        const now = new Date();
+        const target = new Date(dateStr);
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        startOfWeek.setHours(0,0,0,0);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(endOfWeek.getDate() + 7);
+        return target >= startOfWeek && target < endOfWeek;
+    }
+
+    function render() {
+        const list = document.getElementById('taskList');
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        list.innerHTML = '';
+
+        const nowStr = new Date().toISOString().split('T')[0];
+
+        const filtered = tasks.filter(t => {
+            const matchesText = t.text.toLowerCase().includes(query);
+            const taskDate = t.time ? t.time.split('T')[0] : '';
+            let matchesDate = true;
+            if (currentFilter === 'today') matchesDate = (taskDate === nowStr);
+            if (currentFilter === 'week') matchesDate = isThisWeek(t.time);
+            return matchesText && matchesDate;
+        });
+
+        // 更新進度條
+        const done = tasks.filter(t => t.completed).length;
+        const percent = tasks.length ? Math.round((done/tasks.length)*100) : 0;
+        document.getElementById('progress-fill').style.width = percent + '%';
+        document.getElementById('stat-text').innerText = `${percent}% (${done}/${tasks.length})`;
+
+        filtered.forEach(t => {
+            const li = document.createElement('li');
+            if (t.completed) li.classList.add('completed');
+            const d = t.time ? new Date(t.time) : null;
+            const timeDisplay = d ? `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]}) ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` : '未設定時間';
+
+            li.innerHTML = `
+                <div class="task-info" onclick="toggleTask(${t.id})">
+                    <div class="task-title"><span class="dot ${t.priority==3?'high':t.priority==2?'mid':'low'}"></span>${t.text}</div>
+                    <div class="task-meta">${timeDisplay}</div>
+                </div>
+                <button class="del-link" onclick="delTask(${t.id})">×</button>
+            `;
+            list.appendChild(li);
+        });
+    }
+
+    // 新增任務
+    document.getElementById('add-btn').addEventListener('click', async () => {
+        const input = document.getElementById('taskName');
+        const text = input.value.trim();
+        if(!text) return;
+
+        const newTask = {
+            id: Date.now(),
+            text,
+            priority: document.getElementById('taskPrio').value,
+            time: document.getElementById('taskTime').value,
+            completed: false
+        };
+
+        tasks.push(newTask);
+        input.value = '';
+        await save();
+    });
+
+    // 儲存與同步
+    async function save() {
+        tasks.sort((a, b) => b.priority - a.priority);
+        localStorage.setItem('minimalTasksSearchV2', JSON.stringify(tasks));
+        render();
+
+        updateSyncStatus("正在同步至雲端...");
+        try {
+            await fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors', // 解決 GAS 跨網域跳轉問題
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'sync', data: tasks })
+            });
+            updateSyncStatus("雲端同步完成");
+        } catch (e) {
+            updateSyncStatus("同步出錯，僅存於本地");
+        }
+    }
+
+    window.toggleTask = async (id) => {
+        tasks = tasks.map(t => t.id == id ? {...t, completed: !t.completed} : t);
+        await save();
+    };
+
+    window.delTask = async (id) => {
+        if(confirm('確定移除？')) {
+            tasks = tasks.filter(t => t.id != id);
+            await save();
+        }
+    };
+
+    function updateSyncStatus(msg) {
+        document.getElementById('sync-status').innerText = msg;
+    }
+
+    init();
+</script>
+</body>
+</html>
