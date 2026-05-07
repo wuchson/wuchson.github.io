@@ -2,72 +2,191 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>廣告投放控制台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廣告投放管理控制台 - 完整修正版</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
-        .card { max-width: 700px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #007bff; }
-        input, select, button { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .row { display: flex; gap: 10px; }
-        .btn-pub { background: #007bff; color: #fff; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        .code-res { background: #222; color: #0f0; padding: 15px; border-radius: 6px; font-family: monospace; white-space: pre-wrap; font-size: 12px; margin-top: 15px; }
+        :root { --primary: #007bff; --success: #28a745; --bg: #f4f7f6; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); padding: 20px; color: #333; }
+        .card { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .section { background: #fff; border: 1px solid #eee; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid var(--primary); }
+        h2 { color: var(--primary); margin-top: 0; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; font-size: 20px; }
+        label { display: block; font-weight: bold; margin: 15px 0 5px; color: #555; }
+        input, select, button { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
+        .row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-main { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; height: 50px; font-size: 16px; }
+        .btn-main:hover { background: #0056b3; box-shadow: 0 4px 12px rgba(0,123,255,0.3); }
+        
+        /* 修正後的語法顯示區塊：確保不會超出邊框 */
+        .code-area { 
+            background: #2d2d2d; 
+            color: #61dafb; 
+            padding: 20px; 
+            border-radius: 8px; 
+            font-family: 'Consolas', 'Monaco', monospace; 
+            font-size: 13px; 
+            white-space: pre-wrap; 
+            word-break: break-all; 
+            margin-top: 15px; 
+            line-height: 1.6;
+            border: 1px solid #444;
+        }
+        .btn-copy { background: var(--success); color: white; border: none; cursor: pointer; margin-top: 15px; font-weight: bold; }
+        .btn-copy:hover { background: #218838; }
+        .hint { font-size: 12px; color: #888; margin-top: 5px; }
     </style>
 </head>
 <body>
+
 <div class="card">
-    <h2>🎯 廣告投放控制台</h2>
+    <h2>🚀 廣告投放管理控制台</h2>
+    
     <div class="section">
-        <label>GAS 網址</label>
-        <input type="text" id="gasUrl" placeholder="請貼上部署後的 /exec 網址">
+        <label>1. 連線設定</label>
+        <input type="text" id="gasUrl" placeholder="請貼上 GAS 部署網頁應用程式網址 (結尾應為 /exec)" oninput="genEmbed()">
+        <p class="hint">※ 務必確認 GAS 部署權限為「所有人 (Anyone)」。</p>
     </div>
+
     <div class="section">
+        <label>2. 廣告內容設定</label>
         <div class="row">
-            <input type="text" id="zoneId" placeholder="區域 ID (例如: Top-01)" oninput="gen()">
-            <select id="adType" onchange="st()">
-                <option value="圖片">圖片 (Base64 版)</option>
-                <option value="文字">純文字</option>
+            <input type="text" id="zoneId" placeholder="區域 ID (例如: Top-01)" oninput="genEmbed()">
+            <select id="adType" onchange="toggleEditor()">
+                <option value="圖片">圖片廣告 (免雲端權限 Base64 版)</option>
+                <option value="文字">純文字廣告</option>
             </select>
         </div>
         <div class="row">
-            <input type="datetime-local" id="sTime"><input type="datetime-local" id="eTime">
+            <label style="flex:1">開始時間：<input type="datetime-local" id="startTime"></label>
+            <label style="flex:1">結束時間：<input type="datetime-local" id="endTime"></label>
         </div>
-        <div id="imgArea">
-            <label>選擇圖片 (建議 < 200KB)</label><input type="file" id="fIn" accept="image/*">
-            <input type="url" id="linkUrl" placeholder="點擊後的跳轉連結 (https://...)">
+
+        <div id="imageEditor">
+            <label>選擇圖片 (自動壓縮為 Base64 儲存)</label>
+            <input type="file" id="fileIn" accept="image/*">
+            <p class="hint">建議寬度 1200px 內，檔案 < 200KB 以維持最佳效能。</p>
+            <label>點擊跳轉網址</label>
+            <input type="url" id="linkUrl" placeholder="https://www.your-website.com">
+        </div>
+
+        <div id="textEditor" style="display:none;">
+            <label>輸入文字內容</label>
+            <div id="textRows"></div>
+            <button onclick="addTextRow()" style="width:auto; background:#6c757d; color:white; border:none; padding:8px 15px; margin-top:10px; cursor:pointer;">+ 增加一行文字</button>
         </div>
     </div>
-    <button class="btn-pub" onclick="pub()">確認發佈廣告</button>
-    <div class="section">
-        <label>嵌入語法</label>
-        <input type="text" id="jsPath" value="https://XXX.github.io/ad-loader.js" oninput="gen()">
-        <div id="outCode" class="code-res"></div>
+
+    <button class="btn-main" onclick="publishAd()">📤 確認發佈廣告至雲端</button>
+
+    <div class="section" style="margin-top:40px; border-top: 4px solid var(--success); border-left: none;">
+        <h2 style="color:var(--success)">📦 網頁嵌入語法產生器</h2>
+        <label>ad-loader.js 存放網址</label>
+        <input type="text" id="jsPath" value="https://wuchson.github.io/ad-loader.js" oninput="genEmbed()">
+        
+        <div class="code-area" id="embedOutput">請先填寫上方資訊...</div>
+        
+        <button class="btn-copy" onclick="copyEmbedCode()">📋 複製嵌入代碼</button>
     </div>
 </div>
+
 <script>
-    function st() { document.getElementById('imgArea').style.display = document.getElementById('adType').value === '圖片' ? 'block' : 'none'; }
-    async function pub() {
+    // 切換編輯器類型
+    function toggleEditor() {
+        const type = document.getElementById('adType').value;
+        document.getElementById('imageEditor').style.display = (type === '圖片' ? 'block' : 'none');
+        document.getElementById('textEditor').style.display = (type === '文字' ? 'block' : 'none');
+    }
+
+    // 文字編輯器功能
+    function addTextRow() {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `<input type="text" placeholder="內容" class="t-msg"><input type="color" value="#333333" style="width:50px" class="t-col"><input type="number" value="16" style="width:65px" class="t-size"><button onclick="this.parentElement.remove()" style="width:40px; background:#ff4d4d; color:white; border:none; cursor:pointer;">X</button>`;
+        document.getElementById('textRows').appendChild(row);
+    }
+
+    // 發佈廣告
+    async function publishAd() {
         const gas = document.getElementById('gasUrl').value;
-        if(!gas) return alert("請填寫 GAS 網址");
-        const file = document.getElementById('fIn').files[0];
-        let b64 = null;
-        if(file) b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(file); });
-        const data = { 
-            zone: document.getElementById('zoneId').value, 
-            type: document.getElementById('adType').value, 
-            content: "", 
-            link: document.getElementById('linkUrl').value, 
-            start: document.getElementById('sTime').value, 
-            end: document.getElementById('eTime').value, 
-            imageBlob: b64 
+        if(!gas) return alert("❌ 請先填寫 GAS 網址！");
+        
+        const type = document.getElementById('adType').value;
+        let imageBlob = null;
+        let content = "";
+
+        if(type === '圖片') {
+            const file = document.getElementById('fileIn').files[0];
+            if(file) {
+                imageBlob = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                return alert("❌ 請選擇要上傳的圖片！");
+            }
+        } else {
+            document.querySelectorAll('#textRows .row').forEach(r => {
+                const msg = r.querySelector('.t-msg').value;
+                if(msg) {
+                    content += `<span style="color:${r.querySelector('.t-col').value}; font-size:${r.querySelector('.t-size').value}px; display:block; margin-bottom:5px;">${msg}</span>`;
+                }
+            });
+            if(!content) return alert("❌ 請填寫文字內容！");
+        }
+
+        const payload = {
+            zone: document.getElementById('zoneId').value,
+            type: type,
+            content: content,
+            link: document.getElementById('linkUrl').value,
+            start: document.getElementById('startTime').value,
+            end: document.getElementById('endTime').value,
+            imageBlob: imageBlob
         };
-        fetch(gas, { method: 'POST', body: JSON.stringify(data) }).then(() => alert("發佈完成！"));
+
+        try {
+            const response = await fetch(gas, { method: 'POST', body: JSON.stringify(payload) });
+            alert("✅ 廣告已成功發佈至試算表！");
+        } catch (err) {
+            alert("❌ 發佈失敗，請檢查 GAS 網址是否正確或是否已開啟跨域存取。");
+        }
     }
-    function gen() {
-        const z = document.getElementById('zoneId').value || "ZONE";
-        const g = document.getElementById('gasUrl').value || "GAS";
-        const j = document.getElementById('jsPath').value;
-        document.getElementById('outCode').innerText = `<div id="ad-${z}" style="max-width:100%; overflow:hidden;"></div>\n<script src="${j}"><\/script>\n<script>\ninitAd({ target: "ad-${z}", zone: "${z}", api: "${g}?action=get" });\n<\/script>`;
+
+    // 產生嵌入語法
+    function genEmbed() {
+        const zone = document.getElementById('zoneId').value || "YOUR_ZONE_ID";
+        const gas = document.getElementById('gasUrl').value || "YOUR_GAS_URL";
+        const js = document.getElementById('jsPath').value;
+        
+        const code = `<div id="ad-${zone}" style="max-width:100%; overflow:hidden;"></div>\n` +
+                     `<script src="${js}"><\/script>\n` +
+                     `<script>\n` +
+                     `  initAd({\n` +
+                     `    target: "ad-${zone}",\n` +
+                     `    zone: "${zone}",\n` +
+                     `    api: "${gas}?action=get"\n` +
+                     `  });\n` +
+                     `<\/script>`;
+        
+        document.getElementById('embedOutput').innerText = code;
     }
+
+    // 複製功能
+    function copyEmbedCode() {
+        const code = document.getElementById('embedOutput').innerText;
+        if(code.includes("請先填寫")) return alert("請先填寫廣告資訊！");
+        
+        navigator.clipboard.writeText(code).then(() => {
+            alert("✅ 語法已成功複製到剪貼簿！");
+        }).catch(() => {
+            alert("複製失敗，請手動全選文字複製。");
+        });
+    }
+
+    // 初始化
+    addTextRow();
+    genEmbed();
 </script>
+
 </body>
 </html>
