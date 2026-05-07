@@ -1,36 +1,24 @@
-/**
- * 廣告載入器 - 支援 Base64 直接顯示
- */
-window.initAd = async function(config) {
-    const box = document.getElementById(config.target);
-    if (!box) return;
-
+window.initAd = async function(c) {
+    const b = document.getElementById(c.target);
+    if (!b) return;
+    b.style.maxWidth = "100%"; b.style.overflow = "hidden"; b.style.display = "block";
     try {
-        const response = await fetch(config.api);
-        const data = await response.json();
-        const ads = data.filter(a => a.zone === config.zone);
-
-        if (ads.length === 0) {
-            console.log("No active ads for zone: " + config.zone);
-            return;
-        }
-
-        let index = 0;
-        const render = () => {
-            box.style.opacity = 0;
-            box.style.transition = "opacity 0.5s";
-            
+        const r = await fetch(c.api);
+        const d = await r.json();
+        const ads = d.filter(a => a.zone === c.zone);
+        if (ads.length === 0) return;
+        let i = 0;
+        const fn = () => {
+            b.style.opacity = 0; b.style.transition = "opacity 0.5s";
             setTimeout(() => {
-                // 直接將試算表中的 HTML 代碼（含 Base64 圖片）注入
-                box.innerHTML = ads[index].content;
-                box.style.opacity = 1;
-                index = (index + 1) % ads.length;
+                b.innerHTML = ads[i].content;
+                const imgs = b.getElementsByTagName('img');
+                for (let img of imgs) { img.style.maxWidth = "100%"; img.style.height = "auto"; img.style.display = "block"; }
+                b.style.opacity = 1;
+                i = (i + 1) % ads.length;
             }, 500);
         };
-
-        render();
-        if (ads.length > 1) setInterval(render, 5000); // 5秒輪播
-    } catch (e) {
-        console.error("Ad System Error:", e);
-    }
+        fn();
+        if (ads.length > 1) setInterval(fn, 5000);
+    } catch (e) { console.error(e); }
 };
