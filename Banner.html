@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>廣告推播系統控制台</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #007bff; }
+        h2, h4 { margin-top: 0; color: #007bff; }
+        input, select, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .row { display: flex; gap: 5px; margin-top: 5px; }
+        .preview { border: 1px solid #ccc; padding: 15px; margin-top: 10px; min-height: 40px; background: #fff; text-align: center; }
+        .btn-add { background: #6c757d; color: white; cursor: pointer; width: auto; padding: 8px 15px; }
+        .btn-pub { background: #007bff; color: white; font-size: 18px; cursor: pointer; border: none; margin-top: 10px; }
+        .btn-copy { background: #28a745; color: white; font-size: 18px; cursor: pointer; border: none; margin-top: 10px; }
+        /* 語法顯示區 */
+        .code-output { background: #282c34; color: #abb2bf; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; margin-top: 15px; white-space: pre-wrap; font-size: 13px; position: relative; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎯 廣告投放與語法管理中心</h2>
+    
+    <div class="section">
+        <label>1. 設定您的 GAS 網址 (部署後產生的網址)</label>
+        <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+
+    <div class="section">
+        <label>2. 廣告投放設定</label>
+        <div class="row">
+            <input type="text" id="zone" placeholder="區域 ID (例如: Top_Banner)" oninput="updateCode()">
+            <select id="adType" onchange="toggleType()">
+                <option value="文字">多行文字排版</option>
+                <option value="圖片">圖片廣告</option>
+            </select>
+        </div>
+        <div class="row">
+            <label style="width:50px">開始</label><input type="datetime-local" id="start">
+            <label style="width:50px">結束</label><input type="datetime-local" id="end">
+        </div>
+    </div>
+
+    <!-- 文字編輯區 -->
+    <div id="textEditor" class="section">
+        <h4>文字排版編輯</h4>
+        <div id="textRows"></div>
+        <button class="btn-add" onclick="addTextRow()">+ 新增一行文字</button>
+        <div class="preview" id="textPreview">文字預覽區域</div>
+    </div>
+
+    <!-- 圖片編輯區 -->
+    <div id="imageEditor" class="section" style="display:none;">
+        <h4>圖片上傳設定</h4>
+        <input type="file" id="fileIn" accept="image/*">
+        <input type="text" id="imgSize" placeholder="顯示寬度 (如: 100% 或 300px)" value="100%">
+        <input type="url" id="imgLink" placeholder="圖片跳轉連結 (https://...)">
+    </div>
+
+    <button class="btn-pub" onclick="publish()">1. 確認發佈到雲端</button>
+
+    <hr style="margin:30px 0;">
+
+    <div class="section" style="border-left-color: #28a745;">
+        <h4>3. 產生嵌入語法</h4>
+        <label>您的 JS 檔案載入路徑 (GitHub Pages 網址)</label>
+        <input type="text" id="jsPath" placeholder="https://你的帳號.github.io/專案名/ad-loader.js" oninput="updateCode()">
+        
+        <div id="codeResult" class="code-output">填寫上方資訊以產生語法...</div>
+        <button class="btn-copy" onclick="copyCode()">2. 複製嵌入語法</button>
+    </div>
+</div>
+
+<script>
+    function toggleType() {
+        const isTxt = document.getElementById('adType').value === '文字';
+        document.getElementById('textEditor').style.display = isTxt ? 'block' : 'none';
+        document.getElementById('imageEditor').style.display = isTxt ? 'none' : 'block';
+    }
+
+    function addTextRow() {
+        const div = document.createElement('div');
+        div.className = 'row';
+        div.innerHTML = `
+            <input type="text" placeholder="內容" oninput="renderText()" class="t-msg">
+            <input type="color" value="#333333" onchange="renderText()" class="t-col" style="width:40px">
+            <input type="number" value="18" oninput="renderText()" class="t-size" style="width:60px">
+            <input type="text" placeholder="連結" oninput="renderText()" class="t-lnk">
+            <button onclick="this.parentElement.remove(); renderText();" style="width:40px">X</button>
+        `;
+        document.getElementById('textRows').appendChild(div);
+    }
+
+    function renderText() {
+        let html = "";
+        document.querySelectorAll('#textRows .row').forEach(row => {
+            const m = row.querySelector('.t-msg').value;
+            const c = row.querySelector('.t-col').value;
+            const s = row.querySelector('.t-size').value;
+            const l = row.querySelector('.t-lnk').value;
+            if(!m) return;
+            let line = `<span style="color:${c}; font-size:${s}px; display:block; margin:5px 0; font-weight:bold;">${m}</span>`;
+            if(l) line = `<a href="${l}" target="_blank" style="text-decoration:none;">${line}</a>`;
+            html += line;
+        });
+        document.getElementById('textPreview').innerHTML = html;
+        return html;
+    }
+
+    async function publish() {
+        const gas = document.getElementById('gasUrl').value;
+        if(!gas) return alert("請先填寫 GAS 網址");
+
+        const type = document.getElementById('adType').value;
+        let imageBlob = null, mimeType = null;
+
+        if(type === '圖片') {
+            const f = document.getElementById('fileIn').files[0];
+            if(f) {
+                mimeType = f.type;
+                imageBlob = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); });
+            }
+        }
+
+        const data = {
+            zone: document.getElementById('zone').value,
+            type: type,
+            content: type === '文字' ? renderText() : "",
+            imgSize: document.getElementById('imgSize').value,
+            link: document.getElementById('imgLink').value,
+            start: document.getElementById('start').value,
+            end: document.getElementById('end').value,
+            imageBlob: imageBlob,
+            mimeType: mimeType
+        };
+
+        fetch(gas, { method: 'POST', body: JSON.stringify(data) })
+            .then(() => { alert("廣告已成功發佈！請複製下方語法安裝至網站。"); updateCode(); });
+    }
+
+    // 產生語法核心功能
+    function updateCode() {
+        const gas = document.getElementById('gasUrl').value || "YOUR_GAS_URL";
+        const zone = document.getElementById('zone').value || "Zone_A";
+        const js = document.getElementById('jsPath').value || "YOUR_JS_PATH/ad-loader.js";
+        
+        const code = `<!-- 廣告區域：${zone} -->\n<div id="ad-${zone}"></div>\n<script src="${js}"><\/script>\n<script>\n  initAd({\n    target: "ad-${zone}",\n    zone: "${zone}",\n    api: "${gas}?action=get"\n  });\n<\/script>`;
+        
+        document.getElementById('codeResult').innerText = code;
+    }
+
+    function copyCode() {
+        const text = document.getElementById('codeResult').innerText;
+        navigator.clipboard.writeText(text).then(() => alert("代碼已複製！"));
+    }
+
+    addTextRow();
+</script>
+</body>
+</html>
