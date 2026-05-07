@@ -2,128 +2,63 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>廣告投放管理系統</title>
+    <title>廣告管理控制台</title>
     <style>
         body { font-family: sans-serif; background: #f4f7f9; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #007bff; }
+        .card { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #007bff; }
         input, select, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .row { display: flex; gap: 5px; margin-top: 5px; }
-        .preview { border: 1px solid #ccc; padding: 15px; margin-top: 10px; background: #fff; text-align: center; }
-        .btn-pub { background: #007bff; color: white; cursor: pointer; border: none; font-size: 16px; margin-top: 15px; }
-        .code-res { background: #222; color: #0f0; padding: 15px; border-radius: 6px; font-family: monospace; white-space: pre-wrap; font-size: 12px; margin-top: 15px; }
+        .row { display: flex; gap: 10px; }
+        .btn-pub { background: #007bff; color: white; border: none; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .code-res { background: #222; color: #0f0; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; font-size: 12px; margin-top: 15px; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>🎯 廣告投放控制台</h2>
-    <input type="text" id="gasUrl" placeholder="貼上您的 GAS 網址">
-
+<div class="card">
+    <h2>🚀 廣告管理控制台</h2>
     <div class="section">
-        <label>1. 基本設定</label>
+        <label>GAS 網址</label>
+        <input type="text" id="gasUrl" placeholder="貼上 /exec 網址">
+    </div>
+    <div class="section">
         <div class="row">
-            <input type="text" id="zone" placeholder="區域 ID (例如: Top_Banner)" oninput="updateCode()">
-            <select id="adType" onchange="toggleType()">
-                <option value="文字">文字排版</option>
-                <option value="圖片">圖片(免雲端硬碟權限)</option>
+            <input type="text" id="zId" placeholder="區域 ID" oninput="gen()">
+            <select id="aTy" onchange="st()">
+                <option value="圖片">圖片</option>
+                <option value="文字">文字</option>
             </select>
         </div>
         <div class="row">
-            <input type="datetime-local" id="start">
-            <input type="datetime-local" id="end">
+            <input type="datetime-local" id="sT"><input type="datetime-local" id="eT">
+        </div>
+        <div id="iE">
+            <label>圖片</label><input type="file" id="fI" accept="image/*">
+            <label>連結</label><input type="url" id="lU" placeholder="https://...">
         </div>
     </div>
-
-    <div id="textEditor" class="section">
-        <label>文字內容 (可新增多行)</label>
-        <div id="textRows"></div>
-        <button onclick="addTextRow()" style="width:auto; margin-top:5px;">+ 新增行</button>
-        <div class="preview" id="textPreview">文字預覽</div>
-    </div>
-
-    <div id="imageEditor" class="section" style="display:none;">
-        <label>上傳圖片</label>
-        <input type="file" id="fileIn" accept="image/*">
-        <input type="text" id="imgSize" placeholder="顯示寬度 (如: 100%)" value="100%">
-        <input type="url" id="imgLink" placeholder="跳轉網址 (https://...)">
-    </div>
-
-    <button class="btn-pub" onclick="publish()">1. 確認發佈</button>
-
-    <div class="section" style="border-left-color: #28a745; margin-top:30px;">
-        <label>2. 嵌入語法</label>
-        <input type="text" id="jsPath" placeholder="ad-loader.js 存放網址" oninput="updateCode()">
-        <div id="codeResult" class="code-res"></div>
-        <button onclick="copyCode()" style="background:#28a745; color:white; border:none; cursor:pointer;">複製代碼</button>
+    <button class="btn-pub" onclick="pub()">發佈廣告</button>
+    <div class="section">
+        <label>嵌入語法</label>
+        <input type="text" id="jsU" value="ad-loader.js" oninput="gen()">
+        <div id="out" class="code-res"></div>
     </div>
 </div>
-
 <script>
-    function toggleType() {
-        const isTxt = document.getElementById('adType').value === '文字';
-        document.getElementById('textEditor').style.display = isTxt ? 'block' : 'none';
-        document.getElementById('imageEditor').style.display = isTxt ? 'none' : 'block';
-    }
-
-    function addTextRow() {
-        const div = document.createElement('div');
-        div.className = 'row';
-        div.innerHTML = `<input type="text" placeholder="文字" oninput="renderText()" class="t-msg"><input type="color" value="#333333" onchange="renderText()" class="t-col" style="width:40px"><input type="number" value="18" oninput="renderText()" class="t-size" style="width:60px"><input type="text" placeholder="連結" oninput="renderText()" class="t-lnk"><button onclick="this.parentElement.remove(); renderText();" style="width:40px">X</button>`;
-        document.getElementById('textRows').appendChild(div);
-    }
-
-    function renderText() {
-        let h = "";
-        document.querySelectorAll('#textRows .row').forEach(r => {
-            const m = r.querySelector('.t-msg').value;
-            const c = r.querySelector('.t-col').value;
-            const s = r.querySelector('.t-size').value;
-            const l = r.querySelector('.t-lnk').value;
-            if(!m) return;
-            let line = `<span style="color:${c}; font-size:${s}px; display:block; margin:5px 0;">${m}</span>`;
-            if(l) line = `<a href="${l}" target="_blank" style="text-decoration:none;">${line}</a>`;
-            h += line;
-        });
-        document.getElementById('textPreview').innerHTML = h;
-        return h;
-    }
-
-    async function publish() {
+    function st() { document.getElementById('iE').style.display = document.getElementById('aTy').value === '圖片' ? 'block' : 'none'; }
+    async function pub() {
         const gas = document.getElementById('gasUrl').value;
-        const type = document.getElementById('adType').value;
-        let imageBlob = null;
-
-        if(type === '圖片') {
-            const f = document.getElementById('fileIn').files[0];
-            if(f) imageBlob = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(f); });
-        }
-
-        const data = {
-            zone: document.getElementById('zone').value,
-            type: type,
-            content: type === '文字' ? renderText() : "",
-            imgSize: document.getElementById('imgSize').value,
-            link: document.getElementById('imgLink').value,
-            start: document.getElementById('start').value,
-            end: document.getElementById('end').value,
-            imageBlob: imageBlob
-        };
-
-        fetch(gas, { method: 'POST', body: JSON.stringify(data) }).then(() => alert("發佈成功！"));
+        const file = document.getElementById('fI').files[0];
+        let b64 = null;
+        if(file) b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(file); });
+        const data = { zone: document.getElementById('zId').value, type: document.getElementById('aTy').value, link: document.getElementById('lU').value, start: document.getElementById('sT').value, end: document.getElementById('eT').value, imageBlob: b64 };
+        fetch(gas, { method: 'POST', body: JSON.stringify(data) }).then(() => alert("成功"));
     }
-
-    function updateCode() {
-        const gas = document.getElementById('gasUrl').value || "GAS_URL";
-        const zone = document.getElementById('zone').value || "Zone_A";
-        const js = document.getElementById('jsPath').value || "ad-loader.js";
-        document.getElementById('codeResult').innerText = `<div id="ad-${zone}"></div>\n<script src="${js}"><\/script>\n<script>\ninitAd({ target:"ad-${zone}", zone:"${zone}", api:"${gas}?action=get" });\n<\/script>`;
+    function gen() {
+        const z = document.getElementById('zId').value || "ZONE";
+        const g = document.getElementById('gasUrl').value || "GAS";
+        const j = document.getElementById('jsU').value;
+        document.getElementById('out').innerText = `<div id="ad-${z}" style="max-width:100%;overflow:hidden;"></div>\\n<script src="${j}"><\\/script>\\n<script>\\ninitAd({ target:"ad-${z}", zone:"${z}", api:"${g}?action=get" });\\n<\\/script>`;
     }
-
-    function copyCode() {
-        navigator.clipboard.writeText(document.getElementById('codeResult').innerText).then(() => alert("已複製"));
-    }
-    addTextRow();
 </script>
 </body>
 </html>
