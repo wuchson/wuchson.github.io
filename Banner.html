@@ -2,62 +2,71 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>廣告管理控制台</title>
+    <title>廣告投放控制台</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f9; padding: 20px; }
-        .card { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #007bff; }
-        input, select, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .card { max-width: 700px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #007bff; }
+        input, select, button { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; }
-        .btn-pub { background: #007bff; color: white; border: none; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        .code-res { background: #222; color: #0f0; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; font-size: 12px; margin-top: 15px; }
+        .btn-pub { background: #007bff; color: #fff; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .code-res { background: #222; color: #0f0; padding: 15px; border-radius: 6px; font-family: monospace; white-space: pre-wrap; font-size: 12px; margin-top: 15px; }
     </style>
 </head>
 <body>
 <div class="card">
-    <h2>🚀 廣告管理控制台</h2>
+    <h2>🎯 廣告投放控制台</h2>
     <div class="section">
         <label>GAS 網址</label>
-        <input type="text" id="gasUrl" placeholder="貼上 /exec 網址">
+        <input type="text" id="gasUrl" placeholder="請貼上部署後的 /exec 網址">
     </div>
     <div class="section">
         <div class="row">
-            <input type="text" id="zId" placeholder="區域 ID" oninput="gen()">
-            <select id="aTy" onchange="st()">
-                <option value="圖片">圖片</option>
-                <option value="文字">文字</option>
+            <input type="text" id="zoneId" placeholder="區域 ID (例如: Top-01)" oninput="gen()">
+            <select id="adType" onchange="st()">
+                <option value="圖片">圖片 (Base64 版)</option>
+                <option value="文字">純文字</option>
             </select>
         </div>
         <div class="row">
-            <input type="datetime-local" id="sT"><input type="datetime-local" id="eT">
+            <input type="datetime-local" id="sTime"><input type="datetime-local" id="eTime">
         </div>
-        <div id="iE">
-            <label>圖片</label><input type="file" id="fI" accept="image/*">
-            <label>連結</label><input type="url" id="lU" placeholder="https://...">
+        <div id="imgArea">
+            <label>選擇圖片 (建議 < 200KB)</label><input type="file" id="fIn" accept="image/*">
+            <input type="url" id="linkUrl" placeholder="點擊後的跳轉連結 (https://...)">
         </div>
     </div>
-    <button class="btn-pub" onclick="pub()">發佈廣告</button>
+    <button class="btn-pub" onclick="pub()">確認發佈廣告</button>
     <div class="section">
         <label>嵌入語法</label>
-        <input type="text" id="jsU" value="ad-loader.js" oninput="gen()">
-        <div id="out" class="code-res"></div>
+        <input type="text" id="jsPath" value="https://wuchson.github.io/ad-loader.js" oninput="gen()">
+        <div id="outCode" class="code-res"></div>
     </div>
 </div>
 <script>
-    function st() { document.getElementById('iE').style.display = document.getElementById('aTy').value === '圖片' ? 'block' : 'none'; }
+    function st() { document.getElementById('imgArea').style.display = document.getElementById('adType').value === '圖片' ? 'block' : 'none'; }
     async function pub() {
         const gas = document.getElementById('gasUrl').value;
-        const file = document.getElementById('fI').files[0];
+        if(!gas) return alert("請填寫 GAS 網址");
+        const file = document.getElementById('fIn').files[0];
         let b64 = null;
         if(file) b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(file); });
-        const data = { zone: document.getElementById('zId').value, type: document.getElementById('aTy').value, link: document.getElementById('lU').value, start: document.getElementById('sT').value, end: document.getElementById('eT').value, imageBlob: b64 };
-        fetch(gas, { method: 'POST', body: JSON.stringify(data) }).then(() => alert("成功"));
+        const data = { 
+            zone: document.getElementById('zoneId').value, 
+            type: document.getElementById('adType').value, 
+            content: "", 
+            link: document.getElementById('linkUrl').value, 
+            start: document.getElementById('sTime').value, 
+            end: document.getElementById('eTime').value, 
+            imageBlob: b64 
+        };
+        fetch(gas, { method: 'POST', body: JSON.stringify(data) }).then(() => alert("發佈完成！"));
     }
     function gen() {
-        const z = document.getElementById('zId').value || "ZONE";
+        const z = document.getElementById('zoneId').value || "ZONE";
         const g = document.getElementById('gasUrl').value || "GAS";
-        const j = document.getElementById('jsU').value;
-        document.getElementById('out').innerText = `<div id="ad-${z}" style="max-width:100%;overflow:hidden;"></div>\\n<script src="${j}"><\\/script>\\n<script>\\ninitAd({ target:"ad-${z}", zone:"${z}", api:"${g}?action=get" });\\n<\\/script>`;
+        const j = document.getElementById('jsPath').value;
+        document.getElementById('outCode').innerText = `<div id="ad-${z}" style="max-width:100%; overflow:hidden;"></div>\n<script src="${j}"><\/script>\n<script>\ninitAd({ target: "ad-${z}", zone: "${z}", api: "${g}?action=get" });\n<\/script>`;
     }
 </script>
 </body>
