@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>五京報價單智慧系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @page {
             size: A4;
@@ -34,7 +33,6 @@
             transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
         }
         .btn:hover { background-color: #e9edf4; transform: translateY(-1px); }
-        .btn-excel { color: #1e7145; border-left: 4px solid #1e7145; }
         .btn-pdf { color: #b30000; border-left: 4px solid #b30000; }
         .btn-img { color: #e67e22; border-left: 4px solid #e67e22; }
         
@@ -103,7 +101,6 @@
 
     <div class="control-panel">
         <div class="control-title">🛠️ 五京電子報價單系統 - 智慧操作後台</div>
-        <button class="btn btn-excel" onclick="downloadDirectExcel()">📥 直接下載現有資料 Excel 檔</button>
         <button class="btn btn-pdf" onclick="window.print()">🖨️ 直接列印或匯出 PDF 檔</button>
         <button class="btn btn-img" onclick="downloadAsImage()">🖼️ 一鍵直接下載圖片檔</button>
     </div>
@@ -140,13 +137,13 @@
                 <div class="doc-no">No. <span contenteditable="true" id="docNo" style="border-bottom:1px solid #333; display:inline-block; width:130px; text-align:left;"></span></div>
                 
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon" id="chk-cash">⬜</span>CASH SALE 估價單
+                    <span class="box-icon">⬜</span>CASH SALE 估價單
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon" id="chk-order">⬜</span>ORDER FROM 訂貨單
+                    <span class="box-icon">⬜</span>ORDER FROM 訂貨單
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon" id="chk-invoice">⬜</span>INVOICE 發貨單
+                    <span class="box-icon">⬜</span>INVOICE 發貨單
                 </div>
                 
                 <div class="doc-date" contenteditable="true" id="docDate">日期：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日</div>
@@ -182,13 +179,13 @@
             <div class="payment-method-block">
                 <div class="payment-title">付款方式 Payment Method</div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon" id="pay-chk-cash">⬜</span>Cash 現金
+                    <span class="box-icon">⬜</span>Cash 現金
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon" id="pay-chk-check">⬜</span>Check 支票
+                    <span class="box-icon">⬜</span>Check 支票
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon" id="pay-chk-other">⬜</span>Other 其他
+                    <span class="box-icon">⬜</span>Other 其他
                 </div>
             </div>
             
@@ -263,52 +260,6 @@
                 link.href = imgData;
                 link.click();
             });
-        }
-
-        // 100% 修正成功的 Excel 導出函數
-        function downloadDirectExcel() {
-            try {
-                const data = [
-                    [document.getElementById("compName").innerText, "", "", ""],
-                    ["地址：" + document.getElementById("compAddr").innerText, "", "傳真：" + document.getElementById("compFax").innerText, ""],
-                    ["電話：" + document.getElementById("compTel").innerText, "", "", ""],
-                    ["手機：" + document.getElementById("compPhone").innerText, "", "", ""],
-                    ["", "", "", ""],
-                    ["廠商名稱：" + document.getElementById("cName").innerText, "", "單據號碼：" + document.getElementById("docNo").innerText, ""],
-                    ["姓名：" + document.getElementById("cPerson").innerText, "", "單據類型狀態：", ""],
-                    ["地址：" + document.getElementById("cAddr").innerText, "", " - CASH 估價單:", document.getElementById("chk-cash").innerText === '☑' ? '是' : '否'],
-                    ["電話：" + document.getElementById("cTel").innerText, "", " - ORDER 訂貨單:", document.getElementById("chk-order").innerText === '☑' ? '是' : '否'],
-                    ["", "", " - INVOICE 發貨單:", document.getElementById("chk-invoice").innerText === '☑' ? '是' : '否'],
-                    [document.getElementById("docDate").innerText, "", "", ""],
-                    ["", "", "", ""],
-                    ["品名 (Description)", "數量 (Quantity)", "單價 (Unit Price)", "總金額 (Amount)"]
-                ];
-
-                const rows = document.querySelectorAll(".item-row");
-                rows.forEach((row) => {
-                    const desc = row.cells[0].innerText;
-                    const qty = row.cells[1].innerText ? parseFloat(row.cells[1].innerText) : "";
-                    const price = row.cells[2].innerText ? parseFloat(row.cells[2].innerText) : "";
-                    const amt = row.cells[3].innerText ? parseFloat(row.cells[3].innerText) : 0;
-                    data.push([desc, qty, price, amt]);
-                });
-
-                data.push(["", "", "", ""]);
-                data.push(["付款方式：", "", "總計 TOTAL:", parseFloat(document.getElementById("total-amount").innerText)]);
-                data.push([" - 現金 (Cash):", document.getElementById("pay-chk-cash").innerText === '☑' ? '有勾選' : '無', "保證金 DEPOSIT:", parseFloat(document.getElementById("deposit-value").innerText) || 0]);
-                data.push([" - 支票 (Check):", document.getElementById("pay-chk-check").innerText === '☑' ? '有勾選' : '無', "差額 BALANCE:", parseFloat(document.getElementById("balance-amount").innerText)]);
-                data.push([" - 其他 (Other):", document.getElementById("pay-chk-other").innerText === '☑' ? '有勾選' : '無', "", ""]);
-                data.push(["", "", "", ""]);
-                data.push(["訂貨人 Order by: " + document.getElementById("sigOrder").innerText, "領貨人 person: " + document.getElementById("sigGet").innerText, "經手人 Signature: " + document.getElementById("sigSign").innerText, ""]);
-
-                const workbook = XLSX.utils.book_new();
-                const worksheet = XLSX.utils.aoa_to_sheet(data);
-                XLSX.utils.book_append_sheet(workbook, worksheet, "報價單明細");
-                
-                XLSX.writeFile(workbook, "五京報價單_即時導出資料.xlsx");
-            } catch (error) {
-                alert("下載發生錯誤，請重試：" + error.message);
-            }
         }
     </script>
 </body>
