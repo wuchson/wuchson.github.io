@@ -204,20 +204,26 @@
             </div>
             
             <div class="summary-block">
-                <table class="summary-table">
-                    <tr>
-                        <td class="summary-label">總計 TOTAL</td>
-                        <td class="summary-value">元 <span id="total-amount">0.00</span></td>
-                    </tr>
-                    <tr>
-                        <td class="summary-label">保證金 DEPOSIT</td>
-                        <td class="summary-value" contenteditable="true" oninput="calculateTotal()" id="deposit-value" style="background-color: #fffdeb; outline:none;">0.00</td>
-                    </tr>
-                    <tr class="row-balance">
-                        <td class="summary-label">差額 BALANCE</td>
-                        <td class="summary-value">元 <span id="balance-amount">0.00</span></td>
-                    </tr>
-                </table>
+                <!-- 找到 HTML 中 summary-table 的部分，已修改如下 -->
+<table class="summary-table">
+    <tr>
+        <td class="summary-label">總計 TOTAL</td>
+        <!-- 將 元 移至 span 後方 -->
+        <td class="summary-value"><span id="total-amount">0.00</span> 元</td>
+    </tr>
+    <tr>
+        <td class="summary-label">保證金 DEPOSIT</td>
+        <!-- 保持 contenteditable 功能，並在後方加上 元 -->
+        <td class="summary-value">
+            <span contenteditable="true" oninput="calculateTotal()" id="deposit-value" style="background-color: #fffdeb; outline:none; display:inline-block; min-width:60px;">0.00</span> 元
+        </td>
+    </tr>
+    <tr class="row-balance">
+        <td class="summary-label">差額 BALANCE</td>
+        <!-- 將 元 移至 span 後方 -->
+        <td class="summary-value"><span id="balance-amount">0.00</span> 元</td>
+    </tr>
+</table>
             </div>
         </div>
 
