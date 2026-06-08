@@ -100,8 +100,8 @@
 <body>
 
     <div class="control-panel">
-        <div class="control-title">🛠️ 五京電子報價單系統 - 智慧操作後台</div>
-        <button class="btn btn-pdf" onclick="window.print()">🖨️ 直接列印或匯出 PDF 檔</button>
+        <div class="control-title">🛠️ 五京電子報報價單系統 - 智慧操作後台</div>
+        <button class="btn btn-pdf" onclick="triggerPrintPDF()">🖨️ 直接列印或匯出 PDF 檔</button>
         <button class="btn btn-img" onclick="downloadAsImage()">🖼️ 一鍵直接下載圖片檔</button>
     </div>
 
@@ -215,6 +215,19 @@
     </div>
 
     <script>
+        // 取得當前日期的 YYYY-MM-DD 格式
+        function getFormattedDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            let mm = today.getMonth() + 1;
+            let dd = today.getDate();
+            
+            if (mm < 10) mm = '0' + mm;
+            if (dd < 10) dd = '0' + dd;
+            
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         function toggleCheckbox(element) {
             const icon = element.querySelector('.box-icon');
             if (icon.innerText === '⬜') {
@@ -248,15 +261,33 @@
             document.getElementById('balance-amount').innerText = balance.toFixed(2);
         }
 
+        // PDF 匯出功能：自動修改網頁 Title，讓系統預設的列印檔名帶上當天日期
+        function triggerPrintPDF() {
+            const originalTitle = document.title;
+            const dateStr = getFormattedDate();
+            
+            // 暫時將網頁標題改為含日期的檔名，列印時瀏覽器就會預設這個名字
+            document.title = `五京報價單_出單檔案_${dateStr}`;
+            window.print();
+            
+            // 列印視窗關閉後恢復原標題
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        }
+
+        // 圖片下載功能：檔名尾端自動串接當天日期
         function downloadAsImage() {
             const element = document.getElementById("invoiceCard");
+            const dateStr = getFormattedDate();
+            
             html2canvas(element, {
                 scale: 2, 
                 useCORS: true
             }).then(canvas => {
                 const imgData = canvas.toDataURL("image/png");
                 const link = document.createElement("a");
-                link.download = "五京報價單_出單圖片.png";
+                link.download = `五京報價單_出單圖片_${dateStr}.png`;
                 link.href = imgData;
                 link.click();
             });
