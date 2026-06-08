@@ -26,16 +26,23 @@
             position: sticky; top: 0; z-index: 9999;
         }
         .control-title { color: #ffffff; margin: 0 0 10px 0; font-size: 16px; font-weight: bold; }
+        .btn-group { margin-bottom: 8px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .btn {
             background-color: #ffffff; color: #1f497d; border: none;
-            padding: 10px 22px; margin: 0 8px; font-size: 14px; font-weight: bold;
+            padding: 10px 18px; font-size: 14px; font-weight: bold;
             border-radius: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
         }
         .btn:hover { background-color: #e9edf4; transform: translateY(-1px); }
+        .btn-storage { color: #2980b9; border-left: 4px solid #2980b9; }
+        .btn-export { color: #8e44ad; border-left: 4px solid #8e44ad; }
+        .btn-import { color: #d35400; border-left: 4px solid #d35400; }
         .btn-pdf { color: #b30000; border-left: 4px solid #b30000; }
         .btn-img { color: #e67e22; border-left: 4px solid #e67e22; }
         
+        /* 隱藏的檔案選擇器 */
+        #importFile { display: none; }
+
         .invoice-capture-area {
             background-color: #ffffff;
             width: 210mm;
@@ -100,9 +107,16 @@
 <body>
 
     <div class="control-panel">
-        <div class="control-title">🛠️ 五京電子報報價單系統 - 智慧操作後台</div>
-        <button class="btn btn-pdf" onclick="triggerPrintPDF()">🖨️ 直接列印或匯出 PDF 檔</button>
-        <button class="btn btn-img" onclick="downloadAsImage()">🖼️ 一鍵直接下載圖片檔</button>
+        <div class="control-title">🛠️ 五京電子報價單系統 - 智慧操作後台</div>
+        <div class="btn-group">
+            <button class="btn btn-storage" onclick="saveToLocal()">💾 暫存到本機</button>
+            <button class="btn btn-storage" onclick="loadFromLocal()">🔄 讀取本機暫存</button>
+            <button class="btn btn-export" onclick="exportDataFile()">📤 備份匯出檔</button>
+            <button class="btn btn-import" onclick="document.getElementById('importFile').click()">📥 還原匯入檔</button>
+            <input type="file" id="importFile" accept=".json" onchange="importDataFile(this)">
+            <button class="btn btn-pdf" onclick="triggerPrintPDF()">🖨️ 直接列印或匯出 PDF 檔</button>
+            <button class="btn btn-img" onclick="downloadAsImage()">🖼️ 一鍵直接下載圖片檔</button>
+        </div>
     </div>
 
     <div class="invoice-capture-area" id="invoiceCard">
@@ -112,15 +126,15 @@
 
         <table class="company-info-table">
             <tr>
-                <td style="width: 55%;">地址：雲林縣北港鎮新街里新德路343號<span class="editable-cell" contenteditable="true" id="compAddr" style="display:inline-block; width:80%;"></span></td>
-                <td style="width: 45%;">傅真：<span class="editable-cell" contenteditable="true" id="compFax" style="display:inline-block; width:80%;"></span></td>
+                <td style="width: 55%;">地址：<span class="editable-cell" contenteditable="true" id="compAddr" style="display:inline-block; width:80%;"></span></td>
+                <td style="width: 45%;">傳真：<span class="editable-cell" contenteditable="true" id="compFax" style="display:inline-block; width:80%;"></span></td>
             </tr>
             <tr>
-                <td>連絡人：<span class="editable-cell" contenteditable="true" id="compTel" style="display:inline-block; width:80%;"></span></td>
+                <td>電話：<span class="editable-cell" contenteditable="true" id="compTel" style="display:inline-block; width:80%;"></span></td>
                 <td></td>
             </tr>
             <tr>
-                <td>手機：0930549638<span class="editable-cell" contenteditable="true" id="compPhone" style="display:inline-block; width:80%;"></span></td>
+                <td>手機：<span class="editable-cell" contenteditable="true" id="compPhone" style="display:inline-block; width:80%;"></span></td>
                 <td></td>
             </tr>
         </table>
@@ -137,13 +151,13 @@
                 <div class="doc-no">No. <span contenteditable="true" id="docNo" style="border-bottom:1px solid #333; display:inline-block; width:130px; text-align:left;"></span></div>
                 
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon">⬜</span>CASH SALE 估價單
+                    <span class="box-icon" id="chk-cash">⬜</span>CASH SALE 估價單
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon">⬜</span>ORDER FROM 訂貨單
+                    <span class="box-icon" id="chk-order">⬜</span>ORDER FROM 訂貨單
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon">⬜</span>INVOICE 發貨單
+                    <span class="box-icon" id="chk-invoice">⬜</span>INVOICE 發貨單
                 </div>
                 
                 <div class="doc-date" contenteditable="true" id="docDate">日期：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日</div>
@@ -179,13 +193,13 @@
             <div class="payment-method-block">
                 <div class="payment-title">付款方式 Payment Method</div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon">⬜</span>Cash 現金
+                    <span class="box-icon" id="pay-chk-cash">⬜</span>Cash 現金
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon">⬜</span>Check 支票
+                    <span class="box-icon" id="pay-chk-check">⬜</span>Check 支票
                 </div>
                 <div class="checkbox-item" onclick="toggleCheckbox(this)">
-                    <span class="box-icon">⬜</span>Other 其他
+                    <span class="box-icon" id="pay-chk-other">⬜</span>Other 其他
                 </div>
             </div>
             
@@ -215,16 +229,13 @@
     </div>
 
     <script>
-        // 取得當前日期的 YYYY-MM-DD 格式
         function getFormattedDate() {
             const today = new Date();
             const yyyy = today.getFullYear();
             let mm = today.getMonth() + 1;
             let dd = today.getDate();
-            
             if (mm < 10) mm = '0' + mm;
             if (dd < 10) dd = '0' + dd;
-            
             return `${yyyy}-${mm}-${dd}`;
         }
 
@@ -261,30 +272,152 @@
             document.getElementById('balance-amount').innerText = balance.toFixed(2);
         }
 
-        // PDF 匯出功能：自動修改網頁 Title，讓系統預設的列印檔名帶上當天日期
+        // ==================== 🛠️ 智慧數據打包系統核心（新增功能） ====================
+        function collectAllData() {
+            const rowsData = [];
+            const rows = document.querySelectorAll(".item-row");
+            rows.forEach(row => {
+                rowsData.push({
+                    desc: row.cells[0].innerText,
+                    qty: row.cells[1].innerText,
+                    price: row.cells[2].innerText,
+                    amount: row.cells[3].innerText
+                });
+            });
+
+            return {
+                compName: document.getElementById("compName").innerText,
+                compAddr: document.getElementById("compAddr").innerText,
+                compFax: document.getElementById("compFax").innerText,
+                compTel: document.getElementById("compTel").innerText,
+                compPhone: document.getElementById("compPhone").innerText,
+                cName: document.getElementById("cName").innerText,
+                cPerson: document.getElementById("cPerson").innerText,
+                cAddr: document.getElementById("cAddr").innerText,
+                cTel: document.getElementById("cTel").innerText,
+                docNo: document.getElementById("docNo").innerText,
+                docDate: document.getElementById("docDate").innerText,
+                deposit: document.getElementById("deposit-value").innerText,
+                sigOrder: document.getElementById("sigOrder").innerText,
+                sigGet: document.getElementById("sigGet").innerText,
+                sigSign: document.getElementById("sigSign").innerText,
+                // 儲存打勾狀態
+                chks: {
+                    cash: document.getElementById("chk-cash").innerText,
+                    order: document.getElementById("chk-order").innerText,
+                    invoice: document.getElementById("chk-invoice").innerText,
+                    payCash: document.getElementById("pay-chk-cash").innerText,
+                    payCheck: document.getElementById("pay-chk-check").innerText,
+                    payOther: document.getElementById("pay-chk-other").innerText
+                },
+                rows: rowsData
+            };
+        }
+
+        function applyDataToForm(data) {
+            if (!data) return;
+            try {
+                document.getElementById("compName").innerText = data.compName || "五京有限公司";
+                document.getElementById("compAddr").innerText = data.compAddr || "";
+                document.getElementById("compFax").innerText = data.compFax || "";
+                document.getElementById("compTel").innerText = data.compTel || "";
+                document.getElementById("compPhone").innerText = data.compPhone || "";
+                document.getElementById("cName").innerText = data.cName || "";
+                document.getElementById("cPerson").innerText = data.cPerson || "";
+                document.getElementById("cAddr").innerText = data.cAddr || "";
+                document.getElementById("cTel").innerText = data.cTel || "";
+                document.getElementById("docNo").innerText = data.docNo || "";
+                document.getElementById("docDate").innerText = data.docDate || "日期：        年      月      日";
+                document.getElementById("deposit-value").innerText = data.deposit || "0.00";
+                document.getElementById("sigOrder").innerText = data.sigOrder || "";
+                document.getElementById("sigGet").innerText = data.sigGet || "";
+                document.getElementById("sigSign").innerText = data.sigSign || "";
+
+                if (data.chks) {
+                    document.getElementById("chk-cash").innerText = data.chks.cash || "⬜";
+                    document.getElementById("chk-order").innerText = data.chks.order || "⬜";
+                    document.getElementById("chk-invoice").innerText = data.chks.invoice || "⬜";
+                    document.getElementById("pay-chk-cash").innerText = data.chks.payCash || "⬜";
+                    document.getElementById("pay-chk-check").innerText = data.chks.payCheck || "⬜";
+                    document.getElementById("pay-chk-other").innerText = data.chks.payOther || "⬜";
+                }
+
+                const rows = document.querySelectorAll(".item-row");
+                if (data.rows && data.rows.length > 0) {
+                    data.rows.forEach((rowData, idx) => {
+                        if (rows[idx]) {
+                            rows[idx].cells[0].innerText = rowData.desc || "";
+                            rows[idx].cells[1].innerText = rowData.qty || "";
+                            rows[idx].cells[2].innerText = rowData.price || "";
+                            rows[idx].cells[3].innerText = rowData.amount || "0.00";
+                        }
+                    });
+                }
+                calculateTotal();
+            } catch (e) {
+                alert("資料還原解析時發生錯誤：" + e.message);
+            }
+        }
+
+        // 1. 本地儲存與讀取 (LocalStorage)
+        function saveToLocal() {
+            const data = collectAllData();
+            localStorage.setItem("wujing_invoice_backup", JSON.stringify(data));
+            alert("✅ 成功！當前資料已安全暫存在這台電腦中。");
+        }
+
+        function loadFromLocal() {
+            const saved = localStorage.getItem("wujing_invoice_backup");
+            if (!saved) {
+                alert("ℹ️ 找不到這台電腦的暫存紀錄喔！");
+                return;
+            }
+            applyDataToForm(JSON.parse(saved));
+            alert("🔄 成功！已還原上次在本機暫存的資料。");
+        }
+
+        // 2. 備份匯出檔 (下載專屬檔案)
+        function exportDataFile() {
+            const data = collectAllData();
+            const dateStr = getFormattedDate();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `五京報價單_備份檔_${dateStr}.json`;
+            link.click();
+        }
+
+        // 3. 還原匯入檔 (讀取上傳檔案)
+        function importDataFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    applyDataToForm(data);
+                    alert("📥 成功！備份檔案已完美匯入並還原。");
+                    input.value = ""; // 清空選擇器
+                } catch (err) {
+                    alert("❌ 錯誤：這不是一個正確的報價單備份檔！");
+                }
+            };
+            reader.readAsText(file);
+        }
+        // =======================================================================
+
         function triggerPrintPDF() {
             const originalTitle = document.title;
             const dateStr = getFormattedDate();
-            
-            // 暫時將網頁標題改為含日期的檔名，列印時瀏覽器就會預設這個名字
             document.title = `五京報價單_出單檔案_${dateStr}`;
             window.print();
-            
-            // 列印視窗關閉後恢復原標題
-            setTimeout(() => {
-                document.title = originalTitle;
-            }, 1000);
+            setTimeout(() => { document.title = originalTitle; }, 1000);
         }
 
-        // 圖片下載功能：檔名尾端自動串接當天日期
         function downloadAsImage() {
             const element = document.getElementById("invoiceCard");
             const dateStr = getFormattedDate();
-            
-            html2canvas(element, {
-                scale: 2, 
-                useCORS: true
-            }).then(canvas => {
+            html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
                 const imgData = canvas.toDataURL("image/png");
                 const link = document.createElement("a");
                 link.download = `五京報價單_出單圖片_${dateStr}.png`;
