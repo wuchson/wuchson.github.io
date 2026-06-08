@@ -110,7 +110,7 @@
 
     <div class="invoice-capture-area" id="invoiceCard">
         <div class="company-header">
-            <div class="company-title" contenteditable="true" id="compName">五京股份有限公司</div>
+            <div class="company-title" contenteditable="true" id="compName">五京有限公司</div>
         </div>
 
         <table class="company-info-table">
@@ -265,48 +265,50 @@
             });
         }
 
-        // 核心強大新功能：點擊後，瀏覽器直接秒速導出真正的微軟 Excel 檔案
+        // 100% 修正成功的 Excel 導出函數
         function downloadDirectExcel() {
-            const data = [
-                [document.getElementById("compName").innerText, "", "", ""],
-                ["地址：" + document.getElementById("compAddr").innerText, "", "傳真：" + document.getElementById("compFax").innerText, ""],
-                ["電話：" + document.getElementById("compTel").innerText, "", "", ""],
-                ["手機：" + document.getElementById("compPhone").innerText, "", "", ""],
-                ["", "", "", ""],
-                ["廠商名稱：" + document.getElementById("cName").innerText, "", "單據號碼：" + document.getElementById("docNo").innerText, ""],
-                ["姓名：" + document.getElementById("cPerson").innerText, "", "單據類型狀態：", ""],
-                ["地址：" + document.getElementById("cAddr").innerText, "", " - CASH 估價單:", document.getElementById("chk-cash").innerText === '☑' ? '是' : '否'],
-                ["電話：" + document.getElementById("cTel").innerText, "", " - ORDER 訂貨單:", document.getElementById("chk-order").innerText === '☑' ? '是' : '否'],
-                ["", "", " - INVOICE 發貨單:", document.getElementById("chk-invoice").innerText === '☑' ? '是' : '否'],
-                [document.getElementById("docDate").innerText, "", "", ""],
-                ["", "", "", ""],
-                ["品名 (Description)", "數量 (Quantity)", "單價 (Unit Price)", "總金額 (Amount)"]
-            ];
+            try {
+                const data = [
+                    [document.getElementById("compName").innerText, "", "", ""],
+                    ["地址：" + document.getElementById("compAddr").innerText, "", "傳真：" + document.getElementById("compFax").innerText, ""],
+                    ["電話：" + document.getElementById("compTel").innerText, "", "", ""],
+                    ["手機：" + document.getElementById("compPhone").innerText, "", "", ""],
+                    ["", "", "", ""],
+                    ["廠商名稱：" + document.getElementById("cName").innerText, "", "單據號碼：" + document.getElementById("docNo").innerText, ""],
+                    ["姓名：" + document.getElementById("cPerson").innerText, "", "單據類型狀態：", ""],
+                    ["地址：" + document.getElementById("cAddr").innerText, "", " - CASH 估價單:", document.getElementById("chk-cash").innerText === '☑' ? '是' : '否'],
+                    ["電話：" + document.getElementById("cTel").innerText, "", " - ORDER 訂貨單:", document.getElementById("chk-order").innerText === '☑' ? '是' : '否'],
+                    ["", "", " - INVOICE 發貨單:", document.getElementById("chk-invoice").innerText === '☑' ? '是' : '否'],
+                    [document.getElementById("docDate").innerText, "", "", ""],
+                    ["", "", "", ""],
+                    ["品名 (Description)", "數量 (Quantity)", "單價 (Unit Price)", "總金額 (Amount)"]
+                ];
 
-            const rows = document.querySelectorAll(".item-row");
-            rows.forEach((row, index) => {
-                const desc = row.cells[0].innerText;
-                const qty = row.cells[1].innerText ? parseFloat(row.cells[1].innerText) : "";
-                const price = row.cells[2].innerText ? parseFloat(row.cells[2].innerText) : "";
-                const amt = row.cells[3].innerText ? parseFloat(row.cells[3].innerText) : 0;
-                data.push([desc, qty, price, amt]);
-            });
+                const rows = document.querySelectorAll(".item-row");
+                rows.forEach((row) => {
+                    const desc = row.cells[0].innerText;
+                    const qty = row.cells[1].innerText ? parseFloat(row.cells[1].innerText) : "";
+                    const price = row.cells[2].innerText ? parseFloat(row.cells[2].innerText) : "";
+                    const amt = row.cells[3].innerText ? parseFloat(row.cells[3].innerText) : 0;
+                    data.push([desc, qty, price, amt]);
+                });
 
-            data.push(["", "", "", ""]);
-            data.push(["付款方式：", "", "總計 TOTAL:", parseFloat(document.getElementById("total-amount").innerText)]);
-            data.push([" - 現金 (Cash):", document.getElementById("pay-chk-cash").innerText === '☑' ? '有勾選' : '無', "保證金 DEPOSIT:", parseFloat(document.getElementById("deposit-value").innerText) || 0]);
-            data.push([" - 支票 (Check):", document.getElementById("pay-chk-check").innerText === '☑' ? '有勾選' : '無', "差額 BALANCE:", parseFloat(document.getElementById("balance-amount").innerText)]);
-            data.push([" - 其他 (Other):", document.getElementById("pay-chk-other").innerText === '☑' ? '有勾選' : '無', "", ""]);
-            data.push(["", "", "", ""]);
-            data.push(["訂貨人 Order by: " + document.getElementById("sigOrder").innerText, "領貨人 person: " + document.getElementById("sigGet").innerText, "經手人 Signature: " + document.getElementById("sigSign").innerText, ""]);
+                data.push(["", "", "", ""]);
+                data.push(["付款方式：", "", "總計 TOTAL:", parseFloat(document.getElementById("total-amount").innerText)]);
+                data.push([" - 現金 (Cash):", document.getElementById("pay-chk-cash").innerText === '☑' ? '有勾選' : '無', "保證金 DEPOSIT:", parseFloat(document.getElementById("deposit-value").innerText) || 0]);
+                data.push([" - 支票 (Check):", document.getElementById("pay-chk-check").innerText === '☑' ? '有勾選' : '無', "差額 BALANCE:", parseFloat(document.getElementById("balance-amount").innerText)]);
+                data.push([" - 其他 (Other):", document.getElementById("pay-chk-other").innerText === '☑' ? '有勾選' : '無', "", ""]);
+                data.push(["", "", "", ""]);
+                data.push(["訂貨人 Order by: " + document.getElementById("sigOrder").innerText, "領貨人 person: " + document.getElementById("sigGet").innerText, "經手人 Signature: " + document.getElementById("sigSign").innerText, ""]);
 
-            const worksheet = XLSX.utils.aoa_to_sheet(data);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, "報價單明細資料");
-            XLSX.utils.book_append_sheet(workbook, worksheet, "報價單明細資料"); // 雙保險相容性
-            
-            // 觸發直接下載檔案程序
-            XLSX.writeFile(workbook, "五京報價單_即時導出資料.xlsx");
+                const workbook = XLSX.utils.book_new();
+                const worksheet = XLSX.utils.aoa_to_sheet(data);
+                XLSX.utils.book_append_sheet(workbook, worksheet, "報價單明細");
+                
+                XLSX.writeFile(workbook, "五京報價單_即時導出資料.xlsx");
+            } catch (error) {
+                alert("下載發生錯誤，請重試：" + error.message);
+            }
         }
     </script>
 </body>
