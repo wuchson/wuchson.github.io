@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雲林縣海線社區大學115年度第1學期生活陶瓷班</title>
+    <style>
+        :root {
+            --primary-color: #366092;
+            --primary-hover: #28486F;
+            --bg-color: #f8fafc;
+            --border-color: #555555;
+            --zebra-color: #f9fafb;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 15px;
+            color: #000000;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .header-section {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+        }
+
+        h1 {
+            color: #000000;
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: #16a34a; }
+        .btn-success:hover { background-color: #15803d; }
+        .btn-info { background-color: #0284c7; }
+        .btn-info:hover { background-color: #0369a1; }
+        .btn-secondary { background-color: #e2e8f0; color: #334155; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+        .btn-important { background-color: #ea580c; }
+        .btn-important:hover { background-color: #c2410c; }
+
+        #fileInput { display: none; }
+
+        .print-area-wrapper {
+            background: white;
+            padding: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: white;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 5px 2px;
+            text-align: center;
+            height: 28px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #000000;
+            font-weight: bold;
+        }
+
+        .col-id { width: 5%; }
+        .col-name { width: 11%; font-weight: bold; }
+        .col-blank { width: 6%; }
+        .col-week { width: 5.5%; }
+
+        .cell-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 13px;
+            color: #000000;
+            outline: none;
+            padding: 0;
+        }
+        .cell-input:focus {
+            background: #fef08a;
+        }
+
+        /* 產生的圖片預覽區 */
+        #imagePreviewResult {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #cbd5e1;
+            display: none;
+            text-align: center;
+        }
+        #previewImg {
+            max-width: 100%;
+            border: 1px solid #94a3b8;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            margin-top: 10px;
+        }
+
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .toolbar, #imagePreviewResult { display: none !important; }
+            @page { size: A4 landscape; margin: 8mm 10mm 8mm 10mm; }
+            table { width: 100%; font-size: 12px; }
+            th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            td { height: 25px !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h1 id="tableTitle">雲林縣海線社區大學 115年度第1學期生活陶瓷班</h1>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="btn btn-success" onclick="exportCSV()">📁 匯出 CSV</button>
+        <button class="btn btn-info" onclick="triggerImport()">📥 匯入 CSV</button>
+        <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
+        
+        <button class="btn btn-important" onclick="exportImage()">🖼️ 點此產生 A4-圖片</button>
+        <button class="btn btn-secondary" onclick="printPDF()">🖨️ 轉成 A4-PDF / 列印</button>
+    </div>
+
+    <!-- Printable Area -->
+    <div class="print-area-wrapper" id="printArea">
+        <table id="rollCallTable">
+            <thead>
+                <tr>
+                    <th class="col-id">編號</th>
+                    <th class="col-name">姓名</th>
+                    <th class="col-blank"></th>
+                    <th class="col-week"></th><th class="col-week"></th><th class="col-week"></th><th class="col-week"></th>
+                    <th class="col-week"></th><th class="col-week"></th><th class="col-week"></th><th class="col-week"></th>
+                    <th class="col-week"></th><th class="col-week"></th><th class="col-week"></th><th class="col-week"></th>
+                    <th class="col-week"></th><th class="col-week"></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Image Result Section -->
+    <div id="imagePreviewResult">
+        <h3 style="color: #ea580c; margin: 0;">🎉 圖片已成功在下方產生！</h3>
+        <p style="font-size: 14px; color: #475569; margin: 5px 0 15px 0;">由於部分瀏覽器安全限制未觸發自動下載，請直接在下方圖片上點擊<b>【滑鼠右鍵】</b>並選擇<b>【另存圖片】</b>即可儲存！</p>
+        <img id="previewImg" src="" alt="點名表圖片預覽">
+    </div>
+</div>
+
+<script>
+    // 內嵌 html2canvas 原始碼，確保 100% 離線可用
+    console.error('html2canvas load failed');
+
+    const exactNames = [
+        "何宗樺", "侯泳琳", "侯麗惠", "吳姿函", "吳永發", 
+        "吳淑玲", "吳銘鐘", "周賢修", "林春源", "蔡慶騰", 
+        "蔡月治", "蘇利娜", "郭金一", "陳丁魁", "陳小鳳", 
+        "陳馥郁", "黃婉貞", "龔玉雲", "吳如雯", "蕭梅香",
+        ""
+    ];
+
+    const tableBody = document.getElementById('tableBody');
+
+    function initTable() {
+        tableBody.innerHTML = '';
+        for (let i = 1; i <= 21; i++) {
+            const name = exactNames[i - 1] || "";
+            tableBody.appendChild(createRowHTML(i, name));
+        }
+    }
+
+    function createRowHTML(id, name, blankCol = "", weeks = Array(14).fill("")) {
+        const tr = document.createElement('tr');
+        
+        const tdId = document.createElement('td');
+        tdId.innerText = id;
+        tr.appendChild(tdId);
+
+        const tdName = document.createElement('td');
+        tdName.innerHTML = `<input type="text" class="cell-input" style="font-weight:bold;" value="${name}">`;
+        tr.appendChild(tdName);
+
+        const tdBlank = document.createElement('td');
+        tdBlank.innerHTML = `<input type="text" class="cell-input" value="${blankCol}">`;
+        tr.appendChild(tdBlank);
+
+        for (let w = 0; w < 14; w++) {
+            const tdWeek = document.createElement('td');
+            const val = weeks[w] || "";
+            tdWeek.innerHTML = `<input type="text" class="cell-input" value="${val}">`;
+            tr.appendChild(tdWeek);
+        }
+
+        return tr;
+    }
+
+    function triggerImport() { document.getElementById('fileInput').click(); }
+
+    function getFormattedDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        return yyyy + mm + dd;
+    }
+
+    function exportCSV() {
+        const rows = [];
+        const title = document.getElementById('tableTitle').innerText;
+        rows.push([title]);
+        rows.push(["編號", "姓名", "空白欄", "欄1", "欄2", "欄3", "欄4", "欄5", "欄6", "欄7", "欄8", "欄9", "欄10", "欄11", "欄12", "欄13", "欄14"]);
+
+        const trs = tableBody.querySelectorAll("tr");
+        trs.forEach(tr => {
+            const rowData = [];
+            rowData.push(tr.cells[0].innerText);
+            for (let i = 1; i < tr.cells.length; i++) {
+                const input = tr.cells[i].querySelector('input');
+                rowData.push(input ? input.value : "");
+            }
+            rows.push(rowData);
+        });
+
+        let csvContent = "\uFEFF"; 
+        rows.forEach(row => {
+            const safeRow = row.map(val => `"${val.replace(/"/g, '""')}"`);
+            csvContent += safeRow.join(",") + "\r\n";
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `${title}_資料_${getFormattedDate()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function importCSV(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split(/\r?\n/);
+            if (lines.length < 3) return;
+
+            tableBody.innerHTML = '';
+            let count = 1;
+            for (let i = 2; i < lines.length && count <= 21; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const cells = [];
+                let current = '';
+                let inQuotes = false;
+                for (let c = 0; c < lines[i].length; c++) {
+                    const char = lines[i][c];
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) {
+                        cells.push(current.trim());
+                        current = '';
+                    } else current += char;
+                }
+                cells.push(current.trim());
+                const cleanCells = cells.map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
+
+                if (cleanCells.length >= 2) {
+                    const name = cleanCells[1];
+                    const blankCol = cleanCells[2] || "";
+                    const weeks = cleanCells.slice(3);
+                    tableBody.appendChild(createRowHTML(count++, name, blankCol, weeks));
+                }
+            }
+            while(count <= 21) {
+                tableBody.appendChild(createRowHTML(count++, ""));
+            }
+            alert("資料已成功載入！");
+        };
+        reader.readAsText(file, 'UTF-8');
+        event.target.value = '';
+    }
+
+    function printPDF() { window.print(); }
+
+    function exportImage() {
+        const printArea = document.getElementById('printArea');
+        const title = document.getElementById('tableTitle').innerText;
+        const previewBlock = document.getElementById('imagePreviewResult');
+        const previewImg = document.getElementById('previewImg');
+
+        // 執行截圖
+        html2canvas(printArea, {
+            scale: 2, // 2倍高畫質
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            
+            // 1. 顯示在下方的預覽區，讓使用者百分之百可以用右鍵另存
+            previewImg.src = imgData;
+            previewBlock.style.display = 'block';
+            
+            // 捲動畫面到圖片區
+            previewBlock.scrollIntoView({ behavior: 'smooth' });
+
+            // 2. 同時嘗試自動下載
+            try {
+                const link = document.createElement('a');
+                link.download = `${title}_點名表_${getFormattedDate()}.png`;
+                link.href = imgData;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch(e) {
+                console.log("自動下載被瀏覽器阻擋，已改用下方右鍵另存方案。");
+            }
+        }).catch(err => {
+            alert("轉換圖片發生錯誤，這通常是本機瀏覽器的安全限制。請直接點選【轉成 A4-PDF / 列印】並選另存為 PDF，一樣能得到完美單頁檔案！");
+        });
+    }
+
+    window.onload = initTable;
+</script>
+
+</body>
+</html>
