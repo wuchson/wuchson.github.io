@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雲林縣海線社區大學     年度第   學期生活陶瓷班</title>
+    <title>雲林縣海線社區大學-生活陶瓷班</title>
     <style>
         :root {
             --primary-color: #366092;
@@ -35,25 +35,32 @@
         }
 
         .header-section {
+            margin-top: 15px;
             margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
             border-bottom: 2px solid var(--primary-color);
             padding-bottom: 8px;
         }
 
-        h1 {
+        /* 將標題改為可編輯輸入框的樣式 */
+        .title-input {
+            width: 100%;
+            border: none;
+            background: transparent;
             color: #000000;
             margin: 0;
             font-size: 20px;
             font-weight: bold;
+            outline: none;
+            padding: 0;
+        }
+        .title-input:focus {
+            background: #fef08a;
         }
 
         .toolbar {
             display: flex;
             gap: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
 
         .btn {
@@ -152,16 +159,13 @@
             table { width: 100%; font-size: 12px; }
             th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             td { height: 25px !important; }
+            .header-section { border-bottom: 2px solid #555555 !important; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-section">
-        <h1 id="tableTitle">雲林縣海線社區大學 115年度第1學期生活陶瓷班</h1>
-    </div>
-
     <div class="toolbar">
         <button class="btn btn-success" onclick="exportCSV()">📁 匯出 CSV</button>
         <button class="btn btn-info" onclick="triggerImport()">📥 匯入 CSV</button>
@@ -172,6 +176,10 @@
     </div>
 
     <div class="print-area-wrapper" id="printArea">
+        <div class="header-section">
+            <input type="text" id="tableTitle" class="title-input" value="雲林縣海線社區大學 115年度第1學期生活陶瓷班">
+        </div>
+
         <table id="rollCallTable">
             <thead>
                 <tr>
@@ -195,18 +203,7 @@
     </div>
 </div>
 
-<script>
-!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.html2canvas=t():e.html2canvas=t()}(self,(function(){return function(e){var t={};function n(r){if(t[r])return t[r].exports;var o=t[r]={i:r,l:l=!1,exports:{}};return e[r].call(o.exports,o,o.exports,n),o.l=!0,o.exports}var r=[,,,function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.CSSParsedCounterDeclaration=t.CSSParsedCounterDeclarationImpl=void 0;var r=n(30),o=n(4),i=function(){function e(e){this.counterReset=e.counterReset?e.counterReset.split(",").map((function(e){return e.trim()}))+[]:[],this.counterIncrement=e.counterIncrement?e.counterIncrement.split(",").map((function(e){return e.trim()}))+[]:[]}return e.prototype.getCounterValue=function(e){return 0},e}();t.CSSParsedCounterDeclarationImpl=i,t.CSSParsedCounterDeclaration={parse:function(e,t){return new i(t)}}},function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.CSSParsedCounterDeclarationImpl=t.CSSParsedCounterDeclaration=void 0},,,,,,,,,,,,,,,,,,,,,,,,,,,function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.html2canvas=void 0;var r=n(31),o=n(32),i=n(33);function a(e,t){return void 0===t&&(t={}),r.renderElement(e,t)}t.html2canvas=a,t.default=a}],"html2canvas";return n(28)}([function(e,t,n){"use strict";
-/*
- * html2canvas 1.4.1 <https://html2canvas.hertzen.com>
- * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
- * Released under MIT License
- */
-var r=Object.prototype.hasOwnProperty,o=Object.prototype.toString,i=Object.defineProperty,a=Object.getOwnPropertyDescriptor,s=function(e){return"function"==typeof Array.from?Array.from(e):Array.prototype.slice.call(e)},c=function(e){return"function"==typeof Object.keys?Object.keys(e):function(e){var t=[];for(var n in e)r.call(e,n)&&t.push(n);return t}(e)},u=function(e){return"function"==typeof Object.assign?Object.assign.apply(Object,[{}].concat(s(arguments))):function(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];if(null!=n)for(var o in n)r.call(n,o)&&(e[o]=n[o])}return e}.apply(this,arguments)},l=function(e){return e&&"object"==typeof e&&"number"==typeof e.length&&"[object Array]"===o.call(e)},f=function(e){return e&&"object"==typeof e&&"[object Object]"===o.call(e)},p=function(e){return"function"==typeof e||"[object Function]"===o.call(e)},d=function(e){return null===e||void 0===e},h=function(e){return"string"==typeof e||"[object String]"===o.call(e)},v=function(e){return"number"==typeof e||"[object Number]"===o.call(e)},m=function(e){return!0===e||!1===e||"[object Boolean]"===o.call(e)},g=function(e){return e&&p(e.then)},y=function(e){return d(e)?"":e.toString().trim()},w=function(e){return y(e).toLowerCase()},b=function(e){return v(e)&&!isNaN(e)&&isFinite(e)},E=function(e){return b(e)&&e%1==0},x=function(e,t,n){var r=e.indexOf(t);if(-1!==r){var o=e.indexOf(n,r+t.length);if(-1!==o)return e.substring(r+t.length,o)}return""},C=function(e){var t,n,r;return f(e)&&p(t=e.constructor)&&f(n=t.prototype)&&r=n.hasOwnProperty("isPrototypeOf"),r},S=function(e){return"undefined"!=typeof window&&e===window||e&&"object"==typeof e&&"window"in e&&e.window===e},T=function(e){return e&&"object"==typeof e&&"nodeType"in e&&v(e.nodeType)},O=function(e){return T(e)&&1===e.nodeType},_=function(e){return T(e)&&9===e.nodeType},P=function(e){return T(e)&&3===e.nodeType};e.exports={hasOwn:r,toString:o,defineProperty:i,getOwnPropertyDescriptor:a,toArray:s,keys:c,assign:u,isArray:l,isObject:f,isFunction:p,isNullOrUndefined:d,isString:h,isNumber:v,isBoolean:m,isPromise:g,trim:y,toLowerCase:w,isNumeric:b,isInteger:E,substringBetween:x,isPlainObject:C,isWindow:S,isNode:T,isElement:O,isDocument:_,isTextNode:P}},function(e,t,n){"use strict";var r=n(0),o=r.isFunction,i=r.isArray,a=r.isObject,s=r.isPlainObject,c=r.isWindow,u=r.isNode,l=r.isElement,f=r.isDocument,p=r.isTextNode,d=function(e,t,n){if(o(e)){if(i(t))for(var r=0;r<t.length;r++)e.call(n,t[r],r,t);else if(a(t))if(c(t)||u(t)||f(t))e.call(n,t,0,[t]);else if(i(t.length))for(var r=0;r<t.length;r++)e.call(n,t[r],r,t);else for(var o in t)t.hasOwnProperty(o)&&e.call(n,t[o],o,t)}return t};e.exports={each:d}},function(e,t,n){"use strict";var r=n(1).each,o=function(e,t){var n=[];return r((function(r,o,i){e.call(t,r,o,i)&&n.push(r)}),e),n};e.exports={filter:o}},function(e,t,n){"use strict";var r=n(1).each,o=function(e,t){var n=[];return r((function(r,o,i){n.push(e.call(t,r,o,i))}),e),n};e.exports={map:o}},function(e,t,n){"use strict";var r=n(1).each,o=function(e,t){var n=[];return r((function(e,r,o){n=n.concat(e)}),e),n};e.exports={flatten:o}}]);
-    // 考慮到 html2canvas 太過龐大，這裡利用動態載入 DataURI 的方式將其封裝，確保離線可用且程式碼乾淨。
-    // 以下為精簡的 html2canvas 橋接程式碼
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibSRrgAG5qn2FRcMWeFZxwK4cH3HQqMw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
     const exactNames = [
@@ -264,7 +261,7 @@ var r=Object.prototype.hasOwnProperty,o=Object.prototype.toString,i=Object.defin
 
     function exportCSV() {
         const rows = [];
-        const title = document.getElementById('tableTitle').innerText;
+        const title = document.getElementById('tableTitle').value;
         rows.push([title]);
         rows.push(["編號", "姓名", "空白欄", "欄1", "欄2", "欄3", "欄4", "欄5", "欄6", "欄7", "欄8", "欄9", "欄10", "欄11", "欄12", "欄13", "欄14"]);
 
@@ -303,6 +300,14 @@ var r=Object.prototype.hasOwnProperty,o=Object.prototype.toString,i=Object.defin
             const text = e.target.result;
             const lines = text.split(/\r?\n/);
             if (lines.length < 3) return;
+
+            // 匯入時同步更新標題輸入框
+            if(lines[0]) {
+                const importedTitle = lines[0].replace(/^"|"$/g, '').trim();
+                if(importedTitle) {
+                    document.getElementById('tableTitle').value = importedTitle;
+                }
+            }
 
             tableBody.innerHTML = '';
             let count = 1;
@@ -348,30 +353,33 @@ var r=Object.prototype.hasOwnProperty,o=Object.prototype.toString,i=Object.defin
         }
 
         const printArea = document.getElementById('printArea');
-        const title = document.getElementById('tableTitle').innerText;
+        const title = document.getElementById('tableTitle').value;
         const previewBlock = document.getElementById('imagePreviewResult');
         const previewImg = document.getElementById('previewImg');
 
-        // 將輸入框的值即時同步到 attribute，避免轉換時內容遺失
+        // 將所有輸入框（包含標題與表格內容）當下的值同步到屬性中，確保截圖能抓到最新文字
         const inputs = printArea.querySelectorAll('input');
         inputs.forEach(input => {
             input.setAttribute('value', input.value);
         });
 
+        // 執行截圖
         html2canvas(printArea, {
-            scale: 2, // 2倍清晰度
+            scale: 2, // 2倍高畫質
             useCORS: true,
             allowTaint: true,
             backgroundColor: '#ffffff'
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             
-            // 顯示在下方預覽區
+            // 顯示在下方的預覽區
             previewImg.src = imgData;
             previewBlock.style.display = 'block';
+            
+            // 捲動畫面到圖片區
             previewBlock.scrollIntoView({ behavior: 'smooth' });
 
-            // 自動觸發下載
+            // 同時嘗試自動下載
             try {
                 const link = document.createElement('a');
                 link.download = `${title}_點名表_${getFormattedDate()}.png`;
@@ -380,11 +388,11 @@ var r=Object.prototype.hasOwnProperty,o=Object.prototype.toString,i=Object.defin
                 link.click();
                 document.body.removeChild(link);
             } catch(e) {
-                console.log("自動下載被阻擋，已採用右鍵另存方案。");
+                console.log("自動下載被瀏覽器阻擋，已改用下方右鍵另存方案。");
             }
         }).catch(err => {
             console.error(err);
-            alert("轉換圖片發生錯誤，請直接點選【轉成 A4-PDF / 列印】並選另存為 PDF。");
+            alert("轉換圖片發生錯誤。請直接點選【轉成 A4-PDF / 列印】並選另存為 PDF。");
         });
     }
 
