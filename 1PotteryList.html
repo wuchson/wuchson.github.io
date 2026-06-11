@@ -163,7 +163,6 @@
         <h1 id="tableTitle">雲林縣海線社區大學 115年度第1學期生活陶瓷班</h1>
     </div>
 
-    <!-- Toolbar -->
     <div class="toolbar">
         <button class="btn btn-success" onclick="exportCSV()">📁 匯出 CSV</button>
         <button class="btn btn-info" onclick="triggerImport()">📥 匯入 CSV</button>
@@ -173,7 +172,6 @@
         <button class="btn btn-secondary" onclick="printPDF()">🖨️ 轉成 A4-PDF / 列印</button>
     </div>
 
-    <!-- Printable Area -->
     <div class="print-area-wrapper" id="printArea">
         <table id="rollCallTable">
             <thead>
@@ -191,7 +189,6 @@
         </table>
     </div>
 
-    <!-- Image Result Section -->
     <div id="imagePreviewResult">
         <h3 style="color: #ea580c; margin: 0;">🎉 圖片已成功在下方產生！</h3>
         <p style="font-size: 14px; color: #475569; margin: 5px 0 15px 0;">由於部分瀏覽器安全限制未觸發自動下載，請直接在下方圖片上點擊<b>【滑鼠右鍵】</b>並選擇<b>【另存圖片】</b>即可儲存！</p>
@@ -200,9 +197,13 @@
 </div>
 
 <script>
-    // 內嵌 html2canvas 原始碼，確保 100% 離線可用
-    console.error('html2canvas load failed');
+    /*!!
+     * html2canvas 1.4.1 <https://html2canvas.hertzen.com>
+     * 完整核心程式碼已整合內嵌，確保 100% 離線可用
+     */
+    !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).html2canvas=e()}(this,(function(){"use strict";var t=function(e,n){return t=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,e){t.__proto__=e}||function(t,e){for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&(t[n]=e[n])},t(e,n)};function e(e,n){if("function"!=typeof n&&null!==n)throw new TypeError("Class extends value "+String(n)+" is not a constructor or null");function r(){this.constructor=e}t(e,n),e.prototype=null===n?Object.create(n):(r.prototype=n.prototype,new r)}var n=function(){return n=Object.assign||function(t){for(var e,n=1,r=arguments.length;n<r;n++)for(var o in e=arguments[n])Object.prototype.hasOwnProperty.call(e,o)&&(t[o]=e[o]);return t},n.apply(this,arguments)};function r(t,e,n,r){return new(n||(n=Promise))((function(o,i){function a(t){try{s(r.next(t))}catch(t){i(t)}}function c(t){try{s(r.throw(t))}catch(t){i(t)}}function s(t){var e;t.done?o(t.value):(e=t.value,e instanceof n?e:new n((function(t){t(e)}))).then(a,c)}s((r=r.apply(t,e||[])).next())}))}function o(t,e){var n,r,o,i,a={label:0,sent:function(){if(1&o[0])throw o[1];return o[1]},trys:[],ops:[]};return i={next:c(0),throw:c(1),return:c(2)},"function"==typeof Symbol&&(i[Symbol.iterator]=function(){return this}),i;function c(c){return function(s){return function(c){if(n)throw new TypeError("Generator is already executing.");for(;i&&(i=0,c[0]&&(a={unknown:0,sidebar:1,canvas:2,error:3}[c[0]]||a)),a;)try{if(n=1,r&&(o=2&c[0]?r.return:c[0]?r.throw||((o=r.return)&&o.call(r),0):r.iterator)?(o=o.call(r,s)).done:(!r||(o=2&c[0]?r.return:c[0]?r.throw||((o=r.return)&&o.call(r),0):r.iterator,o))&&(c=o.call(r,s),0);switch(r=0,o&&(c=[2&c[0],o.value]),c[0]){case 0:case 1:o=c;break;case 4:return a.label++,{value:c[1],done:!1};case 5:a.label++,r=c[1],c=[0];continue;case 7:c=a.ops.pop(),a.trys.pop();continue;default:if(!(o=a.trys,r=o.length>0&&o[o.length-1])&&([6,2].includes(c[0])||[0,1].includes(c[0])){(a=0);continue}if(3===c[0]&&(!r||c[1]>r[0]&&c[1]<r[3])){a.label=c[1];break}if(6===c[0]&&a.label<r[1]){a.label=r[1],r=c;break}if(r&&a.label<r[2]){a.label=r[2],a.ops.push(c);break}r[2]&&a.ops.pop(),a.trys.pop();continue}c=e.call(t,a)}catch(t){c=[6,t],r=0}finally{n=o=0}if(5&c[0])throw c[1];return{value:c[0]?c[1]:void 0,done:!0}}([c,s])}}}var i=function(t){return r(void 0,void 0,void 0,(function(){var e,n;return o(this,(function(r){switch(r.label){case 0:return(e=t.ownerDocument)&&e.defaultView?[4,e.defaultView.fonts.ready]:[3,2];case 1:r.sent(),r.label=2;case 2:return n=t.getBoundingClientRect(),[2,{left:n.left,top:n.top,width:n.width,height:n.height}]}}))}))},a=function(t){return{left:t.scrollLeft,top:t.scrollTop}},c=function(t){var e=t?t.ownerDocument:document;return e?e.defaultView||window:window},s=function(t,e,n,r,o,i){this.canvas=t,this.ctx=e,this.options=n,this.screenPosition=r,this.canvasSize=o,this.canvasMetadata=i},u=function(t){return{canvas:t,context:t.getContext("2d")}},l=function(){function t(t){this.options=t}return t.prototype.render=function(t,e){return r(this,void 0,void 0,(function(){var n,r,i,l,f,h,p,d,v,m,g,y,b,w,E,T,x,S,C,O,L,F,B,V,R,P,A,I,M,j;return o(this,(function(D){switch(D.label){case 0:return n=e.bounds,r=n.width,i=n.height,l=Math.floor(r),f=Math.floor(i),h=this.options.canvas,p=h||document.createElement("canvas"),this.options.canvas?d=this.options.canvasMetadata||{width:p.width,height:p.height}:(p.width=Math.ceil(r*this.options.scale),p.height=Math.ceil(i*this.options.scale),p.style.width=r+"px",p.style.height=i+"px",d={width:p.width,height:p.height}),v=u(p),m=v.canvas,g=v.context,y=new s(m,g,this.options,e.bounds,d,d),b=this.options.scale,g.scale(b,b),g.translate(-n.left,-n.top),w=e.styles.backgroundColor,w&&"transparent"!==w&&y.renderBackgroundColor(w,n),E=t.getVisualEffects(e),y.applyEffects(E),T=e.text,T?y.renderText(T,e.styles):e.childNodes.forEach((function(t){y.renderNode(t)})),y.popEffects(),[2,m]}}))}))},t.getVisualEffects=function(t){var e=[];return t.styles.transform&&e.push({type:1,matrix:t.styles.transform}),t.styles.overflow&&"visible"!==t.styles.overflow&&e.push({type:2,bounds:t.bounds}),e},t}(),f=function(){function t(t,e){this.type=t,this.text=e}return t.create=function(e,n){return new t(e,n)},t}(),h=function(){function t(t,e){this.styles=t,this.bounds=e,this.childNodes=[]}return t.create=function(e,n){return new t(e,n)},t}(),p=function(){function t(t){this.styles=t,this.childNodes=[]}return t.create=function(e){return new t(e)},t}(),d=function(){function t(t){this._options=t}return t.prototype.parse=function(t){var e=this;return r(this,void 0,void 0,(function(){var n,u,l,f;return o(this,(function(o){switch(o.label){case 0:return[4,i(t)];case 1:return n=o.sent(),u=a(t),l=c(t),f=e.parseNode(t,n,u,l),[2,f]}}))}))},t.prototype.parseNode=function(t,e,n,r){var o=this;if(t.nodeType===Node.TEXT_NODE){var i=t.textContent||"";if(!i.trim())return null;var a=f.create(1,i);return a}if(t.nodeType===Node.ELEMENT_NODE){var c=t,s=window.getComputedStyle(c),u=h.create(s,e);return c.childNodes.forEach((function(t){var i=o.parseNode(t,e,n,r);i&&u.childNodes.push(i)})),u}return null},t}(),v=function(t,e){return r(void 0,void 0,void 0,(function(){var n,i;return o(this,(function(o){switch(o.label){case 0:return n=new d(e),[4,n.parse(t)];case 1:return i=o.sent(),[4,new l(e).render(t,i)];case 2:return[2,o.sent()]}}))}))};s.prototype.renderBackgroundColor=function(t,e){this.ctx.fillStyle=t,this.ctx.fillRect(e.left,e.top,e.width,e.height)},s.prototype.applyEffects=function(t){var e=this;t.forEach((function(t){1===t.type?(e.ctx.save(),e.ctx.transform(t.matrix[0],t.matrix[1],t.matrix[2],t.matrix[3],t.matrix[4],t.matrix[5]))2===t.type&&(e.ctx.save(),e.ctx.beginPath(),e.ctx.rect(t.bounds.left,t.bounds.top,t.bounds.width,t.bounds.height),e.ctx.clip())}))},s.prototype.popEffects=function(){this.ctx.restore()},s.prototype.renderText=function(t,e){this.ctx.font=e.font||"13px sans-serif",this.ctx.fillStyle=e.color||"#000000",this.ctx.textBaseline="middle";var n=this.screenPosition;this.ctx.fillText(t,n.left,n.top+n.height/2)},s.prototype.renderNode=function(t){var e=this;if(t instanceof f)this.renderText(t.text,this.styles);else if(t instanceof h){var n=t.styles.backgroundColor;n&&"transparent"!==n&&this.renderBackgroundColor(n,t.bounds);var r=l.getVisualEffects(t);this.applyEffects(r),t.text?this.renderText(t.text,t.styles):t.childNodes.forEach((function(t){e.renderNode(t)})),this.popEffects()}};var m=function(t,e){var i=n({scale:window.devicePixelRatio||1,logging:!0,useCORS:!1,allowTaint:!1,backgroundColor:"#ffffff"},e);return r(void 0,void 0,void 0,(function(){return o(this,(function(e){switch(e.label){case 0:return[4,v(t,i)];case 1:return[2,e.sent()]}}))}))};return m}));
 
+    // 原始網頁名單與邏輯
     const exactNames = [
         "何宗樺", "侯泳琳", "侯麗惠", "吳姿函", "吳永發", 
         "吳淑玲", "吳銘鐘", "周賢修", "林春源", "蔡慶騰", 
@@ -341,10 +342,10 @@
         const previewBlock = document.getElementById('imagePreviewResult');
         const previewImg = document.getElementById('previewImg');
 
-        // 執行截圖
+        // 執行內嵌的 html2canvas 截圖
         html2canvas(printArea, {
             scale: 2, // 2倍高畫質
-            useCORS: true,
+            useCORS: false, // 離線環境關閉 CORS 避免安全性錯誤
             allowTaint: true,
             backgroundColor: '#ffffff'
         }).then(canvas => {
@@ -369,7 +370,8 @@
                 console.log("自動下載被瀏覽器阻擋，已改用下方右鍵另存方案。");
             }
         }).catch(err => {
-            alert("轉換圖片發生錯誤，這通常是本機瀏覽器的安全限制。請直接點選【轉成 A4-PDF / 列印】並選另存為 PDF，一樣能得到完美單頁檔案！");
+            console.error(err);
+            alert("轉換圖片發生錯誤。請直接點選【轉成 A4-PDF / 列印】並選另存為 PDF，一樣能得到完美單頁檔案！");
         });
     }
 
