@@ -23,9 +23,15 @@
         .card { background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 2.5rem 1.8rem; box-shadow: var(--shadow); border: 1px solid rgba(251, 196, 182, 0.2); position: relative; overflow: hidden; }
         .card::after { content: '🌸'; position: absolute; top: -10px; right: -10px; font-size: 4rem; opacity: 0.05; }
         h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 0.5px; color: var(--text-dark); line-height: 1.4; text-align: center; }
-        .event-info-box { background-color: rgba(251, 196, 182, 0.12); border-radius: var(--radius-md); padding: 0.85rem 1.2rem; margin-bottom: 2rem; display: flex; justify-content: center; align-items: center; }
-        .event-info-box p { font-size: 0.88rem; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* 活動資訊盒調整 */
+        .event-info-box { background-color: rgba(251, 196, 182, 0.12); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.8rem; text-align: center; }
+        .event-info-box p { font-size: 0.88rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.3rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .event-info-box span { color: var(--text-dark); font-weight: 700; }
+        
+        /* 獨特名額標籤 */
+        .counter-badge { display: inline-block; background-color: var(--accent-rose); color: #fff; padding: 0.25rem 0.8rem; font-size: 0.8rem; font-weight: 700; border-radius: 20px; margin-top: 0.5rem; box-shadow: 0 4px 10px rgba(217, 136, 128, 0.2); }
+
         .alert { padding: 0.9rem 1.2rem; border-radius: var(--radius-md); margin-bottom: 2rem; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: 1px solid transparent; }
         .alert-info { background-color: #fffbfa; color: var(--accent-rose); border-color: rgba(219, 136, 128, 0.2); }
         .alert-error { background-color: #fff5f2; color: var(--error-color); }
@@ -35,23 +41,14 @@
         input, select, textarea { width: 100%; padding: 1rem 1.2rem; border: 2px solid #fbf4f2; border-radius: var(--radius-md); font-family: inherit; font-size: 1rem; color: var(--text-dark); transition: var(--transition); background-color: #fffbfa; outline: none; -webkit-appearance: none; }
         select { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238c7671' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>"); background-repeat: no-repeat; background-position: right 1.2rem center; background-size: 1.2rem; padding-right: 2.5rem; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary-pink); background-color: #fff; box-shadow: 0 4px 16px rgba(251, 196, 182, 0.25); transform: translateY(-1px); }
-        textarea { resize: none; }
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; background: linear-gradient(135deg, #fbc4b6 0%, #fba694 100%); color: #fff; border: none; padding: 1.1rem 2rem; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); width: 100%; letter-spacing: 1px; box-shadow: 0 8px 24px rgba(251, 166, 148, 0.35); }
-        .btn:hover, .btn:active { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(251, 166, 148, 0.5); background: linear-gradient(135deg, #fba694 0%, #fbc4b6 100%); }
+        .btn:hover, .btn:active { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(251, 166, 148, 0.5); }
         .btn:disabled { background: #eddcd9 !important; box-shadow: none !important; color: #baaba8; cursor: not-allowed; transform: none !important; }
-        
-        /* 載入中遮罩 */
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,246,244,0.85); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: 700; color: var(--accent-rose); }
-        
-        @media (max-width: 480px) {
-            header { padding: 1.5rem 1rem 0.5rem 1rem; } .logo { font-size: 1.3rem; } main { padding: 0 1rem; }
-            .card { padding: 2rem 1.25rem; border-radius: 20px; } h2 { font-size: 1.35rem; }
-            input, select, textarea { padding: 0.9rem 1rem; font-size: 0.95rem; } .btn { padding: 1rem 1.5rem; font-size: 1rem; }
-        }
     </style>
 </head>
 <body>
-    <div id="loadingOverlay" class="loading-overlay">🌸 正在與雲端同步中，請稍候...</div>
+    <div id="loadingOverlay" class="loading-overlay">🌸 正在與雲端同步中...</div>
     <div class="top-bar"></div>
     <header>
         <div class="logo"><i class="fa-solid fa-heart"></i> L'Amour Hub</div>
@@ -60,7 +57,10 @@
         <div class="card">
             <h2 id="frontEventName">載入中...</h2>
             <div class="event-info-box">
-                <p><i class="fa-regular fa-calendar-heart"></i> Booking Period：<span id="frontEventDateRange">Loading</span></p>
+                <p><i class="fa-regular fa-calendar-heart"></i> Booking Period：<span id="frontEventDateRange">-</span></p>
+                <div id="capacityInfoContainer" style="display: none;">
+                    <div class="counter-badge" id="remainingCountTag">剩餘席位計算中...</div>
+                </div>
             </div>
             <div id="registrationAlert"></div>
             <form id="regForm" onsubmit="handleRegister(event)">
@@ -70,7 +70,7 @@
                 </div>
                 <div class="form-group">
                     <label for="regEmail">電子郵件 / Email</label>
-                    <input type="email" id="regEmail" required placeholder="example@email.com">
+                    <input type="email" id="regEmail" required placeholder="example@gmail.com">
                 </div>
                 <div class="form-group">
                     <label for="regPhone">行動電話 / Mobile</label>
@@ -96,9 +96,10 @@
     </main>
 
     <script>
-        // ⚠️ 請在此處替換成你在第一步取得的 Google Apps Script 部署網址
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzWftwQ9i3jNeUGy8vxeW4AcT39aIv4QRLglmCJADdrzmbpZJ8MI8qZEHMgysTP7rAJ/exec";
         let systemConfig = {};
+        let currentCount = 0;
+        let isFull = false;
 
         document.addEventListener("DOMContentLoaded", fetchCloudConfig);
 
@@ -107,22 +108,38 @@
                 .then(res => res.json())
                 .then(data => {
                     systemConfig = data.config;
+                    currentCount = data.currentCount;
+                    
                     document.getElementById('frontEventName').innerText = systemConfig.eventName;
                     document.getElementById('frontEventDateRange').innerText = `${systemConfig.startDate} ~ ${systemConfig.endDate}`;
+                    
+                    // 控管名額運算 (maxCapacity 為 0 代表不設限)
+                    const max = parseInt(systemConfig.maxCapacity) || 0;
+                    if (max > 0) {
+                        const remaining = max - currentCount;
+                        isFull = (remaining <= 0);
+                        if (systemConfig.showRemaining === "yes") {
+                            document.getElementById('capacityInfoContainer').style.display = 'block';
+                            document.getElementById('remainingCountTag').innerText = isFull ? `🚨 席位已完美完售` : `✨ 僅剩 ${remaining} 個專屬席位`;
+                        }
+                    }
+                    
                     checkRegistrationStatus();
                     document.getElementById('loadingOverlay').style.display = 'none';
                 })
-                .catch(err => {
-                    alert("雲端連線失敗，請檢查網路或 API 設定。");
-                    console.error(err);
-                });
+                .catch(err => { alert("雲端連線失敗"); });
         }
 
         function checkRegistrationStatus() {
             const today = new Date().toISOString().split('T')[0];
             const alertBox = document.getElementById('registrationAlert');
             const submitBtn = document.getElementById('submitRegBtn');
-            if (today < systemConfig.startDate) {
+            
+            if (isFull) {
+                alertBox.innerHTML = `<div class="alert alert-error"><i class="fa-solid fa-circle-xmark"></i> 很抱歉，本場次預約名額已額滿。</div>`;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> 預約名額已滿 (Full)`;
+            } else if (today < systemConfig.startDate) {
                 alertBox.innerHTML = `<div class="alert alert-info"><i class="fa-solid fa-bell"></i> 專屬預約尚未開放。</div>`;
                 submitBtn.disabled = true;
             } else if (today > systemConfig.endDate) {
@@ -137,7 +154,7 @@
         function handleRegister(e) {
             e.preventDefault();
             document.getElementById('loadingOverlay').style.display = 'flex';
-            document.getElementById('loadingOverlay').innerText = "⚡ 正在上傳報名資料至雲端...";
+            document.getElementById('loadingOverlay').innerText = "⚡ 正在上傳報名資料...";
 
             const payload = {
                 action: "register",
@@ -151,24 +168,19 @@
                 note: document.getElementById('regNote').value
             };
 
-            fetch(GAS_API_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
+            fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 if(data.result === "success") {
-                    alert('✨ 預約成功！資料已同步至雲端試算表。');
-                    document.getElementById('regForm').reset();
-                } else {
-                    alert('寫入雲端失敗，請稍後再試。');
-                }
+                    alert('✨ 預約成功！');
+                    location.reload();
+                } else if(data.result === "full") {
+                    alert('🚨 慢了一步！剛剛剛好額滿了。');
+                    location.reload();
+                } else { alert('寫入失敗。'); }
             })
-            .catch(err => {
-                document.getElementById('loadingOverlay').style.display = 'none';
-                alert('連線錯誤，資料未能送出。');
-            });
+            .catch(err => { document.getElementById('loadingOverlay').style.display = 'none'; });
         }
     </script>
 </body>
