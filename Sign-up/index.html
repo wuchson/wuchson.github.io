@@ -8,18 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-pink: #fbc4b6;
-            --bg-pink: #fff6f4;
-            --accent-rose: #d98880;
-            --text-dark: #3a2e2b;
-            --text-muted: #8c7671;
-            --card-bg: #ffffff;
-            --success-color: #76c893;
-            --error-color: #e07a5f;
-            --radius-lg: 24px;
-            --radius-md: 14px;
-            --shadow: 0 12px 32px rgba(217, 136, 128, 0.08);
-            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            --primary-pink: #fbc4b6; --bg-pink: #fff6f4; --accent-rose: #d98880; --text-dark: #3a2e2b; --text-muted: #8c7671;
+            --card-bg: #ffffff; --success-color: #76c893; --error-color: #e07a5f; --radius-lg: 24px; --radius-md: 14px;
+            --shadow: 0 12px 32px rgba(217, 136, 128, 0.08); --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Quicksand', 'Noto Sans TC', sans-serif; background-color: var(--bg-pink); color: var(--text-dark); line-height: 1.6; padding-bottom: 3rem; }
@@ -48,6 +39,10 @@
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; background: linear-gradient(135deg, #fbc4b6 0%, #fba694 100%); color: #fff; border: none; padding: 1.1rem 2rem; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); width: 100%; letter-spacing: 1px; box-shadow: 0 8px 24px rgba(251, 166, 148, 0.35); }
         .btn:hover, .btn:active { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(251, 166, 148, 0.5); background: linear-gradient(135deg, #fba694 0%, #fbc4b6 100%); }
         .btn:disabled { background: #eddcd9 !important; box-shadow: none !important; color: #baaba8; cursor: not-allowed; transform: none !important; }
+        
+        /* 載入中遮罩 */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,246,244,0.85); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: 700; color: var(--accent-rose); }
+        
         @media (max-width: 480px) {
             header { padding: 1.5rem 1rem 0.5rem 1rem; } .logo { font-size: 1.3rem; } main { padding: 0 1rem; }
             .card { padding: 2rem 1.25rem; border-radius: 20px; } h2 { font-size: 1.35rem; }
@@ -56,13 +51,14 @@
     </style>
 </head>
 <body>
+    <div id="loadingOverlay" class="loading-overlay">🌸 正在與雲端同步中，請稍候...</div>
     <div class="top-bar"></div>
     <header>
         <div class="logo"><i class="fa-solid fa-heart"></i> L'Amour Hub</div>
     </header>
     <main>
         <div class="card">
-            <h2 id="frontEventName">正在加載活動項目...</h2>
+            <h2 id="frontEventName">載入中...</h2>
             <div class="event-info-box">
                 <p><i class="fa-regular fa-calendar-heart"></i> Booking Period：<span id="frontEventDateRange">Loading</span></p>
             </div>
@@ -92,7 +88,7 @@
                     <label for="regNote">其他需求備註 / Special Request</label>
                     <textarea id="regNote" rows="3" placeholder="如有特殊需求或備註，請在此留言給我們"></textarea>
                 </div>
-                <button type="submit" class="btn" id="submitRegBtn">
+                <button type="submit" class="btn" id="submitRegBtn" disabled>
                     <i class="fa-solid fa-envelope-open-heart"></i> 送出預約申請
                 </button>
             </form>
@@ -100,36 +96,51 @@
     </main>
 
     <script>
-        const DEFAULT_CONFIG = { eventName: "2026 時尚新品發表暨尊榮體驗會", startDate: "2026-06-01", endDate: "2026-07-31" };
-        let systemConfig = JSON.parse(localStorage.getItem('ev_config')) || DEFAULT_CONFIG;
-        let attendees = JSON.parse(localStorage.getItem('ev_attendees')) || [];
+        // ⚠️ 請在此處替換成你在第一步取得的 Google Apps Script 部署網址
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzWftwQ9i3jNeUGy8vxeW4AcT39aIv4QRLglmCJADdrzmbpZJ8MI8qZEHMgysTP7rAJ/exec";
+        let systemConfig = {};
 
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById('frontEventName').innerText = systemConfig.eventName;
-            document.getElementById('frontEventDateRange').innerText = `${systemConfig.startDate} ~ ${systemConfig.endDate}`;
-            checkRegistrationStatus();
-        });
+        document.addEventListener("DOMContentLoaded", fetchCloudConfig);
+
+        function fetchCloudConfig() {
+            fetch(GAS_API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    systemConfig = data.config;
+                    document.getElementById('frontEventName').innerText = systemConfig.eventName;
+                    document.getElementById('frontEventDateRange').innerText = `${systemConfig.startDate} ~ ${systemConfig.endDate}`;
+                    checkRegistrationStatus();
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                })
+                .catch(err => {
+                    alert("雲端連線失敗，請檢查網路或 API 設定。");
+                    console.error(err);
+                });
+        }
 
         function checkRegistrationStatus() {
             const today = new Date().toISOString().split('T')[0];
             const alertBox = document.getElementById('registrationAlert');
             const submitBtn = document.getElementById('submitRegBtn');
             if (today < systemConfig.startDate) {
-                alertBox.innerHTML = `<div class="alert alert-info"><i class="fa-solid fa-bell"></i> 專屬預約尚未開放，敬請期待。</div>`;
+                alertBox.innerHTML = `<div class="alert alert-info"><i class="fa-solid fa-bell"></i> 專屬預約尚未開放。</div>`;
                 submitBtn.disabled = true;
             } else if (today > systemConfig.endDate) {
-                alertBox.innerHTML = `<div class="alert alert-error"><i class="fa-solid fa-hourglass-end"></i> 本期預約已完美截止。</div>`;
+                alertBox.innerHTML = `<div class="alert alert-error"><i class="fa-solid fa-hourglass-end"></i> 本期預約已截止。</div>`;
                 submitBtn.disabled = true;
             } else {
-                alertBox.innerHTML = `<div class="alert alert-success"><i class="fa-solid fa-sparkles"></i> 專屬通道已開啟，歡迎預約席位。</div>`;
+                alertBox.innerHTML = `<div class="alert alert-success"><i class="fa-solid fa-sparkles"></i> 歡迎預約席位。</div>`;
                 submitBtn.disabled = false;
             }
         }
 
         function handleRegister(e) {
             e.preventDefault();
-            attendees = JSON.parse(localStorage.getItem('ev_attendees')) || [];
-            const newAttendee = {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('loadingOverlay').innerText = "⚡ 正在上傳報名資料至雲端...";
+
+            const payload = {
+                action: "register",
                 id: Date.now(),
                 activityName: systemConfig.eventName,
                 timestamp: new Date().toLocaleString(),
@@ -139,10 +150,25 @@
                 category: document.getElementById('regCategory').value,
                 note: document.getElementById('regNote').value
             };
-            attendees.push(newAttendee);
-            localStorage.setItem('ev_attendees', JSON.stringify(attendees));
-            alert('✨ 預約成功！我們將儘速與您聯繫。');
-            document.getElementById('regForm').reset();
+
+            fetch(GAS_API_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                if(data.result === "success") {
+                    alert('✨ 預約成功！資料已同步至雲端試算表。');
+                    document.getElementById('regForm').reset();
+                } else {
+                    alert('寫入雲端失敗，請稍後再試。');
+                }
+            })
+            .catch(err => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                alert('連線錯誤，資料未能送出。');
+            });
         }
     </script>
 </body>
