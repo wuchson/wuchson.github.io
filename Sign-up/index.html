@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Event Registry | 專屬預約報名</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-pink: #fbc4b6;
+            --bg-pink: #fff6f4;
+            --accent-rose: #d98880;
+            --text-dark: #3a2e2b;
+            --text-muted: #8c7671;
+            --card-bg: #ffffff;
+            --success-color: #76c893;
+            --error-color: #e07a5f;
+            --radius-lg: 24px;
+            --radius-md: 14px;
+            --shadow: 0 12px 32px rgba(217, 136, 128, 0.08);
+            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Quicksand', 'Noto Sans TC', sans-serif; background-color: var(--bg-pink); color: var(--text-dark); line-height: 1.6; padding-bottom: 3rem; }
+        .top-bar { height: 6px; background: linear-gradient(90deg, #fbc4b6, #fbe3b6, #fbc4c6); }
+        header { padding: 2rem 1.5rem 1rem 1.5rem; text-align: center; }
+        .logo { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 3px; color: var(--text-dark); display: inline-flex; align-items: center; gap: 0.5rem; }
+        .logo i { color: var(--accent-rose); font-size: 1.2rem; animation: heartBeat 2s infinite ease-in-out; }
+        @keyframes heartBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+        main { width: 100%; max-width: 580px; margin: 0 auto; padding: 0 1.25rem; }
+        .card { background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 2.5rem 1.8rem; box-shadow: var(--shadow); border: 1px solid rgba(251, 196, 182, 0.2); position: relative; overflow: hidden; }
+        .card::after { content: '🌸'; position: absolute; top: -10px; right: -10px; font-size: 4rem; opacity: 0.05; }
+        h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 0.5px; color: var(--text-dark); line-height: 1.4; text-align: center; }
+        .event-info-box { background-color: rgba(251, 196, 182, 0.12); border-radius: var(--radius-md); padding: 0.85rem 1.2rem; margin-bottom: 2rem; display: flex; justify-content: center; align-items: center; }
+        .event-info-box p { font-size: 0.88rem; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+        .event-info-box span { color: var(--text-dark); font-weight: 700; }
+        .alert { padding: 0.9rem 1.2rem; border-radius: var(--radius-md); margin-bottom: 2rem; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: 1px solid transparent; }
+        .alert-info { background-color: #fffbfa; color: var(--accent-rose); border-color: rgba(219, 136, 128, 0.2); }
+        .alert-error { background-color: #fff5f2; color: var(--error-color); }
+        .alert-success { background-color: #f2fbf4; color: var(--success-color); }
+        .form-group { margin-bottom: 1.6rem; }
+        label { display: block; margin-bottom: 0.6rem; font-size: 0.9rem; font-weight: 700; color: var(--text-muted); padding-left: 0.2rem; }
+        input, select, textarea { width: 100%; padding: 1rem 1.2rem; border: 2px solid #fbf4f2; border-radius: var(--radius-md); font-family: inherit; font-size: 1rem; color: var(--text-dark); transition: var(--transition); background-color: #fffbfa; outline: none; -webkit-appearance: none; }
+        select { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238c7671' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>"); background-repeat: no-repeat; background-position: right 1.2rem center; background-size: 1.2rem; padding-right: 2.5rem; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary-pink); background-color: #fff; box-shadow: 0 4px 16px rgba(251, 196, 182, 0.25); transform: translateY(-1px); }
+        textarea { resize: none; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; background: linear-gradient(135deg, #fbc4b6 0%, #fba694 100%); color: #fff; border: none; padding: 1.1rem 2rem; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); width: 100%; letter-spacing: 1px; box-shadow: 0 8px 24px rgba(251, 166, 148, 0.35); }
+        .btn:hover, .btn:active { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(251, 166, 148, 0.5); background: linear-gradient(135deg, #fba694 0%, #fbc4b6 100%); }
+        .btn:disabled { background: #eddcd9 !important; box-shadow: none !important; color: #baaba8; cursor: not-allowed; transform: none !important; }
+        @media (max-width: 480px) {
+            header { padding: 1.5rem 1rem 0.5rem 1rem; } .logo { font-size: 1.3rem; } main { padding: 0 1rem; }
+            .card { padding: 2rem 1.25rem; border-radius: 20px; } h2 { font-size: 1.35rem; }
+            input, select, textarea { padding: 0.9rem 1rem; font-size: 0.95rem; } .btn { padding: 1rem 1.5rem; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar"></div>
+    <header>
+        <div class="logo"><i class="fa-solid fa-heart"></i> L'Amour Hub</div>
+    </header>
+    <main>
+        <div class="card">
+            <h2 id="frontEventName">正在加載活動項目...</h2>
+            <div class="event-info-box">
+                <p><i class="fa-regular fa-calendar-heart"></i> Booking Period：<span id="frontEventDateRange">Loading</span></p>
+            </div>
+            <div id="registrationAlert"></div>
+            <form id="regForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="regName">姓名 / Name</label>
+                    <input type="text" id="regName" required placeholder="請填寫您的真實姓名">
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">電子郵件 / Email</label>
+                    <input type="email" id="regEmail" required placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="regPhone">行動電話 / Mobile</label>
+                    <input type="tel" id="regPhone" required placeholder="0912-345-678">
+                </div>
+                <div class="form-group">
+                    <label for="regCategory">專屬貴賓分類 / Tier</label>
+                    <select id="regCategory" required>
+                        <option value="一般民眾">一般民眾 (Regular)</option>
+                        <option value="VIP貴賓">尊榮貴賓 (VIP Member)</option>
+                        <option value="工作人員/媒體">媒體與合作夥伴 (Media / Staff)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="regNote">其他需求備註 / Special Request</label>
+                    <textarea id="regNote" rows="3" placeholder="如有特殊需求或備註，請在此留言給我們"></textarea>
+                </div>
+                <button type="submit" class="btn" id="submitRegBtn">
+                    <i class="fa-solid fa-envelope-open-heart"></i> 送出預約申請
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const DEFAULT_CONFIG = { eventName: "2026 時尚新品發表暨尊榮體驗會", startDate: "2026-06-01", endDate: "2026-07-31" };
+        let systemConfig = JSON.parse(localStorage.getItem('ev_config')) || DEFAULT_CONFIG;
+        let attendees = JSON.parse(localStorage.getItem('ev_attendees')) || [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('frontEventName').innerText = systemConfig.eventName;
+            document.getElementById('frontEventDateRange').innerText = `${systemConfig.startDate} ~ ${systemConfig.endDate}`;
+            checkRegistrationStatus();
+        });
+
+        function checkRegistrationStatus() {
+            const today = new Date().toISOString().split('T')[0];
+            const alertBox = document.getElementById('registrationAlert');
+            const submitBtn = document.getElementById('submitRegBtn');
+            if (today < systemConfig.startDate) {
+                alertBox.innerHTML = `<div class="alert alert-info"><i class="fa-solid fa-bell"></i> 專屬預約尚未開放，敬請期待。</div>`;
+                submitBtn.disabled = true;
+            } else if (today > systemConfig.endDate) {
+                alertBox.innerHTML = `<div class="alert alert-error"><i class="fa-solid fa-hourglass-end"></i> 本期預約已完美截止。</div>`;
+                submitBtn.disabled = true;
+            } else {
+                alertBox.innerHTML = `<div class="alert alert-success"><i class="fa-solid fa-sparkles"></i> 專屬通道已開啟，歡迎預約席位。</div>`;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            attendees = JSON.parse(localStorage.getItem('ev_attendees')) || [];
+            const newAttendee = {
+                id: Date.now(),
+                activityName: systemConfig.eventName,
+                timestamp: new Date().toLocaleString(),
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                phone: document.getElementById('regPhone').value,
+                category: document.getElementById('regCategory').value,
+                note: document.getElementById('regNote').value
+            };
+            attendees.push(newAttendee);
+            localStorage.setItem('ev_attendees', JSON.stringify(attendees));
+            alert('✨ 預約成功！我們將儘速與您聯繫。');
+            document.getElementById('regForm').reset();
+        }
+    </script>
+</body>
+</html>
