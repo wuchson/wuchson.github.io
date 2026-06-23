@@ -8,9 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #111111; --secondary-color: #666666; --accent-color: #997d60;
-            --bg-color: #f9f9f9; --card-bg: #ffffff; --border-color: #e5e5e5;
-            --success-color: #27ae60; --error-color: #c0392b; --radius: 8px; --transition: all 0.3s ease;
+            --primary-color: #111111; --secondary-color: #666666; --bg-color: #f9f9f9; --card-bg: #ffffff;
+            --border-color: #e5e5e5; --error-color: #c0392b; --radius: 8px; --transition: all 0.3s ease;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--primary-color); padding: 2rem 1rem; }
@@ -19,6 +18,7 @@
         h2 { font-size: 1.4rem; font-weight: 500; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
         .form-group { margin-bottom: 1.2rem; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-row-4 { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap: 1rem; }
         label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500; }
         input, select, textarea { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 0.95rem; background-color: #fafafa; }
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: var(--primary-color); color: #fff; border: 1px solid var(--primary-color); padding: 0.7rem 1.5rem; font-size: 0.9rem; font-weight: 500; border-radius: var(--radius); cursor: pointer; transition: var(--transition); }
@@ -36,23 +36,14 @@
         .badge-regular { background-color: #e0f2fe; color: #0369a1; }
         .badge-staff { background-color: #dcfce7; color: #15803d; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: 700; }
-
         @media print {
-            body { background-color: #fff; color: #000; padding: 0; }
-            .card, main { border: none; padding: 0; margin: 0; max-width: 100%; }
             #loginSection, .card:nth-of-type(1), .btn, .btn-secondary, .search-container, h1 button { display: none !important; }
-            h2 { font-size: 1.6rem; margin-bottom: 2rem; text-align: center; }
-            table { width: 100%; border: 1px solid #000; font-size: 10pt; }
-            th, td { padding: 8px; border: 1px solid #ddd; color: #000 !important; }
-            th { background-color: #eaeded !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .badge { background: none !important; color: #000 !important; padding: 0; font-weight: bold; }
         }
     </style>
 </head>
 <body>
     <div id="loadingOverlay" class="loading-overlay" style="display: none;">🌐 正在與 Google 雲端同步...</div>
     <main>
-        <!-- 登入驗證 -->
         <div id="loginSection" class="login-overlay">
             <div class="card" style="width: 100%; max-width: 400px;">
                 <h2 style="justify-content: center;">雲端管理員登入</h2>
@@ -65,7 +56,6 @@
             </div>
         </div>
 
-        <!-- 後台核心功能 -->
         <div id="adminContent" style="display: none;">
             <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
                 <h1 style="font-size: 1.8rem; font-weight: 500;">雲端活動控制台</h1>
@@ -78,7 +68,7 @@
                     <label for="setEventName">活動名稱</label>
                     <input type="text" id="setEventName">
                 </div>
-                <div class="form-row">
+                <div class="form-row-4">
                     <div class="form-group">
                         <label for="setStartDate">報名開始日期</label>
                         <input type="date" id="setStartDate">
@@ -87,8 +77,19 @@
                         <label for="setEndDate">報名截止日期</label>
                         <input type="date" id="setEndDate">
                     </div>
+                    <div class="form-group">
+                        <label for="setMaxCapacity">人數上限 (0為不限)</label>
+                        <input type="number" id="setMaxCapacity" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="setShowRemaining">前台顯現餘額</label>
+                        <select id="setShowRemaining">
+                            <option value="yes">顯示餘額</option>
+                            <option value="no">隱藏餘額</option>
+                        </select>
+                    </div>
                 </div>
-                <button class="btn" onclick="saveSettings()">儲存並同步至前台</button>
+                <button class="btn" style="margin-top: 1rem;" onclick="saveSettings()">儲存並同步至前台</button>
             </div>
 
             <div class="card">
@@ -113,21 +114,15 @@
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div id="backendCounterTag" style="font-weight: 700; color: var(--accent-color);">當前統計：-</div>
                     <button class="btn" style="background-color: #2c3e50; border-color: #2c3e50;" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> 匯出當前查詢 PDF</button>
                 </div>
 
                 <div class="table-responsive">
                     <table>
                         <thead>
-                            <tr>
-                                <th>報名時間</th>
-                                <th>姓名</th>
-                                <th>身分分類</th>
-                                <th>Email</th>
-                                <th>電話</th>
-                                <th>備註留言</th>
-                            </tr>
+                            <tr><th>報名時間</th><th>姓名</th><th>身分分類</th><th>Email</th><th>電話</th><th>備註留言</th></tr>
                         </thead>
                         <tbody id="attendeeTableBody"></tbody>
                     </table>
@@ -137,66 +132,48 @@
     </main>
 
     <script>
-        // ⚠️ 請在此處替換成你在第一步取得的 Google Apps Script 部署網址
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzWftwQ9i3jNeUGy8vxeW4AcT39aIv4QRLglmCJADdrzmbpZJ8MI8qZEHMgysTP7rAJ/exec";
-        
-        let systemConfig = {};
-        let attendees = [];
-        let cloudPassword = "";
+        let systemConfig = {}; let attendees = []; let cloudPassword = ""; let currentEventCount = 0;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // 預先抓取雲端密碼與設定
-            fetch(GAS_API_URL)
-                .then(res => res.json())
-                .then(data => {
-                    cloudPassword = data.password;
-                    systemConfig = data.config;
-                    attendees = data.attendees;
-                    document.getElementById('adminPassword').placeholder = "請輸入雲端設定的密碼";
-                });
+            fetch(GAS_API_URL).then(res => res.json()).then(data => {
+                cloudPassword = data.password; systemConfig = data.config; attendees = data.attendees;
+                document.getElementById('adminPassword').placeholder = "請輸入雲端設定的密碼";
+            });
         });
 
         function handleLogin() {
-            const pass = document.getElementById('adminPassword').value;
-            if(pass === cloudPassword) {
+            if(document.getElementById('adminPassword').value === cloudPassword) {
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
                 initBackend();
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
+            } else { document.getElementById('loginError').style.display = 'block'; }
         }
 
         function fetchCloudData() {
             document.getElementById('loadingOverlay').style.display = 'flex';
-            fetch(GAS_API_URL)
-                .then(res => res.json())
-                .then(data => {
-                    systemConfig = data.config;
-                    attendees = data.attendees;
-                    initBackend();
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                });
+            fetch(GAS_API_URL).then(res => res.json()).then(data => {
+                systemConfig = data.config; attendees = data.attendees; initBackend();
+                document.getElementById('loadingOverlay').style.display = 'none';
+            });
         }
 
         function initBackend() {
             document.getElementById('setEventName').value = systemConfig.eventName;
             document.getElementById('setStartDate').value = systemConfig.startDate;
             document.getElementById('setEndDate').value = systemConfig.endDate;
-            buildActivityDropdown();
-            updatePDFTitle();
-            renderAdminTable();
+            document.getElementById('setMaxCapacity').value = systemConfig.maxCapacity || 0;
+            document.getElementById('setShowRemaining').value = systemConfig.showRemaining || "yes";
+            buildActivityDropdown(); updatePDFTitle(); renderAdminTable();
         }
 
         function buildActivityDropdown() {
             const dropdown = document.getElementById('filterActivity');
             let activityList = attendees.map(item => item.activityName || "未歸類活動");
             activityList.unshift(systemConfig.eventName);
-            let uniqueActivities = [...new Set(activityList)];
-            dropdown.innerHTML = '';
+            let uniqueActivities = [...new Set(activityList)]; dropdown.innerHTML = '';
             uniqueActivities.forEach(act => {
-                const opt = document.createElement('option'); opt.value = act; opt.innerText = act;
-                dropdown.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = act; opt.innerText = act; dropdown.appendChild(opt);
             });
         }
 
@@ -211,30 +188,20 @@
             const newConfig = {
                 eventName: document.getElementById('setEventName').value,
                 startDate: document.getElementById('setStartDate').value,
-                endDate: document.getElementById('setEndDate').value
+                endDate: document.getElementById('setEndDate').value,
+                maxCapacity: parseInt(document.getElementById('setMaxCapacity').value) || 0,
+                showRemaining: document.getElementById('setShowRemaining').value
             };
 
-            fetch(GAS_API_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "saveSettings", config: newConfig })
-            })
-            .then(res => res.json())
-            .then(data => {
+            fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "saveSettings", config: newConfig }) })
+            .then(res => res.json()).then(data => {
                 if(data.result === "success") {
-                    systemConfig = newConfig;
-                    buildActivityDropdown();
-                    document.getElementById('filterActivity').value = systemConfig.eventName;
-                    handleActivityChange();
-                    alert('雲端活動參數更新成功！前台已同步變更。');
+                    systemConfig = newConfig; buildActivityDropdown();
+                    document.getElementById('filterActivity').value = systemConfig.eventName; handleActivityChange();
+                    alert('雲端名額控管設定更新成功！');
                 }
                 document.getElementById('loadingOverlay').style.display = 'none';
             });
-        }
-
-        function getBadgeClass(cat) {
-            if(cat === 'VIP貴賓') return 'badge badge-vip';
-            if(cat === '工作人員/媒體') return 'badge badge-staff';
-            return 'badge badge-regular';
         }
 
         function renderAdminTable() {
@@ -246,28 +213,27 @@
 
             const filteredData = attendees.filter(item => {
                 const itemActName = item.activityName || "未歸類活動";
-                const matchesActivity = (itemActName === selectedActivity);
-                const matchesCategory = (filterCat === '全部' || item.category === filterCat);
-                const matchesKeyword = !keyword || 
-                    item.name.toLowerCase().includes(keyword) ||
-                    item.email.toLowerCase().includes(keyword) ||
-                    item.phone.includes(keyword) ||
-                    (item.note && item.note.toLowerCase().includes(keyword));
-                return matchesActivity && matchesCategory && matchesKeyword;
+                return (itemActName === selectedActivity) && 
+                       (filterCat === '全部' || item.category === filterCat) &&
+                       (!keyword || item.name.toLowerCase().includes(keyword) || item.email.toLowerCase().includes(keyword) || item.phone.includes(keyword));
             });
 
+            // 更新人數統計標籤
+            const maxText = systemConfig.maxCapacity > 0 ? `/ 上限 ${systemConfig.maxCapacity} 人` : "(無名額上限)";
+            if(selectedActivity === systemConfig.eventName) {
+                document.getElementById('backendCounterTag').innerText = `📊 本場當前已報名：${filteredData.length} 人 ${maxText}`;
+            } else {
+                document.getElementById('backendCounterTag').innerText = `📊 此歷史活動總計：${filteredData.length} 人`;
+            }
+
             if(filteredData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#999; padding: 2rem;">此活動目前無符合條件的報名名單</td></tr>`;
-                return;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#999; padding: 2rem;">無符合報名名單</td></tr>`; return;
             }
 
             filteredData.forEach(item => {
                 const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.timestamp}</td><td style="font-weight:500;">${item.name}</td>
-                    <td><span class="${getBadgeClass(item.category)}">${item.category}</span></td>
-                    <td>${item.email}</td><td>${item.phone}</td><td style="color:#666; font-size:0.85rem;">${item.note || '-'}</td>
-                `;
+                let bClass = item.category === 'VIP貴賓' ? 'badge badge-vip' : (item.category === '工作人員/媒體' ? 'badge badge-staff' : 'badge badge-regular');
+                row.innerHTML = `<td>${item.timestamp}</td><td style="font-weight:500;">${item.name}</td><td><span class="${bClass}">${item.category}</span></td><td>${item.email}</td><td>${item.phone}</td><td style="color:#666; font-size:0.85rem;">${item.note || '-'}</td>`;
                 tbody.appendChild(row);
             });
         }
