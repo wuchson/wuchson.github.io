@@ -24,14 +24,13 @@
         .card::after { content: '🌸'; position: absolute; top: -10px; right: -10px; font-size: 4rem; opacity: 0.05; }
         h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 0.5px; color: var(--text-dark); line-height: 1.4; text-align: center; }
         
-        /* 活動資訊盒調整 */
+        /* 活動說明區塊樣式 */
+        .event-description-box { font-size: 0.92rem; color: #5a4b47; background-color: #fffbfb; border-left: 3px solid var(--primary-pink); padding: 0.8rem 1rem; margin-bottom: 1.5rem; border-radius: 0 var(--radius-md) var(--radius-md) 0; white-space: pre-line; text-align: left; line-height: 1.5; }
+
         .event-info-box { background-color: rgba(251, 196, 182, 0.12); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.8rem; text-align: center; }
         .event-info-box p { font-size: 0.88rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.3rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .event-info-box span { color: var(--text-dark); font-weight: 700; }
-        
-        /* 獨特名額標籤 */
         .counter-badge { display: inline-block; background-color: var(--accent-rose); color: #fff; padding: 0.25rem 0.8rem; font-size: 0.8rem; font-weight: 700; border-radius: 20px; margin-top: 0.5rem; box-shadow: 0 4px 10px rgba(217, 136, 128, 0.2); }
-
         .alert { padding: 0.9rem 1.2rem; border-radius: var(--radius-md); margin-bottom: 2rem; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: 1px solid transparent; }
         .alert-info { background-color: #fffbfa; color: var(--accent-rose); border-color: rgba(219, 136, 128, 0.2); }
         .alert-error { background-color: #fff5f2; color: var(--error-color); }
@@ -56,6 +55,9 @@
     <main>
         <div class="card">
             <h2 id="frontEventName">載入中...</h2>
+            
+            <div id="frontEventDescription" class="event-description-box" style="display: none;"></div>
+
             <div class="event-info-box">
                 <p><i class="fa-regular fa-calendar-heart"></i> Booking Period：<span id="frontEventDateRange">-</span></p>
                 <div id="capacityInfoContainer" style="display: none;">
@@ -70,7 +72,7 @@
                 </div>
                 <div class="form-group">
                     <label for="regEmail">電子郵件 / Email</label>
-                    <input type="email" id="regEmail" required placeholder="example@gmail.com">
+                    <input type="email" id="regEmail" required placeholder="example@email.com">
                 </div>
                 <div class="form-group">
                     <label for="regPhone">行動電話 / Mobile</label>
@@ -97,37 +99,35 @@
 
     <script>
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzWftwQ9i3jNeUGy8vxeW4AcT39aIv4QRLglmCJADdrzmbpZJ8MI8qZEHMgysTP7rAJ/exec";
-        let systemConfig = {};
-        let currentCount = 0;
-        let isFull = false;
+        let systemConfig = {}; let currentCount = 0; let isFull = false;
 
         document.addEventListener("DOMContentLoaded", fetchCloudConfig);
 
         function fetchCloudConfig() {
-            fetch(GAS_API_URL)
-                .then(res => res.json())
-                .then(data => {
-                    systemConfig = data.config;
-                    currentCount = data.currentCount;
-                    
-                    document.getElementById('frontEventName').innerText = systemConfig.eventName;
-                    document.getElementById('frontEventDateRange').innerText = `${systemConfig.startDate} ~ ${systemConfig.endDate}`;
-                    
-                    // 控管名額運算 (maxCapacity 為 0 代表不設限)
-                    const max = parseInt(systemConfig.maxCapacity) || 0;
-                    if (max > 0) {
-                        const remaining = max - currentCount;
-                        isFull = (remaining <= 0);
-                        if (systemConfig.showRemaining === "yes") {
-                            document.getElementById('capacityInfoContainer').style.display = 'block';
-                            document.getElementById('remainingCountTag').innerText = isFull ? `🚨 席位已完美完售` : `✨ 僅剩 ${remaining} 個專屬席位`;
-                        }
+            fetch(GAS_API_URL).then(res => res.json()).then(data => {
+                systemConfig = data.config; currentCount = data.currentCount;
+                
+                document.getElementById('frontEventName').innerText = systemConfig.eventName;
+                document.getElementById('frontEventDateRange').innerText = `${systemConfig.startDate} ~ ${systemConfig.endDate}`;
+                
+                // 控制活動說明顯示
+                if (systemConfig.showDescription === "yes" && systemConfig.eventDescription) {
+                    const descBox = document.getElementById('frontEventDescription');
+                    descBox.innerText = systemConfig.eventDescription;
+                    descBox.style.display = 'block';
+                }
+
+                const max = parseInt(systemConfig.maxCapacity) || 0;
+                if (max > 0) {
+                    const remaining = max - currentCount; isFull = (remaining <= 0);
+                    if (systemConfig.showRemaining === "yes") {
+                        document.getElementById('capacityInfoContainer').style.display = 'block';
+                        document.getElementById('remainingCountTag').innerText = isFull ? `🚨 席位已完美完售` : `✨ 僅剩 ${remaining} 個專屬席位`;
                     }
-                    
-                    checkRegistrationStatus();
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                })
-                .catch(err => { alert("雲端連線失敗"); });
+                }
+                checkRegistrationStatus();
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }).catch(err => { alert("雲端連線失敗"); });
         }
 
         function checkRegistrationStatus() {
@@ -137,8 +137,7 @@
             
             if (isFull) {
                 alertBox.innerHTML = `<div class="alert alert-error"><i class="fa-solid fa-circle-xmark"></i> 很抱歉，本場次預約名額已額滿。</div>`;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> 預約名額已滿 (Full)`;
+                submitBtn.disabled = true; submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> 預約名額已滿 (Full)`;
             } else if (today < systemConfig.startDate) {
                 alertBox.innerHTML = `<div class="alert alert-info"><i class="fa-solid fa-bell"></i> 專屬預約尚未開放。</div>`;
                 submitBtn.disabled = true;
@@ -154,33 +153,16 @@
         function handleRegister(e) {
             e.preventDefault();
             document.getElementById('loadingOverlay').style.display = 'flex';
-            document.getElementById('loadingOverlay').innerText = "⚡ 正在上傳報名資料...";
-
             const payload = {
-                action: "register",
-                id: Date.now(),
-                activityName: systemConfig.eventName,
-                timestamp: new Date().toLocaleString(),
-                name: document.getElementById('regName').value,
-                email: document.getElementById('regEmail').value,
-                phone: document.getElementById('regPhone').value,
-                category: document.getElementById('regCategory').value,
-                note: document.getElementById('regNote').value
+                action: "register", id: Date.now(), activityName: systemConfig.eventName, timestamp: new Date().toLocaleString(),
+                name: document.getElementById('regName').value, email: document.getElementById('regEmail').value,
+                phone: document.getElementById('regPhone').value, category: document.getElementById('regCategory').value, note: document.getElementById('regNote').value
             };
-
-            fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(payload) })
-            .then(res => res.json())
-            .then(data => {
+            fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(payload) }).then(res => res.json()).then(data => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                if(data.result === "success") {
-                    alert('✨ 預約成功！');
-                    location.reload();
-                } else if(data.result === "full") {
-                    alert('🚨 慢了一步！剛剛剛好額滿了。');
-                    location.reload();
-                } else { alert('寫入失敗。'); }
-            })
-            .catch(err => { document.getElementById('loadingOverlay').style.display = 'none'; });
+                if(data.result === "success") { alert('✨ 預約成功！'); location.reload(); } 
+                else if(data.result === "full") { alert('🚨 剛好額滿了！'); location.reload(); }
+            }).catch(err => { document.getElementById('loadingOverlay').style.display = 'none'; });
         }
     </script>
 </body>
