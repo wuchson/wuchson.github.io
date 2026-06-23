@@ -9,7 +9,7 @@
     <style>
         :root {
             --primary-color: #111111; --secondary-color: #666666; --bg-color: #f9f9f9; --card-bg: #ffffff;
-            --border-color: #e5e5e5; --error-color: #c0392b; --radius: 8px; --transition: all 0.3s ease;
+            --border-color: #e5e5e5; --error-color: #c0392b; --radius: 8px; --transition: all 0.3s ease; --accent-color: #997d60;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--primary-color); padding: 2rem 1rem; }
@@ -21,6 +21,7 @@
         .form-row-4 { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap: 1rem; }
         label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500; }
         input, select, textarea { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 0.95rem; background-color: #fafafa; }
+        textarea { resize: vertical; }
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: var(--primary-color); color: #fff; border: 1px solid var(--primary-color); padding: 0.7rem 1.5rem; font-size: 0.9rem; font-weight: 500; border-radius: var(--radius); cursor: pointer; transition: var(--transition); }
         .btn:hover { background-color: #333; }
         .btn-secondary { background-color: transparent; color: var(--primary-color); border: 1px solid var(--border-color); }
@@ -68,6 +69,12 @@
                     <label for="setEventName">活動名稱</label>
                     <input type="text" id="setEventName">
                 </div>
+                
+                <div class="form-group">
+                    <label for="setEventDescription">活動報名詳細說明 (支援換行)</label>
+                    <textarea id="setEventDescription" rows="3" placeholder="請填寫顯示在前台標題下方的活動公告、詳情或注意事項..."></textarea>
+                </div>
+
                 <div class="form-row-4">
                     <div class="form-group">
                         <label for="setStartDate">報名開始日期</label>
@@ -82,13 +89,22 @@
                         <input type="number" id="setMaxCapacity" min="0" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="setShowRemaining">前台顯現餘額</label>
+                        <label for="setShowRemaining">前台顯示餘額</label>
                         <select id="setShowRemaining">
                             <option value="yes">顯示餘額</option>
                             <option value="no">隱藏餘額</option>
                         </select>
                     </div>
                 </div>
+
+                <div class="form-group" style="margin-top: 1.2rem; max-width: 250px;">
+                    <label for="setShowDescription">前台顯示活動說明</label>
+                    <select id="setShowDescription">
+                        <option value="yes">顯示說明</option>
+                        <option value="no">隱藏說明</option>
+                    </select>
+                </div>
+
                 <button class="btn" style="margin-top: 1rem;" onclick="saveSettings()">儲存並同步至前台</button>
             </div>
 
@@ -133,7 +149,7 @@
 
     <script>
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzWftwQ9i3jNeUGy8vxeW4AcT39aIv4QRLglmCJADdrzmbpZJ8MI8qZEHMgysTP7rAJ/exec";
-        let systemConfig = {}; let attendees = []; let cloudPassword = ""; let currentEventCount = 0;
+        let systemConfig = {}; let attendees = []; let cloudPassword = "";
 
         document.addEventListener("DOMContentLoaded", () => {
             fetch(GAS_API_URL).then(res => res.json()).then(data => {
@@ -160,10 +176,12 @@
 
         function initBackend() {
             document.getElementById('setEventName').value = systemConfig.eventName;
+            document.getElementById('setEventDescription').value = systemConfig.eventDescription || "";
             document.getElementById('setStartDate').value = systemConfig.startDate;
             document.getElementById('setEndDate').value = systemConfig.endDate;
             document.getElementById('setMaxCapacity').value = systemConfig.maxCapacity || 0;
             document.getElementById('setShowRemaining').value = systemConfig.showRemaining || "yes";
+            document.getElementById('setShowDescription').value = systemConfig.showDescription || "yes";
             buildActivityDropdown(); updatePDFTitle(); renderAdminTable();
         }
 
@@ -187,10 +205,12 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             const newConfig = {
                 eventName: document.getElementById('setEventName').value,
+                eventDescription: document.getElementById('setEventDescription').value,
                 startDate: document.getElementById('setStartDate').value,
                 endDate: document.getElementById('setEndDate').value,
                 maxCapacity: parseInt(document.getElementById('setMaxCapacity').value) || 0,
-                showRemaining: document.getElementById('setShowRemaining').value
+                showRemaining: document.getElementById('setShowRemaining').value,
+                showDescription: document.getElementById('setShowDescription').value
             };
 
             fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "saveSettings", config: newConfig }) })
@@ -198,7 +218,7 @@
                 if(data.result === "success") {
                     systemConfig = newConfig; buildActivityDropdown();
                     document.getElementById('filterActivity').value = systemConfig.eventName; handleActivityChange();
-                    alert('雲端名額控管設定更新成功！');
+                    alert('雲端所有控制參數更新成功！前台已即時同步。');
                 }
                 document.getElementById('loadingOverlay').style.display = 'none';
             });
@@ -218,7 +238,6 @@
                        (!keyword || item.name.toLowerCase().includes(keyword) || item.email.toLowerCase().includes(keyword) || item.phone.includes(keyword));
             });
 
-            // 更新人數統計標籤
             const maxText = systemConfig.maxCapacity > 0 ? `/ 上限 ${systemConfig.maxCapacity} 人` : "(無名額上限)";
             if(selectedActivity === systemConfig.eventName) {
                 document.getElementById('backendCounterTag').innerText = `📊 本場當前已報名：${filteredData.length} 人 ${maxText}`;
