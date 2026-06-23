@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Panel | 報名系統後台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #111111; --secondary-color: #666666; --accent-color: #997d60;
+            --bg-color: #f9f9f9; --card-bg: #ffffff; --border-color: #e5e5e5;
+            --success-color: #27ae60; --error-color: #c0392b; --radius: 8px; --transition: all 0.3s ease;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--primary-color); padding: 2rem 1rem; }
+        main { max-width: 1000px; margin: 0 auto; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 2rem; margin-bottom: 2rem; }
+        h2 { font-size: 1.4rem; font-weight: 500; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 0.95rem; background-color: #fafafa; }
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); background-color: #fff; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: var(--primary-color); color: #fff; border: 1px solid var(--primary-color); padding: 0.7rem 1.5rem; font-size: 0.9rem; font-weight: 500; border-radius: var(--radius); cursor: pointer; transition: var(--transition); }
+        .btn:hover { background-color: #333; }
+        .btn-secondary { background-color: transparent; color: var(--primary-color); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background-color: #f5f5f5; }
+        .btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .search-container { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background: #f5f5f5; padding: 1rem; border-radius: var(--radius); }
+        .search-container .form-group { margin-bottom: 0; }
+        .table-responsive { overflow-x: auto; margin-top: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #f5f5f5; font-weight: 500; color: var(--secondary-color); }
+        .login-overlay { display: flex; justify-content: center; padding-top: 5rem; }
+        .badge { display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; }
+        .badge-vip { background-color: #fef3c7; color: #d97706; }
+        .badge-regular { background-color: #e0f2fe; color: #0369a1; }
+        .badge-staff { background-color: #dcfce7; color: #15803d; }
+        #importFile { display: none; }
+
+        @media print {
+            body { background-color: #fff; color: #000; padding: 0; }
+            .card, main { border: none; padding: 0; margin: 0; max-width: 100%; }
+            #loginSection, .card:nth-of-type(1), .btn, .btn-group, .search-container, h1 button { display: none !important; }
+            h2 { font-size: 1.6rem; margin-bottom: 2rem; text-align: center; }
+            table { width: 100%; border: 1px solid #000; font-size: 10pt; }
+            th, td { padding: 8px; border: 1px solid #ddd; color: #000 !important; }
+            th { background-color: #eaeded !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .badge { background: none !important; color: #000 !important; padding: 0; font-weight: bold; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="loginSection" class="login-overlay">
+            <div class="card" style="width: 100%; max-width: 400px;">
+                <h2 style="justify-content: center;">管理員登入</h2>
+                <div class="form-group">
+                    <label for="adminPassword">請輸入密碼</label>
+                    <input type="password" id="adminPassword" placeholder="預設密碼為 admin">
+                </div>
+                <button class="btn" style="width: 100%;" onclick="handleLogin()">確認登入</button>
+                <p id="loginError" style="color: var(--error-color); margin-top: 1rem; display: none; text-align: center; font-size: 0.9rem;">密碼錯誤</p>
+            </div>
+        </div>
+
+        <div id="adminContent" style="display: none;">
+            <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <h1 style="font-size: 1.8rem; font-weight: 500;">活動控制台</h1>
+                <button class="btn btn-secondary" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> 整理名單</button>
+            </div>
+
+            <div class="card">
+                <h2><i class="fa-solid fa-sliders"></i> 建立 / 修改當前活動</h2>
+                <div class="form-group">
+                    <label for="setEventName">活動名稱</label>
+                    <input type="text" id="setEventName">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="setStartDate">報名開始日期</label>
+                        <input type="date" id="setStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="setEndDate">報名截止日期</label>
+                        <input type="date" id="setEndDate">
+                    </div>
+                </div>
+                <button class="btn" onclick="saveSettings()">儲存活動設定</button>
+            </div>
+
+            <div class="card">
+                <h2 id="pdfTitle"><i class="fa-solid fa-users"></i> 報名人員名單資料庫</h2>
+                <div class="search-container">
+                    <div class="form-group">
+                        <label for="filterActivity"><i class="fa-solid fa-folder-open"></i> 選擇要查詢的活動資料</label>
+                        <select id="filterActivity" onchange="handleActivityChange()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="searchKeyword"><i class="fa-solid fa-magnifying-glass"></i> 關鍵字搜尋</label>
+                        <input type="text" id="searchKeyword" placeholder="姓名/Email/電話..." oninput="renderAdminTable()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterCategory">身分分類篩選</label>
+                        <select id="filterCategory" onchange="renderAdminTable()">
+                            <option value="全部">全部身分分類</option>
+                            <option value="一般民眾">一般民眾</option>
+                            <option value="VIP貴賓">VIP貴賓</option>
+                            <option value="工作人員/媒體">工作人員/媒體</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1rem;">
+                    <div class="btn-group">
+                        <button class="btn" style="background-color: #2c3e50; border-color: #2c3e50;" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> 匯出當前查詢 PDF</button>
+                        <button class="btn btn-secondary" onclick="exportData()"><i class="fa-solid fa-download"></i> 匯出全部資料 (JSON)</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> 匯入外部資料 (JSON)</button>
+                        <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+                        <button class="btn btn-secondary" style="color: var(--error-color); border-color:#fadbd8" onclick="clearAllData()"><i class="fa-solid fa-trash"></i> 清空資料</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>報名時間</th>
+                                <th>姓名</th>
+                                <th>身分分類</th>
+                                <th>Email</th>
+                                <th>電話</th>
+                                <th>備註留言</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendeeTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const DEFAULT_CONFIG = { eventName: "2026 時尚新品發表暨尊榮體驗會", startDate: "2026-06-01", endDate: "2026-07-31" };
+        let systemConfig = JSON.parse(localStorage.getItem('ev_config')) || DEFAULT_CONFIG;
+        let attendees = JSON.parse(localStorage.getItem('ev_attendees')) || [];
+
+        function handleLogin() {
+            const pass = document.getElementById('adminPassword').value;
+            if(pass === 'admin') { // 後台密碼在此修改
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                initBackend();
+            } else { document.getElementById('loginError').style.display = 'block'; }
+        }
+
+        function initBackend() {
+            document.getElementById('setEventName').value = systemConfig.eventName;
+            document.getElementById('setStartDate').value = systemConfig.startDate;
+            document.getElementById('setEndDate').value = systemConfig.endDate;
+            buildActivityDropdown();
+            updatePDFTitle();
+            renderAdminTable();
+        }
+
+        function buildActivityDropdown() {
+            attendees = JSON.parse(localStorage.getItem('ev_attendees')) || [];
+            const dropdown = document.getElementById('filterActivity');
+            let activityList = attendees.map(item => item.activityName || "未歸類活動");
+            activityList.unshift(systemConfig.eventName);
+            let uniqueActivities = [...new Set(activityList)];
+            dropdown.innerHTML = '';
+            uniqueActivities.forEach(act => {
+                const opt = document.createElement('option'); opt.value = act; opt.innerText = act;
+                dropdown.appendChild(opt);
+            });
+        }
+
+        function handleActivityChange() { updatePDFTitle(); renderAdminTable(); }
+        function updatePDFTitle() {
+            const selectedAct = document.getElementById('filterActivity').value;
+            document.getElementById('pdfTitle').innerHTML = `<i class="fa-solid fa-users"></i> ${selectedAct} - 報名名單`;
+        }
+
+        function saveSettings() {
+            systemConfig.eventName = document.getElementById('setEventName').value;
+            systemConfig.startDate = document.getElementById('setStartDate').value;
+            systemConfig.endDate = document.getElementById('setEndDate').value;
+            localStorage.setItem('ev_config', JSON.stringify(systemConfig));
+            buildActivityDropdown();
+            document.getElementById('filterActivity').value = systemConfig.eventName;
+            handleActivityChange();
+            alert('新活動已開拓！前台表單已同步更新。');
+        }
+
+        function getBadgeClass(cat) {
+            if(cat === 'VIP貴賓') return 'badge badge-vip';
+            if(cat === '工作人員/媒體') return 'badge badge-staff';
+            return 'badge badge-regular';
+        }
+
+        function renderAdminTable() {
+            attendees = JSON.parse(localStorage.getItem('ev_attendees')) || [];
+            const tbody = document.getElementById('attendeeTableBody');
+            const selectedActivity = document.getElementById('filterActivity').value;
+            const filterCat = document.getElementById('filterCategory').value;
+            const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+            tbody.innerHTML = '';
+
+            const filteredData = attendees.filter(item => {
+                const itemActName = item.activityName || "未歸類活動";
+                const matchesActivity = (itemActName === selectedActivity);
+                const matchesCategory = (filterCat === '全部' || item.category === filterCat);
+                const matchesKeyword = !keyword || 
+                    item.name.toLowerCase().includes(keyword) ||
+                    item.email.toLowerCase().includes(keyword) ||
+                    item.phone.includes(keyword) ||
+                    (item.note && item.note.toLowerCase().includes(keyword));
+                return matchesActivity && matchesCategory && matchesKeyword;
+            });
+
+            if(filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#999; padding: 2rem;">此活動目前無符合條件的報名名單</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.timestamp}</td><td style="font-weight:500;">${item.name}</td>
+                    <td><span class="${getBadgeClass(item.category)}">${item.category}</span></td>
+                    <td>${item.email}</td><td>${item.phone}</td><td style="color:#666; font-size:0.85rem;">${item.note || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function exportPDF() { window.print(); }
+
+        function exportData() {
+            if(attendees.length === 0) { alert('目前沒有資料可供匯出。'); return; }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(attendees, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr); downloadAnchor.setAttribute("download", `全活動報名名單總備份.json`);
+            document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        if(confirm(`確認匯入 ${imported.length} 筆外部歷史資料嗎？`)) {
+                            attendees = attendees.concat(imported);
+                            localStorage.setItem('ev_attendees', JSON.stringify(attendees));
+                            initBackend();
+                            alert('名單資料夾入與歷史活動選單更新成功！');
+                        }
+                    } else { alert('檔案格式錯誤，必須是標準的 JSON 陣列。'); }
+                } catch (err) { alert('解析檔案失敗，請檢查 JSON 格式。'); }
+            };
+            reader.readAsText(file); document.getElementById('importFile').value = '';
+        }
+
+        function clearAllData() {
+            if(confirm('🚨 嚴重警告：確定要刪除所有歷史與當前活動的報名名單嗎？此動作將無法復原！')) {
+                attendees = []; localStorage.setItem('ev_attendees', JSON.stringify(attendees)); initBackend();
+            }
+        }
+    </script>
+</body>
+</html>
