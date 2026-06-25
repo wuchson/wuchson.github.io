@@ -19,6 +19,7 @@
         .form-group { margin-bottom: 1.2rem; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .form-row-4 { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr; gap: 1rem; }
+        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
         label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500; }
         input, select, textarea { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 0.95rem; background-color: #fafafa; }
         textarea { resize: vertical; }
@@ -38,87 +39,19 @@
         .badge-staff { background-color: #dcfce7; color: #15803d; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: 700; }
 
-        /* ===================================================
-           ✨ 關鍵修改：徹底隱藏控制台與修改活動項目的藍色框框
-           =================================================== */
         @media print {
-            /* 1. 透過精準 ID 直接抹除登入區、控制台標題、活動修改卡片、搜尋列和所有按鈕 */
-            #loginSection, 
-            #controlHeader, 
-            #configCard, 
-            .search-container, 
-            .btn, 
-            .btn-secondary, 
-            #loadingOverlay { 
-                display: none !important; 
-            }
-
-            /* 2. 重設頁面基礎樣式，去除外框與外距背景 */
-            body {
-                background: #ffffff !important;
-                color: #000000 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            main {
-                max-width: 100% !important;
-                width: 100% !important;
-            }
-            .card {
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                background: transparent !important;
-            }
-
-            /* 3. 調整名單標題與統計數據字型 */
-            h2#pdfTitle {
-                font-size: 1.6rem !important;
-                font-weight: 700 !important;
-                margin-bottom: 0.5rem !important;
-                color: #000000 !important;
-            }
-            #backendCounterTag {
-                font-size: 1rem !important;
-                color: #333333 !important;
-                margin-bottom: 1.5rem !important;
-            }
-
-            /* 4. 確保表格框線黑白分明且不被紙張裁切 */
-            .table-responsive {
-                overflow: visible !important;
-                margin-top: 0 !important;
-            }
-            table {
-                width: 100% !important;
-                border-collapse: collapse !important;
-                page-break-inside: auto; 
-            }
-            tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
-            }
-            th, td {
-                border: 1px solid #444444 !important; 
-                padding: 8px 10px !important; 
-                font-size: 0.85rem !important;
-                color: #000000 !important;
-            }
-            th {
-                background-color: #eaeaea !important; 
-                font-weight: 700 !important;
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact;
-            }
-            
-            /* 將身分標籤改為正式的黑白純文字呈現 */
-            .badge {
-                background: none !important;
-                color: #000000 !important;
-                padding: 0 !important;
-                font-weight: 700 !important;
-            }
+            #loginSection, #controlHeader, #configCard, .search-container, .btn, .btn-secondary, #loadingOverlay { display: none !important; }
+            body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; margin: 0 !important; }
+            main { max-width: 100% !important; width: 100% !important; }
+            .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; background: transparent !important; }
+            h2#pdfTitle { font-size: 1.6rem !important; font-weight: 700 !important; margin-bottom: 0.5rem !important; color: #000000 !important; }
+            #backendCounterTag { font-size: 1rem !important; color: #333333 !important; margin-bottom: 1.5rem !important; }
+            .table-responsive { overflow: visible !important; margin-top: 0 !important; }
+            table { width: 100% !important; border-collapse: collapse !important; page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            th, td { border: 1px solid #444444 !important; padding: 8px 10px !important; font-size: 0.85rem !important; color: #000000 !important; }
+            th { background-color: #eaeaea !important; font-weight: 700 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .badge { background: none !important; color: #000000 !important; padding: 0 !important; font-weight: 700 !important; }
         }
     </style>
 </head>
@@ -138,13 +71,11 @@
         </div>
 
         <div id="adminContent" style="display: none;">
-            <!-- 已加上識別標籤 id="controlHeader"，列印時會精準隱藏 -->
             <div id="controlHeader" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
                 <h1 style="font-size: 1.8rem; font-weight: 500;">雲端活動控制台</h1>
                 <button class="btn btn-secondary" onclick="fetchCloudData()"><i class="fa-solid fa-rotate"></i> 重新整理雲端資料</button>
             </div>
 
-            <!-- 已加上識別標籤 id="configCard"，列印時會精準隱藏 -->
             <div class="card" id="configCard">
                 <h2><i class="fa-solid fa-sliders"></i> 建立 / 修改當前活動項目</h2>
                 <div class="form-group">
@@ -179,12 +110,23 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-top: 1.2rem; max-width: 250px;">
-                    <label for="setShowDescription">前台顯示活動說明</label>
-                    <select id="setShowDescription">
-                        <option value="yes">顯示說明</option>
-                        <option value="no">隱藏說明</option>
-                    </select>
+                <div class="form-row-3" style="margin-top: 1.2rem;">
+                    <div class="form-group">
+                        <label for="setShowDescription">前台顯示活動說明</label>
+                        <select id="setShowDescription">
+                            <option value="yes">顯示說明</option>
+                            <option value="no">隱藏說明</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="setThemeColor"><i class="fa-solid fa-palette"></i> 前台主題風格顏色</label>
+                        <select id="setThemeColor">
+                            <option value="pink">🌸 茉莉原創粉 (Jasmine Pink)</option>
+                            <option value="blue">💎 科技商務藍 (Business Blue)</option>
+                            <option value="gold">✨ 奢華質感金 (Luxury Gold)</option>
+                            <option value="green">🌿 療癒森林綠 (Forest Green)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button class="btn" style="margin-top: 1rem;" onclick="saveSettings()">儲存並同步至前台</button>
@@ -264,6 +206,7 @@
             document.getElementById('setMaxCapacity').value = systemConfig.maxCapacity || 0;
             document.getElementById('setShowRemaining').value = systemConfig.showRemaining || "yes";
             document.getElementById('setShowDescription').value = systemConfig.showDescription || "yes";
+            document.getElementById('setThemeColor').value = systemConfig.themeColor || "pink"; // 預設粉色
             buildActivityDropdown(); updatePDFTitle(); renderAdminTable();
         }
 
@@ -292,7 +235,8 @@
                 endDate: document.getElementById('setEndDate').value,
                 maxCapacity: parseInt(document.getElementById('setMaxCapacity').value) || 0,
                 showRemaining: document.getElementById('setShowRemaining').value,
-                showDescription: document.getElementById('setShowDescription').value
+                showDescription: document.getElementById('setShowDescription').value,
+                themeColor: document.getElementById('setThemeColor').value // 同步儲存主題
             };
 
             fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "saveSettings", config: newConfig }) })
@@ -300,7 +244,7 @@
                 if(data.result === "success") {
                     systemConfig = newConfig; buildActivityDropdown();
                     document.getElementById('filterActivity').value = systemConfig.eventName; handleActivityChange();
-                    alert('雲端所有控制參數更新成功！前台已即時同步。');
+                    alert('雲端所有控制參數與顏色主題更新成功！前台已即時同步。');
                 }
                 document.getElementById('loadingOverlay').style.display = 'none';
             });
