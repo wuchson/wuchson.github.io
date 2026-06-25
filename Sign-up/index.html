@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 預設樣式（將由 JavaScript 依據主題設定動態覆蓋） */
         :root {
             --primary-pink: #fbc4b6; --bg-pink: #fff6f4; --accent-rose: #d98880; --text-dark: #3a2e2b; --text-muted: #8c7671;
             --card-bg: #ffffff; --success-color: #76c893; --error-color: #e07a5f; --radius-lg: 24px; --radius-md: 14px;
@@ -23,8 +22,6 @@
         @keyframes heartBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
         main { width: 100%; max-width: 580px; margin: 0 auto; padding: 0 1.25rem; }
         .card { background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 2.5rem 1.8rem; box-shadow: var(--shadow); border: 1px solid rgba(251, 196, 182, 0.2); position: relative; overflow: hidden; }
-        
-        /* 浮水裝飾圖案 */
         .card::after { content: var(--logo-icon); position: absolute; top: -10px; right: -10px; font-size: 4rem; opacity: 0.05; }
         h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 0.5px; color: var(--text-dark); line-height: 1.4; text-align: center; }
         
@@ -108,7 +105,7 @@
         function applyTheme(colorKey) {
             const root = document.documentElement.style;
             
-            // 🎨 定義 4 種高質感前台配色方案
+            // 🎨 完整定義 10 大美型主題配色參數庫
             const themes = {
                 pink: {
                     primary: '#fbc4b6', bg: '#fff6f4', accent: '#d98880', text: '#3a2e2b', muted: '#8c7671',
@@ -125,12 +122,35 @@
                 green: {
                     primary: '#a7d7c5', bg: '#f4faf7', accent: '#4e8770', text: '#1a3329', muted: '#527869',
                     gStart: '#74c69d', gEnd: '#4e8770', icon: '🌿', faIcon: 'fa-seedling'
+                },
+                orange: {
+                    primary: '#ffd0a1', bg: '#fffaf5', accent: '#e67e22', text: '#4a2700', muted: '#8f561b',
+                    gStart: '#ffb366', gEnd: '#e67e22', icon: '🍊', faIcon: 'fa-sun'
+                },
+                purple: {
+                    primary: '#d1b3ff', bg: '#f9f5ff', accent: '#8e44ad', text: '#2c133d', muted: '#684382',
+                    gStart: '#b98aff', gEnd: '#8e44ad', icon: '🔮', faIcon: 'fa-wand-magic-sparkles'
+                },
+                red: {
+                    primary: '#ffadad', bg: '#fff5f5', accent: '#c0392b', text: '#4a0e08', muted: '#8c352b',
+                    gStart: '#ff7575', gEnd: '#c0392b', icon: '🌹', faIcon: 'fa-fire'
+                },
+                grey: {
+                    primary: '#cbd5e1', bg: '#f8fafc', accent: '#475569', text: '#0f172a', muted: '#475569',
+                    gStart: '#94a3b8', gEnd: '#475569', icon: '🖤', faIcon: 'fa-cube'
+                },
+                matcha: {
+                    primary: '#c8ddbb', bg: '#f7f9f5', accent: '#607254', text: '#2c3327', muted: '#505b49',
+                    gStart: '#a9c298', gEnd: '#607254', icon: '🍵', faIcon: 'fa-leaf'
+                },
+                peach: {
+                    primary: '#ffc4d6', bg: '#fff5f7', accent: '#ff6b8b', text: '#4a1521', muted: '#9e475a',
+                    gStart: '#ffa6c9', gEnd: '#ff6b8b', icon: '🍑', faIcon: 'fa-face-smile-wink'
                 }
             };
 
             const selected = themes[colorKey] || themes.pink;
 
-            // 動態更新 CSS 變數
             root.setProperty('--primary-pink', selected.primary);
             root.setProperty('--bg-pink', selected.bg);
             root.setProperty('--accent-rose', selected.accent);
@@ -140,13 +160,11 @@
             root.setProperty('--gradient-end', selected.gEnd);
             root.setProperty('--logo-icon', `'${selected.icon}'`);
             
-            // 更換前台最上方的 icon 圖示
             const logoContainer = document.getElementById('headerLogoIcon');
             if(logoContainer) {
                 logoContainer.innerHTML = `<i class="fa-solid ${selected.faIcon}"></i> 茉莉老師雲端報名系統`;
             }
             
-            // 微調區塊底色搭配
             document.getElementById('frontEventDescription').style.borderColor = selected.primary;
             document.getElementById('infoBoxContainer').style.backgroundColor = `${selected.primary}20`;
         }
@@ -155,7 +173,7 @@
             fetch(GAS_API_URL).then(res => res.json()).then(data => {
                 systemConfig = data.config; currentCount = data.currentCount;
                 
-                // 🚀 套用雲端色彩主題
+                // 🚀 解析並自動套用對應的主題
                 applyTheme(systemConfig.themeColor);
                 
                 document.getElementById('frontEventName').innerText = systemConfig.eventName;
