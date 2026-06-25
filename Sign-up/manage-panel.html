@@ -39,21 +39,21 @@
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: 700; }
 
         /* ===================================================
-           ✨ 關鍵修改：控制管理後台 PDF 匯出「只留乾淨名單」
+           ✨ 關鍵修改：徹底隱藏控制台與修改活動項目的藍色框框
            =================================================== */
         @media print {
-            /* 1. 隱藏所有不需要出現在 PDF 上的後台雜訊、設定卡片與操作按鈕 */
+            /* 1. 透過精準 ID 直接抹除登入區、控制台標題、活動修改卡片、搜尋列和所有按鈕 */
             #loginSection, 
-            .card:nth-of-type(1), 
+            #controlHeader, 
+            #configCard, 
             .search-container, 
             .btn, 
             .btn-secondary, 
-            #loadingOverlay,
-            main > div:first-of-type { 
+            #loadingOverlay { 
                 display: none !important; 
             }
 
-            /* 2. 重設頁面基礎樣式，去除網頁背景與外框陰影 */
+            /* 2. 重設頁面基礎樣式，去除外框與外距背景 */
             body {
                 background: #ffffff !important;
                 color: #000000 !important;
@@ -72,7 +72,7 @@
                 background: transparent !important;
             }
 
-            /* 3. 優化名單標題（顯示當前選取的活動名稱）與統計人數 */
+            /* 3. 調整名單標題與統計數據字型 */
             h2#pdfTitle {
                 font-size: 1.6rem !important;
                 font-weight: 700 !important;
@@ -85,7 +85,7 @@
                 margin-bottom: 1.5rem !important;
             }
 
-            /* 4. 確保表格在 A4 紙張/PDF 上完美呈現、不被裁切 */
+            /* 4. 確保表格框線黑白分明且不被紙張裁切 */
             .table-responsive {
                 overflow: visible !important;
                 margin-top: 0 !important;
@@ -100,7 +100,7 @@
                 page-break-after: auto;
             }
             th, td {
-                border: 1px solid #666666 !important; 
+                border: 1px solid #444444 !important; 
                 padding: 8px 10px !important; 
                 font-size: 0.85rem !important;
                 color: #000000 !important;
@@ -112,7 +112,7 @@
                 print-color-adjust: exact;
             }
             
-            /* 將身分標籤（VIP等）的背景拿掉，改為純文字黑白呈現，比較正式 */
+            /* 將身分標籤改為正式的黑白純文字呈現 */
             .badge {
                 background: none !important;
                 color: #000000 !important;
@@ -138,12 +138,14 @@
         </div>
 
         <div id="adminContent" style="display: none;">
-            <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <!-- 已加上識別標籤 id="controlHeader"，列印時會精準隱藏 -->
+            <div id="controlHeader" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
                 <h1 style="font-size: 1.8rem; font-weight: 500;">雲端活動控制台</h1>
                 <button class="btn btn-secondary" onclick="fetchCloudData()"><i class="fa-solid fa-rotate"></i> 重新整理雲端資料</button>
             </div>
 
-            <div class="card">
+            <!-- 已加上識別標籤 id="configCard"，列印時會精準隱藏 -->
+            <div class="card" id="configCard">
                 <h2><i class="fa-solid fa-sliders"></i> 建立 / 修改當前活動項目</h2>
                 <div class="form-group">
                     <label for="setEventName">活動名稱</label>
