@@ -118,13 +118,20 @@
                             <option value="no">隱藏說明</option>
                         </select>
                     </div>
+                    <!-- ✨ 擴充項目：前台 10 大主題風格顏色主題設定選單 -->
                     <div class="form-group">
                         <label for="setThemeColor"><i class="fa-solid fa-palette"></i> 前台主題風格顏色</label>
                         <select id="setThemeColor">
-                            <option value="pink">🌸 茉莉原創粉 (Jasmine Pink)</option>
+                            <option value="pink">🌸 茉莉原創粉 (Original Pink)</option>
                             <option value="blue">💎 科技商務藍 (Business Blue)</option>
                             <option value="gold">✨ 奢華質感金 (Luxury Gold)</option>
                             <option value="green">🌿 療癒森林綠 (Forest Green)</option>
+                            <option value="orange">🍊 活力亮彩橘 (Bright Orange)</option>
+                            <option value="purple">🔮 神秘薰衣紫 (Lavender Purple)</option>
+                            <option value="red">🌹 經典炙熱紅== (Classic Red)</option>
+                            <option value="grey">🖤 現代極簡灰 (Modern Grey)</option>
+                            <option value="matcha">🍵 日系文青綠 (Matcha Green)</option>
+                            <option value="peach">🍑 軟萌蜜桃粉 (Peach Pink)</option>
                         </select>
                     </div>
                 </div>
@@ -206,7 +213,7 @@
             document.getElementById('setMaxCapacity').value = systemConfig.maxCapacity || 0;
             document.getElementById('setShowRemaining').value = systemConfig.showRemaining || "yes";
             document.getElementById('setShowDescription').value = systemConfig.showDescription || "yes";
-            document.getElementById('setThemeColor').value = systemConfig.themeColor || "pink"; // 預設粉色
+            document.getElementById('setThemeColor').value = systemConfig.themeColor || "pink"; 
             buildActivityDropdown(); updatePDFTitle(); renderAdminTable();
         }
 
@@ -236,7 +243,7 @@
                 maxCapacity: parseInt(document.getElementById('setMaxCapacity').value) || 0,
                 showRemaining: document.getElementById('setShowRemaining').value,
                 showDescription: document.getElementById('setShowDescription').value,
-                themeColor: document.getElementById('setThemeColor').value // 同步儲存主題
+                themeColor: document.getElementById('setThemeColor').value 
             };
 
             fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "saveSettings", config: newConfig }) })
