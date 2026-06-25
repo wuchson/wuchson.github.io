@@ -37,8 +37,88 @@
         .badge-regular { background-color: #e0f2fe; color: #0369a1; }
         .badge-staff { background-color: #dcfce7; color: #15803d; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; z-index: 999; font-weight: 700; }
+
+        /* ===================================================
+           ✨ 關鍵修改：控制管理後台 PDF 匯出「只留乾淨名單」
+           =================================================== */
         @media print {
-            #loginSection, .card:nth-of-type(1), .btn, .btn-secondary, .search-container, h1 button { display: none !important; }
+            /* 1. 隱藏所有不需要出現在 PDF 上的後台雜訊、設定卡片與操作按鈕 */
+            #loginSection, 
+            .card:nth-of-type(1), 
+            .search-container, 
+            .btn, 
+            .btn-secondary, 
+            #loadingOverlay,
+            main > div:first-of-type { 
+                display: none !important; 
+            }
+
+            /* 2. 重設頁面基礎樣式，去除網頁背景與外框陰影 */
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            main {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: transparent !important;
+            }
+
+            /* 3. 優化名單標題（顯示當前選取的活動名稱）與統計人數 */
+            h2#pdfTitle {
+                font-size: 1.6rem !important;
+                font-weight: 700 !important;
+                margin-bottom: 0.5rem !important;
+                color: #000000 !important;
+            }
+            #backendCounterTag {
+                font-size: 1rem !important;
+                color: #333333 !important;
+                margin-bottom: 1.5rem !important;
+            }
+
+            /* 4. 確保表格在 A4 紙張/PDF 上完美呈現、不被裁切 */
+            .table-responsive {
+                overflow: visible !important;
+                margin-top: 0 !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                page-break-inside: auto; 
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            th, td {
+                border: 1px solid #666666 !important; 
+                padding: 8px 10px !important; 
+                font-size: 0.85rem !important;
+                color: #000000 !important;
+            }
+            th {
+                background-color: #eaeaea !important; 
+                font-weight: 700 !important;
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+            }
+            
+            /* 將身分標籤（VIP等）的背景拿掉，改為純文字黑白呈現，比較正式 */
+            .badge {
+                background: none !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                font-weight: 700 !important;
+            }
         }
     </style>
 </head>
