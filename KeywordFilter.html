@@ -131,7 +131,7 @@
     </div>
     
     <div class="control-group">
-        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：我會參加直播)">
+        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：唯森傳統紙藝)">
         <button class="btn extract-btn" onclick="extractNames()">提取名單</button>
         <button class="btn copy-btn" onclick="copyToClipboard()">一鍵複製</button>
         <button class="btn download-btn" onclick="downloadTXT()">下載檔案</button>
@@ -162,7 +162,7 @@
 
     // 監聽關鍵字高亮
     keywordInput.addEventListener('input', function() {
-        const keyword = this.value;
+        const keyword = this.value.trim();
         if (!rawContent && displayArea.innerText !== "") {
             rawContent = displayArea.innerText;
         }
@@ -180,7 +180,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 提取邏輯 (已針對全新臉書複製排版優化) ---
+    // --- 終極相容提取邏輯 ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -188,46 +188,52 @@
             return;
         }
 
+        // 取得純文字並依行切分
         const content = rawContent || displayArea.innerText;
         const lines = content.split('\n').map(line => line.trim());
         const nameList = [];
 
-        // 臉書複製時常見的系統雜訊關鍵字，往上尋找姓名時必須跳過
-        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤"];
+        // 雜訊過濾清單
+        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤", ".", ""];
 
         for (let i = 0; i < lines.length; i++) {
+            // 模糊比對：只要該行包含關鍵字就處理
             if (lines[i].includes(keyword)) {
                 let foundName = "";
                 
-                // 從關鍵字這一行開始「往上」追溯找人名
+                // 往上追溯尋找姓名
                 for (let j = i - 1; j >= 0; j--) {
-                    const currentLine = lines[j];
+                    let currentLine = lines[j];
                     
-                    // 排除空行、點點、系統字、以及包含關鍵字本身的行
-                    if (currentLine !== "" && 
-                        currentLine !== "." && 
-                        !systemWords.includes(currentLine) && 
-                        !currentLine.includes(keyword)) {
+                    // 移除常見的干擾引號與前後空白，避免精準比對失敗
+                    const cleanLine = currentLine.replace(/[『』「」""''\s]/g, '').trim();
+                    
+                    if (cleanLine !== "" && 
+                        !systemWords.includes(cleanLine) && 
+                        !cleanLine.includes(keyword)) {
                         
-                        // 額外防錯：如果複製到「許玉姍 · 14週」，自動切除後面，只保留人名
+                        // 處理包含時間戳或小數點的行 (例如: "Jameshy Chang · 14週")
                         if (currentLine.includes('·')) {
                             foundName = currentLine.split('·')[0].trim();
                         } else {
                             foundName = currentLine;
                         }
-                        break; // 抓到最近的人名就立刻停止向上搜尋
+                        break; 
                     }
                 }
                 
-                // 確保人名有效，且不重複塞入名單
-                if (foundName && !nameList.includes(foundName)) {
-                    nameList.push(foundName);
+                // 確保抓到的名字不是系統雜訊、不是點點、不是空的
+                if (foundName && !systemWords.includes(foundName.trim()) && foundName.trim() !== ".") {
+                    const finalName = foundName.trim();
+                    if (!nameList.includes(finalName)) {
+                        nameList.push(finalName);
+                    }
                 }
             }
         }
 
         if (nameList.length === 0) {
-            alert("找不到對應的名稱，請檢查關鍵字！");
+            alert("找不到對應的名稱，請檢查關鍵字是否完全正確！");
             return;
         }
 
@@ -250,7 +256,6 @@
             await navigator.clipboard.writeText(text);
             showToast("已複製到剪貼簿！");
         } catch (err) {
-            // 備用方案
             const textArea = document.createElement("textarea");
             textArea.value = text;
             document.body.appendChild(textArea);
@@ -261,7 +266,6 @@
         }
     }
 
-    // 顯示提示訊息
     function showToast(msg) {
         toast.innerText = msg;
         toast.className = "show";
