@@ -129,7 +129,7 @@
     </div>
     
     <div class="control-group">
-        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：唯森傳統紙藝)">
+        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：唯森傳統)">
         <button class="btn extract-btn" onclick="extractNames()">提取名單</button>
         <button class="btn copy-btn" onclick="copyToClipboard()">一鍵複製</button>
         <button class="btn download-btn" onclick="downloadTXT()">下載檔案</button>
@@ -176,7 +176,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 獨立回溯提取法（加強人名淨化） ---
+    // --- 終極深度淨化提取法 ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -194,15 +194,17 @@
             if (lines[i].includes(keyword)) {
                 let foundName = "";
 
+                // 開始往上尋找人名
                 for (let j = i - 1; j >= 0; j--) {
                     const originalLine = lines[j];
                     
-                    // 清理乾淨用來比對的內容
-                    const cleanLine = originalLine.replace(/[『』「」""''\s\.]/g, '').trim();
+                    // 用來進行雜訊比對的極度純化行
+                    const cleanLine = originalLine.replace(/[『』「」""''\s\.\-<>←]/g, '').trim();
 
                     const isSystemNoise = systemWords.some(word => cleanLine.includes(word));
                     const isKeywordLine = cleanLine.includes(keyword);
 
+                    // 排除空行、純點點、系統字、包含關鍵字的行
                     if (cleanLine !== "" && cleanLine !== "." && !isSystemNoise && !isKeywordLine) {
                         if (originalLine.includes('·')) {
                             foundName = originalLine.split('·')[0];
@@ -210,8 +212,11 @@
                             foundName = originalLine;
                         }
                         
-                        // 【關鍵修復】在此處立刻將名字前後的空白、換行或點點全部徹底刮掉
-                        foundName = foundName.replace(/^[\s\.\n\r]+|[\s\.\n\r]+$/g, '').trim();
+                        // 【終極修復】強力洗滌人名！
+                        // 1. 先把可能混進來的換行、點點、箭頭符號等極端贅字通通拿掉
+                        foundName = foundName.replace(/[·\.\-\r\n<>←]/g, '').trim();
+                        // 2. 移除前後可能殘留的多餘空白
+                        foundName = foundName.trim();
                         break; 
                     }
                 }
@@ -220,9 +225,12 @@
                     const finalCleanName = foundName.replace(/[『』「」""''\s\.]/g, '').trim();
                     const isStillNoise = systemWords.some(word => finalCleanName.includes(word));
                     
+                    // 確保洗乾淨後的人名不是空的，也不是系統詞
                     if (finalCleanName !== "" && !isStillNoise) {
-                        if (!nameList.includes(foundName)) {
-                            nameList.push(foundName);
+                        // 壓縮中英文名字內部可能產生的連續多個空格，只保留標準單空格
+                        const finalFormattedName = foundName.replace(/\s+/g, ' ');
+                        if (!nameList.includes(finalFormattedName)) {
+                            nameList.push(finalFormattedName);
                         }
                     }
                 }
@@ -234,8 +242,8 @@
             return;
         }
 
-        // 【二次保險】輸出名單時，確保每行都是絕對乾淨的名字
-        const resultText = nameList.map(name => name.trim()).filter(name => name !== "").join('\n');
+        // 最終輸出：過濾掉任何意外產生的空行
+        const resultText = nameList.filter(name => name.trim() !== "").join('\n');
         displayArea.innerText = resultText;
         rawContent = resultText;
         keywordInput.value = ""; 
