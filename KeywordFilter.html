@@ -44,7 +44,6 @@
             outline: none;
         }
 
-        /* 按鈕樣式優化 */
         .btn {
             padding: 0 15px;
             color: white;
@@ -64,7 +63,7 @@
         .btn:active { transform: translateY(0); }
 
         .extract-btn { background-color: #007bff; }
-        .copy-btn { background-color: #6f42c1; } /* 紫色 */
+        .copy-btn { background-color: #6f42c1; } 
         .download-btn { background-color: #28a745; }
         .clear-btn { background-color: #ff4d4f; }
 
@@ -92,7 +91,6 @@
             border-radius: 2px;
         }
         
-        /* 複製成功的浮動提示 */
         #copyToast {
             visibility: hidden;
             min-width: 150px;
@@ -153,14 +151,12 @@
     const toast = document.getElementById('copyToast');
     let rawContent = "";
 
-    // 監聽內容輸入
     displayArea.addEventListener('input', function() {
         if (keywordInput.value === "") {
             rawContent = displayArea.innerText;
         }
     });
 
-    // 監聽關鍵字高亮
     keywordInput.addEventListener('input', function() {
         const keyword = this.value.trim();
         if (!rawContent && displayArea.innerText !== "") {
@@ -180,7 +176,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 終極相容提取邏輯 ---
+    // --- 全新架構：區塊切割提取法 ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -188,46 +184,36 @@
             return;
         }
 
-        // 取得純文字並依行切分
         const content = rawContent || displayArea.innerText;
         const lines = content.split('\n').map(line => line.trim());
         const nameList = [];
 
-        // 雜訊過濾清單
-        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤", ".", ""];
+        // 系統雜訊過濾
+        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤", "."];
+
+        let currentName = "";
 
         for (let i = 0; i < lines.length; i++) {
-            // 模糊比對：只要該行包含關鍵字就處理
-            if (lines[i].includes(keyword)) {
-                let foundName = "";
-                
-                // 往上追溯尋找姓名
-                for (let j = i - 1; j >= 0; j--) {
-                    let currentLine = lines[j];
-                    
-                    // 移除常見的干擾引號與前後空白，避免精準比對失敗
-                    const cleanLine = currentLine.replace(/[『』「」""''\s]/g, '').trim();
-                    
-                    if (cleanLine !== "" && 
-                        !systemWords.includes(cleanLine) && 
-                        !cleanLine.includes(keyword)) {
-                        
-                        // 處理包含時間戳或小數點的行 (例如: "Jameshy Chang · 14週")
-                        if (currentLine.includes('·')) {
-                            foundName = currentLine.split('·')[0].trim();
-                        } else {
-                            foundName = currentLine;
-                        }
-                        break; 
-                    }
+            const line = lines[i];
+            if (line === "") continue;
+
+            // 判斷這一行是不是新的人名區塊開始
+            // 臉書的規律：人名通常後面不包含系統字、不是單純點點，且如果含有「·」代表帶有時間戳
+            const isSystem = systemWords.some(word => line.includes(word));
+            
+            // 如果遇到新名字，就更新目前追蹤的「當前留言者」
+            if (!isSystem && !line.includes(keyword)) {
+                if (line.includes('·')) {
+                    currentName = line.split('·')[0].trim();
+                } else {
+                    currentName = line;
                 }
-                
-                // 確保抓到的名字不是系統雜訊、不是點點、不是空的
-                if (foundName && !systemWords.includes(foundName.trim()) && foundName.trim() !== ".") {
-                    const finalName = foundName.trim();
-                    if (!nameList.includes(finalName)) {
-                        nameList.push(finalName);
-                    }
+            }
+
+            // 只要在當前區塊的任何地方（包含留言行、引號行）偵測到關鍵字
+            if (line.includes(keyword) && currentName) {
+                if (!nameList.includes(currentName) && !systemWords.includes(currentName)) {
+                    nameList.push(currentName);
                 }
             }
         }
