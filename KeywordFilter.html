@@ -129,7 +129,7 @@
     </div>
     
     <div class="control-group">
-        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：唯森傳統)">
+        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：唯森傳統紙)">
         <button class="btn extract-btn" onclick="extractNames()">提取名單</button>
         <button class="btn copy-btn" onclick="copyToClipboard()">一鍵複製</button>
         <button class="btn download-btn" onclick="downloadTXT()">下載檔案</button>
@@ -176,7 +176,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 終極深度淨化提取法 ---
+    // --- 定位回溯 6 行提取法 ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -185,52 +185,39 @@
         }
 
         const content = rawContent || displayArea.innerText;
-        const lines = content.split('\n').map(line => line.trim());
+        // 使用原汁原味的每行文本，不做預先過濾
+        const lines = content.split('\n');
         const nameList = [];
-
-        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤"];
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes(keyword)) {
-                let foundName = "";
+                let targetIndex = -1;
 
-                // 開始往上尋找人名
-                for (let j = i - 1; j >= 0; j--) {
-                    const originalLine = lines[j];
-                    
-                    // 用來進行雜訊比對的極度純化行
-                    const cleanLine = originalLine.replace(/[『』「」""''\s\.\-<>←]/g, '').trim();
-
-                    const isSystemNoise = systemWords.some(word => cleanLine.includes(word));
-                    const isKeywordLine = cleanLine.includes(keyword);
-
-                    // 排除空行、純點點、系統字、包含關鍵字的行
-                    if (cleanLine !== "" && cleanLine !== "." && !isSystemNoise && !isKeywordLine) {
-                        if (originalLine.includes('·')) {
-                            foundName = originalLine.split('·')[0];
-                        } else {
-                            foundName = originalLine;
-                        }
-                        
-                        // 【終極修復】強力洗滌人名！
-                        // 1. 先把可能混進來的換行、點點、箭頭符號等極端贅字通通拿掉
-                        foundName = foundName.replace(/[·\.\-\r\n<>←]/g, '').trim();
-                        // 2. 移除前後可能殘留的多餘空白
-                        foundName = foundName.trim();
-                        break; 
-                    }
+                // 判斷關鍵字上一行是不是「來自作者」
+                if (i > 0 && lines[i - 1].trim() === "來自作者") {
+                    // 如果有關鍵字行 + 來自作者行，人名在「來自作者」再往上數第 5 行
+                    targetIndex = i - 1 - 5;
+                } else {
+                    // 如果沒有「來自作者」字樣，直接從關鍵字行往上數第 6 行
+                    targetIndex = i - 6;
                 }
 
-                if (foundName) {
-                    const finalCleanName = foundName.replace(/[『』「」""''\s\.]/g, '').trim();
-                    const isStillNoise = systemWords.some(word => finalCleanName.includes(word));
+                // 確保數過去的行數在合理範圍內
+                if (targetIndex >= 0) {
+                    let rawName = lines[targetIndex];
+
+                    // 清洗抓到的名字，移除可能殘留的 FB 時間標籤(·)與前後空白雜訊
+                    if (rawName.includes('·')) {
+                        rawName = rawName.split('·')[0];
+                    }
                     
-                    // 確保洗乾淨後的人名不是空的，也不是系統詞
-                    if (finalCleanName !== "" && !isStillNoise) {
-                        // 壓縮中英文名字內部可能產生的連續多個空格，只保留標準單空格
-                        const finalFormattedName = foundName.replace(/\s+/g, ' ');
-                        if (!nameList.includes(finalFormattedName)) {
-                            nameList.push(finalFormattedName);
+                    // 徹底洗淨前後空白與特殊換行
+                    const cleanName = rawName.trim();
+
+                    // 確保抓出來的不是空行，才塞入名單
+                    if (cleanName !== "") {
+                        if (!nameList.includes(cleanName)) {
+                            nameList.push(cleanName);
                         }
                     }
                 }
@@ -242,8 +229,8 @@
             return;
         }
 
-        // 最終輸出：過濾掉任何意外產生的空行
-        const resultText = nameList.filter(name => name.trim() !== "").join('\n');
+        // 輸出名單
+        const resultText = nameList.join('\n');
         displayArea.innerText = resultText;
         rawContent = resultText;
         keywordInput.value = ""; 
