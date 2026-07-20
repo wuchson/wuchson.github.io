@@ -176,7 +176,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 獨立回溯提取法（不受任何格式與狀態干擾） ---
+    // --- 獨立回溯提取法（加強人名淨化） ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -188,47 +188,41 @@
         const lines = content.split('\n').map(line => line.trim());
         const nameList = [];
 
-        // 全面清除雜訊用的關鍵字清單
         const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤"];
 
         for (let i = 0; i < lines.length; i++) {
-            // 只要這一行包含你的關鍵字，就啟動獨立回溯
             if (lines[i].includes(keyword)) {
                 let foundName = "";
 
-                // 從這一行開始往上找
                 for (let j = i - 1; j >= 0; j--) {
                     const originalLine = lines[j];
                     
-                    // 把引號、點點、空白、中英文括號全部拿掉來做乾淨的比對
+                    // 清理乾淨用來比對的內容
                     const cleanLine = originalLine.replace(/[『』「」""''\s\.]/g, '').trim();
 
-                    // 檢查這一行是不是我們不要的雜訊
                     const isSystemNoise = systemWords.some(word => cleanLine.includes(word));
                     const isKeywordLine = cleanLine.includes(keyword);
 
-                    // 如果不是空行、不是點點、不是系統字、不包含關鍵字，那就是人名了！
                     if (cleanLine !== "" && cleanLine !== "." && !isSystemNoise && !isKeywordLine) {
-                        
-                        // 處理可能帶有時間戳的情形 (例如: "Jameshy Chang · 14週")
                         if (originalLine.includes('·')) {
-                            foundName = originalLine.split('·')[0].trim();
+                            foundName = originalLine.split('·')[0];
                         } else {
                             foundName = originalLine;
                         }
-                        break; // 抓到最近的有效名字後立刻阻斷
+                        
+                        // 【關鍵修復】在此處立刻將名字前後的空白、換行或點點全部徹底刮掉
+                        foundName = foundName.replace(/^[\s\.\n\r]+|[\s\.\n\r]+$/g, '').trim();
+                        break; 
                     }
                 }
 
-                // 塞入名單前做最後確認
                 if (foundName) {
                     const finalCleanName = foundName.replace(/[『』「」""''\s\.]/g, '').trim();
-                    // 再次確保抓到的不是漏網的系統關鍵字
                     const isStillNoise = systemWords.some(word => finalCleanName.includes(word));
                     
                     if (finalCleanName !== "" && !isStillNoise) {
-                        if (!nameList.includes(foundName.trim())) {
-                            nameList.push(foundName.trim());
+                        if (!nameList.includes(foundName)) {
+                            nameList.push(foundName);
                         }
                     }
                 }
@@ -240,7 +234,8 @@
             return;
         }
 
-        const resultText = nameList.join('\n');
+        // 【二次保險】輸出名單時，確保每行都是絕對乾淨的名字
+        const resultText = nameList.map(name => name.trim()).filter(name => name !== "").join('\n');
         displayArea.innerText = resultText;
         rawContent = resultText;
         keywordInput.value = ""; 
