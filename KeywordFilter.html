@@ -129,7 +129,7 @@
     </div>
     
     <div class="control-group">
-        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：唯森傳統紙)">
+        <input type="text" id="keywordInput" placeholder="輸入關鍵字 (如：我愛科學)">
         <button class="btn extract-btn" onclick="extractNames()">提取名單</button>
         <button class="btn copy-btn" onclick="copyToClipboard()">一鍵複製</button>
         <button class="btn download-btn" onclick="downloadTXT()">下載檔案</button>
@@ -176,7 +176,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 定位回溯 6 行提取法 ---
+    // --- 雙模精準回溯提取法（自動判定有無「來自作者」） ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -185,7 +185,6 @@
         }
 
         const content = rawContent || displayArea.innerText;
-        // 使用原汁原味的每行文本，不做預先過濾
         const lines = content.split('\n');
         const nameList = [];
 
@@ -193,29 +192,29 @@
             if (lines[i].includes(keyword)) {
                 let targetIndex = -1;
 
-                // 判斷關鍵字上一行是不是「來自作者」
+                // 【自動判定機制】
+                // 檢查上一行是不是「來自作者」
                 if (i > 0 && lines[i - 1].trim() === "來自作者") {
-                    // 如果有關鍵字行 + 來自作者行，人名在「來自作者」再往上數第 5 行
-                    targetIndex = i - 1 - 5;
-                } else {
-                    // 如果沒有「來自作者」字樣，直接從關鍵字行往上數第 6 行
+                    // 格式 A：包含「來自作者」-> 人名在關鍵字行往上數第 6 行 (i - 6)
                     targetIndex = i - 6;
+                } else {
+                    // 格式 B：新格式，少了來自作者，中間空 4 行 -> 人名在關鍵字行往上數第 5 行 (i - 5)
+                    targetIndex = i - 5;
                 }
 
-                // 確保數過去的行數在合理範圍內
+                // 確保索引大於等於 0
                 if (targetIndex >= 0) {
                     let rawName = lines[targetIndex];
 
-                    // 清洗抓到的名字，移除可能殘留的 FB 時間標籤(·)與前後空白雜訊
+                    // 處理可能帶有 FB 時間戳的情形 (·)
                     if (rawName.includes('·')) {
                         rawName = rawName.split('·')[0];
                     }
                     
-                    // 徹底洗淨前後空白與特殊換行
                     const cleanName = rawName.trim();
 
-                    // 確保抓出來的不是空行，才塞入名單
-                    if (cleanName !== "") {
+                    // 排除掉不小心抓到「來自作者」或其他系統行，且不能是空行
+                    if (cleanName !== "" && cleanName !== "來自作者" && cleanName !== ".") {
                         if (!nameList.includes(cleanName)) {
                             nameList.push(cleanName);
                         }
@@ -229,7 +228,7 @@
             return;
         }
 
-        // 輸出名單
+        // 輸出純淨名單
         const resultText = nameList.join('\n');
         displayArea.innerText = resultText;
         rawContent = resultText;
