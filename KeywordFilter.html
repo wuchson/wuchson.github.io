@@ -180,7 +180,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 提取邏輯 ---
+    // --- 提取邏輯 (已針對全新臉書複製排版優化) ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -192,15 +192,34 @@
         const lines = content.split('\n').map(line => line.trim());
         const nameList = [];
 
+        // 臉書複製時常見的系統雜訊關鍵字，往上尋找姓名時必須跳過
+        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤"];
+
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes(keyword)) {
                 let foundName = "";
+                
+                // 從關鍵字這一行開始「往上」追溯找人名
                 for (let j = i - 1; j >= 0; j--) {
-                    if (lines[j] !== "") {
-                        foundName = lines[j];
-                        break; 
+                    const currentLine = lines[j];
+                    
+                    // 排除空行、點點、系統字、以及包含關鍵字本身的行
+                    if (currentLine !== "" && 
+                        currentLine !== "." && 
+                        !systemWords.includes(currentLine) && 
+                        !currentLine.includes(keyword)) {
+                        
+                        // 額外防錯：如果複製到「許玉姍 · 14週」，自動切除後面，只保留人名
+                        if (currentLine.includes('·')) {
+                            foundName = currentLine.split('·')[0].trim();
+                        } else {
+                            foundName = currentLine;
+                        }
+                        break; // 抓到最近的人名就立刻停止向上搜尋
                     }
                 }
+                
+                // 確保人名有效，且不重複塞入名單
                 if (foundName && !nameList.includes(foundName)) {
                     nameList.push(foundName);
                 }
@@ -231,7 +250,7 @@
             await navigator.clipboard.writeText(text);
             showToast("已複製到剪貼簿！");
         } catch (err) {
-            // 備用方案 (針對較舊的瀏覽器)
+            // 備用方案
             const textArea = document.createElement("textarea");
             textArea.value = text;
             document.body.appendChild(textArea);
