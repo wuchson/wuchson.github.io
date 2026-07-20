@@ -176,7 +176,7 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 全新架構：區塊切割提取法 ---
+    // --- 獨立回溯提取法（不受任何格式與狀態干擾） ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -188,32 +188,49 @@
         const lines = content.split('\n').map(line => line.trim());
         const nameList = [];
 
-        // 系統雜訊過濾
-        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤", "."];
-
-        let currentName = "";
+        // 全面清除雜訊用的關鍵字清單
+        const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤"];
 
         for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            if (line === "") continue;
+            // 只要這一行包含你的關鍵字，就啟動獨立回溯
+            if (lines[i].includes(keyword)) {
+                let foundName = "";
 
-            // 判斷這一行是不是新的人名區塊開始
-            // 臉書的規律：人名通常後面不包含系統字、不是單純點點，且如果含有「·」代表帶有時間戳
-            const isSystem = systemWords.some(word => line.includes(word));
-            
-            // 如果遇到新名字，就更新目前追蹤的「當前留言者」
-            if (!isSystem && !line.includes(keyword)) {
-                if (line.includes('·')) {
-                    currentName = line.split('·')[0].trim();
-                } else {
-                    currentName = line;
+                // 從這一行開始往上找
+                for (let j = i - 1; j >= 0; j--) {
+                    const originalLine = lines[j];
+                    
+                    // 把引號、點點、空白、中英文括號全部拿掉來做乾淨的比對
+                    const cleanLine = originalLine.replace(/[『』「」""''\s\.]/g, '').trim();
+
+                    // 檢查這一行是不是我們不要的雜訊
+                    const isSystemNoise = systemWords.some(word => cleanLine.includes(word));
+                    const isKeywordLine = cleanLine.includes(keyword);
+
+                    // 如果不是空行、不是點點、不是系統字、不包含關鍵字，那就是人名了！
+                    if (cleanLine !== "" && cleanLine !== "." && !isSystemNoise && !isKeywordLine) {
+                        
+                        // 處理可能帶有時間戳的情形 (例如: "Jameshy Chang · 14週")
+                        if (originalLine.includes('·')) {
+                            foundName = originalLine.split('·')[0].trim();
+                        } else {
+                            foundName = originalLine;
+                        }
+                        break; // 抓到最近的有效名字後立刻阻斷
+                    }
                 }
-            }
 
-            // 只要在當前區塊的任何地方（包含留言行、引號行）偵測到關鍵字
-            if (line.includes(keyword) && currentName) {
-                if (!nameList.includes(currentName) && !systemWords.includes(currentName)) {
-                    nameList.push(currentName);
+                // 塞入名單前做最後確認
+                if (foundName) {
+                    const finalCleanName = foundName.replace(/[『』「」""''\s\.]/g, '').trim();
+                    // 再次確保抓到的不是漏網的系統關鍵字
+                    const isStillNoise = systemWords.some(word => finalCleanName.includes(word));
+                    
+                    if (finalCleanName !== "" && !isStillNoise) {
+                        if (!nameList.includes(foundName.trim())) {
+                            nameList.push(foundName.trim());
+                        }
+                    }
                 }
             }
         }
