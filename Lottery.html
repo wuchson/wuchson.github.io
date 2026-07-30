@@ -14,7 +14,6 @@
             --glass: rgba(255, 255, 255, 0.05);
         }
 
-        /* 各種主題色定義 */
         .theme-blue { --theme-primary: #4CAF50; --theme-secondary: #A5D6A7; --theme-bg-1: #00251a; --theme-bg-2: #000000; }
         .theme-purple { --theme-primary: #9C27B0; --theme-secondary: #E1BEE7; --theme-bg-1: #1a0033; --theme-bg-2: #000000; }
         .theme-red { --theme-primary: #F44336; --theme-secondary: #FFCDD2; --theme-bg-1: #330000; --theme-bg-2: #000000; }
@@ -35,7 +34,7 @@
 
         .container {
             width: 100%;
-            max-width: 500px; /* 手機版寬度優化 */
+            max-width: 500px;
             background: var(--glass);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255,255,255,0.1);
@@ -45,7 +44,6 @@
             box-sizing: border-box;
         }
 
-        /* 顏色按鈕區 */
         .theme-switcher {
             display: flex;
             justify-content: center;
@@ -61,7 +59,6 @@
         }
         .theme-dot.active { border-color: #fff; transform: scale(1.1); }
 
-        /* 輸入與設定區 */
         .config-section {
             display: flex;
             flex-direction: column;
@@ -81,7 +78,6 @@
         }
         textarea { height: 60px; resize: none; }
 
-        /* 視覺顯示區 */
         .display-area {
             text-align: center;
             padding: 10px 0;
@@ -105,7 +101,6 @@
             text-shadow: 0 0 15px var(--theme-primary);
         }
 
-        /* 抽獎按鈕 - 確保不會被切掉 */
         .draw-btn {
             width: 100%;
             padding: 15px;
@@ -121,7 +116,6 @@
         }
         .draw-btn:disabled { filter: grayscale(1); opacity: 0.5; }
 
-        /* 中獎區 */
         .winner-section { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
         .winner-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
         .winner-item {
@@ -174,8 +168,11 @@
                 </div>
             </div>
             <div class="config-group">
-                <span class="label">名單 (一人一行)</span>
-                <textarea id="nameList" placeholder="請輸入或匯入名單..."></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="label">名單 (一人一行)</span>
+                    <span class="label" id="userCount" style="color: rgba(255,255,255,0.6); font-weight: normal;">總人數: 0 人</span>
+                </div>
+                <textarea id="nameList" placeholder="請輸入或匯入名單..." oninput="updateUserCount()"></textarea>
             </div>
         </div>
 
@@ -207,6 +204,11 @@
 
         function updateT(v) { document.getElementById('main-title').innerText = v || "ROYAL DRAW"; }
 
+        function updateUserCount() {
+            const names = document.getElementById('nameList').value.split('\n').filter(n => n.trim());
+            document.getElementById('userCount').innerText = `總人數: ${names.length} 人`;
+        }
+
         function beep(f, d) {
             const o = audio.createOscillator();
             const g = audio.createGain();
@@ -222,6 +224,7 @@
                 const sheet = XLSX.read(ev.target.result, {type:'array'}).Sheets;
                 const data = XLSX.utils.sheet_to_json(sheet[Object.keys(sheet)[0]], {header:1});
                 document.getElementById('nameList').value = data.flat().filter(n => n).join('\n');
+                updateUserCount();
             };
             reader.readAsArrayBuffer(e.target.files[0]);
         });
@@ -249,6 +252,7 @@
                         result.push(names.splice(idx, 1)[0]);
                     }
                     document.getElementById('nameList').value = names.join('\n');
+                    updateUserCount();
                     box.innerText = result.length > 1 ? "恭喜中獎" : result[0];
                     result.forEach(w => {
                         winners.push(w);
@@ -270,6 +274,9 @@
             XLSX.utils.book_append_sheet(wb, ws, "Winners");
             XLSX.writeFile(wb, "中獎名單.xlsx");
         }
+        
+        // 頁面初始化時計算一次
+        updateUserCount();
     </script>
 </body>
 </html>
