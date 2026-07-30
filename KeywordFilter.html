@@ -63,7 +63,7 @@
         .btn:active { transform: translateY(0); }
 
         .extract-btn { background-color: #007bff; }
-        .tool-btn { background-color: #17a2b8; } /* 輔助功能按鈕顏色 */
+        .tool-btn { background-color: #17a2b8; } 
         .copy-btn { background-color: #6f42c1; } 
         .download-btn { background-color: #28a745; }
         .clear-btn { background-color: #ff4d4f; }
@@ -126,7 +126,7 @@
 
     <div class="intro">
         <strong>💡 操作流程：</strong><br>
-        1. 貼上全文 → 2. 可選擇點擊<strong>「刪除[.]」</strong>或<strong>「刪除[空行]」</strong>進行預處理 → 3. 輸入關鍵字並點擊<strong>「提取名單」</strong>。
+        1. 貼上全文 → 2. 可點擊<strong>「刪除[.]」</strong>或<strong>「刪除[空行]」</strong>進行預處理 → 3. 輸入關鍵字並點擊<strong>「提取名單」</strong>。
     </div>
     
     <div class="control-group">
@@ -179,42 +179,51 @@
         displayArea.innerHTML = highlightedText;
     }
 
-    // --- 新增按鈕功能 1：刪除所有點點 ---
+    // --- 修正版：徹底清除所有類型的點號 (含 . ． · •) ---
     function removeDots() {
-        const content = displayArea.innerText;
+        // 先取得目前的純文字內容
+        let content = displayArea.innerText;
         if (!content.trim()) {
             alert("目前沒有內容可以處理！");
             return;
         }
-        // 清除半型 . 與全型 ．
-        const newText = content.replace(/[.．]/g, '');
+
+        // 使用正則表達式汏除半型點 (.)、全型點 (．)、FB 中間點 (·)、項目點 (•)
+        const newText = content.replace(/[.．·•]/g, '');
+        
+        // 強制重置 DOM 內容與緩存
+        displayArea.innerHTML = '';
         displayArea.innerText = newText;
         rawContent = newText;
+
         if (keywordInput.value.trim()) {
             highlight(keywordInput.value.trim());
         }
-        showToast("已刪除所有點點！");
+        showToast("已徹底刪除所有點號！");
     }
 
-    // --- 新增按鈕功能 2：刪除所有空行 ---
+    // --- 刪除所有空行 ---
     function removeEmptyLines() {
         const content = displayArea.innerText;
         if (!content.trim()) {
             alert("目前沒有內容可以處理！");
             return;
         }
-        // 將多重換行與含有空格的空行壓縮為單一換行
+        
         const lines = content.split('\n').map(line => line.trim()).filter(line => line !== "");
         const newText = lines.join('\n');
+        
+        displayArea.innerHTML = '';
         displayArea.innerText = newText;
         rawContent = newText;
+
         if (keywordInput.value.trim()) {
             highlight(keywordInput.value.trim());
         }
         showToast("已刪除所有空行！");
     }
 
-    // --- 提取名單功能（搭配自動淨化邏輯） ---
+    // --- 提取名單功能 ---
     function extractNames() {
         const keyword = keywordInput.value.trim();
         if (!keyword) {
@@ -226,33 +235,26 @@
         const lines = content.split('\n');
         const nameList = [];
 
-        // 排除系統雜訊字清單
         const systemWords = ["來自作者", "回覆", "隱藏", "讚", "分享", "查看更多回覆", "發送訊息", "追蹤"];
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes(keyword)) {
                 let foundName = "";
 
-                // 從關鍵字這行開始往上尋找最近的一行「有效人名」
                 for (let j = i - 1; j >= 0; j--) {
                     let currentLine = lines[j].trim();
+                    const cleanCheck = currentLine.replace(/[.．·•]/g, '').trim();
 
-                    // 清除點點做檢查
-                    const cleanCheck = currentLine.replace(/[.．]/g, '').trim();
-
-                    // 檢查是不是系統字
                     const isSystemNoise = systemWords.some(word => cleanCheck.includes(word));
                     const isKeywordLine = cleanCheck.includes(keyword);
 
-                    // 只要這一行不是空行、不是點點、不是系統雜詞、不包含關鍵字，那就是人名！
                     if (cleanCheck !== "" && !isSystemNoise && !isKeywordLine) {
                         if (currentLine.includes('·')) {
                             foundName = currentLine.split('·')[0];
                         } else {
                             foundName = currentLine;
                         }
-                        // 徹底清洗人名前後的點點與空白
-                        foundName = foundName.replace(/[.．]/g, '').trim();
+                        foundName = foundName.replace(/[.．·•]/g, '').trim();
                         break;
                     }
                 }
@@ -271,6 +273,7 @@
         }
 
         const resultText = nameList.join('\n');
+        displayArea.innerHTML = '';
         displayArea.innerText = resultText;
         rawContent = resultText;
         keywordInput.value = ""; 
