@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>時尚風格抽獎系統</title>
+    <!-- 引入思源宋體，營造極佳的文青書卷感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* 文青白底配色 (Pure White Aesthetic Theme) */
+        :root {
+            /* 預設：暖木質感 (Warm Wood) */
+            --theme-primary: #8C6D53;
+            --theme-secondary: #BFA38E;
+            --theme-bg-body: #FAFAFA;
+            --panel-bg: #FFFFFF;
+            --border-color: #E2D9D2;
+            --input-bg: #F8F6F4;
+            --text-main: #2C2A29;
+            --text-sub: #7A7571;
+            --btn-text: #FFFFFF;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 日系文青主題切換 */
+        .theme-matcha {
+            /* 抹茶淡綠 */
+            --theme-primary: #556B2F; --theme-secondary: #8F9E72;
+            --border-color: #D3DCD0; --input-bg: #F4F6F3;
+        }
+        .theme-indigo {
+            /* 深靛藍 */
+            --theme-primary: #3B4B6B; --theme-secondary: #7484A6;
+            --border-color: #D1D8E3; --input-bg: #F3F5F8;
+        }
+        .theme-sakura {
+            /* 櫻花粉灰 */
+            --theme-primary: #A66B75; --theme-secondary: #D4A3A9;
+            --border-color: #E8D3D6; --input-bg: #FAF4F5;
+        }
+        .theme-gray {
+            /* 極簡極黑 */
+            --theme-primary: #1A1A1A; --theme-secondary: #666666;
+            --border-color: #E0E0E0; --input-bg: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Noto Serif TC', "PingFang TC", "Microsoft JhengHei", serif;
+            background-color: var(--theme-bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: var(--shadow);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        /* 文青切換器 */
+        .theme-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 25px;
+            background: var(--input-bg);
+            padding: 8px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+        }
+        .theme-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.25s ease;
+            opacity: 0.8;
+        }
+        .theme-dot:hover { opacity: 1; transform: scale(1.15); }
+        .theme-dot.active { 
+            opacity: 1;
+            transform: scale(1.25); 
+            border-color: #FFFFFF;
+            box-shadow: 0 0 0 1px var(--theme-primary);
+        }
+
+        /* 配置區域 */
+        .config-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+        .config-group { display: flex; flex-direction: column; gap: 6px; }
+        .label { 
+            color: var(--text-sub); 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            height: 20px;
+            margin: 0;
+        }
+        
+        input, textarea {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.25s ease;
+            box-sizing: border-box;
+            height: 42px;
+            margin: 0;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+            background: #FFFFFF;
+            box-shadow: 0 0 8px rgba(0,0,0,0.03);
+        }
+        textarea { height: 75px; padding: 10px 14px; resize: none; line-height: 1.5; }
+
+        /* 顯示區域 */
+        .display-area {
+            text-align: center;
+            padding: 5px 0;
+            margin-bottom: 20px;
+        }
+        #main-title {
+            color: var(--text-main);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 18px 0;
+            letter-spacing: 3px;
+            word-break: break-all;
+        }
+
+        #lucky-box {
+            font-size: 2.6rem;
+            font-weight: 600;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--input-bg);
+            border-radius: 14px;
+            margin-bottom: 22px;
+            color: var(--theme-primary);
+            border: 1px solid var(--border-color);
+            letter-spacing: 2px;
+            padding: 0 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        /* 抽獎按鈕 */
+        .draw-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: inherit;
+            border-radius: 30px;
+            border: none;
+            background: var(--theme-primary);
+            color: var(--btn-text);
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+            margin-bottom: 22px;
+            transition: all 0.25s ease;
+            letter-spacing: 2px;
+        }
+        .draw-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .draw-btn:active { transform: translateY(1px); }
+        .draw-btn:disabled { 
+            background: #E0E0E0; 
+            box-shadow: none; 
+            color: #A0A0A0; 
+            cursor: not-allowed; 
+            transform: none;
+        }
+
+        /* 中獎名單區域 */
+        .winner-section { 
+            border-top: 1px solid var(--border-color); 
+            padding-top: 20px; 
+        }
+        .winner-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+        .winner-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--theme-primary);
+            font-weight: 600;
+            letter-spacing: 1px;
+            animation: softFade 0.4s ease-out;
+        }
+
+        @keyframes softFade { 
+            0% { opacity: 0; transform: translateY(8px); } 
+            100% { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* 次要按鈕與對齊修正 */
+        .sub-btn {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 42px; /* 與 input 對齊 */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .sub-btn:hover {
+            border-color: var(--theme-primary);
+            color: var(--theme-primary);
+            background: var(--input-bg);
+        }
+    </style>
+</head>
+<body class="theme-default">
+
+    <div class="container">
+        <!-- 色系切換按鈕 -->
+        <div class="theme-switcher">
+            <div class="theme-dot active" style="background: #8C6D53;" onclick="changeTheme('', this)"></div>
+            <div class="theme-dot" style="background: #556B2F;" onclick="changeTheme('matcha', this)"></div>
+            <div class="theme-dot" style="background: #3B4B6B;" onclick="changeTheme('indigo', this)"></div>
+            <div class="theme-dot" style="background: #A66B75;" onclick="changeTheme('sakura', this)"></div>
+            <div class="theme-dot" style="background: #1A1A1A;" onclick="changeTheme('gray', this)"></div>
+        </div>
+
+        <div class="config-section">
+            <div class="config-group">
+                <span class="label">活動主題</span>
+                <input type="text" id="tInput" value="幸運抽獎活動" placeholder="請輸入活動名稱..." oninput="updateT(this.value)">
+            </div>
+            
+            <div style="display:flex; gap:12px; align-items: flex-start;">
+                <div class="config-group" style="flex:1;">
+                    <span class="label">抽取人數</span>
+                    <input type="number" id="nCount" value="1" min="1" style="text-align: center;">
+                </div>
+                <div class="config-group" style="flex:1;">
+                    <span class="label">匯入名單</span>
+                    <button class="sub-btn" style="width: 100%;" onclick="document.getElementById('fUp').click()">選擇 Excel 檔</button>
+                    <input type="file" id="fUp" accept=".xlsx, .xls" style="display:none">
+                </div>
+            </div>
+
+            <div class="config-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="label">參與者名單 (一人一行)</span>
+                    <span class="label" id="userCount" style="color: var(--text-sub); font-weight: normal; font-size: 0.75rem;">總人數：0 人</span>
+                </div>
+                <textarea id="nameList" placeholder="請輸入或匯入名單..." oninput="updateUserCount()"></textarea>
+            </div>
+        </div>
+
+        <div class="display-area">
+            <h1 id="main-title">幸運抽獎活動</h1>
+            <div id="lucky-box">準備就緒</div>
+            <button id="drawBtn" class="draw-btn" onclick="startDraw()">開始抽獎</button>
+        </div>
+
+        <div class="winner-section">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="label" style="color: var(--text-main); font-size: 0.85rem; font-weight: 700;">幸運中獎名單</span>
+                <button class="sub-btn" style="height: 32px; font-size: 0.75rem;" onclick="exportExcel()">匯出 Excel</button>
+            </div>
+            <div id="wList" class="winner-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let winners = [];
+        let drawing = false;
+        const audio = new (window.AudioContext || window.webkitAudioContext)();
+
+        function changeTheme(cls, el) {
+            document.body.className = cls ? 'theme-' + cls : '';
+            document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function updateT(v) { 
+            document.getElementById('main-title').innerText = v.trim() || "幸運抽獎活動"; 
+        }
+
+        function updateUserCount() {
+            const names = document.getElementById('nameList').value.split('\n').filter(n => n.trim());
+            document.getElementById('userCount').innerText = `總人數：${names.length} 人`;
+        }
+
+        function beep(f, d) {
+            const o = audio.createOscillator();
+            const g = audio.createGain();
+            o.type = 'sine';
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0.03, audio.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + d);
+            o.connect(g); g.connect(audio.destination);
+            o.start(); o.stop(audio.currentTime + d);
+        }
+
+        document.getElementById('fUp').addEventListener('change', (e) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const sheet = XLSX.read(ev.target.result, {type:'array'}).Sheets;
+                const data = XLSX.utils.sheet_to_json(sheet[Object.keys(sheet)[0]], {header:1});
+                document.getElementById('nameList').value = data.flat().filter(n => n).join('\n');
+                updateUserCount();
+            };
+            reader.readAsArrayBuffer(e.target.files[0]);
+        });
+
+        function startDraw() {
+            if(drawing) return;
+            const names = document.getElementById('nameList').value.split('\n').filter(n => n.trim());
+            const num = parseInt(document.getElementById('nCount').value);
+            
+            if(names.length === 0) return alert("請先輸入或匯入名單喔！");
+            if(names.length < num) return alert("參與人數少於預計抽取人數！");
+
+            drawing = true;
+            const btn = document.getElementById('drawBtn');
+            const box = document.getElementById('lucky-box');
+            btn.disabled = true;
+
+            let start = Date.now();
+            const timer = setInterval(() => {
+                box.innerText = names[Math.floor(Math.random()*names.length)];
+                beep(523, 0.05); 
+                if(Date.now() - start > 1500) {
+                    clearInterval(timer);
+                    let result = [];
+                    for(let i=0; i<num; i++) {
+                        if(names.length === 0) break;
+                        const idx = Math.floor(Math.random()*names.length);
+                        result.push(names.splice(idx, 1)[0]);
+                    }
+                    document.getElementById('nameList').value = names.join('\n');
+                    updateUserCount();
+                    
+                    box.innerText = result.length > 1 ? "恭喜中獎" : result[0];
+                    
+                    result.forEach(w => {
+                        winners.push(w);
+                        const item = document.createElement('div');
+                        item.className = 'winner-item';
+                        item.innerText = w;
+                        document.getElementById('wList').prepend(item);
+                    });
+                    
+                    beep(880, 0.35);
+                    drawing = false; 
+                    btn.disabled = false;
+                }
+            }, 65);
+        }
+
+        function exportExcel() {
+            if(!winners.length) return alert("目前尚無中獎名單！");
+            const ws = XLSX.utils.json_to_sheet(winners.map(w => ({ "幸運中獎者": w })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "中獎名單");
+            XLSX.writeFile(wb, "中獎名單.xlsx");
+        }
+        
+        updateT(document.getElementById('tInput').value);
+        updateUserCount();
+    </script>
+</body>
+</html>
