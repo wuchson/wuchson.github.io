@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML 檔案產生器</title>
+  <style>
+    :root {
+      --bg-color: #F8F6F0;
+      --card-bg: #FFFFFF;
+      --primary-color: #5A6B5C;
+      --text-color: #2D312E;
+      --border-color: #EAE6DF;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px 16px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin-top: 0;
+      margin-bottom: 16px;
+      text-align: center;
+      color: var(--primary-color);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background-color: #FAF9F6;
+      outline: none;
+    }
+
+    textarea {
+      height: 220px;
+      font-family: monospace;
+      resize: vertical;
+    }
+
+    .btn-download {
+      width: 100%;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 25px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(90, 107, 92, 0.2);
+    }
+
+    .btn-download:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>HTML 檔案產生器</h1>
+  
+  <div class="form-group">
+    <label for="filename">設定檔名：</label>
+    <input type="text" id="filename" value="健康手札.html">
+  </div>
+
+  <div class="form-group">
+    <label for="htmlCode">貼上 HTML 程式碼：</label>
+    <textarea id="htmlCode" placeholder="請在此處貼上完整的 HTML 程式碼..."></textarea>
+  </div>
+
+  <button type="button" class="btn-download" onclick="generateFile()">產生並下載 HTML 檔案</button>
+</div>
+
+<script>
+  function generateFile() {
+    const code = document.getElementById('htmlCode').value;
+    let fileName = document.getElementById('filename').value.trim();
+
+    if (!code.trim()) {
+      alert('請先貼上 HTML 程式碼！');
+      return;
+    }
+
+    if (!fileName.endsWith('.html')) {
+      fileName += '.html';
+    }
+
+    const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+
+</body>
+</html>
