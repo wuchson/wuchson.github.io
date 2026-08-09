@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日常健康手札</title>
+  <!-- 引入思源宋體與英文字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- 引入截圖套件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      /* 文青時尚色調：莫蘭迪與燕麥大地色系 */
+      --bg-color: #F8F6F0;           /* 暖燕麥色 */
+      --card-bg: #FFFFFF;
+      --text-main: #2D312E;          /* 靜謐深灰 */
+      --text-muted: #8C8C8C;         /* 柔和灰 */
+      --accent-primary: #5A6B5C;     /* 鼠尾草綠 */
+      --accent-light: #EBF0EC;
+      --accent-brown: #8C705F;       /* 溫暖駱駝棕 */
+      --danger-color: #C85A54;       /* 莫蘭迪磚紅 */
+      --border-color: #EAE6DF;       /* 極淺線條 */
+      --input-bg: #FAF9F6;
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px; /* 限制電腦版寬度，維持手札精緻感 */
+      padding: 20px 16px 40px 16px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin: 12px 0 24px 0;
+    }
+
+    h1 {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      color: var(--text-main);
+      font-size: 1.5rem;
+      margin: 0 0 6px 0;
+    }
+
+    .subtitle {
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 22px 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .card-title {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: 0.05em;
+      margin: 0 0 18px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      background-color: var(--accent-primary);
+      border-radius: 2px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.25s ease;
+      -webkit-appearance: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent-primary);
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(90, 107, 92, 0.1);
+    }
+
+    .person-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .person-row select {
+      flex: 1;
+    }
+
+    .btn-add-person {
+      background-color: var(--accent-light);
+      color: var(--accent-primary);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .btn-add-person:active {
+      background-color: #dce5df;
+    }
+
+    .btn-submit {
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      box-shadow: 0 6px 16px rgba(90, 107, 92, 0.2);
+      transition: all 0.25s ease;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-export {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-main);
+      background-color: #FAF9F6;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-export:active {
+      background-color: #EAE6DF;
+    }
+
+    /* 歷史紀錄卡片細節 */
+    .record-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .record-item {
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      background-color: #FFFFFF;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.015);
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px var(--border-color);
+    }
+
+    .name-badge {
+      background-color: var(--accent-light);
+      color: var(--accent-primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .temp-tag {
+      font-size: 1.05rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .temp-high {
+      color: var(--danger-color);
+    }
+
+    .record-time {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .record-body {
+      font-size: 0.88rem;
+      color: #4A4A4A;
+      line-height: 1.6;
+    }
+
+    .record-body div {
+      margin-bottom: 2px;
+    }
+
+    .btn-delete {
+      background: none;
+      color: var(--text-muted);
+      border: 1px solid #EAEAEA;
+      border-radius: 12px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 10px;
+      float: right;
+      transition: all 0.2s ease;
+    }
+
+    .btn-delete:hover, .btn-delete:active {
+      color: var(--danger-color);
+      border-color: var(--danger-color);
+      background-color: #FFF5F5;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 28px 0;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>日常健康手札</h1>
+    <div class="subtitle">Wellness Journal</div>
+  </header>
+
+  <!-- 新增紀錄表單 -->
+  <div class="card">
+    <div class="card-title">新增健康紀錄</div>
+    <form id="recordForm">
+      
+      <div class="form-group">
+        <label for="personSelect">記錄對象</label>
+        <div class="person-row">
+          <select id="personSelect" required></select>
+          <button type="button" class="btn-add-person" id="btnAddPerson">＋ 成員</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="datetime">日期與時間</label>
+        <input type="datetime-local" id="datetime" required>
+      </div>
+
+      <div class="form-group">
+        <label for="temperature">體溫 (°C)</label>
+        <input type="number" id="temperature" step="0.1" placeholder="36.5" required>
+      </div>
+
+      <div class="form-group">
+        <label for="symptoms">主要症狀</label>
+        <input type="text" id="symptoms" placeholder="喉嚨痛、發燒..." required>
+      </div>
+
+      <div class="form-group">
+        <label for="medication">服用藥物</label>
+        <input type="text" id="medication" placeholder="退燒藥（選填）">
+      </div>
+
+      <div class="form-group">
+        <label for="notes">備註 / 醫師指示</label>
+        <textarea id="notes" rows="2" placeholder="紀錄其他身體狀態..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">儲存紀錄</button>
+    </form>
+  </div>
+
+  <!-- 歷史紀錄與匯出/匯入 -->
+  <div class="card" id="exportArea">
+    <div class="filter-bar">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="card-title" style="margin: 0;">歷史紀錄</div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <select id="filterPerson" style="padding: 6px 10px; font-size: 0.8rem; width: auto; border-radius: 12px;">
+            <option value="ALL">所有人</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 功能按鈕區 -->
+      <div class="action-buttons" data-html2canvas-ignore="true">
+        <button type="button" class="btn-export" id="btnExportExcel">📊 匯出 Excel</button>
+        <button type="button" class="btn-export" id="btnExportImage">🖼️ 轉出圖片</button>
+        <button type="button" class="btn-export" id="btnExportJSON">💾 備份資料</button>
+        <button type="button" class="btn-export" onclick="document.getElementById('fileImport').click()">📥 匯入資料</button>
+        <input type="file" id="fileImport" accept=".json" style="display: none;">
+      </div>
+    </div>
+
+    <div id="recordList" class="record-list"></div>
+    <div id="emptyMessage" class="empty-msg">目前尚無紀錄</div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initTime();
+    initPeople();
+    renderList();
+  });
+
+  function initTime() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('datetime').value = now.toISOString().slice(0, 16);
+  }
+
+  function getStoredData(key, defaultValue) {
+    return JSON.parse(localStorage.getItem(key)) || defaultValue;
+  }
+
+  function saveData(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function initPeople() {
+    let people = getStoredData('illness_people', ['爸爸', '媽媽', '小孩']);
+    updatePersonSelects(people);
+  }
+
+  function updatePersonSelects(people) {
+    const personSelect = document.getElementById('personSelect');
+    const filterPerson = document.getElementById('filterPerson');
+    const currentFilter = filterPerson.value;
+
+    personSelect.innerHTML = '';
+    filterPerson.innerHTML = '<option value="ALL">所有人</option>';
+
+    people.forEach(name => {
+      personSelect.innerHTML += `<option value="${name}">${name}</option>`;
+      filterPerson.innerHTML += `<option value="${name}">${name}</option>`;
+    });
+
+    filterPerson.value = people.includes(currentFilter) || currentFilter === 'ALL' ? currentFilter : 'ALL';
+  }
+
+  document.getElementById('btnAddPerson').addEventListener('click', () => {
+    const newName = prompt('請輸入新成員姓名：');
+    if (newName && newName.trim() !== '') {
+      let people = getStoredData('illness_people', ['爸爸', '媽媽', '小孩']);
+      const trimmedName = newName.trim();
+      
+      if (!people.includes(trimmedName)) {
+        people.push(trimmedName);
+        saveData('illness_people', people);
+        updatePersonSelects(people);
+        document.getElementById('personSelect').value = trimmedName;
+      } else {
+        alert('該成員姓名已存在！');
+      }
+    }
+  });
+
+  document.getElementById('recordForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // 收起手機鍵盤，防止頁面高度鎖死
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    const record = {
+      id: Date.now(),
+      person: document.getElementById('personSelect').value,
+      datetime: document.getElementById('datetime').value,
+      temperature: parseFloat(document.getElementById('temperature').value).toFixed(1),
+      symptoms: document.getElementById('symptoms').value,
+      medication: document.getElementById('medication').value || '-',
+      notes: document.getElementById('notes').value || '-'
+    };
+
+    const records = getStoredData('illness_records', []);
+    records.unshift(record);
+    saveData('illness_records', records);
+    
+    renderList();
+    
+    const selectedPerson = document.getElementById('personSelect').value;
+    document.getElementById('recordForm').reset();
+    document.getElementById('personSelect').value = selectedPerson;
+    initTime();
+
+    // 平滑捲動至頁面頂部
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  });
+
+  document.getElementById('filterPerson').addEventListener('change', () => {
+    renderList();
+  });
+
+  function deleteRecord(id) {
+    if (confirm('確定要刪除這筆紀錄嗎？')) {
+      let records = getStoredData('illness_records', []);
+      records = records.filter(r => r.id !== id);
+      saveData('illness_records', records);
+      renderList();
+    }
+  }
+
+  function getFilteredRecords() {
+    const records = getStoredData('illness_records', []);
+    const filterValue = document.getElementById('filterPerson').value;
+    return filterValue === 'ALL' 
+      ? records 
+      : records.filter(r => r.person === filterValue);
+  }
+
+  function renderList() {
+    const filteredRecords = getFilteredRecords();
+    const recordList = document.getElementById('recordList');
+    const emptyMessage = document.getElementById('emptyMessage');
+
+    recordList.innerHTML = '';
+
+    if (filteredRecords.length === 0) {
+      emptyMessage.style.display = 'block';
+      return;
+    }
+
+    emptyMessage.style.display = 'none';
+
+    filteredRecords.forEach(r => {
+      const isHighTemp = parseFloat(r.temperature) >= 37.5;
+      
+      const formattedDate = new Date(r.datetime).toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const item = document.createElement('div');
+      item.className = 'record-item';
+      item.innerHTML = `
+        <div class="record-header">
+          <span class="name-badge">${escapeHtml(r.person)}</span>
+          <span class="temp-tag ${isHighTemp ? 'temp-high' : ''}">${r.temperature} °C</span>
+        </div>
+        <div class="record-time">🕒 ${formattedDate}</div>
+        <div class="record-body">
+          <div><strong>症狀：</strong>${escapeHtml(r.symptoms)}</div>
+          <div><strong>藥物：</strong>${escapeHtml(r.medication)}</div>
+          <div><strong>備註：</strong>${escapeHtml(r.notes)}</div>
+        </div>
+        <button class="btn-delete" data-html2canvas-ignore="true" onclick="deleteRecord(${r.id})">刪除</button>
+        <div style="clear:both;"></div>
+      `;
+      recordList.appendChild(item);
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+  }
+
+  // 1. 匯出 Excel (CSV)
+  document.getElementById('btnExportExcel').addEventListener('click', () => {
+    const records = getFilteredRecords();
+    if (records.length === 0) {
+      alert('目前沒有紀錄可匯出！');
+      return;
+    }
+
+    let csvContent = "\uFEFF";
+    csvContent += "成員,日期時間,體溫(°C),主要症狀,服用藥物,備註\n";
+
+    records.forEach(r => {
+      const formattedDate = new Date(r.datetime).toLocaleString('zh-TW');
+      const row = [
+        `"${r.person}"`,
+        `"${formattedDate}"`,
+        `"${r.temperature}"`,
+        `"${r.symptoms.replace(/"/g, '""')}"`,
+        `"${r.medication.replace(/"/g, '""')}"`,
+        `"${r.notes.replace(/"/g, '""')}"`
+      ].join(",");
+      csvContent += row + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    const filterPerson = document.getElementById('filterPerson').value;
+    const filename = `健康紀錄_${filterPerson}_${new Date().toISOString().slice(0,10)}.csv`;
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  // 2. 轉出圖片 (PNG)
+  document.getElementById('btnExportImage').addEventListener('click', () => {
+    const records = getFilteredRecords();
+    if (records.length === 0) {
+      alert('目前沒有紀錄可轉出圖片！');
+      return;
+    }
+
+    const exportArea = document.getElementById('exportArea');
+
+    html2canvas(exportArea, {
+      scale: 2,
+      backgroundColor: '#F8F6F0'
+    }).then(canvas => {
+      const link = document.createElement('a');
+      const filterPerson = document.getElementById('filterPerson').value;
+      const filename = `健康紀錄卡片_${filterPerson}_${new Date().toISOString().slice(0,10)}.png`;
+      
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  });
+
+  // 3. 匯出完整 JSON 備份檔
+  document.getElementById('btnExportJSON').addEventListener('click', () => {
+    const data = {
+      people: getStoredData('illness_people', []),
+      records: getStoredData('illness_records', [])
+    };
+
+    if (data.records.length === 0 && data.people.length === 0) {
+      alert('目前沒有任何資料可供備份！');
+      return;
+    }
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `健康紀錄備份_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  // 4. 匯入 JSON 備份檔
+  document.getElementById('fileImport').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target.result);
+
+        if (!importedData.records || !importedData.people) {
+          throw new Error('格式不正確');
+        }
+
+        if (confirm('匯入備份將會整合現有的紀錄，確定要繼續嗎？')) {
+          let currentPeople = getStoredData('illness_people', []);
+          const mergedPeople = Array.from(new Set([...currentPeople, ...importedData.people]));
+          saveData('illness_people', mergedPeople);
+
+          let currentRecords = getStoredData('illness_records', []);
+          const recordMap = new Map();
+          [...importedData.records, ...currentRecords].forEach(r => recordMap.set(r.id, r));
+          const mergedRecords = Array.from(recordMap.values()).sort((a, b) => b.id - a.id);
+          saveData('illness_records', mergedRecords);
+
+          initPeople();
+          renderList();
+          alert('資料匯入成功！');
+        }
+      } catch (err) {
+        alert('匯入失敗：請確認選擇的是有效的健康紀錄備份檔 (.json)。');
+      }
+      e.target.value = '';
+    };
+
+    reader.readAsText(file);
+  });
+</script>
+
+</body>
+</html>
