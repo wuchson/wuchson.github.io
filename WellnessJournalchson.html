@@ -154,10 +154,6 @@
       transition: all 0.2s ease;
     }
 
-    .btn-add-person:active {
-      background-color: #dce5df;
-    }
-
     .btn-submit {
       background-color: var(--accent-primary);
       color: white;
@@ -180,15 +176,41 @@
       box-shadow: none;
     }
 
-    .btn-submit:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-
     .filter-bar {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 10px;
       margin-bottom: 16px;
+      background-color: var(--input-bg);
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .filter-row select, .filter-row input {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+      background-color: #FFFFFF;
+    }
+
+    .btn-clear-date {
+      background-color: var(--accent-light);
+      color: var(--accent-primary);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
     }
 
     .action-buttons {
@@ -196,6 +218,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 8px;
       width: 100%;
+      margin-top: 6px;
     }
 
     .btn-export {
@@ -205,17 +228,13 @@
       font-size: 0.8rem;
       font-weight: 500;
       color: var(--text-main);
-      background-color: #FAF9F6;
+      background-color: #FFFFFF;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
       transition: all 0.2s ease;
-    }
-
-    .btn-export:active {
-      background-color: #EAE6DF;
     }
 
     .record-list {
@@ -358,18 +377,25 @@
   </div>
 
   <div class="card" id="exportArea">
-    <div class="filter-bar">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div class="card-title" style="margin: 0;">歷史紀錄</div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <select id="filterPerson" style="padding: 6px 10px; font-size: 0.8rem; width: auto; border-radius: 12px;">
-            <option value="ALL">所有人</option>
-          </select>
-        </div>
+    <div class="card-title">歷史紀錄</div>
+
+    <!-- 搜尋與篩選列 -->
+    <div class="filter-bar" data-html2canvas-ignore="true">
+      <div class="filter-row">
+        <label style="margin: 0; white-space: nowrap;">👤 對象：</label>
+        <select id="filterPerson">
+          <option value="ALL">所有人</option>
+        </select>
       </div>
 
-      <div class="action-buttons" data-html2canvas-ignore="true">
-        <button type="button" class="btn-export" id="btnExportExcel">📊 匯出 Excel</button>
+      <div class="filter-row">
+        <label style="margin: 0; white-space: nowrap;">📅 日期：</label>
+        <input type="date" id="filterDate">
+        <button type="button" class="btn-clear-date" id="btnClearDate">顯示全部日期</button>
+      </div>
+
+      <div class="action-buttons">
+        <button type="button" class="btn-export" id="btnExportExcel">📊 匯出 CSV</button>
         <button type="button" class="btn-export" id="btnExportImage">🖼️ 轉出圖片</button>
         <button type="button" class="btn-export" id="btnExportJSON">💾 備份資料</button>
         <button type="button" class="btn-export" onclick="document.getElementById('fileImport').click()">📥 匯入資料</button>
@@ -378,7 +404,7 @@
     </div>
 
     <div id="recordList" class="record-list"></div>
-    <div id="emptyMessage" class="empty-msg">目前尚無紀錄</div>
+    <div id="emptyMessage" class="empty-msg">目前尚無符合條件的紀錄</div>
   </div>
 </div>
 
@@ -446,7 +472,7 @@
     }
   });
 
-  // ======================= 1. 新增同步 =======================
+  // 新增紀錄
   document.getElementById('recordForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -496,9 +522,15 @@
     setTimeout(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100);
   });
 
+  // 監聽搜尋條件改變
   document.getElementById('filterPerson').addEventListener('change', () => { renderList(); });
+  document.getElementById('filterDate').addEventListener('change', () => { renderList(); });
+  document.getElementById('btnClearDate').addEventListener('click', () => {
+    document.getElementById('filterDate').value = '';
+    renderList();
+  });
 
-  // ======================= 2. 刪除同步 =======================
+  // 刪除紀錄（同步）
   async function deleteRecord(id) {
     if (confirm('確定要刪除這筆紀錄嗎？（將同步刪除本地與 Google 雲端資料）')) {
       let records = getStoredData('illness_records', []);
@@ -518,10 +550,24 @@
     }
   }
 
+  // 多重條件過濾（對象 + 年/月/日）
   function getFilteredRecords() {
     const records = getStoredData('illness_records', []);
-    const filterValue = document.getElementById('filterPerson').value;
-    return filterValue === 'ALL' ? records : records.filter(r => r.person === filterValue);
+    const filterPerson = document.getElementById('filterPerson').value;
+    const filterDate = document.getElementById('filterDate').value; // 格式 YYYY-MM-DD
+
+    return records.filter(r => {
+      // 1. 比對人員
+      const matchPerson = (filterPerson === 'ALL' || r.person === filterPerson);
+      
+      // 2. 比對日期 (r.datetime 格式為 YYYY-MM-DDTHH:mm)
+      let matchDate = true;
+      if (filterDate) {
+        matchDate = r.datetime.startsWith(filterDate);
+      }
+
+      return matchPerson && matchDate;
+    });
   }
 
   function renderList() {
@@ -570,7 +616,7 @@
 
   document.getElementById('btnExportExcel').addEventListener('click', () => {
     const records = getFilteredRecords();
-    if (records.length === 0) return alert('目前沒有紀錄可匯出！');
+    if (records.length === 0) return alert('目前條件下沒有紀錄可匯出！');
 
     let csvContent = "\uFEFF成員,日期時間,體溫(°C),主要症狀,服用藥物,備註\n";
     records.forEach(r => {
@@ -588,7 +634,7 @@
 
   document.getElementById('btnExportImage').addEventListener('click', () => {
     const records = getFilteredRecords();
-    if (records.length === 0) return alert('目前沒有紀錄可轉出圖片！');
+    if (records.length === 0) return alert('目前條件下沒有紀錄可轉出圖片！');
     html2canvas(document.getElementById('exportArea'), { scale: 2, backgroundColor: '#F8F6F0' }).then(canvas => {
       const link = document.createElement('a');
       link.download = `健康紀錄卡片_${document.getElementById('filterPerson').value}_${new Date().toISOString().slice(0,10)}.png`;
@@ -606,7 +652,6 @@
     link.click();
   });
 
-  // ======================= 3. 匯入同步 =======================
   document.getElementById('fileImport').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
