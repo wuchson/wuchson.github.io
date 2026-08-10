@@ -391,8 +391,8 @@
 </div>
 
 <script>
-  // 請在此處貼上您從 Google Apps Script 取得的部署 URL
-  const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxosdc2BNTWlBf_hT7QE3iTJrvMUWMaroItNQRj5WfFslYSLGaN5oqjHa3anFj4RjWP/exec";
+  // 請在此處替換您從 Google Apps Script 部署取得的 URL
+  const GOOGLE_APPS_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
   document.addEventListener('DOMContentLoaded', () => {
     initTime();
@@ -452,6 +452,7 @@
     }
   });
 
+  // 新增紀錄（單筆同步至雲端）
   document.getElementById('recordForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -474,19 +475,19 @@
       notes: document.getElementById('notes').value || '-'
     };
 
-    // 1. 先儲存至本地 localStorage
+    // 1. 本地儲存
     const records = getStoredData('illness_records', []);
     records.unshift(record);
     saveData('illness_records', records);
     
     renderList();
     
-    // 2. 同步資料至 Google 雲端 (Google Sheets)
+    // 2. 單筆上傳至 Google Sheets
     if (GOOGLE_APPS_SCRIPT_URL && GOOGLE_APPS_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
       try {
         await fetch(GOOGLE_APPS_SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors', // 避開 Apps Script 跨域限制
+          mode: 'no-cors',
           headers: {
             'Content-Type': 'application/json'
           },
@@ -506,7 +507,7 @@
     document.getElementById('personSelect').value = selectedPerson;
     initTime();
 
-    // 平滑捲動至頁面頂部
+    // 平滑捲動至頂部
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
@@ -670,13 +671,13 @@
     document.body.removeChild(link);
   });
 
-  // 4. 匯入 JSON 備份檔
+  // 4. 匯入 JSON 備份檔 (整合本地 + 批量同步至 Google 雲端)
   document.getElementById('fileImport').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const importedData = JSON.parse(event.target.result);
 
@@ -684,11 +685,13 @@
           throw new Error('格式不正確');
         }
 
-        if (confirm('匯入備份將會整合現有的紀錄，確定要繼續嗎？')) {
+        if (confirm('匯入備份將會整合現有的紀錄，並同步上傳至 Google 雲端，確定要繼續嗎？')) {
+          // A. 整合人員名單
           let currentPeople = getStoredData('illness_people', []);
           const mergedPeople = Array.from(new Set([...currentPeople, ...importedData.people]));
           saveData('illness_people', mergedPeople);
 
+          // B. 整合紀錄資料
           let currentRecords = getStoredData('illness_records', []);
           const recordMap = new Map();
           [...importedData.records, ...currentRecords].forEach(r => recordMap.set(r.id, r));
@@ -697,7 +700,26 @@
 
           initPeople();
           renderList();
-          alert('資料匯入成功！');
+
+          // C. 批量同步至 Google Sheets
+          if (GOOGLE_APPS_SCRIPT_URL && GOOGLE_APPS_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+            try {
+              await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(importedData.records)
+              });
+              alert('資料匯入成功，並已成功同步至 Google 雲端！');
+            } catch (cloudErr) {
+              console.error("同步至 Google 雲端失敗：", cloudErr);
+              alert('資料已匯入至本地，但同步至 Google 雲端時失敗。');
+            }
+          } else {
+            alert('資料匯入成功（已存入本地儲存區）！');
+          }
         }
       } catch (err) {
         alert('匯入失敗：請確認選擇的是有效的健康紀錄備份檔 (.json)。');
