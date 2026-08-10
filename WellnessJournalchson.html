@@ -4,24 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>日常健康手札</title>
-  <!-- 引入思源宋體與英文字體 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <!-- 引入截圖套件 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
-      /* 文青時尚色調：莫蘭迪與燕麥大地色系 */
-      --bg-color: #F8F6F0;           /* 暖燕麥色 */
+      --bg-color: #F8F6F0;
       --card-bg: #FFFFFF;
-      --text-main: #2D312E;          /* 靜謐深灰 */
-      --text-muted: #8C8C8C;         /* 柔和灰 */
-      --accent-primary: #5A6B5C;     /* 鼠尾草綠 */
+      --text-main: #2D312E;
+      --text-muted: #8C8C8C;
+      --accent-primary: #5A6B5C;
       --accent-light: #EBF0EC;
-      --accent-brown: #8C705F;       /* 溫暖駱駝棕 */
-      --danger-color: #C85A54;       /* 莫蘭迪磚紅 */
-      --border-color: #EAE6DF;       /* 極淺線條 */
+      --accent-brown: #8C705F;
+      --danger-color: #C85A54;
+      --border-color: #EAE6DF;
       --input-bg: #FAF9F6;
       --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.03);
     }
@@ -43,7 +40,7 @@
 
     .container {
       width: 100%;
-      max-width: 500px; /* 限制電腦版寬度，維持手札精緻感 */
+      max-width: 500px;
       padding: 20px 16px 40px 16px;
       margin: 0 auto;
     }
@@ -221,7 +218,6 @@
       background-color: #EAE6DF;
     }
 
-    /* 歷史紀錄卡片細節 */
     .record-list {
       display: flex;
       flex-direction: column;
@@ -321,11 +317,9 @@
     <div class="subtitle">Wellness Journal</div>
   </header>
 
-  <!-- 新增紀錄表單 -->
   <div class="card">
     <div class="card-title">新增健康紀錄</div>
     <form id="recordForm">
-      
       <div class="form-group">
         <label for="personSelect">記錄對象</label>
         <div class="person-row">
@@ -363,7 +357,6 @@
     </form>
   </div>
 
-  <!-- 歷史紀錄與匯出/匯入 -->
   <div class="card" id="exportArea">
     <div class="filter-bar">
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -375,7 +368,6 @@
         </div>
       </div>
 
-      <!-- 功能按鈕區 -->
       <div class="action-buttons" data-html2canvas-ignore="true">
         <button type="button" class="btn-export" id="btnExportExcel">📊 匯出 Excel</button>
         <button type="button" class="btn-export" id="btnExportImage">🖼️ 轉出圖片</button>
@@ -391,7 +383,9 @@
 </div>
 
 <script>
-  // 請在此處替換您從 Google Apps Script 部署取得的 URL
+  // =========================================================
+  // 替換此 URL 為您的 Google Apps Script「網頁應用程式」網址
+  // =========================================================
   const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxosdc2BNTWlBf_hT7QE3iTJrvMUWMaroItNQRj5WfFslYSLGaN5oqjHa3anFj4RjWP/exec";
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -452,7 +446,7 @@
     }
   });
 
-  // 新增紀錄（單筆同步至雲端）
+  // ======================= 1. 新增同步 =======================
   document.getElementById('recordForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -460,10 +454,7 @@
     btnSubmit.disabled = true;
     btnSubmit.innerText = "同步中...";
 
-    // 收起手機鍵盤
-    if (document.activeElement) {
-      document.activeElement.blur();
-    }
+    if (document.activeElement) document.activeElement.blur();
 
     const record = {
       id: Date.now(),
@@ -475,22 +466,17 @@
       notes: document.getElementById('notes').value || '-'
     };
 
-    // 1. 本地儲存
     const records = getStoredData('illness_records', []);
     records.unshift(record);
     saveData('illness_records', records);
-    
     renderList();
     
-    // 2. 單筆上傳至 Google Sheets
     if (GOOGLE_APPS_SCRIPT_URL && GOOGLE_APPS_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
       try {
         await fetch(GOOGLE_APPS_SCRIPT_URL, {
           method: 'POST',
           mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(record)
         });
       } catch (err) {
@@ -507,31 +493,35 @@
     document.getElementById('personSelect').value = selectedPerson;
     initTime();
 
-    // 平滑捲動至頂部
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
+    setTimeout(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100);
   });
 
-  document.getElementById('filterPerson').addEventListener('change', () => {
-    renderList();
-  });
+  document.getElementById('filterPerson').addEventListener('change', () => { renderList(); });
 
-  function deleteRecord(id) {
-    if (confirm('確定要刪除這筆紀錄嗎？(注意：此操作僅會刪除本地紀錄，雲端試算表不會被刪除)')) {
+  // ======================= 2. 刪除同步 =======================
+  async function deleteRecord(id) {
+    if (confirm('確定要刪除這筆紀錄嗎？（將同步刪除本地與 Google 雲端資料）')) {
       let records = getStoredData('illness_records', []);
       records = records.filter(r => r.id !== id);
       saveData('illness_records', records);
       renderList();
+
+      if (GOOGLE_APPS_SCRIPT_URL && GOOGLE_APPS_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+        try {
+          const deleteUrl = `${GOOGLE_APPS_SCRIPT_URL}?action=delete&id=${id}`;
+          await fetch(deleteUrl, { method: 'GET', mode: 'no-cors' });
+        } catch (err) {
+          console.error("雲端刪除失敗：", err);
+          alert("本地紀錄已刪除，但同步刪除 Google 雲端資料時失敗。");
+        }
+      }
     }
   }
 
   function getFilteredRecords() {
     const records = getStoredData('illness_records', []);
     const filterValue = document.getElementById('filterPerson').value;
-    return filterValue === 'ALL' 
-      ? records 
-      : records.filter(r => r.person === filterValue);
+    return filterValue === 'ALL' ? records : records.filter(r => r.person === filterValue);
   }
 
   function renderList() {
@@ -550,13 +540,8 @@
 
     filteredRecords.forEach(r => {
       const isHighTemp = parseFloat(r.temperature) >= 37.5;
-      
       const formattedDate = new Date(r.datetime).toLocaleString('zh-TW', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
       });
 
       const item = document.createElement('div');
@@ -580,98 +565,48 @@
   }
 
   function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/"/g, "&quot;")
-              .replace(/'/g, "&#039;");
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
 
-  // 1. 匯出 Excel (CSV)
   document.getElementById('btnExportExcel').addEventListener('click', () => {
     const records = getFilteredRecords();
-    if (records.length === 0) {
-      alert('目前沒有紀錄可匯出！');
-      return;
-    }
+    if (records.length === 0) return alert('目前沒有紀錄可匯出！');
 
-    let csvContent = "\uFEFF";
-    csvContent += "成員,日期時間,體溫(°C),主要症狀,服用藥物,備註\n";
-
+    let csvContent = "\uFEFF成員,日期時間,體溫(°C),主要症狀,服用藥物,備註\n";
     records.forEach(r => {
       const formattedDate = new Date(r.datetime).toLocaleString('zh-TW');
-      const row = [
-        `"${r.person}"`,
-        `"${formattedDate}"`,
-        `"${r.temperature}"`,
-        `"${r.symptoms.replace(/"/g, '""')}"`,
-        `"${r.medication.replace(/"/g, '""')}"`,
-        `"${r.notes.replace(/"/g, '""')}"`
-      ].join(",");
+      const row = [`"${r.person}"`, `"${formattedDate}"`, `"${r.temperature}"`, `"${r.symptoms.replace(/"/g, '""')}"`, `"${r.medication.replace(/"/g, '""')}"`, `"${r.notes.replace(/"/g, '""')}"`].join(",");
       csvContent += row + "\n";
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    
-    const filterPerson = document.getElementById('filterPerson').value;
-    const filename = `健康紀錄_${filterPerson}_${new Date().toISOString().slice(0,10)}.csv`;
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
+    link.href = URL.createObjectURL(blob);
+    link.download = `健康紀錄_${document.getElementById('filterPerson').value}_${new Date().toISOString().slice(0,10)}.csv`;
     link.click();
-    document.body.removeChild(link);
   });
 
-  // 2. 轉出圖片 (PNG)
   document.getElementById('btnExportImage').addEventListener('click', () => {
     const records = getFilteredRecords();
-    if (records.length === 0) {
-      alert('目前沒有紀錄可轉出圖片！');
-      return;
-    }
-
-    const exportArea = document.getElementById('exportArea');
-
-    html2canvas(exportArea, {
-      scale: 2,
-      backgroundColor: '#F8F6F0'
-    }).then(canvas => {
+    if (records.length === 0) return alert('目前沒有紀錄可轉出圖片！');
+    html2canvas(document.getElementById('exportArea'), { scale: 2, backgroundColor: '#F8F6F0' }).then(canvas => {
       const link = document.createElement('a');
-      const filterPerson = document.getElementById('filterPerson').value;
-      const filename = `健康紀錄卡片_${filterPerson}_${new Date().toISOString().slice(0,10)}.png`;
-      
-      link.download = filename;
+      link.download = `健康紀錄卡片_${document.getElementById('filterPerson').value}_${new Date().toISOString().slice(0,10)}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     });
   });
 
-  // 3. 匯出完整 JSON 備份檔
   document.getElementById('btnExportJSON').addEventListener('click', () => {
-    const data = {
-      people: getStoredData('illness_people', []),
-      records: getStoredData('illness_records', [])
-    };
-
-    if (data.records.length === 0 && data.people.length === 0) {
-      alert('目前沒有任何資料可供備份！');
-      return;
-    }
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    const data = { people: getStoredData('illness_people', []), records: getStoredData('illness_records', []) };
+    if (data.records.length === 0 && data.people.length === 0) return alert('目前沒有任何資料可供備份！');
     const link = document.createElement('a');
-    link.href = url;
+    link.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     link.download = `健康紀錄備份_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   });
 
-  // 4. 匯入 JSON 備份檔 (整合本地 + 批量同步至 Google 雲端)
+  // ======================= 3. 匯入同步 =======================
   document.getElementById('fileImport').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -680,36 +615,26 @@
     reader.onload = async (event) => {
       try {
         const importedData = JSON.parse(event.target.result);
-
-        if (!importedData.records || !importedData.people) {
-          throw new Error('格式不正確');
-        }
+        if (!importedData.records || !importedData.people) throw new Error('格式不正確');
 
         if (confirm('匯入備份將會整合現有的紀錄，並同步上傳至 Google 雲端，確定要繼續嗎？')) {
-          // A. 整合人員名單
           let currentPeople = getStoredData('illness_people', []);
-          const mergedPeople = Array.from(new Set([...currentPeople, ...importedData.people]));
-          saveData('illness_people', mergedPeople);
+          saveData('illness_people', Array.from(new Set([...currentPeople, ...importedData.people])));
 
-          // B. 整合紀錄資料
           let currentRecords = getStoredData('illness_records', []);
           const recordMap = new Map();
           [...importedData.records, ...currentRecords].forEach(r => recordMap.set(r.id, r));
-          const mergedRecords = Array.from(recordMap.values()).sort((a, b) => b.id - a.id);
-          saveData('illness_records', mergedRecords);
+          saveData('illness_records', Array.from(recordMap.values()).sort((a, b) => b.id - a.id));
 
           initPeople();
           renderList();
 
-          // C. 批量同步至 Google Sheets
           if (GOOGLE_APPS_SCRIPT_URL && GOOGLE_APPS_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
             try {
               await fetch(GOOGLE_APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(importedData.records)
               });
               alert('資料匯入成功，並已成功同步至 Google 雲端！');
@@ -726,10 +651,8 @@
       }
       e.target.value = '';
     };
-
     reader.readAsText(file);
   });
 </script>
-
 </body>
 </html>
