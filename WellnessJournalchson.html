@@ -391,7 +391,7 @@
       <div class="filter-row">
         <label style="margin: 0; white-space: nowrap;">📅 日期：</label>
         <input type="date" id="filterDate">
-        <button type="button" class="btn-clear-date" id="btnClearDate">顯示全部日期</button>
+        <button type="button" class="btn-clear-date" id="btnClearDate">顯示今天日期</button>
       </div>
 
       <div class="action-buttons">
@@ -412,13 +412,23 @@
   // =========================================================
   // 替換此 URL 為您的 Google Apps Script「網頁應用程式」網址
   // =========================================================
-  const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxosdc2BNTWlBf_hT7QE3iTJrvMUWMaroItNQRj5WfFslYSLGaN5oqjHa3anFj4RjWP/exec";
+  const GOOGLE_APPS_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
   document.addEventListener('DOMContentLoaded', () => {
     initTime();
     initPeople();
+    
+    // 預設將歷史紀錄的日期設為「今天」
+    setFilterToToday();
+
     renderList();
   });
+
+  function setFilterToToday() {
+    const today = new Date();
+    today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+    document.getElementById('filterDate').value = today.toISOString().slice(0, 10);
+  }
 
   function initTime() {
     const now = new Date();
@@ -525,8 +535,10 @@
   // 監聽搜尋條件改變
   document.getElementById('filterPerson').addEventListener('change', () => { renderList(); });
   document.getElementById('filterDate').addEventListener('change', () => { renderList(); });
+  
+  // 按鈕功能：顯示今天日期
   document.getElementById('btnClearDate').addEventListener('click', () => {
-    document.getElementById('filterDate').value = '';
+    setFilterToToday();
     renderList();
   });
 
