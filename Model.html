@@ -3,122 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 內衣商品拍攝 Prompt 生成器 Ultra Max 30+ 擴充版</title>
+  <title>AI 內衣商品拍攝指令生成器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #faf7f5;
+      --bg-color: #f6f5f3;
       --card-bg: #ffffff;
-      --primary: #8a5a5c;
-      --primary-hover: #6f4446;
-      --accent: #2e7d32;
-      --accent-hover: #1b5e20;
-      --text: #3c3432;
-      --border: #ebdcd7;
+      --primary: #2d2623;
+      --primary-soft: #4a3e3d;
+      --accent: #8c6d63;
+      --accent-hover: #755950;
+      --accent-light: #f5efe8;
+      --text-main: #2b2b2b;
+      --text-sub: #66605c;
+      --border: #e8e3df;
+      --border-focus: #8c6d63;
+      --shadow-sm: 0 2px 8px rgba(45, 38, 35, 0.04);
+      --shadow-md: 0 12px 32px rgba(45, 38, 35, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text);
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 40px 20px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       background: var(--card-bg);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      padding: 48px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255, 255, 255, 0.8);
     }
-    h1 {
+
+    header {
       text-align: center;
-      color: var(--primary);
-      margin-bottom: 25px;
-      font-size: 1.8rem;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
     }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background-color: var(--accent-light);
+      color: var(--accent);
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      color: var(--primary);
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.3;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 18px;
+      gap: 28px;
     }
+
+    .section-title {
+      grid-column: 1 / -1;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      padding: 12px 16px;
+      background: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      margin-top: 16px;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+    }
+
     .form-group {
       display: flex;
       flex-direction: column;
+      gap: 8px;
     }
+
     label {
       font-weight: 600;
-      margin-bottom: 6px;
-      font-size: 0.9rem;
-      color: #61524e;
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      letter-spacing: 0.2px;
     }
+
     select, input {
-      padding: 10px;
+      width: 100%;
+      padding: 12px 16px;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.95rem;
-      background-color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #ffffff;
+      transition: all 0.2s ease;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%3C8c6d63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 16px;
     }
-    select:focus, input:focus {
+
+    input[type="text"] {
+      background-image: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
       outline: none;
-      border-color: var(--primary);
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(140, 109, 99, 0.12);
     }
-    .section-title {
-      grid-column: 1 / -1;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: var(--primary);
-      border-bottom: 2px solid #f2e6e3;
-      padding-bottom: 6px;
-      margin-top: 20px;
+
+    select:hover, input:hover {
+      border-color: var(--accent);
     }
+
     .output-section {
-      margin-top: 30px;
-      border-top: 2px solid var(--border);
-      padding-top: 20px;
+      margin-top: 40px;
+      background-color: #fcfbf9;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px;
     }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .output-section label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
     textarea {
       width: 100%;
-      height: 220px;
-      padding: 12px;
+      height: 200px;
+      padding: 16px;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #ffffff;
       resize: vertical;
-      box-sizing: border-box;
-      margin-bottom: 12px;
-      line-height: 1.5;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      transition: border-color 0.2s ease;
     }
+
     .btn-group {
       display: flex;
-      gap: 10px;
+      gap: 16px;
     }
+
     button {
       flex: 1;
-      padding: 12px;
+      padding: 14px 24px;
       background-color: var(--primary);
-      color: white;
+      color: #ffffff;
       border: none;
-      border-radius: 6px;
-      font-size: 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
       font-weight: 600;
+      letter-spacing: 0.5px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
+
     button:hover {
-      background-color: var(--primary-hover);
+      background-color: var(--primary-soft);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(45, 38, 35, 0.15);
     }
+
+    button:active {
+      transform: translateY(0);
+    }
+
     .btn-copy {
       background-color: var(--accent);
     }
+
     .btn-copy:hover {
       background-color: var(--accent-hover);
+      box-shadow: 0 4px 12px rgba(140, 109, 99, 0.25);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 10px;
+      }
+      .container {
+        padding: 24px 18px;
+        border-radius: var(--radius-md);
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .btn-group {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>AI 內衣與貼身衣物拍攝 Prompt 生成器 (30+ 選項海量擴充版)</h1>
+  <header>
+    <span class="badge">PROMPT GENERATOR</span>
+    <h1>AI 內衣與貼身衣物拍攝 Prompt 生成器 <br><span style="font-size: 1.1rem; font-weight: 400; color: var(--text-sub);">(30+ 選項海量擴充版)</span></h1>
+  </header>
 
   <div class="grid">
     <!-- 1. 照片格式與比例 (30+) -->
@@ -194,7 +329,7 @@
         <option value="烏克蘭特徵，具有仙氣飄飄、精緻如洋娃娃般的面部特徵">烏克蘭（仙氣夢幻洋娃娃顏）</option>
         <option value="混血兒特徵（中西亞混血），具有立體眉骨與東方柔和眼眸">亞歐混血（立體眉骨與東方柔和）</option>
         <option value="中東迪拜特徵，具有濃密睫毛、極致深邃靈動的雙眼與高貴感">中東（濃密睫毛深邃靈動）</option>
-        <option value="印度人特徵，具有濃郁古典異國風情與深邃明亮的眼神">印度（濃郁古典異國風情）</option>
+        <option value="印度人特徵，具有濃郁古典異國風情與深邃明亮的神">印度（濃郁古典異國風情）</option>
         <option value="非裔美國人特徵，具有極致光澤黑耀肌膚與性感立體唇形">非裔美籍（光澤質感與豐滿雙唇）</option>
         <option value="混血拉丁特徵，具有小麥色肌膚與野性迷人的五官">拉丁美洲（野性迷人小麥肌）</option>
         <option value="新加坡/大馬特徵，具有多元亞裔時尚優雅感">新馬亞裔（現代都會時尚感）</option>
@@ -348,7 +483,7 @@
         <option value="極簡純欲風格，強調肌膚質感與親膚無痕感">極簡純欲風格</option>
         <option value="歐美運動健美風格，帶有字母寬邊腰帶與活力感">歐美運動時尚風格</option>
         <option value="奢華名媛宮廷風格，富含絲綢、水鑽與璀璨細節">奢華名媛宮廷風格</option>
-        <option value="復古膠片寫真風格，帶有90年代港風美學">復古膠片港風風格</option>
+        <option value="復古膠片寫質風格，帶有90年代港風美學">復古膠片港風風格</option>
         <option value="純白新娘婚嫁內衣風格，帶有白紗與純潔蕾絲">純白婚嫁新娘內衣風格</option>
         <option value="清透仙氣夢幻風格，輕盈羽毛與透膚薄紗">清透仙氣夢幻風格</option>
         <option value="暗黑哥特性感風格，帶有捆綁細節與金屬扣環">暗黑哥特性感風格</option>
@@ -621,7 +756,7 @@
       <label>時間與光線氛圍 (30+ 選項)</label>
       <select id="timeOfDay">
         <option value="透過紗簾透進來的清晨柔和晨光（Soft Morning Light）">清晨柔和晨光（透光紗簾）</option>
-        <option value="明亮透亮的白天自然陽光（Bright Daylight）">明亮自然陽光（乾淨通透）</option>
+        <option value="明亮透亮點白天自然陽光（Bright Daylight）">明亮自然陽光（乾淨通透）</option>
         <option value="黃昏溫暖微醺的金色夕陽光（Golden Hour Sunset）">黃昏金色夕陽光（Golden Hour）</option>
         <option value="夜間床頭暖色調燈光，營造私密溫馨氛圍">夜間床頭暖色氛圍光</option>
         <option value="商業攝影棚無瑕高調柔光箱光線（Softbox Lighting）">商業攝影棚極致柔光</option>
@@ -665,7 +800,7 @@
         <option value="可愛眨眼（Wink）與甜美燦爛的笑容">可愛眨眼與燦爛笑容</option>
         <option value="自信優雅且帶有溫柔眼神">自信優雅溫柔眼神</option>
         <option value="害羞輕撫髮絲的甜美神態">害羞甜美神態</option>
-        <option value="清纯無辜且直視鏡頭的大眼神態">清純無辜直視鏡頭</option>
+        <option value="清純無辜且直視鏡頭的大眼神態">清純無辜直視鏡頭</option>
         <option value="微閉雙眼享受陽光照射的寧靜神態">微閉雙眼享受陽光（寧靜感）</option>
         <option value="帶有挑釁與魅惑感的自信微笑">挑釁魅惑自信微笑</option>
         <option value="眼神發空隨性的厭世臉表情（High Fashion Cold Look）">厭世高冷超模臉</option>
@@ -755,7 +890,7 @@
         <option value="平視眼平視角（Eye-level），建立直接真實親近感">平視視角（真實親近感）</option>
         <option value="過肩視角（Over-the-shoulder），帶有互動親密感">過肩視角（互動親密感）</option>
         <option value="切頭構圖（無臉模特），專注於內衣商品本身細節">切頭無臉構圖（專注商品本身）</option>
-        <option value="特寫臀部與褲腳無痕剪裁細節">臀部與褲腳特寫（展示褲腳無痕）</option>
+        <option value="特寫臀部與褲腳無痕剪裁細節">特寫臀部與褲腳細節（展示褲腳無痕）</option>
         <option value="魚眼鏡頭前衛視角（Fisheye），潮酷大片質感">魚眼前衛視角（潮酷大片）</option>
         <option value="高空垂直向下90度平視俯拍（Flatlay Perspective）">90度垂直俯拍（Flatlay感）</option>
         <option value="側顏與肩膀特寫構圖">側顏與肩膀特寫構圖</option>
@@ -808,11 +943,19 @@
 
   <!-- 結果輸出 -->
   <div class="output-section">
-    <label for="output">生成的中文 AI 指令 (Prompt)：</label>
+    <div class="output-header">
+      <label for="output">生成的中文 AI 指令 (Prompt)</label>
+    </div>
     <textarea id="output" readonly></textarea>
     <div class="btn-group">
-      <button onclick="generatePrompt()">生成中文指令</button>
-      <button class="btn-copy" onclick="copyPrompt()">複製指令</button>
+      <button onclick="generatePrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        生成中文指令
+      </button>
+      <button class="btn-copy" onclick="copyPrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        複製指令
+      </button>
     </div>
   </div>
 </div>
