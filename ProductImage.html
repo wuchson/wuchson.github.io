@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>內睡衣商品圖指令 v5.0</title>
+  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v6.0 (文字排版位置全擴充版)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; }
@@ -42,8 +42,8 @@
 
   <div class="container">
     <header>
-      <h1>👙 ULTIMATE MASTER 內睡衣商品圖指令 v5.0</h1>
-      <p class="sub">整合動態隨機 AI 文案與 Prompt 實時生成。</p>
+      <h1>👙 ULTIMATE MASTER 內睡衣/塑身衣 AI 生成器 v6.0 (全功能50+ & 排版位置擴充版)</h1>
+      <p class="sub">新增文字排版位置選項（上方、下方、左側、右側、對角、AI 自動構圖等），生成更靈活的商業視覺。</p>
     </header>
 
     <div class="grid">
@@ -57,7 +57,7 @@
           
           <div class="row">
             <div class="form-group">
-              <label>商品類別 (Category)</label>
+              <label>商品類別 (Category - 55種)</label>
               <select id="categorySelect" onchange="runUpdate()">
                 <optgroup label="── 爆乳托高與集中內衣 ──">
                   <option value="女性水感爆乳集中內衣 (Liquid Push-Up Bra)" selected>水感爆乳集中內衣</option>
@@ -130,7 +130,7 @@
             </div>
 
             <div class="form-group">
-              <label>主打色彩 (Color)</label>
+              <label>主打色彩 (Color - 50種)</label>
               <select id="colorSelect" onchange="runUpdate()">
                 <optgroup label="── 經典高雅色系 ──">
                   <option value="珍珠奶白 (Pearl Ivory White)" selected>珍珠奶白 (Ivory White)</option>
@@ -198,10 +198,9 @@
 
           <div class="row">
             <div class="form-group">
-              <label>罩杯結構 (Cup Structure)</label>
+              <label>罩杯結構 (Cup Structure - 50種)</label>
               <select id="cupSelect" onchange="runUpdate()">
-                <!-- 罩杯結構細分 -->
-                <option value="深V極致集中剪裁，搭配水液與空氣雙層襯墊 (Liquid Air Dual Padding)" selected>01. 【真水專用】水感空氣雙襯墊</option>
+                <option value="深V極致集中剪裁，搭配水效與空氣雙層襯墊 (Liquid Air Dual Padding)" selected>01. 【真水專用】水感空氣雙襯墊</option>
                 <option value="無鋼圈零感設計，Q彈軟凝膠立體支撐條 (Soft Gel Band)">02. 無鋼圈 Q彈軟凝膠支撐</option>
                 <option value="記憶鈦合金軟鋼圈，順應體溫彈性貼合托高 (Memory Wire)">03. 記憶鈦合金軟鋼圈</option>
                 <option value="經典傳統C型穩定鋼圈，強力承托包覆 (Classic C-Wire)">04. 經典C型穩定高托鋼圈</option>
@@ -255,14 +254,13 @@
             </div>
 
             <div class="form-group">
-              <label>版型剪裁 (Cutting Feature)</label>
+              <label>版型剪裁 (Cutting Feature - 50種)</label>
               <select id="featureSelect" onchange="runUpdate()">
-                <!-- 版型剪裁細分 -->
                 <option value="深V集中溝影，側邊加高雙膠條完美收納副乳 (Deep V Side Smoothing)" selected>01. 深V集中 + 加高雙膠條收副乳</option>
                 <option value="高腰雙層加壓收腹，3D手托式立體提臀構造 (High-Waist Shaping)">02. 高腰加壓平腹 + 3D提臀</option>
                 <option value="無痕熱壓貼合工藝，穿著完全不留痕跡 (Seamless Bonding)">03. 無痕熱壓貼合 (Seamless)</option>
                 <option value="3D立體囊袋人體工學剪裁，乾爽不緊繃 (3D Ergonomic Pouch)">04. 3D人體工學立體囊袋</option>
-                <option value="四排四扣高脇邊穩定支撐，平整後背贅肉 (4-Hooks Back Smoothing)">05. 四排四扣加寬平整後背</option>
+                <option value="四排四扣高脅邊穩定支撐，平整後背贅肉 (4-Hooks Back Smoothing)">05. 四排四扣加寬平整後背</option>
                 <option value="美背交叉肩帶時尚設計，適合外露穿搭 (Cross Back Straps)">06. 美背交叉肩帶時尚外露設計</option>
                 <option value="懸浮式減壓肩帶，有效分散肩膀壓力 (Pressure Relief Straps)">07. 懸浮式減壓加寬肩帶</option>
                 <option value="高腰連身雕塑，腹部三層加壓平腹 (3-Layer Abdominal Control)">08. 連身三層加壓平腹塑身</option>
@@ -313,9 +311,8 @@
           </div>
 
           <div class="form-group">
-            <label>材質布料 (可多選)</label>
+            <label>材質布料 (50種選擇 - 可多選)</label>
             <div class="tag-container">
-              <!-- 材質布料多選 -->
               <label class="tag-item"><input type="checkbox" value="高密度防滲漏微纖維與液體襯墊" onchange="runUpdate()" class="mat-cb" checked> 真水防漏微纖維</label>
               <label class="tag-item"><input type="checkbox" value="法式精緻睫毛蕾絲 (Chantilly Lace)" onchange="runUpdate()" class="mat-cb" checked> 法式睫毛蕾絲</label>
               <label class="tag-item"><input type="checkbox" value="100%頂級桑蠶絲 (100% Mulberry Silk)" onchange="runUpdate()" class="mat-cb"> 100%頂級桑蠶絲</label>
@@ -374,14 +371,13 @@
         <div class="card">
           <div class="card-title">
             <span>2. 文案與 AI 靈感生成</span>
-            <button onclick="generateAiTitle()" type="button" class="btn">🎲 AI 隨機換標題</button>
+            <button onclick="generateAiTitle()" type="button" class="btn">🎲 AI 隨機換標題 (50+庫)</button>
           </div>
 
           <div class="row">
             <div class="form-group">
               <label>英文主標題 (Main Title - 可選/自訂)</label>
               <select id="mainTitleSelect" onchange="applyTitleSelect()">
-                <!-- 英文標題選單 -->
                 <option value="LIQUID CURVE" selected>01. LIQUID CURVE</option>
                 <option value="AQUA CLEAVAGE">02. AQUA CLEAVAGE</option>
                 <option value="BREATHABLE SILK">03. BREATHABLE SILK</option>
@@ -439,7 +435,6 @@
             <div class="form-group">
               <label>中文副標題 (Subtitle - 可選/自訂)</label>
               <select id="subTitleSelect" onchange="applySubTitleSelect()">
-                <!-- 中文標題選單 -->
                 <option value="自然波動 雙倍爆乳" selected>01. 自然波動 雙倍爆乳</option>
                 <option value="水感托高 渾圓完美">02. 水感托高 渾圓完美</option>
                 <option value="極致無痕 親膚呼吸">03. 極致無痕 親膚呼吸</option>
@@ -488,7 +483,7 @@
                 <option value="溫宮保暖高腰褲 溫柔呵護腹部">46. 溫宮保暖高腰褲 溫柔呵護腹部</option>
                 <option value="雙層加壓微塑 打造挺拔體態">47. 雙層加壓微塑 打造挺拔體態</option>
                 <option value="法式精緻剪裁 細節成就完美">48. 法式精緻剪裁 細節成就完美</option>
-                <option value="3D桃心提臀 展現迷人臀線">49. 3D桃心提臀 展現迷人臀線</option>
+                <option value="3D桃心提臀 展現迷人臀線">49. 3D桃心提臀 展現迷人臀线</option>
                 <option value="經典高奢設計 展現女性自信">50. 經典高奢設計 展現女性自信</option>
               </select>
               <input type="text" id="subTitleInput" oninput="runUpdate()" value="自然波動 雙倍爆乳" style="margin-top:4px;" placeholder="也可手動輸入中文副標題">
@@ -515,9 +510,8 @@
 
           <div class="row">
             <div class="form-group">
-              <label>字體樣式 (Font Style)</label>
+              <label>字體樣式 (Font Style - 50種)</label>
               <select id="fontStyleSelect" onchange="runUpdate()">
-                <!-- 字體風格選單 -->
                 <option value="高奢 Vogue 經典襯線體 (Vogue Classic Serif)" selected>01. 高奢 Vogue 經典襯線體</option>
                 <option value="日系 Kinfolk 極簡無襯線體 (Kinfolk Modern Sans)">02. 日系 Kinfolk 極簡無襯線體</option>
                 <option value="優美流線手寫草書體 (Elegant Calligraphy Cursive)">03. 優美流線手寫草書體</option>
@@ -572,9 +566,8 @@
             </div>
 
             <div class="form-group">
-              <label>文字色彩 (Font Color)</label>
+              <label>文字色彩 (Font Color - 50種)</label>
               <select id="fontColorSelect" onchange="runUpdate()">
-                <!-- 文字色彩選單 -->
                 <option value="金屬燙金香檳金 (Champagne Gold Foil)" selected>01. 金屬燙金香檳金</option>
                 <option value="純淨極致白 (Pure Crystal White)">02. 純淨極致白</option>
                 <option value="深邃極致黑 (Deep Onyx Black)">03. 深邃極致黑</option>
@@ -633,22 +626,43 @@
         <!-- 模組 3: 場景與排版 -->
         <div class="card">
           <div class="card-title">3. 排版與場景風格設定</div>
+          
+          <div class="form-group">
+            <label style="color:#f472b6; font-weight:bold;">📍 文字排版位置 (Text Placement - 新增重點)</label>
+            <select id="positionSelect" onchange="runUpdate()">
+              <option value="由 AI 根據圖片畫面視覺重心與留白，自動設計最佳文字排版位置 (AI Adaptive Dynamic Layout)" selected>✨ 【AI 自動設計】由 AI 隨圖片美學與留白自動調配位置</option>
+              <option value="所有文字排版壓在畫面頂部 (Top Header Alignment)">⬆️ 【頂部排版】文字集中於畫面頂部 (Top Banner)</option>
+              <option value="所有文字排版壓在畫面底部 (Bottom Footer Alignment)">⬇️ 【底部排版】文字集中於畫面底部 (Bottom Footer)</option>
+              <option value="所有文字集中排版在畫面左側 (Left Side Alignment)">⬅️ 【左側排版】文字靠左垂直對齊 (Left Column)</option>
+              <option value="所有文字集中排版在畫面右側 (Right Side Alignment)">➡️ 【右側排版】文字靠右垂直對齊 (Right Column)</option>
+              <option value="主標題在畫面頂部居中，副標題與短文在畫面底部 (Top & Bottom Split)">↕️ 【上下分開】主標題在頂部，副標題/短文在底部</option>
+              <option value="文字排版在畫面左上方 (Top-Left Corner Alignment)">↖️ 【左上方】文字對齊左上角 (Top-Left Corner)</option>
+              <option value="文字排版在畫面右上方 (Top-Right Corner Alignment)">↗️ 【右上方】文字對齊右上角 (Top-Right Corner)</option>
+              <option value="文字排版在畫面左下方 (Bottom-Left Corner Alignment)">↙️ 【左下方】文字對齊左下角 (Bottom-Left Corner)</option>
+              <option value="文字排版在畫面右下方 (Bottom-Right Corner Alignment)">↘️ 【右下方】文字對齊右下角 (Bottom-Right Corner)</option>
+              <option value="所有文字完全居中對齊於畫面中央 (Center Floating Alignment)">🎯 【正中央居中】文字懸浮於畫面正中央 (Center Float)</option>
+              <option value="主標題橫跨頂部，副標題垂直靠左排列 (Header Banner & Left Bar)">📐 【頂部主標 + 左側副標】L型結構排版</option>
+              <option value="主標題橫跨頂部，副標題垂直靠右排列 (Header Banner & Right Bar)">📐 【頂部主標 + 右側副標】倒L型結構排版</option>
+              <option value="採用對角線動態排版，主標題左上、短文右下 (Diagonal Balance Alignment)">↗️↙️ 【對角線構圖】左上主標題，右下副標題短文</option>
+              <option value="文字採半透明底塊包覆，垂直貼合於畫面最右側 (Right Floating Glass Bar)">🧊 【右側毛玻璃條】右側垂直半透明文字區塊</option>
+            </select>
+          </div>
+
           <div class="row">
             <div class="form-group">
-              <label>雜誌排版風格 (Layout)</label>
+              <label>雜誌排版風格 (Layout - 50種)</label>
               <select id="layoutSelect" onchange="runUpdate()">
-                <!-- 雜誌排版風格選單 -->
-                <option value="VOGUE時尚雜誌封面排版，主標題壓在畫面頂部 (Vogue Cover Layout)" selected>01. VOGUE 高奢雜誌封面排版</option>
+                <option value="VOGUE時尚雜誌封面排版，風格極具張力 (Vogue Cover Layout)" selected>01. VOGUE 高奢雜誌封面排版</option>
                 <option value="日系 Kinfolk 極簡生活雜誌排版，大量的留白與簡約文字 (Kinfolk Minimalist)">02. Kinfolk 日系極簡留白排版</option>
                 <option value="高級電商海報排版，中央大標題搭配產品特寫 (E-Commerce Poster)">03. 高級電商質感海報排版</option>
                 <option value="Harper's BAZAAR 高對比高奢時尚封面 (BAZAAR Fashion Cover)">04. BAZAAR 雜誌封面排版</option>
                 <option value="ELLE 法式時尚典雅網格排版 (ELLE French Grid)">05. ELLE 法式時尚典雅排版</option>
-                <option value="極簡畫廊風格排版，下方標註精緻產品說明 (Art Gallery Minimal)">06. 極簡藝術畫廊風格排版</option>
+                <option value="極簡畫廊風格排版，標註精緻產品說明 (Art Gallery Minimal)">06. 極簡藝術畫廊風格排版</option>
                 <option value="復古報紙雙欄時尚排版 (Retro Newspaper Column)">07. 復古報紙雙欄時尚排版</option>
                 <option value="歐式精品目錄 Lookbook 雙面跨頁排版 (Luxury Lookbook)">08. 精品 Lookbook 目錄排版</option>
                 <option value="現代網頁 Hero Banner 首頁視覺排版 (Web Hero Banner)">09. 現代 Web Hero Banner 排版</option>
                 <option value="Instagram 品牌質感方形滿版排版 (IG Brand Full Layout)">10. Instagram 質感滿版排版</option>
-                <option value="高奢珠寶品牌廣告排版，文字細小精緻位於角落 (Jewelry Ad Minimal)">11. 高奢珠寶極簡角落標籤排版</option>
+                <option value="高奢珠寶品牌廣告排版，文字細小精緻 (Jewelry Ad Minimal)">11. 高奢珠寶極簡角落標籤排版</option>
                 <option value="巴黎時裝週特刊封面排版 (Paris Fashion Week Special)">12. 巴黎時裝週特刊封面排版</option>
                 <option value="米蘭時尚誌跨頁對比排版 (Milan Fashion Spread)">13. 米蘭時尚誌對比排版</option>
                 <option value="日系 FUDGE 清新目錄雜誌排版 (FUDGE Japan Style)">14. FUDGE 日系清新目錄排版</option>
@@ -656,7 +670,7 @@
                 <option value="極致微縮文字藝術排版 (Micro-Type Minimalist)">16. 極致微縮文字藝術排版</option>
                 <option value="對角線動態幾何排版 (Diagonal Dynamic Grid)">17. 對角線動態幾何排版</option>
                 <option value="雙色塊分割對比時尚排版 (Two-Tone Color Block Split)">18. 雙色塊分割對比時尚排版</option>
-                <option value="經典電影海報風格排版，底端標註大字 (Classic Cinema Poster)">19. 經典電影海報風格排版</option>
+                <option value="經典電影海報風格排版 (Classic Cinema Poster)">19. 經典電影海報風格排版</option>
                 <option value="展覽級黑白高對比排版 (Monochrome Exhibition)">20. 展覽級黑白高對比排版</option>
                 <option value="高端香水品牌氣質排版 (Haute Perfume Ad Layout)">21. 高端香水品牌氣質排版</option>
                 <option value="三欄式產品細節說明排版 (Three-Column Detail Layout)">22. 三欄式產品細節說明排版</option>
@@ -692,9 +706,8 @@
             </div>
 
             <div class="form-group">
-              <label>場景與光影 (Scene & Lighting)</label>
+              <label>場景與光影 (Scene & Lighting - 50種)</label>
               <select id="sceneSelect" onchange="runUpdate()">
-                <!-- 場景與光影選單 -->
                 <option value="場景為精品飯店套房，採用柔和的側光與暖色調環境光 (Boutique Hotel Suite)" selected>01. 精品飯店套房 + 奢華暖光</option>
                 <option value="場景為清晨的臥室，溫暖陽光透過白色窗紗灑落在柔軟被單上 (Morning Sun Bedroom)">02. 清晨臥室 + 窗紗陽光</option>
                 <option value="純淨無縫純色背景攝影棚，使用均勻柔和的漫射光 (Studio Soft Diffusion)">03. 純淨攝影棚 + 柔和漫射光</option>
@@ -893,12 +906,13 @@
         var fontS = document.getElementById('fontStyleSelect').value;
         var fontC = document.getElementById('fontColorSelect').value;
 
+        var pos = document.getElementById('positionSelect').value;
         var layout = document.getElementById('layoutSelect').value;
         var scene = document.getElementById('sceneSelect').value;
 
         var descTextFormatted = '';
         if (descT.trim() !== '') {
-          descTextFormatted = '\n- 畫面下方包含精細排版的商品介紹短文：「' + descT.trim() + '」';
+          descTextFormatted = '\n- 畫面包含精細排版的商品介紹短文：「' + descT.trim() + '」';
         }
 
         var fullPrompt = '專業商業攝影，' + layout + '。\n\n' +
@@ -908,10 +922,11 @@
           '剪裁特點：' + feat + '。\n' +
           '材質採用 ' + matStr + '，展現極致細節與質感。\n' +
           '由專業模特兒穿著展示，呈現優美的剪裁與線條。\n\n' +
-          '【文字排版與藝術指令】：\n' +
+          '【文字排版與位置指令】：\n' +
           '畫面上清楚地排版著文字：\n' +
           '- 英文大標題字樣為 "' + mainT + '"\n' +
           '- 中文副標題字樣為 "' + subT + '"' + descTextFormatted + '\n' +
+          '📍 排版位置與構圖：' + pos + '。\n' +
           '字體樣式：採用 ' + fontS + '。\n' +
           '色彩細節：文字色彩為 ' + fontC + '，整體具備頂級商業海報設計感。\n\n' +
           '【場景與光影】：\n' +
