@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 內衣商品拍攝指令生成器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f6f5f3;
+      --card-bg: #ffffff;
+      --primary: #2d2623;
+      --primary-soft: #4a3e3d;
+      --accent: #8c6d63;
+      --accent-hover: #755950;
+      --accent-light: #f5efe8;
+      --text-main: #2b2b2b;
+      --text-sub: #66605c;
+      --border: #e8e3df;
+      --border-focus: #8c6d63;
+      --shadow-sm: 0 2px 8px rgba(45, 38, 35, 0.04);
+      --shadow-md: 0 12px 32px rgba(45, 38, 35, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 40px 20px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 48px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background-color: var(--accent-light);
+      color: var(--accent);
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      color: var(--primary);
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+    }
+
+    .section-title {
+      grid-column: 1 / -1;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      padding: 12px 16px;
+      background: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      margin-top: 16px;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      letter-spacing: 0.2px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #ffffff;
+      transition: all 0.2s ease;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%3C8c6d63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 16px;
+    }
+
+    input[type="text"] {
+      background-image: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(140, 109, 99, 0.12);
+    }
+
+    select:hover, input:hover {
+      border-color: var(--accent);
+    }
+
+    .output-section {
+      margin-top: 40px;
+      background-color: #fcfbf9;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .output-section label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #ffffff;
+      resize: vertical;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      transition: border-color 0.2s ease;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 16px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px 24px;
+      background-color: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: var(--primary-soft);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(45, 38, 35, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-copy {
+      background-color: var(--accent);
+    }
+
+    .btn-copy:hover {
+      background-color: var(--accent-hover);
+      box-shadow: 0 4px 12px rgba(140, 109, 99, 0.25);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 16px 10px;
+      }
+      .container {
+        padding: 24px 18px;
+        border-radius: var(--radius-md);
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .btn-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <span class="badge">PROMPT GENERATOR</span>
+    <h1>GPT 貼身衣物商品拍攝指令生成器 <br><span style="font-size: 1.1rem; font-weight: 400; color: var(--text-sub);">(海量擴充版)</span></h1>
+  </header>
+
+  <div class="grid">
+    <!-- 1. 照片格式與比例 -->
+    <div class="section-title">1. 照片格式與畫幅比例</div>
+    
+    <div class="form-group">
+      <label>照片比例與構圖畫幅</label>
+      <select id="aspectRatio">
+        <option value="直式 9:16（適合智慧型手機全螢幕與限時動態）">直式 9:16（手機全螢幕/限時動態）</option>
+        <option value="直式 3:4（電商商品詳情頁黃金標準比例）">直式 3:4（電商商品詳情頁黃金比例）</option>
+        <option value="直式 4:5（Instagram 貼文最佳直式畫幅）">直式 4:5（Instagram 貼文標準）</option>
+        <option value="正方形 1:1（電商主圖與 Instagram 方格畫幅）">正方形 1:1（商品主圖/方格圖）</option>
+        <option value="橫式 16:9（適合電腦端官網 Banner 與影音封面）">橫式 16:9（官網 Banner/影音）</option>
+        <option value="橫式 21:9（極致電影級電影感寬銀幕畫幅）">橫式 21:9（電影感寬銀幕）</option>
+        <option value="橫式 4:3（復古底片與傳統攝影標準橫圖）">橫式 4:3（復古攝影標準）</option>
+        <option value="橫式 3:2（全畫幅單眼相機原生感構圖）">橫式 3:2（單眼相機原生感）</option>
+        <option value="橫式 2:1（現代簡約雜誌跨頁風格構圖）">橫式 2:1（雜誌跨頁風格）</option>
+        <option value="超寬 3:1（品牌官網首頁頂部超寬橫幅Banner）">超寬 3:1（官網頂部超寬橫幅）</option>
+        <option value="直式 2:3（專業時尚攝影寫真標準特刊畫幅）">直式 2:3（時尚攝影寫真標準）</option>
+        <option value="直式 1:2（修長高挑俐落感商品細節長圖）">直式 1:2（修長高挑商品細節圖）</option>
+        <option value="極致直式 9:21（折疊螢幕手機全屏沉浸畫幅）">極致直式 9:21（折疊屏全屏沉浸）</option>
+        <option value="微橫 5:4（簡約現代商業目錄畫幅）">微橫 5:4（簡約商業目錄圖）</option>
+        <option value="黃金比例 1:1.618（極具視覺舒服感的黃金構圖）">黃金比例 1:1.618（黃金構圖）</option>
+        <option value="正方形圓角切割視角（現代 App 介面風格）">正方形圓角視角（App 介面感）</option>
+        <option value="雙頁併排 8:3（左右對比展示畫面）">雙頁併排 8:3（左右商品對比）</option>
+        <option value="三格連環畫式 18:9（三段式動作組合畫面）">三格畫幅 18:9（三段式動作組合）</option>
+        <option value="圓形窺視鏡構圖（質感窺探視角）">圓形窺視構圖（窺探視角）</option>
+        <option value="橢圓形復古相框畫幅（法式復古宮廷感）">橢圓復古畫幅（法式宮廷感）</option>
+        <option value="底片齒孔邊框畫幅（經典底片膠捲質感）">底片邊框畫幅（經典底片膠捲）</option>
+        <option value="拍立得 Polaroid 白色邊框畫幅（復古隨拍感）">拍立得邊框（復古拍立得風格）</option>
+        <option value="雜誌封面裁切畫幅（預留上方標題排版空間）">雜誌封面畫幅（預留排版空間）</option>
+        <option value="電商主圖滿版無邊框構圖（主體極度突出）">電商主圖滿版（主體極度突出）</option>
+        <option value="中景切邊構圖（著重於腰胸細節，自動裁切頭腳）">中景切邊構圖（專注腰胸細節）</option>
+        <option value="微距局部構圖（1:1超近距離細節展現）">微距局部構圖（超近距離細節）</option>
+        <option value="全景大空鏡構圖（人物占三分之一，背景大面積留白）">全景大空鏡（大面積留白雜誌感）</option>
+        <option value="對角線動態構圖（展現長腿與身材張力）">對角線構圖（展現長腿張力）</option>
+        <option value="三分法經典構圖（視覺焦點落在黃金交叉點）">三分法構圖（視覺焦點完美平衡）</option>
+        <option value="中心對稱黃金構圖（極致平衡與典雅質感）">中心對稱構圖（極致典雅平衡）</option>
+        <option value="">無顯示（不指定畫幅）</option>
+      </select>
+    </div>
+
+    <!-- 2. 模特兒外型、國籍與膚色設定 -->
+    <div class="section-title">2. 模特兒國籍、特徵與膚色</div>
+    
+    <div class="form-group">
+      <label>模特兒性別與年齡感</label>
+      <select id="modelGender">
+        <option value="年輕女性模特兒（約20-25歲，青春活力）">年輕女模特（20-25歲，青春活力）</option>
+        <option value="輕熟女性模特兒（約26-32歲，優雅知性）">輕熟女模特（26-32歲，優雅知性）</option>
+        <option value="成熟女性模特兒（約33-40歲，高貴奢華氣場）">成熟女模特（33-40歲，奢華氣場）</option>
+        <option value="陽光年輕男模特兒（20-25歲，健美活力）">陽光男模特（男士內褲/家居服）</option>
+        <option value="輕熟魅惑男模特兒（28-35歲，成熟性感）">輕熟男模特（男士內褲/胸肌展示）</option>
+        <option value="none">無顯示（不指定性別年齡）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>模特兒國籍與面孔特徵</label>
+      <select id="modelNationality">
+        <option value="台灣人特徵，具有東亞精緻清秀的面孔與溫柔神韻">台灣（清秀溫和東亞氣質）</option>
+        <option value="日本人特徵，具有日系清新甜美的面部輪廓與無辜眼眸">日本（日系清新甜美無辜感）</option>
+        <option value="韓國人特徵，具有韓系時尚精緻的五官與高冷單眼皮/雙眼皮氣質">韓國（韓系時髦精緻高冷）</option>
+        <option value="法國人特徵，具有深邃眼眸、微翹鼻尖與法式慵懶浪漫氣質">法國（浪漫法式慵懶優雅）</option>
+        <option value="義大利人特徵，具有深邃五官、濃密睫毛與濃郁高級時尚感">義大利（濃郁高級時尚氣場）</option>
+        <option value="美國人特徵，具有自信陽光、白皙或健康輪廓與甜美笑容">美國（陽光自信美式風格）</option>
+        <option value="巴西人特徵，具有熱情性感、健康健美的混血立體輪廓">巴西（熱情健康健美混血感）</option>
+        <option value="泰國人特徵，具有精緻深邃的東南亞混血顏與高挺鼻樑">泰國（精緻混血東南亞氣質）</option>
+        <option value="西班牙人特徵，具有熱情迷人的地中海濃顏與深邃眼神">西班牙（熱情地中海濃顏風格）</option>
+        <option value="北歐瑞典特徵，具有極致清冷精緻的淺色五官與金髮碧眼">北歐瑞典（清冷精緻高貴）</option>
+        <option value="英倫英國特徵，具有端莊典雅的名媛輪廓與細緻氣质">英國（英倫古典典雅名媛）</option>
+        <option value="俄羅斯特徵，具有巴掌小臉、極致立體深邃的高冷超模面孔">俄羅斯（高冷精緻超模臉）</option>
+        <option value="烏克蘭特徵，具有仙氣飄飄、精緻如洋娃娃般的面部特徵">烏克蘭（仙氣夢幻洋娃娃顏）</option>
+        <option value="混血兒特徵（中西亞混血），具有立體眉骨與東方柔和眼眸">亞歐混血（立體眉骨與東方柔和）</option>
+        <option value="中東迪拜特徵，具有濃密睫毛、極致深邃靈動的雙眼與高貴感">中東（濃密睫毛深邃靈動）</option>
+        <option value="印度人特徵，具有濃郁古典異國風情與深邃明亮的神">印度（濃郁古典異國風情）</option>
+        <option value="非裔美國人特徵，具有極致光澤黑耀肌膚與性感立體唇形">非裔美籍（光澤質感與豐滿雙唇）</option>
+        <option value="混血拉丁特徵，具有小麥色肌膚與野性迷人的五官">拉丁美洲（野性迷人小麥肌）</option>
+        <option value="新加坡/大馬特徵，具有多元亞裔時尚優雅感">新馬亞裔（現代都會時尚感）</option>
+        <option value="澳洲特徵，具有自然衝浪陽光感、微帶雀斑的親切面孔">澳洲（陽光自然微雀斑感）</option>
+        <option value="德系德國特徵，具有線條俐落嚴謹且高級的現代超模臉">德國（線條俐落高級超模臉）</option>
+        <option value="希臘人特徵，具有雕塑般的完美側顏與古典鼻樑">希臘（雕塑般古典完美側顏）</option>
+        <option value="愛爾蘭特徵，具有空靈白皙肌膚與淡綠色眼眸">愛爾蘭（空靈白皙綠眼）</option>
+        <option value="荷蘭特徵，具有高挑高顱頂與現代時尚感">荷蘭（高挑現代時尚質感）</option>
+        <option value="摩洛哥特徵，具有北非神秘優雅與深邃熱情眼睛">摩洛哥（神秘優雅熱情）</option>
+        <option value="波蘭特徵，具有古典優雅與輕柔優雅面貌">波蘭（古典輕柔氣質）</option>
+        <option value="捷克特徵，具有復古電影女主角般的優雅質感">捷克（復古電影女主角感）</option>
+        <option value="華裔名媛特徵，具有高級單眼皮與俐落時尚感">華裔超模（高級單眼皮俐落感）</option>
+        <option value="維多利亞秘密超模特徵，具有極致性感自信與閃耀神情">維密超模風格（極致性感自信）</option>
+        <option value="CG動漫擬真特徵，具有極致無瑕精緻的CG美少女面孔">CG美少女（無瑕極致精緻）</option>
+        <option value="">無顯示（不指定國籍）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>膚色類型與肌理</label>
+      <select id="skinTone">
+        <option value="白皙透亮且帶有自然紅潤感的珍珠膚色">白皙透亮珍珠膚色</option>
+        <option value="健康自然的陽光小麥色肌膚">健康陽光小麥色</option>
+        <option value="溫暖性感且帶有金屬光澤的古銅色肌膚">溫暖金屬光澤古銅色</option>
+        <option value="柔和粉嫩的蜜桃色肌膚，極具少女感">柔和粉嫩蜜桃膚色</option>
+        <option value="極致雪白冷白皮肌膚，如同白瓷般細緻">冷白皮白瓷肌膚</option>
+        <option value="深色富含油亮光澤感的質感黑耀膚色">油亮質感黑耀膚色</option>
+        <option value="自然健康的東方暖黃膚色，細緻滑順">自然東方暖黃膚色</option>
+        <option value="奶油般絲滑溫暖的奶油白膚色">絲滑奶油白膚色</option>
+        <option value="微帶性感小雀斑的自然美式曬斑肌膚">自然美式小雀斑肌膚</option>
+        <option value="帶有潤澤水光感透亮油光的皮膚肌理">水光透亮潤澤肌膚</option>
+        <option value="啞光高級霧面感的磨砂質感肌膚">高級啞光霧面肌膚</option>
+        <option value="透出微微青色血管質感的極薄白皙肌膚">極薄清透白皙肌膚</option>
+        <option value="微醺泛紅的自然粉紅肌膚，自帶性感氛圍">微醺泛紅自然膚色</option>
+        <option value="陽光照耀下發出金黃閃粉光澤的金燦肌膚">陽光金燦閃粉肌膚</option>
+        <option value="象牙白微帶暖色調的典雅高級膚色">典雅象牙白膚色</option>
+        <option value="橄欖綠微色調的歐美高級感膚色">歐美橄欖綠色調膚色</option>
+        <option value="淺棕色焦糖色彩的光滑肌膚">焦糖淺棕光滑肌膚</option>
+        <option value="帶有運動汗水微微濕潤微光的性感肌膚">運動汗水濕潤微光肌膚</option>
+        <option value="微暖蜂蜜色調的光滑質感肌膚">蜂蜜暖色調質感肌膚</option>
+        <option value="無瑕零毛孔的極致陶瓷質感膚色">無瑕陶瓷質感膚色</option>
+        <option value="帶有自然毛孔與細微肌理的商業真實真實肌膚">商業真實細節肌理肌膚</option>
+        <option value="微帶陽光曬痕（比基尼印痕）的性感肌膚">陽光比基尼曬痕肌膚</option>
+        <option value="甜美栗色調的光滑質感膚色">栗色調甜美膚色</option>
+        <option value="帶有金箔微粒光效的高級奢華身體肌膚">奢華金箔光效身體肌膚</option>
+        <option value="清透如果凍般的微凝膠質感膚色">清透果凍感微凝膚色</option>
+        <option value="帶有淡雅精油潤澤感的光影肌膚">精油潤澤光影肌膚</option>
+        <option value="柔焦薄紗感夢幻透亮膚色">柔焦夢幻透亮膚色</option>
+        <option value="暖暖日落夕陽紅暈肌膚">日落夕陽紅暈肌膚</option>
+        <option value="極致極簡乾淨無瑕白皙膚色">極簡純淨白皙膚色</option>
+        <option value="自然健康的橄欖小麥肌">自然橄欖小麥肌</option>
+        <option value="">無顯示（不指定膚色）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>身材體型與美體曲線</label>
+      <select id="bodyType">
+        <option value="勻稱帶有完美自然的胸腰曲線與水蛇腰">勻稱自然完美胸腰曲線</option>
+        <option value="豐滿挺拔且腰身纖細的完美沙漏型身材">沙漏型身材（豐滿挺拔/細腰）</option>
+        <option value="纖細苗條，鎖骨極度明顯與直角肩美感">纖細骨感（直角肩/天鵝頸/鎖骨）</option>
+        <option value="健美緊緻且帶有清晰馬甲線與腹肌線條">健美緊緻（腹肌/清晰馬甲線）</option>
+        <option value="豐滿肉感且帶有圓潤溫柔曲線的大碼身材">大碼豐滿肉感曲線（Curves）</option>
+        <option value="高挑超模身材，具有1:9黃金頭身比與修長美腿">超模身材（1:9頭身比/逆天長腿）</option>
+        <option value="緊緻翹臀與S型性感背脊線條">S型性感線條（強調翹臀與美背）</option>
+        <option value="極致纖細水蛇腰與精緻小骨架">小骨架極致纖細水蛇腰</option>
+        <option value="自然微胖且帶有軟萌親膚感的大腿曲線">軟萌親膚感微胖曲線</option>
+        <option value="健美圓潤的大腿與完美蜜桃臀">歐美蜜桃臀與健美腿部曲線</option>
+        <option value="平胸清冷文青感，極具高級時裝感">平胸清冷文青感（時尚高級感）</option>
+        <option value="圓潤飽滿的水滴型胸型與纖細手臂">水滴型胸型與纖細手臂</option>
+        <option value="比例均衡的運動員體態，肌肉線條流暢">運動員流暢線條體態</option>
+        <option value="高挑優雅芭蕾舞者體態，體態挺拔輕盈">芭蕾舞者輕盈挺拔體態</option>
+        <option value="親和力十足的日常自然女生身材">日常自然親和身材</option>
+        <option value="微顯骨感且背部翼骨線條優美的後背">優美背脊與翼骨線條</option>
+        <option value="緊緻腰窩與性感胯部線條">性感腰窩與完美胯部線條</option>
+        <option value="豐滿優雅且帶有優美胸形包覆感">豐滿優雅胸型包覆感</option>
+        <option value="嬌小玲瓏且比例極佳的身材">嬌小玲瓏黃金比例身材</option>
+        <option value="寬肩窄臀且挺拔的男士倒三角形體態">男士倒三角形挺拔體態</option>
+        <option value="腹肌分明且胸肌結實的男士健體身材">男士結實胸肌與腹肌體態</option>
+        <option value="自然簡約男士植物系纖細體態">男士植物系纖細體態</option>
+        <option value="強調鎖骨與圓潤肩膀的露肩體態">強調鎖骨與圓潤肩膀體態</option>
+        <option value="長腿挺拔且微帶腰線的俐落體態">俐落長腿挺拔體態</option>
+        <option value="圓潤自然無壓迫感的居家親膚體態">親膚舒適居家體態</option>
+        <option value="修長手腕與纖細指尖的優雅體態">優雅手部與手臂線條體態</option>
+        <option value="富有青春躍動感的活力體態">青春躍動活力體態</option>
+        <option value="端莊高雅的大氣古典體態">大氣古典端莊體態</option>
+        <option value="張力十足的時尚大片折角體態">時尚大片張力折角體態</option>
+        <option value="極致光滑流暢的自然線條">極致光滑流暢線條</option>
+        <option value="">無顯示（不指定身材）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>髮型與髮色</label>
+      <select id="hairStyle">
+        <option value="蓬鬆隨性且帶有空氣感的法式微捲長髮">法式微捲蓬鬆長髮</option>
+        <option value="可愛帶有空氣瀏海的雙馬尾/高丸子頭">空氣瀏海 / 可愛高丸子頭</option>
+        <option value="帥氣俐落的濕髮感齊肩短髮（Wet-look）">帥氣濕髮感齊肩短髮</option>
+        <option value="慵懶自然的法式高包頭，散落微絲髮碎髮">慵懶法式包頭散落碎髮</option>
+        <option value="浪漫金黃色大波浪捲髮，垂在胸前">金黃色浪漫大波浪長髮</option>
+        <option value="烏黑亮麗的垂直發亮長直髮，清純俐落">烏黑亮麗極致長直髮</option>
+        <option value="亞麻棕色羊毛捲/復古小捲髮，熱情可愛">亞麻棕色羊毛捲/小捲髮</option>
+        <option value="精緻短髮耳後剪，展現俐落天鵝頸">耳後精緻短髮（突顯天鵝頸）</option>
+        <option value="性感俐落的高馬尾，甩動感十足">性感俐落高馬尾</option>
+        <option value="粉白色/奶茶色夢幻染髮隨意微捲">粉白/奶茶色夢幻微捲髮</option>
+        <option value="白金色極短髮，極具酷颯時尚感">白金色酷颯極短髮</option>
+        <option value="復古手推波浪髮型（1920s Vintage Wave）">復古手推波浪髮型</option>
+        <option value="低調內斂的低馬尾，帶有絲綢髮帶綁飾">低馬尾搭絲綢髮帶</option>
+        <option value="半紮公主頭，帶有甜美弧度">甜美半紮公主頭</option>
+        <option value="隨性抓夾髮型，散發居家感">隨性鯊魚抓夾髮型（居家感）</option>
+        <option value="雙麻花辮，充滿田園鄉村可愛感">田園雙麻花辮（可愛感）</option>
+        <option value="深褐色隨性中分中長髮，極簡知性">深褐色隨性中分中長髮</option>
+        <option value="焦糖栗色側分波浪髮，遮住半邊臉微露性感">焦糖栗色側分遮臉波浪髮</option>
+        <option value="男士：韓系紋理碎瀏海短髮">男士：韓系紋理碎瀏海短髮</option>
+        <option value="男士：經典復古美式油頭（Slick Back）">男士：美式復古油頭</option>
+        <option value="男士：日系清爽蓬鬆微捲髮">男士：日系清爽蓬鬆微捲髮</option>
+        <option value="男士：俐落寸頭/寸髮，極具硬漢陽光感">男士：俐落陽光寸頭</option>
+        <option value="蓬鬆微濕的剛睡醒頭（Bedhead Look）">剛睡醒微濕隨性髮（Bedhead）</option>
+        <option value="橘紅色/海妖紅耀眼波浪長髮">橘紅耀眼海妖波浪髮</option>
+        <option value="銀灰色超現代前衛微捲長髮">銀灰色超現代前衛長髮</option>
+        <option value="微濕貼額頭的時尚大片造型髮">時尚大片微濕貼額造型髮</option>
+        <option value="編織細小蕾絲髮辮的精緻髮型">細小蕾絲編髮精緻髮型</option>
+        <option value="溫暖蜜桃粉色蓬鬆中長髮">蜜桃粉色蓬鬆中長髮</option>
+        <option value="薄荷淺綠色前衛叛逆短髮">薄荷淺綠前衛叛逆短髮</option>
+        <option value="自然黑髮帶有太陽光金燦光澤">自然黑髮帶陽光光澤</option>
+        <option value="">無顯示（不指定髮型）</option>
+      </select>
+    </div>
+
+    <!-- 3. 內衣商品與整體穿搭 -->
+    <div class="section-title">3. 內衣商品與整體穿搭</div>
+
+    <div class="form-group">
+      <label>圖文對照指示（商品參考）</label>
+      <select id="imgRef">
+        <option value="穿著「第一張圖」中的內衣商品，搭配">穿著「第一張圖」的商品，搭配...</option>
+        <option value="穿著「第二張圖」中的內衣商品，搭配">穿著「第二張圖」的商品，搭配...</option>
+        <option value="同時展示「第一張圖（胸罩）」與「第二張圖（內褲）」的套裝，穿著">第一圖（胸罩）+ 第二圖（內褲）套裝，穿著...</option>
+        <option value="參考上傳圖片的布料蕾絲花紋，穿著">參考圖片蕾絲布料花紋，穿著...</option>
+        <option value="參考上傳圖片的胸型包覆剪裁設計，穿著">參考圖片胸型包覆剪裁，穿著...</option>
+        <option value="">無顯示（不參考圖片）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>整體穿搭風格設定</label>
+      <select id="outfitStyle">
+        <option value="高街時尚酷帥風格，帶有現代俐落剪裁與硬朗線條">時尚帥氣酷颯風格</option>
+        <option value="日系可愛甜美風格，帶有蕾絲蝴蝶結與粉嫩元素">日系可愛甜美風格</option>
+        <option value="法式浪漫簡約風格，強調質感、自然隨性與優雅">法式浪漫氣質風格</option>
+        <option value="極簡純欲風格，強調肌膚質感與親膚無痕感">極簡純欲風格</option>
+        <option value="歐美運動健美風格，帶有字母寬邊腰帶與活力感">歐美運動時尚風格</option>
+        <option value="奢華名媛宮廷風格，富含絲綢、水鑽與璀璨細節">奢華名媛宮廷風格</option>
+        <option value="復古膠片寫質風格，帶有90年代港風美學">復古膠片港風風格</option>
+        <option value="純白新娘婚嫁內衣風格，帶有白紗與純潔蕾絲">純白婚嫁新娘內衣風格</option>
+        <option value="清透仙氣夢幻風格，輕盈羽毛與透膚薄紗">清透仙氣夢幻風格</option>
+        <option value="暗黑哥特性感風格，帶有捆綁細節與金屬扣環">暗黑哥特性感風格</option>
+        <option value="美式復古Pin-up女孩風格，帶有高腰與波點元素">美式復古Pin-up風格</option>
+        <option value="賽博朋克前衛時尚風格，帶有反光面料與科技感">賽博朋克前衛風格</option>
+        <option value="北歐極簡家居慵懶風格，強調純棉與鬆弛感">北歐極簡家居風格</option>
+        <option value="美式學院風，搭配運動棒球衫與短褲內衣">美式學院運動風格</option>
+        <option value="波西米亞流蘇風格，帶有鉤針編織與自然感">波西米亞編織風格</option>
+        <option value="芭蕾風Core（Balletcore），帶有綁帶與粉色絲帶">芭蕾風Balletcore風格</option>
+        <option value="Y2K千禧復古時尚風格，帶有低腰與金屬閃粉">Y2K千禧復古風格</option>
+        <option value="輕奢冷淡風，灰白黑高階低飽和色調">輕奢冷淡風高階色調</option>
+        <option value="午夜性感風格，深色蕾絲與絲綢光澤">午夜性感風格</option>
+        <option value="晨曦清新起床風格，純棉透氣與清晨微光">晨曦清新起床風格</option>
+        <option value="渡假風度假海灘內衣風格，帶有草帽與陽光感">渡假風海灘陽光風格</option>
+        <option value="高級時裝雜誌封面風格，極具結構張力">高級時裝雜誌封面風格</option>
+        <option value="男士簡約質感風格，展現俐落肌肉線條">男士簡約質感風格</option>
+        <option value="奶油系軟糯溫馨風格，暖色調溫柔質感">奶油系軟糯溫馨風格</option>
+        <option value="極致性感透膚風格，若隱若現的光影誘惑">極致性感透膚風格</option>
+        <option value="純真少女閨蜜寫真風格，充滿自然笑顏">純真少女閨蜜寫真風格</option>
+        <option value="英倫復古格紋風格，帶有英倫紳士/淑女感">英倫復古格紋風格</option>
+        <option value="野性豹紋/斑馬紋時尚風格，充滿性感張力">野性動物紋時尚風格</option>
+        <option value="童話夢幻愛麗絲風格，帶有藍白色系與蕾絲">童話夢幻蕾絲風格</option>
+        <option value="未來感金屬光澤風格，亮面貼合剪裁">未來感金屬光澤風格</option>
+        <option value="">無顯示（不指定整體風格）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>上身/胸罩款式與顏色</label>
+      <input type="text" id="topOutfit" placeholder="例：黑色精緻蕾絲包覆型胸罩" value="裸粉色法式無鋼圈蕾絲胸罩">
+    </div>
+
+    <div class="form-group">
+      <label>下身/內褲款式與顏色</label>
+      <input type="text" id="bottomOutfit" placeholder="例：同色系高腰無痕三角內褲" value="同色系蕾絲無痕三角內褲">
+    </div>
+
+    <div class="form-group">
+      <label>罩衫 / 外套 / 搭配衫</label>
+      <select id="outerwear">
+        <option value="半脫落滑至手臂的真絲高級晨袍">半脫落真絲晨袍（性感時尚）</option>
+        <option value="外搭一件寬鬆帥氣的黑色廓形西裝外套">黑色廓形西裝外套（酷颯帥氣）</option>
+        <option value="外搭一件鬆軟純白針織軟糯外套">純白針織軟糯外套（可愛慵懶）</option>
+        <option value="外搭透光輕盈的雪紡薄紗長衫">透光雪紡薄紗長衫（仙氣夢幻）</option>
+        <option value="敞開穿著的男朋友風純白寬鬆襯衫">寬鬆純白男友襯衫（性感）</option>
+        <option value="外搭一件復古藍色寬鬆牛仔外套">寬鬆復古牛仔外套（美式隨性）</option>
+        <option value="外搭一件奢華人造毛皮草大衣（Fur Coat）">奢華皮草大衣（名媛高貴）</option>
+        <option value="外搭一件透氣鏤空鉤針編織罩衫">鏤空鉤針編織罩衫（度假風）</option>
+        <option value="滑落一邊肩膀的灰粉色露肩衛衣">滑落單肩灰色衛衣（運動隨性）</option>
+        <option value="外搭一件黑色皮革夾克/皮衣">黑色酷帥皮衣（硬朗帥氣）</option>
+        <option value="披著一條高級羊絨大圍巾">羊絨大圍巾（溫暖居家感）</option>
+        <option value="外搭半透明蕾絲花邊和服式罩衫">蕾絲和服式罩衫（日式優雅）</option>
+        <option value="外搭柔軟運動連帽拉鍊外套（敞開）">運動連帽拉鍊外套（活力健美）</option>
+        <option value="外搭透明雨衣質感前衛外套">透明PVC前衛外套（賽博時尚）</option>
+        <option value="披著一條復古英倫格紋披肩">英倫格紋披肩（英倫溫暖）</option>
+        <option value="外搭緞面小香風短款外套">小香風短款外套（輕奢優雅）</option>
+        <option value="外搭防曬微透光冰絲長袖罩衫">冰絲微透光長袖罩衫（輕盈透氣）</option>
+        <option value="單純展示內衣套裝，無額外外罩">無外罩（純內衣套裝展示）</option>
+        <option value="外搭法式復古蕾絲小斗篷">法式蕾絲小斗篷（古典浪漫）</option>
+        <option value="外搭棉麻質地隨性長款風衣">棉麻長款風衣（都市隨性）</option>
+        <option value="外搭薄荷綠色馬海毛毛衣">馬海毛蓬鬆毛衣（甜美軟糯）</option>
+        <option value="外搭亮片裝飾奢華罩衫">亮片裝飾奢華罩衫（午夜派對）</option>
+        <option value="外搭黑色網紗透視長罩衫">黑色網紗透視長罩衫（神秘誘惑）</option>
+        <option value="外搭粉色緞面羽毛邊晨袍">粉色羽毛邊緞面晨袍（夢幻甜心）</option>
+        <option value="外搭極簡卡其色風衣（敞開擺動）">卡其色風衣敞開（街拍氣場）</option>
+        <option value="外搭運動風棒球外套">運動棒球外套（美式街頭）</option>
+        <option value="外搭芭蕾風粉色交叉心機罩衫">芭蕾風交叉綁帶罩衫（優雅柔美）</option>
+        <option value="外搭高級深藍色絨面晨袍">深藍色貴族絨面晨袍（奢華沉穩）</option>
+        <option value="身上裹著一張純白柔軟被單（遮住局部）">裹著純白柔軟被單（性感）</option>
+        <option value="外搭印花夏威夷短袖襯衫（敞開）">夏威夷印花襯衫（熱帶度假）</option>
+        <option value="">無顯示（不指定外罩）</option>
+      </select>
+    </div>
+
+    <!-- 4. 時尚穿搭配件 -->
+    <div class="section-title">4. 時尚穿搭配件（首飾/眼鏡/鞋襪/髮飾）</div>
+
+    <div class="form-group">
+      <label>首飾與項鍊（點綴鎖骨/胸前）</label>
+      <select id="jewelry">
+        <option value="佩戴一條細緻金屬鎖骨鍊與精緻小吊墜">細緻金屬鎖骨鍊（精緻氣質）</option>
+        <option value="佩戴多層次金屬金屬項鍊與金屬大耳環">多層次金屬項鍊（帥氣時尚）</option>
+        <option value="佩戴溫潤的雙層珍珠項鍊與珍珠耳環">雙層珍珠項鍊與耳環（優雅復古）</option>
+        <option value="佩戴簡約極簡圓環金屬耳環與金屬戒指">極簡金屬圈圈耳環/戒指</option>
+        <option value="佩戴性感細緻的身體鍊（Body Chain）穿過胸腰">性感身體鍊Body Chain（點綴胸腰）</option>
+        <option value="佩戴黑色蕾絲/皮革頸鍊（Choker）">黑色蕾絲/皮革頸鍊Choker（酷颯）</option>
+        <option value="佩戴璀璨水鑽吊墜與閃耀耳墜">璀璨水鑽吊墜與耳墜（奢華晚宴）</option>
+        <option value="佩戴復古金色法式硬幣項鍊">復古金色法式硬幣項鍊（法式浪漫）</option>
+        <option value="佩戴玫瑰金細雙鍊與手鍊">玫瑰金細雙鍊與手鍊（溫柔質感）</option>
+        <option value="佩戴個性粗金屬鏈條項鍊（Heavy Chain）">粗金屬鏈條項鍊（Y2K潮酷）</option>
+        <option value="佩戴可愛粉色水晶手串與心形吊墜">粉色水晶心形吊墜（甜美少女）</option>
+        <option value="佩戴銀色星芒項鍊與星型耳環">銀色星芒項鍊與耳環（夢幻星空）</option>
+        <option value="佩戴綠翡翠/祖母綠精緻鎖骨吊墜">祖母綠精緻鎖骨吊墜（高貴名媛）</option>
+        <option value="佩戴波西米亞風綠松石項鍊與手鐲">綠松石波西米亞項鍊（民族風格）</option>
+        <option value="手腕佩戴高級奢華金屬手錶">高級金屬手錶（知性幹練）</option>
+        <option value="佩戴細緻腳鍊（Anklet）點綴腳踝">細緻腳鍊Anklet（點綴腳踝）</option>
+        <option value="佩戴極簡金屬肚臍環（Navel Ring）">極簡金屬肚臍環（性感健美）</option>
+        <option value="佩戴帶有蝴蝶結圖案的金屬項鍊">蝴蝶結金屬項鍊（芭蕾少女）</option>
+        <option value="佩戴復古十字架吊墜項鍊">復古十字架項鍊（暗黑哥特）</option>
+        <option value="佩戴精緻珍珠手鍊與多個細戒指疊戴">珍珠手鍊與多戒指疊戴</option>
+        <option value="佩戴金屬蛇形繞手臂手環">蛇形手臂手環（野性高貴）</option>
+        <option value="佩戴小巧璀璨鑽石耳釘（Single Diamond）">鑽石耳釘（極簡奢華）</option>
+        <option value="佩戴亞克力彩色復古大耳環">亞克力彩色復古耳環（Y2K風格）</option>
+        <option value="佩戴純銀鎖骨鍊與小巧月亮吊墜">純銀月亮鎖骨鍊（清冷仙氣）</option>
+        <option value="佩戴奢華香檳金大夸張耳環">奢華香檳金夸張耳環（大片張力）</option>
+        <option value="佩戴流蘇長款閃鑽耳環（垂至肩膀）">流蘇閃鑽長耳環（垂肩靈動）</option>
+        <option value="佩戴紅色寶石心形項鍊">紅寶石心形項鍊（復古誘惑）</option>
+        <option value="佩戴木質與貝殼組合自然項鍊">貝殼木質自然項鍊（渡假風）</option>
+        <option value="佩戴簡約金屬胸針點綴罩衫">簡約金屬胸針（精緻細節）</option>
+        <option value="無任何首飾裝飾，呈現最純粹肌膚">無首飾（純淨自然肌膚）</option>
+        <option value="">無顯示（不指定首飾）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>鞋襪與腳部搭配</label>
+      <select id="footwear">
+        <option value="腳穿一雙細高跟尖頭鞋，展現完美腿部線條">細高跟尖頭鞋（時尚氣場）</option>
+        <option value="腳穿一雙黑色帥氣皮質短靴/馬汀靴">黑色皮質短靴（酷颯帥氣）</option>
+        <option value="腳穿一雙毛絨絨的軟糯居家拖鞋">毛絨絨居家拖鞋（可愛舒適）</option>
+        <option value="赤腳踏在地毯或地板上，呈現自然居家感">自然赤腳（居家放鬆感）</option>
+        <option value="搭配白色半透明蕾絲花邊長襪與瑪莉珍鞋">白色蕾絲長襪 + 瑪莉珍鞋（可愛甜美）</option>
+        <option value="搭配黑色性感半透明長筒絲襪與高跟鞋">黑色長筒絲襪 + 高跟鞋（性感大片）</option>
+        <option value="搭配鬆軟的日系棉質堆堆襪">日系棉質堆堆襪（居家軟糯）</option>
+        <option value="搭配個性細網格網襪與厚底短靴">個性細網襪 + 厚底短靴（酷颯Y2K）</option>
+        <option value="腳穿白色復古復古復古老爹鞋/運動鞋">復古老爹鞋/運動鞋（美式健美）</option>
+        <option value="搭配芭蕾舞交叉綁帶平底鞋與粉色襪子">芭蕾綁帶鞋 + 粉色襪（芭蕾風）</option>
+        <option value="腳穿一雙法式性感一字帶高跟涼鞋">一字帶高跟涼鞋（極簡法式）</option>
+        <option value="腳穿一雙過膝黑色皮革長筒靴">過膝黑色長筒靴（女王氣場）</option>
+        <option value="腳穿奢華羽毛點綴的高跟拖鞋">羽毛高跟拖鞋（奢華）</option>
+        <option value="腳穿純白棉質運動中筒襪">純白運動中筒襪（青春陽光）</option>
+        <option value="腳穿法式絨面穆勒鞋（Mules）">法式絨面穆勒鞋（隨性優雅）</option>
+        <option value="搭配白色吊帶絲襪與經典黑色高跟鞋">白色吊帶絲襪 + 黑色高跟鞋（經典）</option>
+        <option value="搭配黑色吊帶絲襪與經典黑色高跟鞋">黑色吊帶絲襪 + 黑色高跟鞋（經典）</option>
+        <option value="腳穿透明玻璃水晶高跟鞋">透明水晶高跟鞋（仙氣夢幻）</option>
+        <option value="腳穿一雙厚底木屐涼鞋">厚底木屐涼鞋（渡假復古）</option>
+        <option value="搭配黑色膝下中筒襪與樂福鞋">黑色中筒襪 + 樂福鞋（學院風）</option>
+        <option value="腳穿室內純羊毛保暖厚地板襪">羊毛厚地板襪（冬日溫暖）</option>
+        <option value="腳穿金色金屬光澤高跟涼鞋">金色高跟涼鞋（奢華派對）</option>
+        <option value="搭配彩色撞色中筒潮襪">彩色撞色潮襪（街頭潮酷）</option>
+        <option value="腳穿絨面綁帶羅馬涼鞋">絨面綁帶羅馬涼鞋（異國風情）</option>
+        <option value="赤腳並在腳踝戴著金色小腳鍊">赤腳搭金色腳鍊（精緻性感）</option>
+        <option value="腳穿黑色綁帶長靴">黑色綁帶長靴（機能帥氣）</option>
+        <option value="腳穿可愛貓咪圖案居家拖鞋">貓咪居家拖鞋（童趣可愛）</option>
+        <option value="腳穿鬆糕厚底帆布鞋">鬆糕厚底帆布鞋（休閒減齡）</option>
+        <option value="腳穿紅色尖頭細高跟鞋（點睛色彩）">紅色尖頭高跟鞋（紅唇點睛）</option>
+        <option value="搭配白色魚網短襪與高跟鞋">白色魚網短襪 + 高跟鞋（時尚混搭）</option>
+        <option value="赤腳踩在沙灘上（海邊氛圍）">赤腳踩沙灘（海邊自然）</option>
+        <option value="">無顯示（不指定鞋襪）</option>
+      </select>
+    </div>
+
+    <!-- 5. 下午茶、食物與點心道具 -->
+    <div class="section-title">5. 下午茶、食物與點心道具</div>
+
+    <div class="form-group">
+      <label>手拿食物/點心互動</label>
+      <select id="foodItem">
+        <option value="單手拿著一顆新鮮誘人的紅草莓正要輕咬一口">手拿新鮮草莓（可愛甜美/誘惑）</option>
+        <option value="手持精緻粉色法式馬卡龍輕抿嘴邊">手持法式馬卡龍（精緻法式）</option>
+        <option value="手拿一塊帶有糖霜的草莓奶油蛋糕切片與小叉子">手拿草莓奶油蛋糕（溫馨下午茶）</option>
+        <option value="雙手端著一杯帶有綿密奶泡與拉花的熱拿鐵咖啡">雙手端拉花拿鐵（慵懶溫暖）</option>
+        <option value="手捏著一塊金黃酥脆的法式可頌麵包">手捏法式可頌（法式早晨）</option>
+        <option value="優雅手持一高腳杯紅酒或粉紅氣泡酒">優雅手持高腳紅酒/氣泡酒（微醺）</option>
+        <option value="手拿著一支造型可愛的粉色冰淇淋">手拿粉色冰淇淋（美式復古可愛）</option>
+        <option value="手拿吸管輕喝玻璃杯中的冰拿鐵/美式咖啡">吸管輕喝冰咖啡（時尚街拍感）</option>
+        <option value="手持一顆多汁的切開水蜜桃，微露果肉">手持切開水蜜桃（純欲鮮甜）</option>
+        <option value="手拈著一顆黑櫻桃正準備放入嘴裡">手拈黑櫻桃（午夜誘惑）</option>
+        <option value="手持一根彩色棒棒糖放置唇邊">手持彩色棒棒糖（Y2K俏皮）</option>
+        <option value="手端一小碗切塊的紅心芭樂與葡萄">手端水果沙拉碗（健康陽光）</option>
+        <option value="手拿一塊濃郁咬了一口的巧克力布朗尼">手拿巧克力布朗尼（甜蜜療癒）</option>
+        <option value="手持一支裝飾著食用金箔的精緻甜甜圈">手持金箔甜甜圈（奢華派對）</option>
+        <option value="雙手捧著溫熱的陶瓷馬克杯（冒著微弱蒸汽）">捧著蒸汽馬克杯（冬日溫暖）</option>
+        <option value="手拿一瓶復古玻璃瓶裝可口可樂與吸管">手拿復古玻璃瓶可樂（美式復古）</option>
+        <option value="手持精緻玻璃杯裝的香檳並微舉杯祝酒">手持香檳祝酒（高貴慶典）</option>
+        <option value="手拿一支精緻的彩虹法式閃電泡芙">手拿法式閃電泡芙（時尚甜點）</option>
+        <option value="手捏著一片薄切檸檬片貼近面頰">手捏檸檬片（清新夏日）</option>
+        <option value="手持一盤剛烤好的朱古力曲奇餅乾">手持曲奇餅乾（居家烘焙感）</option>
+        <option value="手持一枝透明玻璃瓶裝的鮮奶吸飲">手持鮮奶玻璃瓶（純真清新）</option>
+        <option value="手拿著一枝藍莓塔並用叉子舀起">手拿藍莓塔（精緻下午茶）</option>
+        <option value="手持一隻烤棉花糖串微露笑容">手持烤棉花糖（露營甜美）</option>
+        <option value="手拿切開的黃金百香果與小匙">手拿百香果（熱帶風情）</option>
+        <option value="手持特調粉色漸層雞尾酒杯">手持粉色雞尾酒（酒吧夜生活）</option>
+        <option value="手拿一小塊法式焦糖瑪德蓮糕點">手拿焦糖瑪德蓮（法式優雅）</option>
+        <option value="手持玻璃壺倒出花草茶至精緻茶杯">倒花草茶動作（優雅生活）</option>
+        <option value="手拈著一朵食用玫瑰花裝飾的杯子蛋糕">手拈玫瑰杯子蛋糕（夢幻甜美）</option>
+        <option value="手拿一塊抹茶千層蛋糕與銀叉">手拿抹茶千層（日系清新）</option>
+        <option value="無手拿食物，專注於內衣商品展現">無手拿食物（專注商品）</option>
+        <option value="">無顯示（不拿食物點心）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>周邊下午茶桌面與環境擺設</label>
+      <select id="teaTableSetting">
+        <option value="身旁小桌上擺放著精緻的三層英式下午茶塔與英式茶壺">英式三層點心塔與茶壺（高雅高級）</option>
+        <option value="擺放著精緻銀盤、新鮮切片水果與兩杯咖啡">銀盤水果與咖啡（質感生活）</option>
+        <option value="擺放著剛出爐的烘焙糕點、奶油塊與復古花茶杯">復古烘焙點心與花茶（暖心日系）</option>
+        <option value="擺放著香氛蠟燭、一高腳杯氣泡酒與點心盤">香氛蠟燭與氣泡酒（奢華夜間）</option>
+        <option value="桌上散落著幾本時尚雜誌、墨鏡與半杯美式咖啡">時尚雜誌、墨鏡與咖啡（現代都會）</option>
+        <option value="桌上擺放著滿滿的新鮮鬱金香花束與玻璃水杯">鬱金香花束與水杯（清新浪漫）</option>
+        <option value="擺放著法式長棍麵包、起司盤與紅酒瓶">法式麵包起司與紅酒（法式野餐）</option>
+        <option value="擺放著復古底片相機、拍立得照片與花茶">復古相機與拍立得（懷舊文青）</option>
+        <option value="擺放著滿滿粉色玫瑰花瓣與香檳冰桶">粉色玫瑰花瓣與香檳冰桶（夢幻奢華）</option>
+        <option value="床邊擺放著早安早餐托盤（含煎蛋、吐司與牛奶）">床邊早餐托盤（早安感）</option>
+        <option value="擺放著美式甜甜圈盒與彩色軟糖罐">美式甜甜圈盒與軟糖（美式繽紛）</option>
+        <option value="擺放著精緻日式抹茶器具與和菓子甜點">日式抹茶與和菓子（日式禪意）</option>
+        <option value="桌面擺放著高級香水瓶、珠寶盒與護手霜">高級香水瓶與珠寶盒（時尚梳妝）</option>
+        <option value="托盤上擺放著精緻舒芙蕾鬆餅與蜂蜜罐">舒芙蕾鬆餅與蜂蜜罐（甜美軟糯）</option>
+        <option value="擺放著熱帶水果盤（芒果、鳳梨、木瓜）">熱帶水果盤（度假陽光）</option>
+        <option value="擺放著復古黑膠唱片機與唱片封套">黑膠唱片機與唱片（復古音樂）</option>
+        <option value="擺放著精緻法式栗子蒙布朗與花茶">法式蒙布朗與花茶（秋日優雅）</option>
+        <option value="擺放著玻璃冰桶裝著冰鎮粉紅葡萄酒">冰鎮粉紅葡萄酒（夏日微醺）</option>
+        <option value="桌上擺放著乾燥花束與復古牛皮紙書本">乾燥花束與復古書本（文藝復古）</option>
+        <option value="擺放著彩色馬卡龍塔與閃耀水晶杯">彩色馬卡龍塔與水晶杯（夢幻派對）</option>
+        <option value="擺放著冰淇淋聖代杯與櫻桃點綴">冰淇淋聖代杯（復古美式）</option>
+        <option value="擺放著韓系奶油蛋糕與可愛蠟燭">韓系奶油蛋糕與蠟燭（生日派對）</option>
+        <option value="擺放著精緻青花瓷茶具與中式糕點">青花瓷茶具與糕點（國潮古典）</option>
+        <option value="擺放著新鮮藍莓、草莓與優格碗">水果優格碗（健康美體）</option>
+        <option value="擺放著香氛噴霧、絲巾與精油瓶">香氛噴霧與精油（SPA放鬆感）</option>
+        <option value="擺放著滿滿的水晶高腳杯塔">水晶高腳杯塔（慶典奢華）</option>
+        <option value="擺放著手作巧克力禮盒與緞帶">手作巧克力禮盒（情人節浪漫）</option>
+        <option value="桌面極簡無雜物，強調潔淨空間">極簡無雜物桌面（極簡純淨）</option>
+        <option value="擺放著英式司康（Scone）與果醬凝塊奶油">英式司康與凝塊奶油（正統下午茶）</option>
+        <option value="擺放著冷萃咖啡瓶與水晶威士忌杯">冷萃咖啡與威士忌杯（現代帥氣）</option>
+        <option value="">無顯示（不擺放桌面點心）</option>
+      </select>
+    </div>
+
+    <!-- 6. 場景與光影 -->
+    <div class="section-title">6. 場景環境與光影</div>
+
+    <div class="form-group">
+      <label>拍攝場景風格</label>
+      <select id="environment">
+        <option value="純白色柔軟大床與簡約高級的臥室空間">高級臥室（純白大床/質感被單）</option>
+        <option value="奶油風極簡室內空間，帶有溫暖地毯與簡約沙發">奶油風極簡客廳 (沙發/地毯)</option>
+        <option value="法式輕奢復古房間，帶有落地大鏡子與雕花牆面">法式復古房間 (全身鏡/雕花牆)</option>
+        <option value="陽光充足的大落地窗邊下午茶小桌旁">陽光大落地窗邊下午茶區</option>
+        <option value="現代奢華飯店浴室，帶有大理石紋理與獨立浴缸邊">大理石飯店浴室 (浴缸邊/明亮鏡面)</option>
+        <option value="工業風水泥牆面與俐落金屬家具空間">工業風格房間（帥氣酷感）</option>
+        <option value="極簡純色商業內衣攝影棚無瑕背景">純色極簡攝影棚（商業無瑕）</option>
+        <option value="充滿陽光的熱帶度假Villa海景露台">熱帶度假Villa海景露台</option>
+        <option value="復古90年代美式 motel 房間，帶有霓虹燈影">美式復古 Motel 房間（霓虹光影）</option>
+        <option value="充滿植物與綠意的溫室花園空間">綠意盎然溫室花園</option>
+        <option value="夢幻粉色系少女梳妝台房間">粉色少女梳妝台房間</option>
+        <option value="日式榻榻米與木質溫馨房間">日式榻榻米木質房間</option>
+        <option value="波西米亞風帳篷與編織地毯露營場景">波西米亞露營帳篷場景</option>
+        <option value="極致奢華的歐洲宮廷城堡臥室">歐洲宮廷城堡奢華臥室</option>
+        <option value="充滿陽光與微風的純白海灘邊">純白海灘與藍天大海</option>
+        <option value="現代高空頂樓豪宅天台（Penthouse Rooftop）">高空頂樓豪宅天台</option>
+        <option value="充滿氛圍的室內溫泉/露天風呂邊">夢幻室內溫泉/風呂邊</option>
+        <option value="時尚商業街頭咖啡館戶外座位">街頭咖啡館戶外座位（時尚街拍）</option>
+        <option value="復古黑膠唱片行內部空間">復古黑膠唱片行（懷舊質感）</option>
+        <option value="暗色調極簡奢華套房，帶有隱約微光">暗色調極簡奢華套房</option>
+        <option value="芭蕾舞練習室，帶有鏡牆與舞蹈木把手">芭蕾舞練習室（舞蹈藝術）</option>
+        <option value="藝廊/畫廊展廳，牆上掛著抽象畫作">現代藝廊展廳（藝術氣息）</option>
+        <option value="溫暖木質閣樓房間，帶有斜頂天窗">溫暖木質閣樓天窗房間</option>
+        <option value="充滿復古書香氣息的私人圖書館/書房">私人圖書館/復古書房</option>
+        <option value="充滿夢幻蕾絲帷幄的公主床內部">夢幻蕾絲帷幄公主床</option>
+        <option value="現代健身房/拳擊場邊（健美風格）">現代健身房/拳擊場邊</option>
+        <option value="雨天玻璃窗邊，窗外帶有雨滴模糊夜景">雨天夜景玻璃窗邊</option>
+        <option value="盛開的櫻花樹下/花海之中">盛開櫻花樹下/花海中</option>
+        <option value="賽博朋克風格街頭，帶有炫彩霓虹光影">賽博朋克霓虹街頭</option>
+        <option value="純白抽象無邊界空間，帶有藝術幾何雕塑">純白幾何雕塑抽象空間</option>
+        <option value="">無顯示（不指定場景）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>時間與光線氛圍</label>
+      <select id="timeOfDay">
+        <option value="透過紗簾透進來的清晨柔和晨光（Soft Morning Light）">清晨柔和晨光（透光紗簾）</option>
+        <option value="明亮透亮點白天自然陽光（Bright Daylight）">明亮自然陽光（乾淨通透）</option>
+        <option value="黃昏溫暖微醺的金色夕陽光（Golden Hour Sunset）">黃昏金色夕陽光（Golden Hour）</option>
+        <option value="夜間床頭暖色調燈光，營造溫馨氛圍">夜間床頭暖色氛圍光</option>
+        <option value="商業攝影棚無瑕高調柔光箱光線（Softbox Lighting）">商業攝影棚極致柔光</option>
+        <option value="透過百葉窗照射進來的條紋幾何光影（Chiaroscuro）">百葉窗條紋幾何光影</option>
+        <option value="溫暖的燭光與暗調微光（Candlelight）">溫暖燭光與微光</option>
+        <option value="午後強烈陽光形成的硬朗光影對比（Hard Sun & Shadows）">午後強烈硬光與陰影</option>
+        <option value="藍調時刻（Blue Hour），窗外帶有深藍夜空光線">藍調時刻深藍夜空光</option>
+        <option value="炫彩霓虹燈光（Neon Lights），帶有紅藍復古光影">炫彩霓虹復古光影</option>
+        <option value="極致夢幻的側逆光（Backlight），邊緣發光髮絲">夢幻側逆光（發光髮絲邊緣）</option>
+        <option value="室內溫馨暖黃色落地燈光">室內溫馨暖黃落地燈光</option>
+        <option value="陰天柔和散射光（Overcast Soft Light），極致平滑">陰天柔和散射光（平滑質感）</option>
+        <option value="冷色調科技感藍光與紫光">冷色調科技感藍紫光</option>
+        <option value="透過樹葉灑落的斑駁光影（Komorebi）">樹葉灑落斑駁光影（Komorebi）</option>
+        <option value="月光般清冷的銀白色夜光">月光般清冷銀白夜光</option>
+        <option value="電影感倫勃朗光（Rembrandt Lighting），極具立體感">電影感倫勃朗光（立體光影）</option>
+        <option value="蝴蝶光/美人光（Butterfly Lighting），強調面部精緻">蝴蝶光/美人光（面部精緻）</option>
+        <option value="環形燈（Ring Light）點亮雙眼瞳孔光線">環形燈點亮瞳孔眼神光</option>
+        <option value="水面波光粼粼反射在身上的動態光影">水面波光粼粼反射光影</option>
+        <option value="夢幻彩色玻璃（Stained Glass）折射斑斕光影">彩色玻璃折射斑斕光影</option>
+        <option value="夜間閃光燈直打風格（Flash Photography）">夜間閃光燈直打（時尚街拍感）</option>
+        <option value="低調暗光（Low-key Lighting），大面積陰影神秘感">低調暗光大面積陰影（神秘感）</option>
+        <option value="高調亮光（High-key Lighting），整體通透無陰影">高調亮光通透無陰影</option>
+        <option value="日落後的紫紅霞光透過窗戶">日落紫紅霞光照射</option>
+        <option value="溫室玻璃頂棚透下的全方位無死角自然光">溫室頂棚全方位自然光</option>
+        <option value="投影儀投射在身上的藝術圖案光影">投影儀圖案藝術光影</option>
+        <option value="微弱手電筒/聚光燈重點照射商品">聚光燈重點照射商品</option>
+        <option value="火爐邊跳動溫暖橘紅火光">火爐邊跳動橘紅火光</option>
+        <option value="純淨無暇商業白光">純淨無暇商業白光</option>
+        <option value="">無顯示（不指定光線）</option>
+      </select>
+    </div>
+
+    <!-- 7. 姿勢、視角與質感 -->
+    <div class="section-title">7. 姿勢神態、視角與寫真質感</div>
+
+    <div class="form-group">
+      <label>表情與神態</label>
+      <select id="expression">
+        <option value="慵懶迷人且微張雙唇的神態（Sensual Pout）">慵懶迷人（微張雙唇）</option>
+        <option value="帥氣高冷且眼神犀利的酷颯表情">帥氣酷颯高冷眼神</option>
+        <option value="可愛眨眼（Wink）與甜美燦爛的笑容">可愛眨眼與燦爛笑容</option>
+        <option value="自信優雅且帶有溫柔眼神">自信優雅溫柔眼神</option>
+        <option value="害羞輕撫髮絲的甜美神態">害羞甜美神態</option>
+        <option value="清純無辜且直視鏡頭的大眼神態">清純無辜直視鏡頭</option>
+        <option value="微閉雙眼享受陽光照射的寧靜神態">微閉雙眼享受陽光（寧靜感）</option>
+        <option value="帶有挑釁與魅惑感的自信微笑">挑釁魅惑自信微笑</option>
+        <option value="眼神發空隨性的厭世臉表情（High Fashion Cold Look）">厭世高冷超模臉</option>
+        <option value="剛睡醒般的懵懂迷糊神態">剛睡醒懵懂迷糊神態</option>
+        <option value="輕咬下唇的性感神態">輕咬下唇性感神態</option>
+        <option value="微露齒笑的陽光親切表情">微露齒笑陽光親切表情</option>
+        <option value="沉思微低頭的知性安靜表情">沉思知性安靜表情</option>
+        <option value="充滿好奇心與俏皮靈動的神態">俏皮靈動好奇神態</option>
+        <option value="高貴冷艷且不可侵犯的女王氣場表情">高貴冷艷女王氣場</option>
+        <option value="眼角帶笑的溫柔治癒系神態">治癒系溫柔微笑</option>
+        <option value="帶有些許神秘感的側臉神情">神秘感側臉神情</option>
+        <option value="輕輕吹氣或嘟嘴的可愛表情">嘟嘴可愛俏皮表情</option>
+        <option value="專注於手上點心的享受神情">專注享受點心神情</option>
+        <option value="冷靜專業的商業拍攝神情">冷靜專業商業神情</option>
+        <option value="帶有微醺感眼眸迷離的神態">微醺迷離眼眸神態</option>
+        <option value="深情凝視遠方的文青神情">深情凝視遠方文青神情</option>
+        <option value="動感躍動時的驚喜笑容">躍動驚喜笑容</option>
+        <option value="微微抬起下巴的自信傲嬌神態">自信傲嬌抬下巴神態</option>
+        <option value="溫柔撫摸臉頰的軟萌表情">撫臉軟萌溫柔表情</option>
+        <option value="眼神充滿故事感的底片女主角表情">故事感底片女主角表情</option>
+        <option value="輕輕舔唇的極致誘惑神態">輕舔唇性感神態</option>
+        <option value="放鬆自然無表情的純粹狀態">放鬆自然純粹狀態</option>
+        <option value="充滿運動活力的燦爛大笑">運動活力燦爛大笑</option>
+        <option value="神秘微露半臉的神態">神秘微露半臉神態</option>
+        <option value="">無顯示（不指定表情）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>模特兒姿勢</label>
+      <select id="pose">
+        <option value="輕微側身斜躺在白色床單上，一手輕撫鬢角">側躺床上（呈現胸型與腰線）</option>
+        <option value="一手搭在西裝外套上，腳踩高跟鞋的帥氣站姿">帥氣站姿（搭外套/手插口袋）</option>
+        <option value="雙腿屈膝坐在地毯上，雙手抱膝的可愛坐姿">地毯抱膝坐姿（可愛隨性）</option>
+        <option value="優雅坐在沙發邊緣，雙腿微交疊展現腿長">沙發邊緣坐姿（優雅展現套裝）</option>
+        <option value="背對鏡頭站立，微轉身回眸，重點呈現背部與底褲剪裁">背對回眸（強調美背/內褲剪裁）</option>
+        <option value="自然站立於落地窗前，一手輕搭在腰間展現包覆度">自然站立（展示胸罩包覆度）</option>
+        <option value="俯臥趴在床上，雙腳後抬微翹，雙手托腮">俯臥趴床雙腳後抬托腮（俏皮）</option>
+        <option value="雙手高舉整理頭髮，完美展現腋下與肋骨胸型線條">雙手高舉整理頭髮（拉長胸腰）</option>
+        <option value="一手拉著罩衫邊緣微露肩部，微傾斜身體">一手拉罩衫露肩微傾（性感）</option>
+        <option value="坐在全身鏡前看著鏡中的自己（鏡面反射構圖）">坐在全身鏡前（鏡面反射對比）</option>
+        <option value="單腿支撐靠牆站立，展現長腿與臀部曲線">單腿靠牆站姿（展現腿臀線條）</option>
+        <option value="身體前傾靠近鏡頭，強調胸型與鎖骨細節">身體前傾靠近鏡頭（強調胸型鎖骨）</option>
+        <option value="盤腿坐在床上，手端咖啡杯">盤腿坐床手端咖啡（慵懶早晨）</option>
+        <option value="優雅躺在浴缸邊緣，一隻腳伸直展現線條">躺浴缸邊緣（大理石奢華感）</option>
+        <option value="雙手環抱胸前，展現自信態度">雙手環抱胸前（自信態度）</option>
+        <option value="微側身跨步走動動態抓拍，罩衫飄逸">跨步走動抓拍（動態飄逸感）</option>
+        <option value="正面仰臥躺在床單上，髮絲向四周散開">仰臥躺床髮絲散開（純欲美感）</option>
+        <option value="雙手放在背後扣住，挺胸展現完美胸型">雙手後扣挺胸（強調挺拔胸型）</option>
+        <option value="跪坐在床上/地毯上，身體微後仰展現腹部曲線">跪坐微後仰（展示腹部與腰線）</option>
+        <option value="一手搭在椅背上的俐落坐姿">一手搭椅背俐落坐姿（時尚風格）</option>
+        <option value="雙手輕拉內褲邊帶，展示高腰剪裁與彈力">雙手拉內褲邊帶（展示商品細節）</option>
+        <option value="輕撫胸口與肩帶，展示肩帶質感與面料">輕撫肩帶（展示肩帶布料質感）</option>
+        <option value="坐在高腳凳上，長腿伸直折疊構圖">高腳凳坐姿（極致展示長腿）</option>
+        <option value="側身S型站姿，一手插後口袋或搭臀部">側身S型站姿（凸顯翹臀與S曲線）</option>
+        <option value="雙手遮擋部分臉龐，專注商品展現">雙手遮臉（專注商品焦點）</option>
+        <option value="慵懶窩在單人沙發椅內，雙腿搭在扶手上">窩單人沙發腿搭扶手（極致隨性）</option>
+        <option value="正面伸展肢體，運動感十足">正面伸展肢體（運動健美感）</option>
+        <option value="低頭調整鞋帶或襪子，自然動態感">低頭調整鞋帶/襪子（自然動態）</option>
+        <option value="微醺狀態斜靠在牆邊">斜靠牆邊微醺姿勢</option>
+        <option value="男士：雙手抓著褲頭，展示腰帶Logo標籤">男士：抓褲頭展示腰帶Logo</option>
+        <option value="">無顯示（不指定姿勢）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>拍攝視角與構圖</label>
+      <select id="angle">
+        <option value="正面中景胸部至腰部特寫，清晰展示內衣細節與杯型">中景特寫（胸腰區，強調杯型細節）</option>
+        <option value="正面全身照，完美呈現整體內衣套裝與身材比例">正面全身照（展示整體套裝）</option>
+        <option value="側身45度特寫，強調側收副乳與側邊包覆效果">45度側向特寫（強調側收與線條）</option>
+        <option value="背部與肩帶線條特寫構圖，強調背部美型">背部特寫（強調肩帶/美背設計）</option>
+        <option value="俯拍視角（High-angle），展現慵懶臥姿與性感線條">俯拍視角（展現慵懶曲線）</option>
+        <option value="仰拍仰角視角（Low-angle），展現高挑氣場與逆天長腿">仰拍視角（高挑氣場/長腿）</option>
+        <option value="超微距極近特寫（Macro），展現蕾絲花紋與刺繡布料質感">超微距特寫（蕾絲/刺繡布料細節）</option>
+        <option value="特寫腰部與內褲邊帶細節，展現剪裁與無痕質感">腰部與內褲邊帶特寫（展示無痕）</option>
+        <option value="鏡子反射構圖（Mirror Reflection），同時呈現正面與背面">鏡子反射構圖（同時呈現正背面）</option>
+        <option value="第一人稱視角（POV），彷彿對面伴侶拍攝的視角">第一人稱視角POV（伴侶感）</option>
+        <option value="框架構圖（Framing），透過門縫或紗簾隱約拍攝">框架構圖（門縫/紗簾窺探感）</option>
+        <option value="對角線動態構圖，拉長人體線條">對角線構圖（拉長肢體線條）</option>
+        <option value="中心對稱黃金構圖，極致平衡質感">中心對稱黃金構圖（極致典雅）</option>
+        <option value="三分法構圖，人物放置於畫面左側或右側">三分法構圖（留白雜誌感）</option>
+        <option value="特寫鎖骨與胸罩上沿杯型細節">鎖骨與上杯型特寫（展示胸型）</option>
+        <option value="九宮格動態特寫，捕捉連續微動作">九宮格連續動態特寫</option>
+        <option value="廣角透視視角，強調環境氛圍與空間感">廣角透視視角（強調環境氛圍）</option>
+        <option value="長焦鏡頭壓縮感，景深極淺，背景完美虛化">長焦淺景深（背景完美虛化）</option>
+        <option value="平視眼平視角（Eye-level），建立直接真實親近感">平視視角（真實親近感）</option>
+        <option value="過肩視角（Over-the-shoulder），帶有互動親密感">過肩視角（互動親密感）</option>
+        <option value="切頭構圖（無臉模特），專注於內衣商品本身細節">切頭無臉構圖（專注商品本身）</option>
+        <option value="特寫臀部與褲腳無痕剪裁細節">特寫臀部與褲腳細節（展示褲腳無痕）</option>
+        <option value="魚眼鏡頭前衛視角（Fisheye），潮酷大片質感">魚眼前衛視角（潮酷大片）</option>
+        <option value="高空垂直向下90度平視俯拍（Flatlay Perspective）">90度垂直俯拍（Flatlay感）</option>
+        <option value="側顏與肩膀特寫構圖">側顏與肩膀特寫構圖</option>
+        <option value="特寫手部撫摸布料的觸感細節">手部撫摸布料特寫（展示觸感）</option>
+        <option value="雙人對比構圖（若有兩位模特）">雙人對比展示構圖</option>
+        <option value="動態模糊（Motion Blur）捕捉滑落罩衫瞬時">動態模糊抓拍（時尚隨性）</option>
+        <option value="極致留白大空鏡構圖">極致留白大空鏡構圖</option>
+        <option value="特寫鋼圈與底圍支撐結構">特寫鋼圈與底圍支撐結構</option>
+        <option value="">無顯示（不指定視角）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>畫面質感與風格</label>
+      <select id="styleQuality">
+        <option value="時尚商業內衣大片質感，極致皮膚肌理細節，8k超高畫質，高雅色調">商業內衣大片（高級肌理/高雅色調）</option>
+        <option value="韓系柔光寫真質感，色彩柔和乾淨，清新透亮光影">韓系柔光寫真（清新透亮）</option>
+        <option value="日系底片膠片質感，帶有復古顆粒感與溫暖色調">日系復古膠片感（可愛懷舊）</option>
+        <option value="高對比度冷色調時尚大片，極具視覺衝擊力與硬朗質感">冷酷時尚大片質感（帥氣高冷）</option>
+        <option value="柯達膠卷（Kodak Portra 400）色彩，帶有溫暖懷舊膚色">柯達膠卷Portra 400色彩（溫暖膚色）</option>
+        <option value="富士膠卷（Fujifilm Pro 400H）色彩，帶有清透日系青綠色調">富士膠卷Pro 400H色彩（清透青綠）</option>
+        <option value="拍立得（Polaroid）復古質感，色彩微黃帶有獨特顆粒">拍立得復古質感（獨特顆粒感）</option>
+        <option value="電影級黑白攝影質感（Black & White），極致光影對比與結構">黑白電影攝影質感（光影藝術）</option>
+        <option value="Vogue 雜誌封面質感，極致奢華時尚與高階色調">Vogue 雜誌封面質感（高級時尚）</option>
+        <option value="柔焦夢幻質感（Dreamy Orton Effect），帶有仙氣光暈">柔焦夢幻質感（仙氣光暈）</option>
+        <option value="90年代港風復古膠片，濃郁色彩與獨特氛圍">90年代港風復古膠片（濃郁色彩）</option>
+        <option value="極致真實8K HDR攝影，毛孔與面料纖維清晰可見">8K HDR極致超真實細節</option>
+        <option value="膠片電影感（Cinematic 35mm），2.35:1畫面與溫柔色調">35mm電影膠片感（影院級）</option>
+        <option value="低飽和度極簡莫蘭迪色調（Morandi Color Palette）">低飽和莫蘭迪色調（極簡質感）</option>
+        <option value="油畫般細緻古典質感（Oil Painting Aesthetic）">油畫古典藝術質感</option>
+        <option value="閃光燈直打高調時尚感（High Fashion Flash Aesthetic）">閃光燈高調時尚感（派對街拍）</option>
+        <option value="清透水光質感，帶有微潤光澤感">清透水光潤澤質感</option>
+        <option value="暖洋洋陽光過濾質感，帶有金黃光斑">金黃陽光過濾質感</option>
+        <option value="極致啞光高級質感，無反光沉穩色調">極致啞光高級沉穩質感</option>
+        <option value="賽博朋克炫光質感，帶有霓虹反射光">賽博朋克霓虹反射質感</option>
+        <option value="冷淡風灰色調高階寫真質感">冷淡風灰色調高階寫真</option>
+        <option value="法式慵懶微粒質感，隨性自然">法式慵懶微粒質感</option>
+        <option value="高級奢華金屬光澤色彩風格">奢華金屬光澤色彩風格</option>
+        <option value="美式復古彩色雜誌質感（1970s Vintage）">美式70年代復古雜誌質感</option>
+        <option value="微醺暖紅醺感藝術寫真">微醺暖紅藝術寫真</option>
+        <option value="清冷藍調夢幻畫風">清冷藍調夢幻畫風</option>
+        <option value="純淨無瑕白高調寫真">純淨無瑕白高調寫真</option>
+        <option value="重顆粒粗糙復古黑白大片">重顆粒粗糙復古黑白大片</option>
+        <option value="3D超真實渲染CG質感（Unreal Engine 5）">UE5 3D超真實RENDER質感</option>
+        <option value="極致清透玻璃質感色調">極致清透玻璃質感色調</option>
+        <option value="">無顯示（不指定畫風）</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 結果輸出 -->
+  <div class="output-section">
+    <div class="output-header">
+      <label for="output">生成的 GPT 圖像生成指令 (Prompt)</label>
+    </div>
+    <textarea id="output" readonly></textarea>
+    <div class="btn-group">
+      <button onclick="generatePrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        生成 GPT 圖像指令
+      </button>
+      <button class="btn-copy" onclick="copyPrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        複製 GPT 指令
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /*
+   * GPT 圖像生成友善版 Prompt Builder
+   * 核心原則：
+   * 1. 明確指定「上傳圖片」是商品外觀的唯一參考來源。
+   * 2. 把「想要什麼」與「不要改什麼」分開描述。
+   * 3. 使用「商業攝影 / 電商商品展示」語氣，避免模糊或過度文學化描述。
+   * 4. 不要求模型臆造品牌、Logo、文字或商品結構。
+   */
+
+  function cleanValue(value) {
+    if (!value) return '';
+    return value
+      .replace(/無顯示（[^）]*）/g, '')
+      .replace(/無顯示/g, '')
+      .replace(/（性感[^）]*）/g, '')
+      .replace(/（極致性感[^）]*）/g, '')
+      .replace(/極致性感透膚/g, '時尚透膚材質表現')
+      .replace(/極致性感/g, '高級時尚')
+      .replace(/誘惑/g, '時尚氛圍')
+      .replace(/魅惑/g, '成熟時尚')
+      .replace(/純欲/g, '清透時尚')
+      .replace(/性感/g, '時尚')
+      .replace(/舔唇/g, '自然微笑或放鬆表情')
+      .trim();
+  }
+
+  function get(id) {
+    const el = document.getElementById(id);
+    return el ? cleanValue(el.value.trim()) : '';
+  }
+
+  function generatePrompt() {
+    const ratio = get('aspectRatio');
+    const genderVal = get('modelGender');
+    const nationality = get('modelNationality');
+    const skinTone = get('skinTone');
+    const body = get('bodyType');
+    const hair = get('hairStyle');
+
+    const imgRef = get('imgRef');
+    const outfitStyle = get('outfitStyle');
+    const top = get('topOutfit');
+    const bottom = get('bottomOutfit');
+    const outerwear = get('outerwear');
+
+    const jewelry = get('jewelry');
+    const footwear = get('footwear');
+
+    const food = get('foodItem');
+    const tea = get('teaTableSetting');
+
+    const environment = get('environment');
+    const time = get('timeOfDay');
+    const expression = get('expression');
+    const pose = get('pose');
+    const angle = get('angle');
+    const quality = get('styleQuality');
+
+    const lines = [];
+
+    lines.push('請生成一張「成人模特兒貼身衣物／內衣」商業攝影商品展示圖。');
+    lines.push('整體以真實攝影、自然人體比例、專業電商商品攝影為核心，不生成裸露內容。');
+
+    // 圖片參考規則：這是最重要的 GPT 圖像生成語意。
+    if (imgRef) {
+      lines.push(`【商品圖片參考】${imgRef}。請以使用者上傳的參考圖片作為商品外觀的主要依據，優先保持商品的款式、顏色、蕾絲／布料紋理、版型、車縫線、包覆結構與比例一致。不要自行重新設計商品。`);
+    } else {
+      lines.push('【商品圖片參考】若有使用者上傳商品圖片，請以該圖片作為商品外觀的主要依據；若沒有商品圖片，才依照文字描述生成。');
+    }
+
+    lines.push('【商品保真要求】商品是畫面第一優先，保持商品結構完整、穿著位置正確、左右對稱合理；不要新增不存在的肩帶、扣件、蕾絲、蝴蝶結、Logo、文字或其他裝飾。');
+
+    const model = [];
+    if (genderVal && genderVal !== 'none') model.push(genderVal);
+    if (nationality) model.push(nationality);
+    if (skinTone) model.push(skinTone);
+    if (body) model.push(body);
+    if (hair) model.push(hair);
+    if (model.length) {
+      lines.push(`【模特兒】${model.join('；')}。模特兒設定為成年人，外觀自然、比例合理，避免誇張或不符合人體結構的身材。`);
+    }
+
+    const outfit = [];
+    if (outfitStyle) outfit.push(`整體風格：${outfitStyle}`);
+    if (top) outfit.push(`上身商品：${top}`);
+    if (bottom) outfit.push(`下身商品：${bottom}`);
+    if (outerwear) outfit.push(`外搭：${outerwear}`);
+    if (outfit.length) lines.push(`【穿搭】${outfit.join('；')}。除指定商品外，不要加入會遮住商品主要細節的服裝。`);
+
+    const accessories = [];
+    if (jewelry) accessories.push(jewelry);
+    if (footwear) accessories.push(footwear);
+    if (accessories.length) lines.push(`【配件】${accessories.join('；')}。配件僅作為畫面輔助，不得搶過商品主體。`);
+
+    const props = [];
+    if (food) props.push(food);
+    if (tea) props.push(tea);
+    if (props.length) lines.push(`【道具】${props.join('；')}。道具只作為生活情境陪襯，不遮擋內衣商品。`);
+
+    const scene = [];
+    if (environment) scene.push(`場景：${environment}`);
+    if (time) scene.push(`光線／時間：${time}`);
+    if (scene.length) lines.push(`【場景與光線】${scene.join('；')}。光線自然、皮膚與布料細節清楚，避免過曝、死黑或塑膠感。`);
+
+    const poseParts = [];
+    if (expression) poseParts.push(`表情：${expression}`);
+    if (pose) poseParts.push(`姿勢：${pose}`);
+    if (poseParts.length) lines.push(`【姿勢與神態】${poseParts.join('；')}。姿勢自然、符合人體關節結構，並讓商品主要設計清楚可見。`);
+
+    if (angle) lines.push(`【鏡頭與構圖】${angle}。${ratio ? `畫幅比例：${ratio}。` : ''} 主體構圖完整，商品不被不必要地裁切。`);
+    else if (ratio) lines.push(`【鏡頭與構圖】畫幅比例：${ratio}。以商品展示為主要構圖目的。`);
+
+    if (quality) lines.push(`【影像質感】${quality}。維持真實攝影質感、自然皮膚紋理、清楚布料纖維與縫線細節。`);
+    else lines.push('【影像質感】高品質商業攝影，真實皮膚與布料紋理，柔和自然的攝影棚或環境光。');
+
+    lines.push('【畫面品質】高解析度、細節清晰、自然陰影、真實材質、專業商品攝影、乾淨畫面、自然景深。');
+    lines.push('【禁止事項】不要裸露、不要透明到看見身體私密部位、不要情色姿勢、不要未成年人、不要多餘手指或肢體、不要變形人體、不要錯誤穿著方式、不要修改商品款式、不要錯誤顏色、不要新增Logo或文字、不要浮水印。');
+
+    if (ratio) lines.push(`【輸出】優先使用 ${ratio} 的畫幅比例；若平台不支援完全相同比例，以最接近的可用比例呈現。`);
+
+    const prompt = lines.join('\n');
+    document.getElementById('output').value = prompt;
+  }
+
+  function copyPrompt() {
+    const output = document.getElementById('output');
+    if (!output.value) {
+      alert('請先點擊「生成 GPT 圖像指令」！');
+      return;
+    }
+    output.select();
+    document.execCommand('copy');
+    alert('GPT 圖像指令已成功複製到剪貼簿！');
+  }
+
+  window.onload = generatePrompt;
+</script>
+
+</body>
+</html>
