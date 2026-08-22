@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v6.0 (文字排版位置全擴充版)</title>
+  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v6.2</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; }
@@ -21,8 +21,8 @@
     
     .form-group { margin-bottom: 12px; }
     label { display: block; font-size: 13px; color: #cbd5e1; margin-bottom: 4px; }
-    select, input, textarea { width: 100%; background-color: #0f172a; border: 1px solid #475569; border-radius: 6px; padding: 8px; color: #ffffff; font-size: 13px; outline: none; }
-    select:focus, input:focus, textarea:focus { border-color: #f472b6; }
+    select, input[type="text"], textarea { width: 100%; background-color: #0f172a; border: 1px solid #475569; border-radius: 6px; padding: 8px; color: #ffffff; font-size: 13px; outline: none; }
+    select:focus, input[type="text"]:focus, textarea:focus { border-color: #f472b6; }
     
     .row { display: flex; gap: 12px; }
     .row > div { flex: 1; }
@@ -35,15 +35,19 @@
     .tag-item { display: inline-flex; align-items: center; font-size: 12px; background-color: #1e293b; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; cursor: pointer; color: #cbd5e1; }
     .tag-item input { width: auto; margin-right: 4px; }
     
-    textarea.prompt-box { width: 100%; height: 600px; font-family: monospace; font-size: 13px; color: #6ee7b7; background-color: #020617; border: 1px solid #334155; line-height: 1.5; resize: vertical; }
+    /* 開關元件樣式 */
+    .toggle-label { display: inline-flex; align-items: center; font-size: 12px; color: #f472b6; cursor: pointer; font-weight: normal; }
+    .toggle-label input { margin-right: 4px; cursor: pointer; }
+
+    textarea.prompt-box { width: 100%; height: 620px; font-family: monospace; font-size: 13px; color: #6ee7b7; background-color: #020617; border: 1px solid #334155; line-height: 1.5; resize: vertical; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header>
-      <h1>👙 ULTIMATE MASTER 內睡衣/塑身衣 AI 生成器 v6.0 (全功能50+ & 排版位置擴充版)</h1>
-      <p class="sub">新增文字排版位置選項（上方、下方、左側、右側、對角、AI 自動構圖等），生成更靈活的商業視覺。</p>
+      <h1>👙 ULTIMATE MASTER 內睡衣/塑身衣 AI商品圖生成器 v6.2</h1>
+      <p class="sub">商品內容圖AI指令生成</p>
     </header>
 
     <div class="grid">
@@ -57,7 +61,10 @@
           
           <div class="row">
             <div class="form-group">
-              <label>商品類別 (Category - 55種)</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="margin-bottom:0;">商品類別 (Category - 55種)</label>
+                <label class="toggle-label"><input type="checkbox" id="includeCategoryText" onchange="runUpdate()" checked> 納入文案生成</label>
+              </div>
               <select id="categorySelect" onchange="runUpdate()">
                 <optgroup label="── 爆乳托高與集中內衣 ──">
                   <option value="女性水感爆乳集中內衣 (Liquid Push-Up Bra)" selected>水感爆乳集中內衣</option>
@@ -311,7 +318,10 @@
           </div>
 
           <div class="form-group">
-            <label>材質布料 (50種選擇 - 可多選)</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="margin-bottom:0;">材質布料 (50種選擇 - 可多選)</label>
+              <label class="toggle-label"><input type="checkbox" id="includeMaterialText" onchange="runUpdate()" checked> 納入文案生成</label>
+            </div>
             <div class="tag-container">
               <label class="tag-item"><input type="checkbox" value="高密度防滲漏微纖維與液體襯墊" onchange="runUpdate()" class="mat-cb" checked> 真水防漏微纖維</label>
               <label class="tag-item"><input type="checkbox" value="法式精緻睫毛蕾絲 (Chantilly Lace)" onchange="runUpdate()" class="mat-cb" checked> 法式睫毛蕾絲</label>
@@ -623,12 +633,87 @@
           </div>
         </div>
 
-        <!-- 模組 3: 場景與排版 -->
+        <!-- 模組 3: 場景、排版與框線 -->
         <div class="card">
-          <div class="card-title">3. 排版與場景風格設定</div>
+          <div class="card-title">3. 排版、框線與場景風格設定</div>
           
+          <!-- 新增框線與外框設定區 -->
           <div class="form-group">
-            <label style="color:#f472b6; font-weight:bold;">📍 文字排版位置 (Text Placement - 新增重點)</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="margin-bottom:0; color:#f472b6; font-weight:bold;">🖼️ 框線與外框樣式 (Border Style - 50+種選擇)</label>
+              <label class="toggle-label"><input type="checkbox" id="includeBorderToggle" onchange="runUpdate()" checked> 勾選是否使用框線</label>
+            </div>
+            <select id="borderStyleSelect" onchange="runUpdate()">
+              <optgroup label="── 經典極簡與雙線框 ──">
+                <option value="極簡微細線條全外框 (Minimalist Ultra-Thin Full Border)" selected>01. 極簡微細線條全外框</option>
+                <option value="典雅雙線平行外框 (Elegant Double Line Parallel Frame)">02. 典雅雙線平行外框</option>
+                <option value="內細外粗雙層精品框 (Inner Thin Outer Thick Double Frame)">03. 內細外粗雙層精品框</option>
+                <option value="虛線微光細緻線框 (Dotted Fine Glow Border)">04. 虛線微光細緻線框</option>
+                <option value="極簡純白極細壓邊框 (Clean White Thin Edged Frame)">05. 極簡純白極細壓邊框</option>
+              </optgroup>
+              <optgroup label="── 奢華金屬與燙金邊框 ──">
+                <option value="奢華香檳金燙金質感邊框 (Champagne Gold Foil Frame)">06. 奢華香檳金燙金質感邊框</option>
+                <option value="白銀鉑金光澤奢華邊框 (Platinum Silver Glossy Border)">07. 白銀鉑金光澤奢華邊框</option>
+                <option value="玫瑰金微細金屬光澤外框 (Rose Gold Metallic Border)">08. 玫瑰金微細金屬光澤外框</option>
+                <option value="古銅金屬復古雕花框 (Antique Bronze Metallic Border)">09. 古銅金屬復古雕花框</option>
+                <option value="高光金屬浮雕立體邊框 (3D Metallic Embossed Frame)">10. 高光金屬浮雕立體邊框</option>
+              </optgroup>
+              <optgroup label="── 藝術角框與幾何點綴線 ──">
+                <option value="四角L型極簡直角幾何框 (4-Corner L-Shaped Minimal Frame)">11. 四角 L 型極簡直角幾何框</option>
+                <option value="直角加點裝飾幾何框 (Corner Angle with Dot Accents)">12. 直角加點裝飾幾何框</option>
+                <option value="上下平行對稱雙線框 (Top & Bottom Parallel Accent Lines)">13. 上下平行對稱雙線框</option>
+                <option value="左右垂直兩側裝飾線條 (Left & Right Side Vertical Lines)">14. 左右垂直兩側裝飾線條</option>
+                <option value="對角線幾何切角視覺框 (Diagonal Cut Corner Frame)">15. 對角線幾何切角視覺框</option>
+                <option value="微縮四角包邊邊框 (Micro Corner Bracket Border)">16. 微縮四角包邊邊框</option>
+                <option value="極簡中央圓形文字框 (Centered Circle Badge Frame)">17. 極簡中央圓形文字框</option>
+                <option value="鑽石菱形幾何幾何邊框 (Diamond Geometric Border)">18. 鑽石菱形幾何邊框</option>
+              </optgroup>
+              <optgroup label="── 雜誌與畫廊留白框架 ──">
+                <option value="藝術畫廊卡紙留白寬內外框 (Art Gallery Wide Mat Passpartout)">19. 藝術畫廊卡紙留白寬邊框</option>
+                <option value="Vogue 雜誌封面經典極細全框 (Vogue Cover Classic Thin Frame)">20. Vogue 雜誌封面經典極細全框</option>
+                <option value="復古相框薄邊壓紋 (Retro Photo Frame Debossed Edge)">21. 復古相框薄邊壓紋</option>
+                <option value="寶麗來底片風格留白外框 (Polaroid Film Style Border)">22. 寶麗來底片風格留白外框</option>
+                <option value="底片齒孔復古底片膠捲框 (Vintage Film Strip Border)">23. 復古底片膠捲齒孔邊框</option>
+              </optgroup>
+              <optgroup label="── 宮廷古典與浪漫蕾絲線條 ──">
+                <option value="歐式巴洛克微雕花細緻金邊 (European Baroque Fine Gold Border)">24. 歐式巴洛克微雕花細緻金邊</option>
+                <option value="法式洛可可精細弧形花紋框 (French Rococo Curved Ornament Frame)">25. 法式洛可可精細弧形花紋框</option>
+                <option value="古典圖騰四角花紋雕飾框 (Classic Renaissance Corner Filigree)">26. 古典圖騰四角花紋雕飾框</option>
+                <option value="精緻蕾絲圖騰細緻裝飾線框 (Delicate Lace Pattern Line Frame)">27. 精緻蕾絲圖騰細緻裝飾線框</option>
+                <option value="法式弧形宮廷花邊線框 (French Royal Arch Ornament Frame)">28. 法式弧形宮廷花邊線框</option>
+              </optgroup>
+              <optgroup label="── 現代毛玻璃與光影邊框 ──">
+                <option value="毛玻璃半透明質感文字邊框 (Glassmorphism Semi-Transparent Frame)">29. 毛玻璃半透明質感文字區塊框</option>
+                <option value="霓虹柔微光邊框 (Soft Neon Glow Border)">30. 霓虹柔微光發光邊框</option>
+                <option value="微漸變彩虹金屬邊框 (Micro Gradient Metallic Border)">31. 微漸變彩虹金屬邊框</option>
+                <option value="陰影浮雕視覺區塊框 (Drop Shadow Soft Box Border)">32. 柔和陰影浮雕區塊邊框</option>
+                <option value="水滴漣漪柔和圓弧邊框 (Fluid Soft Curved Edge Frame)">33. 水滴漣漪柔和圓弧邊框</option>
+              </optgroup>
+              <optgroup label="── 自然與質感特殊框線 ──">
+                <option value="植物花藤柔和圍繞邊框 (Botanical Vine Line Border)">34. 植物花藤柔和圍繞線框</option>
+                <option value="金箔碎塊不規則裝飾框 (Gold Leaf Fragment Border)">35. 金箔碎塊不規則裝飾框</option>
+                <option value="絲綢金線織紋邊框 (Silk Thread Golden Border)">36. 絲綢金線織紋邊框</option>
+                <option value="水彩筆觸手繪感質樸線框 (Watercolor Brushstroke Border)">37. 水彩筆觸手繪感線框</option>
+                <option value="大理石紋理邊框線條 (Marble Texture Line Border)">38. 大理石紋理邊框線條</option>
+              </optgroup>
+              <optgroup label="── 時尚風格與潮流線條 ──">
+                <option value="包豪斯幾何線條組合框 (Bauhaus Geometric Line Frame)">39. 包豪斯幾何線條組合框</option>
+                <option value="日系極簡雙層卡片邊框 (Japanese Card Style Border)">40. 日系極簡雙層卡片邊框</option>
+                <option value="高冷鈦鋼切割金屬線條框 (Titanium Steel Cut Line Frame)">41. 高冷鈦鋼切割金屬線條框</option>
+                <option value="點陣極簡幾何框線 (Dot Matrix Minimal Border)">42. 點陣極簡幾何框線</option>
+                <option value="美式復古標籤印章框 (Vintage Label Stamp Border)">43. 美式復古標籤印章框</option>
+                <option value="圓角柔和細微線框 (Rounded Soft Corner Frame)">44. 圓角柔和細微線框</option>
+                <option value="極致微縮雙排點狀線條 (Micro Double Dotted Line)">45. 極致微縮雙排點狀線條</option>
+                <option value="對角雙邊框 (Diagonal Corner Split Border)">46. 對角雙邊框</option>
+                <option value="單側垂直高光厚線條 (Single Side Bold Accent Line)">47. 單側垂直高光厚線條</option>
+                <option value="頂底對稱弧形線條 (Top & Bottom Curved Line Accent)">48. 頂底對稱弧形線條</option>
+                <option value="經典電商促銷高醒目線框 (High-Impact E-Commerce Border)">49. 經典電商促銷高醒目線框</option>
+                <option value="通用經典雜誌風格邊框 (Universal Magazine Style Border)">50. 通用經典雜誌風格邊框</option>
+              </select>
+            </div>
+
+          <div class="form-group">
+            <label style="color:#f472b6; font-weight:bold;">📍 文字排版位置 (Text Placement)</label>
             <select id="positionSelect" onchange="runUpdate()">
               <option value="由 AI 根據圖片畫面視覺重心與留白，自動設計最佳文字排版位置 (AI Adaptive Dynamic Layout)" selected>✨ 【AI 自動設計】由 AI 隨圖片美學與留白自動調配位置</option>
               <option value="所有文字排版壓在畫面頂部 (Top Header Alignment)">⬆️ 【頂部排版】文字集中於畫面頂部 (Top Banner)</option>
@@ -885,16 +970,21 @@
 
     function runUpdate() {
       try {
-        var cat = document.getElementById('categorySelect').value;
+        var catSelect = document.getElementById('categorySelect');
+        var cat = catSelect.value;
+        var catTextClean = catSelect.options[catSelect.selectedIndex].text;
+
         var col = document.getElementById('colorSelect').value;
         var cup = document.getElementById('cupSelect').value;
         var feat = document.getElementById('featureSelect').value;
 
         var matElements = document.getElementsByClassName('mat-cb');
         var matList = [];
+        var matCleanList = [];
         for (var i = 0; i < matElements.length; i++) {
           if (matElements[i].checked) {
             matList.push(matElements[i].value);
+            matCleanList.push(matElements[i].parentNode.innerText.trim());
           }
         }
         var matStr = matList.length > 0 ? matList.join('與') : '高質感親膚布料';
@@ -910,9 +1000,30 @@
         var layout = document.getElementById('layoutSelect').value;
         var scene = document.getElementById('sceneSelect').value;
 
+        // 判斷開關
+        var incCategory = document.getElementById('includeCategoryText').checked;
+        var incMaterial = document.getElementById('includeMaterialText').checked;
+        var incBorder = document.getElementById('includeBorderToggle').checked;
+        var borderStyle = document.getElementById('borderStyleSelect').value;
+
+        var categoryTextFormatted = '';
+        if (incCategory) {
+          categoryTextFormatted = '\n- 畫面包含商品類別標籤字樣：「' + catTextClean + '」';
+        }
+
+        var materialTextFormatted = '';
+        if (incMaterial && matCleanList.length > 0) {
+          materialTextFormatted = '\n- 畫面包含材質特性說明字樣：「' + matCleanList.join(' / ') + '」';
+        }
+
         var descTextFormatted = '';
         if (descT.trim() !== '') {
           descTextFormatted = '\n- 畫面包含精細排版的商品介紹短文：「' + descT.trim() + '」';
+        }
+
+        var borderTextFormatted = '';
+        if (incBorder) {
+          borderTextFormatted = '\n- 邊框與線條設計：選用「' + borderStyle + '」進行點綴包覆，增加畫面精細視覺質感。';
         }
 
         var fullPrompt = '專業商業攝影，' + layout + '。\n\n' +
@@ -922,10 +1033,14 @@
           '剪裁特點：' + feat + '。\n' +
           '材質採用 ' + matStr + '，展現極致細節與質感。\n' +
           '由專業模特兒穿著展示，呈現優美的剪裁與線條。\n\n' +
-          '【文字排版與位置指令】：\n' +
-          '畫面上清楚地排版著文字：\n' +
+          '【文字排版、邊框與位置指令】：\n' +
+          '畫面上清楚地排版著文字與邊框線條：\n' +
           '- 英文大標題字樣為 "' + mainT + '"\n' +
-          '- 中文副標題字樣為 "' + subT + '"' + descTextFormatted + '\n' +
+          '- 中文副標題字樣為 "' + subT + '"' + 
+          categoryTextFormatted + 
+          materialTextFormatted + 
+          descTextFormatted + 
+          borderTextFormatted + '\n' +
           '📍 排版位置與構圖：' + pos + '。\n' +
           '字體樣式：採用 ' + fontS + '。\n' +
           '色彩細節：文字色彩為 ' + fontC + '，整體具備頂級商業海報設計感。\n\n' +
