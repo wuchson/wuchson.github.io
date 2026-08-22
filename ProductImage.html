@@ -8,16 +8,10 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; }
     .container { max-width: 1400px; margin: 0 auto; }
-    header { border-bottom: 1px solid #334155; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+    header { border-bottom: 1px solid #334155; padding-bottom: 12px; margin-bottom: 20px; }
     h1 { color: #f472b6; font-size: 22px; font-weight: bold; }
     p.sub { color: #94a3b8; font-size: 13px; margin-top: 4px; }
     
-    .header-actions { display: flex; gap: 10px; align-items: center; }
-    .btn-export { background-color: #059669; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-export:hover { background-color: #047857; }
-    .btn-import { background-color: #2563eb; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-import:hover { background-color: #1d4ed8; }
-
     .grid { display: flex; flex-wrap: wrap; gap: 20px; }
     .col-left { flex: 1 1 700px; display: flex; flex-direction: column; gap: 16px; }
     .col-right { flex: 1 1 450px; }
@@ -52,16 +46,8 @@
 
   <div class="container">
     <header>
-      <div>
-        <h1>👙 內睡衣/塑身衣 AI商品圖 v6.3</h1>
-        <p class="sub">商品內容圖AI指令生成器</p>
-      </div>
-      <!-- 匯出與匯入功能按鈕區 -->
-      <div class="header-actions">
-        <button type="button" class="btn-export" onclick="exportSettings()">📥 匯出設定 (JSON)</button>
-        <button type="button" class="btn-import" onclick="document.getElementById('importFileInput').click()">📤 匯入設定 (JSON)</button>
-        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importSettings(event)">
-      </div>
+      <h1>👙 內睡衣/塑身衣 AI商品圖 v6.3</h1>
+      <p class="sub">商品內容圖AI指令生成</p>
     </header>
 
     <div class="grid">
@@ -126,7 +112,7 @@
                   <option value="高腰收腹平腹提臀褲 (High-Waist Shaping Panties)">高腰收腹平腹提臀褲</option>
                   <option value="骨架加壓收腰腰封馬甲 (Waist Trainer Corset)">骨架加壓收腰腰封馬甲</option>
                   <option value="無痕提臀大腿塑型褲 (Thigh Slimming Shaping Shorts)">無痕提臀大腿塑型褲</option>
-                  <option value="產後修復雙層加壓塑身褲 (Postpartum Recovery Shaper)">產後修復雙層加壓塑身褲</option>
+                  <option value="產後修復雙層加壓塑身褲 (Postpartum Recovery Shaper)">產後修復雙層加壓塑身裤</option>
                   <option value="全連身開檔雕塑體態衣 (Open-Crotch Body Shaper)">全連身開檔雕塑體態衣</option>
                 </optgroup>
                 <optgroup label="── 睡衣與家居服 ──">
@@ -302,7 +288,7 @@
                 <option value="微壓舒適睡衣鬆緊腰帶剪裁 (Relaxed Comfort Waistband)">23. 微壓舒適居家鬆緊腰帶</option>
                 <option value="立體桃心臀性感提臀線條 (Peach Buttock Lifter)">24. 立體桃心臀性感提臀線條</option>
                 <option value="雙層收胃壓腹高腰平口褲 (Double Abdominal Control)">25. 雙層收胃平腹高腰褲剪裁</option>
-                <option value="鏤空綁帶性感交叉幾何剪裁 (Hollow Strappy Cut)">26. 鏤空綁帶交叉幾何性感剪裁</option>
+                <option value="鏤空綁帶性感交叉幾何剪裁 (Hollow Strappy Cut)">26. 鏤空綁带交叉幾何性感剪裁</option>
                 <option value="背心式全包覆式舒壓無痕剪裁 (Full-Cover Tank Bra)">27. 背心式全包覆舒壓無痕剪裁</option>
                 <option value="三排三扣經典日常穩定版型 (3-Hooks Classic Fit)">28. 三排三扣經典日常穩定版型</option>
                 <option value="無鋼圈一片式超薄裁切 (One-Piece Ultra-Thin Cut)">29. 無鋼圈一片式超薄裁切</option>
@@ -376,7 +362,7 @@
               <label class="tag-item"><input type="checkbox" value="火山岩保暖發熱纖維 (Volcanic Thermal)" onchange="runUpdate()" class="mat-cb"> 火山岩發熱纖維</label>
               <label class="tag-item"><input type="checkbox" value="海藻紗極致滋養纖維 (Seaweed Fiber)" onchange="runUpdate()" class="mat-cb"> 海藻紗滋養纖維</label>
               <label class="tag-item"><input type="checkbox" value="膠原蛋白美肌纖維 (Collagen Infused)" onchange="runUpdate()" class="mat-cb"> 膠原蛋白美肌纖維</label>
-              <label class="tag-item"><input type="checkbox" value="柔滑人造絲纖維 (Smooth Rayon)" onchange="runUpdate()" class="mat-cb"> 柔滑人造絲纖維</label>
+              <label class="tag-item"><input type="checkbox" value="柔滑人造絲縴維 (Smooth Rayon)" onchange="runUpdate()" class="mat-cb"> 柔滑人造絲纖維</label>
               <label class="tag-item"><input type="checkbox" value="高針數密實羅紋布 (High-Gauge Ribbed)" onchange="runUpdate()" class="mat-cb"> 高針數密實羅紋布</label>
               <label class="tag-item"><input type="checkbox" value="鏤空剪花蕾絲 (Laser-Cut Lace)" onchange="runUpdate()" class="mat-cb"> 鏤空剪花蕾絲</label>
               <label class="tag-item"><input type="checkbox" value="超彈力橡筋織帶 (High Elastic Band)" onchange="runUpdate()" class="mat-cb"> 超彈力橡筋織帶</label>
@@ -507,7 +493,7 @@
                 <option value="溫宮保暖高腰褲 溫柔呵護腹部">46. 溫宮保暖高腰褲 溫柔呵護腹部</option>
                 <option value="雙層加壓微塑 打造挺拔體態">47. 雙層加壓微塑 打造挺拔體態</option>
                 <option value="法式精緻剪裁 細節成就完美">48. 法式精緻剪裁 細節成就完美</option>
-                <option value="3D桃心提臀 展現迷人臀線">49. 3D桃心提臀 展現迷人臀線</option>
+                <option value="3D桃心提臀 展現迷人臀線">49. 3D桃心提臀 展現迷人臀线</option>
                 <option value="經典高奢設計 展現女性自信">50. 經典高奢設計 展現女性自信</option>
               </select>
               <input type="text" id="subTitleInput" oninput="runUpdate()" value="自然波動 雙倍爆乳" style="margin-top:4px;" placeholder="也可手動輸入中文副標題">
@@ -880,14 +866,14 @@
                 <option value="玫瑰花海鋪底場景，柔和夢幻粉紅光線 (Rose Flower Bed Dreamy)">40. 玫瑰花海鋪底 + 夢幻柔粉光</option>
                 <option value="微型水面倒影場景，帶有清澈漣漪光影 (Clear Water Ripples Mirror)">41. 微型水面倒影 + 清澈漣漪光影</option>
                 <option value="極致無痕灰階背景，商業時尚目錄光 (Classic Seamless Gray Studio)">42. 無痕灰階棚 + 時尚目錄光</option>
-                <option value="微光幾何柱體背景，低調高雅燈光 (Muted Geometric Pillars)">43. 微光幾何柱體 + 低調高雅光</option>
-                <option value="日系和室榻榻米，帶有竹影搖曳光影 (Japanese Tatami Bamboo Shadow)">44. 日系和室 + 竹影搖曳光影</option>
-                <option value="深海藍色高雅背景，微弱流動水光感 (Deep Sea Blue Water Glow)">45. 深海藍色背景 + 流動水光感</option>
-                <option value="摩洛哥風情庭院，太陽高照與強烈光影 (Moroccan Courtyard Sunlight)">46. 摩洛哥庭院 + 強烈太陽光影</option>
-                <option value="法式窗邊早午餐場景，自然溫馨日常光 (French Breakfast Table Light)">47. 法式窗邊 + 自然溫馨日常光</option>
-                <option value="現代冷光極簡工作室，無瑕潔白商業光 (Cold Minimalist White Studio)">48. 現代冷光工作室 + 潔白商業光</option>
-                <option value="復古奢華大劇院後台，燈泡化妝鏡光 (Retro Theater Backstage Light)">49. 劇院後台 + 燈泡化妝鏡光</option>
-                <option value="通用經典高質感室內暖光 (Universal Luxury Indoor Light)">50. 通用經典高質感室內暖光</option>
+                <option value="極簡莫蘭迪粉色背景，均勻雙光源 (Morandi Pink Dual Light)">43. 莫蘭迪粉牆 + 均勻雙光源</option>
+                <option value="奢華珍珠飾品陳列台，聚光燈強調細節 (Pearl Jewelry Showcase)">44. 珍珠陳列台 + 細節聚光燈</option>
+                <option value="高光璀璨閃耀背景，營造奢華派對感 (Sparkling Glitter Party Vibe)">45. 璀璨閃耀背景 + 奢華派對光</option>
+                <option value="日系清新白木質空間，溫和明亮日光 (Japanese White Wood Bright)">46. 日系白木質空間 + 明亮日光</option>
+                <option value="復古深色木質百葉窗，強烈條紋光影 (Dark Wooden Venetian Blinds)">47. 深色百葉窗 + 強烈條紋光影</option>
+                <option value="輕奢金屬幾何線條場景，現代燈帶打光 (Metallic Geometric LED Stripe)">48. 金屬幾何場景 + 現代 LED 燈光</option>
+                <option value="夢幻藍色星空夜景，帶有微弱星光照射 (Starry Night Sky Dream)">49. 藍色星空夜景 + 夢幻星光</option>
+                <option value="通用經典棚拍柔光場景 (Universal Classic Soft Studio)">50. 通用經典棚拍柔光場景</option>
               </select>
             </div>
           </div>
@@ -895,14 +881,13 @@
 
       </div>
 
-      <!-- 右側 Prompt 輸出區 -->
+      <!-- 右側結果區 -->
       <div class="col-right">
-        <div class="card" style="position: sticky; top: 16px;">
-          <div class="card-title">
-            <span>🚀 生成之 AI 繪圖指令 (Prompt)</span>
-          </div>
-          <textarea id="promptOutput" class="prompt-box" readonly></textarea>
-          <button onclick="copyPrompt()" type="button" class="btn btn-copy">📋 複製完整 Prompt</button>
+        <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+          <div class="card-title">最終 AI 中文指令 (Prompt)</div>
+          <p style="font-size:11px; color:#94a3b8; margin-bottom:8px;">以下為動態實時生成的 Prompt，可直接複製使用：</p>
+          <textarea id="finalPrompt" class="prompt-box" readonly></textarea>
+          <button onclick="copyPromptText()" id="copyBtn" type="button" class="btn btn-copy">📋 複製完整指令</button>
         </div>
       </div>
 
@@ -910,8 +895,7 @@
   </div>
 
   <script>
-    // 預設與隨機標題/短文資料庫
-    const titlesDB = [
+    var titleDatabase = [
       { main: "LIQUID CURVE", sub: "自然波動 雙倍爆乳" },
       { main: "AQUA CLEAVAGE", sub: "水感托高 渾圓完美" },
       { main: "BREATHABLE SILK", sub: "極致無痕 親膚呼吸" },
@@ -921,256 +905,235 @@
       { main: "BODY SCULPTOR", sub: "極致塑形 重塑曲線" },
       { main: "FEATHERTOUCH", sub: "羽感裸膚 無感體驗" },
       { main: "VELVET TOUCH", sub: "軟凝膠支撐 告別鋼圈" },
-      { main: "DEEP V HOURGLASS", sub: "深V誘惑 打造自信美胸" }
+      { main: "SEAMLESS BARE", sub: "高脅邊包覆 完美收副乳" },
+      { main: "NUDITY SENSATION", sub: "深V誘惑 打造自信美胸" },
+      { main: "DEEP V HOURGLASS", sub: "高腰收腹 平腹立體提臀" },
+      { main: "LIFT & SHAPE", sub: "冰絲涼感 乾爽不黏膩" },
+      { main: "INVISIBLE FIT", sub: "一體成型 隱形貼合外衣" },
+      { main: "LUXURY LACE", sub: "輕量氣墊 自然升級罩杯" },
+      { main: "CHANTILLY GLAM", sub: "美背交叉 展現性感線條" },
+      { main: "ROYAL COMFORT", sub: "大罩杯減壓 渾圓不壓胸" },
+      { main: "AIR PUSH-UP", sub: "產後修復 輕鬆回復S曲線" },
+      { main: "BOUNCE & FLEX", sub: "莫代爾親膚 極致居家體驗" },
+      { main: "S-CURVE POWER", sub: "極致透視 展現女性魅力" },
+      { main: "GENTLE SUPPORT", sub: "手托集中 秒速包覆托高" },
+      { main: "ZERO PRESSURE", sub: "高強度防震 運動無拘無束" },
+      { main: "COOL ICE SILK", sub: "記憶軟鋼圈 貼合不壓骨" },
+      { main: "SATIN NIGHTS", sub: "石墨烯抗菌 全天候健康守護" },
+      { main: "MIDNIGHT ALLURE", sub: "前扣秒穿 集中溝影即刻現" },
+      { main: "ELEGANT SILHOUETTE", sub: "抹胸平口 穿搭防走光首選" },
+      { main: "PERFECT FULLNESS", sub: "馬甲骨架 雕塑迷人蜂腰" },
+      { main: "SOFT GEL FLEX", sub: "輕奢刺繡 彰顯高貴品味" },
+      { main: "ULTRA LIGHT FIT", sub: "裸感軟凝膠 宛如第二層肌膚" },
+      { main: "DAILY CONFIDENCE", sub: "四季適穿 柔滑極致親膚" },
+      { main: "BOHO BRALETTE", sub: "減壓止滑肩帶 告別下滑困擾" },
+      { main: "HIGH IMPACT ACTIVE", sub: "大腿加長防磨 舒適塑型褲" },
+      { main: "YOGA FLUIDITY", sub: "深V低脊心 告別胸骨壓迫" },
+      { main: "WAIST SCULPTING", sub: "高微壓雕塑 輕鬆穿出好身材" },
+      { main: "BUTT LIFT SHAPER", sub: "性感連身睡裙 浪漫夜晚首選" },
+      { main: "POSTURE CORRECTOR", sub: "男士3D囊袋 乾爽透氣不緊繃" },
+      { main: "PURE COTTON TOUCH", sub: "純棉有機撫觸 溫柔守護肌膚" },
+      { main: "BAMBOO FRESH", sub: "四排扣高包覆 平整後背贅肉" },
+      { main: "GRAPHENE CARE", sub: "天絲木代爾 觸感如雲朵般柔軟" },
+      { main: "DELICATE EMBROIDERY", sub: "極致鏤空綁帶 時尚美背焦點" },
+      { main: "SHEER SEDUCTION", sub: "蜂巢透氣杯 全天候舒爽體驗" },
+      { main: "VOGUE ESSENCE", sub: "薄款背心式 無拘無束自由感" },
+      { main: "MINIMALIST BEAUTY", sub: "極速吸濕排汗 運動乾爽無負擔" },
+      { main: "CANDY COLOR VIBE", sub: "日系極簡美學 純粹高質感" },
+      { main: "PASTEL DREAMS", sub: "重磅真絲光澤 散發名媛氣質" },
+      { main: "SWEET ROSE SILK", sub: "溫宮保暖高腰褲 溫柔呵護腹部" },
+      { main: "MODAL SOFTNESS", sub: "雙層加壓微塑 打造挺拔體態" },
+      { main: "GLAMOUR COUTURE", sub: "法式精緻剪裁 細節成就完美" },
+      { main: "BEAUTY BACK LIFT", sub: "3D桃心提臀 展現迷人臀線" },
+      { main: "AUTHENTIC CURVE", sub: "經典高奢設計 展現女性自信" }
     ];
 
-    const descsDB = [
-      "Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。",
-      "Ultra-soft fabric with invisible support for all-day seamless confidence. 極致軟彈面料搭配隱形支撐，全天候打造無痕自信。",
-      "Exquisite French lace blended with ergonomic design for pure luxury. 精緻法式蕾絲結合人體工學，呈現純粹奢華美感。",
-      "Revolutionary weightless structure delivering natural push-up perfection. 革命性無感結構，提供自然完美的托高效果。",
-      "High-density shaping technology that gracefully contours your body. 高密度塑型科技，優雅雕塑極致S身形曲線。"
-    ];
+    var descDatabase = {
+      zh: [
+        "專為完美胸型設計，內建輕量液體與空氣雙層襯墊，貼合胸部律動，呈現自然渾圓深V溝影。",
+        "無鋼圈零壓迫感，高彈力親膚透氣布料，全天候打造自然挺拔的極致舒適體驗。",
+        "法式高奢工藝剪裁，完美收納副乳與贅肉，打造優雅無瑕的完美身形線條。",
+        "嚴選100%頂級桑蠶絲布料，極致親膚絲滑，給予肌膚如雲朵般的奢華觸感。",
+        "果凍軟凝膠立體支撐，溫柔替代傳統鋼圈，托高集中同時享有零感自由。",
+        "高脅邊雙膠條完美包覆，輕鬆收納側邊副乳，打造渾圓挺拔的完美曲線。",
+        "極致無痕熱壓貼合技術，穿著緊身外衣完全不留痕跡，隨時展現自信美背。",
+        "高腰雙層加壓微收腹設計，彈力順應身形，輕鬆雕塑優雅S曲線。",
+        "透氣冰絲涼感微纖維，迅速帶走體表熱氣，保持全天候乾爽不黏膩。",
+        "3D人體工學立體包覆，給予胸部最穩固的承託，自然展現迷人溝影。"
+      ],
+      en: [
+        "Engineered for optimal shaping, featuring fluid-air dual padding that gracefully mimics natural contours.",
+        "Ultra-lightweight wireless support with breathable stretch fabric for zero-pressure daily comfort.",
+        "Exquisite French tailoring designed to accentuate natural curves with effortless elegance.",
+        "Crafted from 100% Mulberry silk, offering an incomparably smooth and luxurious touch to your skin.",
+        "Innovative soft-gel structure providing gentle support and lifting without the constraint of underwires.",
+        "High side-coverage designed to smooth underarm bulge and refine your side silhouette flawlessly.",
+        "Seamless bonding technology creates a totally invisible fit under any tight-fitting outfit.",
+        "High-waisted compression design effortlessly controls tummy and shapes an elegant S-curve silhouette.",
+        "Ice-silk cooling microfiber rapidly wicks away moisture for all-day dry and breathable freshness.",
+        "3D ergonomic contouring offers maximum lifting and a naturally full cleavage effect."
+      ],
+      bilingual: [
+        "Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。",
+        "Zero-pressure wireless design for all-day comfort. 無鋼圈零感體驗，全天候完美托高。",
+        "French haute couture tailoring for flawless silhouette. 法式高奢工藝，勾勒優雅無瑕身形。",
+        "100% Mulberry silk for luxurious skin-touch. 100%頂級桑蠶絲，給予如雲朵般奢華觸感。",
+        "Soft-gel support replaces underwires gently. 果凍軟凝膠支撐，享受無鋼圈托高自由。",
+        "High side-coverage smooths underarm seamlessly. 高脅邊包覆收納副乳，打造完美側邊曲線。",
+        "Seamless bonding for completely invisible wear. 無痕熱壓貼合，穿著緊身外衣完美隱形。",
+        "High-waist double compression sculpts S-curve. 高腰雙層加壓收腹，輕鬆雕塑優雅S曲線。",
+        "Ice-silk cool microfiber stays fresh all day. 冰絲涼感微纖維，全天候保持乾爽透氣。",
+        "3D ergonomic support for natural full cleavage. 3D立體包覆，給予胸部穩定承託與自然溝影。"
+      ]
+    };
 
     function applyTitleSelect() {
-      const select = document.getElementById("mainTitleSelect");
-      document.getElementById("mainTitleInput").value = select.value;
+      var val = document.getElementById("mainTitleSelect").value;
+      document.getElementById("mainTitleInput").value = val;
       runUpdate();
     }
 
     function applySubTitleSelect() {
-      const select = document.getElementById("subTitleSelect");
-      document.getElementById("subTitleInput").value = select.value;
+      var val = document.getElementById("subTitleSelect").value;
+      document.getElementById("subTitleInput").value = val;
       runUpdate();
     }
 
     function generateAiTitle() {
-      const random = titlesDB[Math.floor(Math.random() * titlesDB.length)];
-      document.getElementById("mainTitleInput").value = random.main;
-      document.getElementById("subTitleInput").value = random.sub;
+      var randIndex = Math.floor(Math.random() * titleDatabase.length);
+      var item = titleDatabase[randIndex];
+      document.getElementById("mainTitleInput").value = item.main;
+      document.getElementById("subTitleInput").value = item.sub;
+      document.getElementById("mainTitleSelect").value = item.main;
+      document.getElementById("subTitleSelect").value = item.sub;
       runUpdate();
     }
 
     function generateAiDesc() {
-      const random = descsDB[Math.floor(Math.random() * descsDB.length)];
-      document.getElementById("descInput").value = random;
+      var lang = document.getElementById("langSelect").value;
+      var arr = descDatabase[lang] || descDatabase.zh;
+      var randIndex = Math.floor(Math.random() * arr.length);
+      document.getElementById("descInput").value = arr[randIndex];
       runUpdate();
     }
 
     function getSelectedMaterials() {
-      const checkboxes = document.querySelectorAll(".mat-cb:checked");
-      let materials = [];
-      checkboxes.forEach(cb => materials.push(cb.value));
-      return materials.join(", ");
+      var cbs = document.querySelectorAll(".mat-cb:checked");
+      var list = [];
+      cbs.forEach(function(cb) {
+        list.push(cb.value);
+      });
+      return list;
     }
 
     function runUpdate() {
-      const category = document.getElementById("categorySelect").value;
-      const color = document.getElementById("colorSelect").value;
-      const cup = document.getElementById("cupSelect").value;
-      const feature = document.getElementById("featureSelect").value;
-      const materials = getSelectedMaterials();
+      var category = document.getElementById("categorySelect").value;
+      var color = document.getElementById("colorSelect").value;
+      var cup = document.getElementById("cupSelect").value;
+      var feature = document.getElementById("featureSelect").value;
+      var materials = getSelectedMaterials();
       
-      const mainTitle = document.getElementById("mainTitleInput").value;
-      const subTitle = document.getElementById("subTitleInput").value;
-      const desc = document.getElementById("descInput").value;
-      const lang = document.getElementById("langSelect").value;
+      var mainTitle = document.getElementById("mainTitleInput").value.trim();
+      var subTitle = document.getElementById("subTitleInput").value.trim();
+      var desc = document.getElementById("descInput").value.trim();
       
-      const fontStyle = document.getElementById("fontStyleSelect").value;
-      const fontColor = document.getElementById("fontColorSelect").value;
+      var fontStyle = document.getElementById("fontStyleSelect").value;
+      var fontColor = document.getElementById("fontColorSelect").value;
       
-      const position = document.getElementById("positionSelect").value;
-      const layout = document.getElementById("layoutSelect").value;
-      const scene = document.getElementById("sceneSelect").value;
+      var includeBorder = document.getElementById("includeBorderToggle").checked;
+      var borderStyle = document.getElementById("borderStyleSelect").value;
+      
+      var includeBadge = document.getElementById("includeBadgeToggle").checked;
+      var badgePosition = document.getElementById("badgePositionSelect").value;
+      var badgeStyle = document.getElementById("badgeStyleSelect").value;
+      
+      var position = document.getElementById("positionSelect").value;
+      var layout = document.getElementById("layoutSelect").value;
+      var scene = document.getElementById("sceneSelect").value;
+      
+      var includeCategory = document.getElementById("includeCategoryText").checked;
+      var includeMaterial = document.getElementById("includeMaterialText").checked;
 
-      const includeCategory = document.getElementById("includeCategoryText").checked;
-      const includeMaterial = document.getElementById("includeMaterialText").checked;
-      const includeBadge = document.getElementById("includeBadgeToggle").checked;
-      const badgePosition = document.getElementById("badgePositionSelect").value;
-      const badgeStyle = document.getElementById("badgeStyleSelect").value;
-
-      const includeBorder = document.getElementById("includeBorderToggle").checked;
-      const borderStyle = document.getElementById("borderStyleSelect").value;
-
-      let prompt = `[ Commercial Fashion Product Photography Prompt ]\n\n`;
-      prompt += `Subject & Apparel:\n`;
-      prompt += `- Category: ${category}\n`;
-      prompt += `- Color Theme: ${color}\n`;
-      prompt += `- Cup & Structure: ${cup}\n`;
-      prompt += `- Cutting & Feature: ${feature}\n`;
-      if (materials) prompt += `- Fabric Materials: ${materials}\n`;
+      var prompt = "生成一張極致高奢時尚風格的商品宣傳海報照片，詳細規格如下：\n\n";
       
-      prompt += `\nScene & Lighting Environment:\n`;
-      prompt += `- Setting: ${scene}\n`;
-      
-      prompt += `\nLayout & Graphic Design Overlay:\n`;
-      prompt += `- Overall Layout Style: ${layout}\n`;
-      prompt += `- Text Placement: ${position}\n`;
-      prompt += `- Typography Style: ${fontStyle}\n`;
-      prompt += `- Typography Color: ${fontColor}\n`;
+      prompt += "【商品主題】\n";
+      prompt += "• 類別：" + category + "\n";
+      prompt += "• 色彩：" + color + "\n";
+      prompt += "• 罩杯結構：" + cup + "\n";
+      prompt += "• 版型剪裁：" + feature + "\n";
+      if(materials.length > 0) {
+        prompt += "• 材質布料：" + materials.join("、 ") + "\n";
+      }
+      prompt += "\n";
 
-      if (includeBorder) {
-        prompt += `- Border / Frame Style: Include ${borderStyle}\n`;
+      prompt += "【畫面排版與風格】\n";
+      prompt += "• 排版風格：" + layout + "\n";
+      prompt += "• 文字位置：" + position + "\n";
+      prompt += "• 場景光影：" + scene + "\n";
+      
+      if(includeBorder) {
+        prompt += "• 框線外框：" + borderStyle + "\n";
       } else {
-        prompt += `- Border / Frame Style: No Border (Clean Borderless Full Bleed)\n`;
+        prompt += "• 框線外框：不使用框線 (無邊框滿版視覺)\n";
       }
-
-      if (includeBadge) {
-        prompt += `- Feature Badge: Render a small functional badge ("${badgeStyle}") positioned at ${badgePosition}, highlighting product features.\n`;
-      }
-
-      prompt += `\nText Content to Render on Image:\n`;
-      if (mainTitle) prompt += `- Main Header (English): "${mainTitle}"\n`;
-      if (subTitle) prompt += `- Subheader (Chinese): "${subTitle}"\n`;
       
-      let copyContent = [];
-      if (includeCategory) copyContent.push(`[Category: ${category}]`);
-      if (includeMaterial && materials) copyContent.push(`[Materials: ${materials}]`);
-      if (desc) copyContent.push(desc);
-
-      if (copyContent.length > 0) {
-        prompt += `- Description Copy (${lang}): "${copyContent.join(" - ")}"\n`;
+      if(includeBadge) {
+        prompt += "• 材質功能小圓標：是，請在「" + badgePosition + "」生成一個標註商品材質與功能的" + badgeStyle + "，圓標內印有材質機能簡短說明圖示與文字\n";
       }
+      prompt += "\n";
 
-      prompt += `\nQuality & Aesthetics:\n`;
-      prompt += `- Masterpiece, 8K resolution, high-fashion commercial lookbook, crisp product detail, perfect typography rendering, professional color grading, studio quality lighting.`;
+      prompt += "【畫面文字與視覺排版】\n";
+      prompt += "• 字體樣式：" + fontStyle + "\n";
+      prompt += "• 文字色彩：" + fontColor + "\n";
+      
+      if(mainTitle) {
+        prompt += "• 英文主標題 (Main Title)：\"" + mainTitle + "\"\n";
+      }
+      if(subTitle) {
+        prompt += "• 中文副標題 (Subtitle)：\"" + subTitle + "\"\n";
+      }
+      if(desc) {
+        prompt += "• 產品說明短文 (Description)：\"" + desc + "\"\n";
+      }
+      
+      var extraText = [];
+      if(includeCategory) {
+        extraText.push("商品類別名稱 (\"" + category.split(' (')[0] + "\")");
+      }
+      if(includeMaterial && materials.length > 0) {
+        extraText.push("材質標籤 (\"" + materials.map(m => m.split(' (')[0]).join(", ") + "\")");
+      }
+      
+      if(extraText.length > 0) {
+        prompt += "• 額外納入排版文案：" + extraText.join("、 ") + "\n";
+      }
+      
+      prompt += "\n【視覺畫質要求】\n";
+      prompt += "8k 解析度，商業攝影棚光影，頂級時尚雜誌封面質感，細節極致清晰，色彩飽和自然，文字排版精準優雅。";
 
-      document.getElementById("promptOutput").value = prompt;
+      document.getElementById("finalPrompt").value = prompt;
     }
 
-    function copyPrompt() {
-      const output = document.getElementById("promptOutput");
-      output.select();
+    function copyPromptText() {
+      var textarea = document.getElementById("finalPrompt");
+      textarea.select();
       document.execCommand("copy");
-      alert("✅ 已成功複製 Prompt 至剪貼簿！");
+      
+      var btn = document.getElementById("copyBtn");
+      var originalText = btn.innerText;
+      btn.innerText = "✅ 已成功複製 Prompt！";
+      btn.style.backgroundColor = "#059669";
+      
+      setTimeout(function() {
+        btn.innerText = originalText;
+        btn.style.backgroundColor = "#db2777";
+      }, 2000);
     }
 
-    // ----------------------------------------------------
-    // 新增：匯出 (Export) 與 匯入 (Import) 功能
-    // ----------------------------------------------------
-    
-    // 匯出當前所有表單設定為 JSON 檔
-    function exportSettings() {
-      const matCheckboxes = document.querySelectorAll(".mat-cb");
-      const matStates = [];
-      matCheckboxes.forEach((cb, index) => {
-        matStates.push({ index: index, value: cb.value, checked: cb.checked });
-      });
-
-      const configData = {
-        version: "v6.3",
-        exportTime: new Date().toLocaleString(),
-        settings: {
-          categorySelect: document.getElementById("categorySelect").value,
-          includeCategoryText: document.getElementById("includeCategoryText").checked,
-          colorSelect: document.getElementById("colorSelect").value,
-          cupSelect: document.getElementById("cupSelect").value,
-          featureSelect: document.getElementById("featureSelect").value,
-          includeMaterialText: document.getElementById("includeMaterialText").checked,
-          materials: matStates,
-          
-          mainTitleSelect: document.getElementById("mainTitleSelect").value,
-          mainTitleInput: document.getElementById("mainTitleInput").value,
-          subTitleSelect: document.getElementById("subTitleSelect").value,
-          subTitleInput: document.getElementById("subTitleInput").value,
-          langSelect: document.getElementById("langSelect").value,
-          descInput: document.getElementById("descInput").value,
-          fontStyleSelect: document.getElementById("fontStyleSelect").value,
-          fontColorSelect: document.getElementById("fontColorSelect").value,
-          
-          includeBadgeToggle: document.getElementById("includeBadgeToggle").checked,
-          badgePositionSelect: document.getElementById("badgePositionSelect").value,
-          badgeStyleSelect: document.getElementById("badgeStyleSelect").value,
-          includeBorderToggle: document.getElementById("includeBorderToggle").checked,
-          borderStyleSelect: document.getElementById("borderStyleSelect").value,
-          positionSelect: document.getElementById("positionSelect").value,
-          layoutSelect: document.getElementById("layoutSelect").value,
-          sceneSelect: document.getElementById("sceneSelect").value
-        }
-      };
-
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configData, null, 2));
-      const downloadAnchor = document.createElement("a");
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `AI_Generator_Config_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    // 匯入 JSON 檔並還原表單設定
-    function importSettings(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (!imported.settings) {
-            alert("⚠️ 匯入的 JSON 格式不正確！");
-            return;
-          }
-
-          const s = imported.settings;
-
-          // 還原下拉選單與輸入框
-          if (s.categorySelect !== undefined) document.getElementById("categorySelect").value = s.categorySelect;
-          if (s.includeCategoryText !== undefined) document.getElementById("includeCategoryText").checked = s.includeCategoryText;
-          if (s.colorSelect !== undefined) document.getElementById("colorSelect").value = s.colorSelect;
-          if (s.cupSelect !== undefined) document.getElementById("cupSelect").value = s.cupSelect;
-          if (s.featureSelect !== undefined) document.getElementById("featureSelect").value = s.featureSelect;
-          if (s.includeMaterialText !== undefined) document.getElementById("includeMaterialText").checked = s.includeMaterialText;
-
-          // 還原多選材質
-          if (s.materials && Array.isArray(s.materials)) {
-            const matCheckboxes = document.querySelectorAll(".mat-cb");
-            matCheckboxes.forEach((cb) => { cb.checked = false; }); // 先清空
-            s.materials.forEach(item => {
-              if (item.index !== undefined && matCheckboxes[item.index]) {
-                matCheckboxes[item.index].checked = item.checked;
-              } else {
-                // 若按 value 匹配
-                matCheckboxes.forEach(cb => {
-                  if (cb.value === item.value) cb.checked = item.checked;
-                });
-              }
-            });
-          }
-
-          if (s.mainTitleSelect !== undefined) document.getElementById("mainTitleSelect").value = s.mainTitleSelect;
-          if (s.mainTitleInput !== undefined) document.getElementById("mainTitleInput").value = s.mainTitleInput;
-          if (s.subTitleSelect !== undefined) document.getElementById("subTitleSelect").value = s.subTitleSelect;
-          if (s.subTitleInput !== undefined) document.getElementById("subTitleInput").value = s.subTitleInput;
-          if (s.langSelect !== undefined) document.getElementById("langSelect").value = s.langSelect;
-          if (s.descInput !== undefined) document.getElementById("descInput").value = s.descInput;
-          if (s.fontStyleSelect !== undefined) document.getElementById("fontStyleSelect").value = s.fontStyleSelect;
-          if (s.fontColorSelect !== undefined) document.getElementById("fontColorSelect").value = s.fontColorSelect;
-
-          if (s.includeBadgeToggle !== undefined) document.getElementById("includeBadgeToggle").checked = s.includeBadgeToggle;
-          if (s.badgePositionSelect !== undefined) document.getElementById("badgePositionSelect").value = s.badgePositionSelect;
-          if (s.badgeStyleSelect !== undefined) document.getElementById("badgeStyleSelect").value = s.badgeStyleSelect;
-          if (s.includeBorderToggle !== undefined) document.getElementById("includeBorderToggle").checked = s.includeBorderToggle;
-          if (s.borderStyleSelect !== undefined) document.getElementById("borderStyleSelect").value = s.borderStyleSelect;
-          if (s.positionSelect !== undefined) document.getElementById("positionSelect").value = s.positionSelect;
-          if (s.layoutSelect !== undefined) document.getElementById("layoutSelect").value = s.layoutSelect;
-          if (s.sceneSelect !== undefined) document.getElementById("sceneSelect").value = s.sceneSelect;
-
-          // 更新繪圖指令
-          runUpdate();
-          alert("🎉 設定匯入成功！");
-
-        } catch (err) {
-          alert("❌ 解析 JSON 檔案失敗：" + err.message);
-        }
-      };
-      reader.readAsText(file);
-      // 清空 input 讓重複匯入同檔名時能觸發 onchange
-      event.target.value = '';
-    }
-
-    // 初始化執行一次
-    window.onload = runUpdate;
+    // 初始化執行
+    window.onload = function() {
+      runUpdate();
+    };
   </script>
 </body>
 </html>
