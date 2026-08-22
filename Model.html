@@ -185,12 +185,14 @@
 
     .btn-group {
       display: flex;
-      gap: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     button {
       flex: 1;
-      padding: 14px 24px;
+      min-width: 140px;
+      padding: 14px 20px;
       background-color: var(--primary);
       color: #ffffff;
       border: none;
@@ -226,6 +228,18 @@
       box-shadow: 0 4px 12px rgba(140, 109, 99, 0.25);
     }
 
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     @media (max-width: 768px) {
       body {
         padding: 16px 10px;
@@ -243,6 +257,9 @@
       }
       .btn-group {
         flex-direction: column;
+      }
+      button {
+        width: 100%;
       }
     }
   </style>
@@ -631,7 +648,7 @@
         <option value="腳穿鬆糕厚底帆布鞋">鬆糕厚底帆布鞋（休閒減齡）</option>
         <option value="腳穿紅色尖頭細高跟鞋（點睛色彩）">紅色尖頭高跟鞋（紅唇點睛）</option>
         <option value="搭配白色魚網短襪與高跟鞋">白色魚網短襪 + 高跟鞋（時尚混搭）</option>
-        <option value="赤腳踩在沙灘上（海邊氛圍）">赤腳踩沙灘（海邊自然）</option>
+        <option value="赤腳踩在地板上（海邊氛圍）">赤腳踩沙灘（海邊自然）</option>
         <option value="">無顯示（不指定鞋襪）</option>
       </select>
     </div>
@@ -650,7 +667,7 @@
         <option value="優雅手持一高腳杯紅酒或粉紅氣泡酒">優雅手持高腳紅酒/氣泡酒（微醺）</option>
         <option value="手拿著一支造型可愛的粉色冰淇淋">手拿粉色冰淇淋（美式復古可愛）</option>
         <option value="手拿吸管輕喝玻璃杯中的冰拿鐵/美式咖啡">吸管輕喝冰咖啡（時尚街拍感）</option>
-        <option value="手持一顆多汁的切開水蜜桃，微露果肉">手持切開水蜜桃（純欲鮮甜）</option>
+        <option value="手持顆多汁的切開水蜜桃，微露果肉">手持切開水蜜桃（純欲鮮甜）</option>
         <option value="手拈著一顆黑櫻桃正準備放入嘴裡">手拈黑櫻桃（午夜誘惑）</option>
         <option value="手持一根彩色棒棒糖放置唇邊">手持彩色棒棒糖（Y2K俏皮）</option>
         <option value="手端一小碗切塊的紅心芭樂與葡萄">手端水果沙拉碗（健康陽光）</option>
@@ -942,6 +959,9 @@
     </div>
   </div>
 
+  <!-- 隱藏的檔案上傳 Input -->
+  <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImport(event)">
+
   <!-- 結果輸出 -->
   <div class="output-section">
     <div class="output-header">
@@ -957,11 +977,27 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         複製指令
       </button>
+      <button class="btn-secondary" onclick="exportSettings()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        匯出設定
+      </button>
+      <button class="btn-secondary" onclick="triggerImport()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        匯入設定
+      </button>
     </div>
   </div>
 </div>
 
 <script>
+  // 需要被儲存與還原的欄位 ID 清單
+  const fieldIds = [
+    'aspectRatio', 'modelGender', 'modelNationality', 'skinTone', 'bodyType', 
+    'hairStyle', 'imgRef', 'outfitStyle', 'topOutfit', 'bottomOutfit', 
+    'outerwear', 'jewelry', 'footwear', 'foodItem', 'teaTableSetting', 
+    'environment', 'timeOfDay', 'expression', 'pose', 'angle', 'styleQuality'
+  ];
+
   function generatePrompt() {
     const ratio = document.getElementById('aspectRatio').value;
     const genderVal = document.getElementById('modelGender').value;
@@ -1075,6 +1111,67 @@
     output.select();
     document.execCommand('copy');
     alert('指令已成功複製到剪貼簿！');
+  }
+
+  // 匯出 JSON 設定
+  function exportSettings() {
+    const config = {};
+    fieldIds.forEach(id => {
+      const elem = document.getElementById(id);
+      if (elem) {
+        config[id] = elem.value;
+      }
+    });
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+    const downloadAnchor = document.createElement('a');
+    
+    // 設定檔名帶上日期時間，方便區分
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 10) + '_' + now.toTimeString().slice(0, 5).replace(':', '');
+    
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `prompt_config_${timestamp}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  }
+
+  // 觸發匯入隱藏的 input
+  function triggerImport() {
+    document.getElementById('importFileInput').click();
+  }
+
+  // 處理檔案匯入
+  function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const config = JSON.parse(e.target.result);
+        
+        // 將資料還原至表單
+        fieldIds.forEach(id => {
+          if (config.hasOwnProperty(id)) {
+            const elem = document.getElementById(id);
+            if (elem) {
+              elem.value = config[id];
+            }
+          }
+        });
+
+        // 匯入完成後自動重新生成 Prompt
+        generatePrompt();
+        alert('設定檔已成功匯入！');
+      } catch (err) {
+        alert('檔案格式錯誤，無法解析 JSON 檔案！');
+      }
+    };
+    reader.readAsText(file);
+    // 清空，確保連續選擇相同檔案時能再次觸發
+    event.target.value = '';
   }
 
   window.onload = generatePrompt;
