@@ -511,8 +511,8 @@
             </div>
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-size: 13px; color: #cbd5e1;">介紹短文段落</span>
-                <button type="button" onclick="generateAiDesc()" style="background: none; border: none; color: #f472b6; font-size: 12px; cursor: pointer; font-weight: bold;">✨ AI 隨機生成短文</button>
+                <span style="font-size: 13px; color: #cbd5e1;">介紹短文</span>
+                <button type="button" onclick="generateAiDesc()" style="background: none; border: none; color: #f472b6; font-size: 12px; cursor: pointer; font-weight: bold;">✨ AI 隨機短文</button>
               </div>
               <input type="text" id="descInput" oninput="runUpdate()" placeholder="點擊右上角 AI 生成短文..." value="Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。">
             </div>
@@ -640,8 +640,8 @@
           <!-- 新增小圓標標籤設定區 -->
           <div class="form-group" style="background-color:#0f172a; padding:10px; border-radius:6px; border:1px solid #334155; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="margin-bottom:0; color:#f472b6; font-weight:bold;">🏷️ 材質功能小圓標 (Material Badge)</label>
-              <label class="toggle-label"><input type="checkbox" id="includeBadgeToggle" onchange="runUpdate()"> 生成材質功能小圓標</label>
+              <label style="margin-bottom:0; color:#f472b6; font-weight:bold;">🏷️ 材質功能小圓標</label>
+              <label class="toggle-label"><input type="checkbox" id="includeBadgeToggle" onchange="runUpdate()"> 勾選生成</label>
             </div>
             <div class="row">
               <div>
@@ -671,8 +671,8 @@
           <!-- 新增框線與外框設定區 -->
           <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label style="margin-bottom:0; color:#f472b6; font-weight:bold;">🖼️ 框線與外框樣式 (Border Style)</label>
-              <label class="toggle-label"><input type="checkbox" id="includeBorderToggle" onchange="runUpdate()" checked> 勾選是否使用框線</label>
+              <label style="margin-bottom:0; color:#f472b6; font-weight:bold;">🖼️ 框線與外框樣式</label>
+              <label class="toggle-label"><input type="checkbox" id="includeBorderToggle" onchange="runUpdate()" checked> 勾選使用框線</label>
             </div>
             <select id="borderStyleSelect" onchange="runUpdate()">
               <optgroup label="── 經典極簡與雙線框 ──">
