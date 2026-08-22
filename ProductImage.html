@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v4.1 (100% 穩定版)</title>
+  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v5.0 (全功能50+極致擴充版)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; }
-    .container { max-width: 1200px; margin: 0 auto; }
+    .container { max-width: 1400px; margin: 0 auto; }
     header { border-bottom: 1px solid #334155; padding-bottom: 12px; margin-bottom: 20px; }
     h1 { color: #f472b6; font-size: 22px; font-weight: bold; }
     p.sub { color: #94a3b8; font-size: 13px; margin-top: 4px; }
     
     .grid { display: flex; flex-wrap: wrap; gap: 20px; }
-    .col-left { flex: 1 1 600px; display: flex; flex-direction: column; gap: 16px; }
-    .col-right { flex: 1 1 400px; }
+    .col-left { flex: 1 1 700px; display: flex; flex-direction: column; gap: 16px; }
+    .col-right { flex: 1 1 450px; }
     
     .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
     .card-title { font-size: 15px; font-weight: bold; color: #f472b6; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -31,19 +31,19 @@
     .btn:hover { background-color: #be185d; }
     .btn-copy { width: 100%; padding: 12px; font-size: 15px; margin-top: 12px; background-color: #db2777; }
     
-    .tag-container { display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow-y: auto; background-color: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
+    .tag-container { display: flex; flex-wrap: wrap; gap: 6px; max-height: 180px; overflow-y: auto; background-color: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
     .tag-item { display: inline-flex; align-items: center; font-size: 12px; background-color: #1e293b; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; cursor: pointer; color: #cbd5e1; }
     .tag-item input { width: auto; margin-right: 4px; }
     
-    textarea.prompt-box { width: 100%; height: 480px; font-family: monospace; font-size: 13px; color: #6ee7b7; background-color: #020617; border: 1px solid #334155; line-height: 1.5; resize: vertical; }
+    textarea.prompt-box { width: 100%; height: 600px; font-family: monospace; font-size: 13px; color: #6ee7b7; background-color: #020617; border: 1px solid #334155; line-height: 1.5; resize: vertical; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header>
-      <h1>👙 ULTIMATE MASTER 內睡衣/塑身衣 AI 生成器 v4.1 (超穩定版)</h1>
-      <p class="sub">原生高相容架構：無外部依賴、100% 即時生成 AI 指令與文案。</p>
+      <h1>👙 ULTIMATE MASTER 內睡衣/塑身衣 AI 生成器 v5.0 (全功能50+極致擴充版)</h1>
+      <p class="sub">所有控制選項全數升級 50+ 種選擇，整合動態隨機 AI 文案與 Prompt 實時生成。</p>
     </header>
 
     <div class="grid">
@@ -57,77 +57,315 @@
           
           <div class="row">
             <div class="form-group">
-              <label>商品類別 (Category)</label>
+              <label>商品類別 (Category - 55種)</label>
               <select id="categorySelect" onchange="runUpdate()">
-                <optgroup label="── 女性內衣 ──">
-                  <option value="女性水感爆乳集中內衣 (Liquid Push-Up Bra)" selected>女性真水爆乳內衣 (Liquid Push-Up Bra)</option>
-                  <option value="女性法式蕾絲三角杯內衣 (Lace Bralette)">女性法式蕾絲三角杯 (Lace Bralette)</option>
-                  <option value="女性無痕無鋼圈貼合內衣 (Seamless Wireless Bra)">女性無痕無鋼圈內衣 (Seamless Wireless)</option>
-                  <option value="女性記憶軟鋼圈托高內衣 (Soft-Wire Push-Up Bra)">女性軟鋼圈托高內衣 (Soft-Wire)</option>
-                  <option value="女性大罩杯高包覆全罩內衣 (Full Coverage Bra)">女性大罩杯高包覆內衣 (Full Coverage)</option>
-                  <option value="女性美背交叉肩帶內衣 (Cross-Back Beauty Bra)">女性美背交叉內衣 (Cross-Back Bra)</option>
+                <optgroup label="── 爆乳托高與集中內衣 ──">
+                  <option value="女性水感爆乳集中內衣 (Liquid Push-Up Bra)" selected>水感爆乳集中內衣</option>
+                  <option value="雙倍空氣氣墊托高內衣 (Air-Pad Push-Up Bra)">雙倍空氣氣墊托高內衣</option>
+                  <option value="深V極致爆乳鋼圈內衣 (Deep-V Push-Up Bra)">深V極致爆乳鋼圈內衣</option>
+                  <option value="手托式爆乳提胸內衣 (Hand-shaped Palm Push-Up Bra)">手托式爆乳提胸內衣</option>
+                  <option value="側收副乳集中托高內衣 (Side-Smoothing Push-Up Bra)">側收副乳集中托高內衣</option>
+                  <option value="厚杯小胸救星爆乳內衣 (Thick Padded Small Bust Bra)">厚杯小胸救星爆乳內衣</option>
+                  <option value="W型下扒強力托高內衣 (W-Wire Lifting Bra)">W型下扒強力托高內衣</option>
                 </optgroup>
-                <optgroup label="── 運動與塑身 ──">
-                  <option value="高強度防震跑步運動內衣 (High-Impact Sports Bra)">高強度防震運動內衣 (High-Impact)</option>
-                  <option value="女性無痕高腰連身塑身衣 (Full Body Shaping Bodysuit)">女性連身塑身衣 (Shaping Bodysuit)</option>
-                  <option value="女性高腰收腹平腹提臀褲 (High-Waist Shaping Panties)">女性高腰收腹提臀褲 (Shaping Panties)</option>
+                <optgroup label="── 無痕、無鋼圈與舒適內衣 ──">
+                  <option value="女性無痕無鋼圈貼合內衣 (Seamless Wireless Bra)">無痕無鋼圈貼合內衣</option>
+                  <option value="果凍條立體支撐無鋼圈內衣 (Jelly Strip Wireless Bra)">果凍條立體支撐無鋼圈內衣</option>
+                  <option value="裸感軟凝膠立體支撐內衣 (Nude Soft Gel Wireless Bra)">裸感軟凝膠立體支撐內衣</option>
+                  <option value="記憶軟鋼圈托高內衣 (Soft-Wire Push-Up Bra)">記憶軟鋼圈托高內衣</option>
+                  <option value="超輕量薄款背心式內衣 (Ultra-Light Vest Bra)">超輕量薄款背心式內衣</option>
+                  <option value="莫代爾極致親膚背心內衣 (Modal Comfort Bralette)">莫代爾極致親膚背心內衣</option>
+                  <option value="無縫一體成型貼合內衣 (One-Piece Molded Bra)">無縫一體成型貼合內衣</option>
                 </optgroup>
-                <optgroup label="── 睡衣與男著 ──">
-                  <option value="女性性感吊帶真絲睡裙 (Silk Nightgown)">女性性感真絲吊帶睡裙 (Silk Nightgown)</option>
-                  <option value="女性兩件式質感家居睡衣套裝 (Two-Piece Silk Pajama Set)">女性真絲家居睡衣套裝 (Pajama Set)</option>
-                  <option value="男性3D囊袋透氣四角內褲 (Men's 3D Pouch Boxer Briefs)">男性3D囊袋四角褲 (Boxer Briefs)</option>
+                <optgroup label="── 法式、蕾絲與時尚性感內衣 ──">
+                  <option value="法式蕾絲三角杯內衣 (French Lace Bralette)">法式蕾絲三角杯內衣</option>
+                  <option value="睫毛蕾絲透視美背內衣 (Chantilly Lace Sheer Bra)">睫毛蕾絲透視美背內衣</option>
+                  <option value="美背交叉肩帶時尚內衣 (Cross-Back Beauty Bra)">美背交叉肩帶時尚內衣</option>
+                  <option value="復古馬甲式骨架蕾絲內衣 (Corset-Style Lace Bra)">復古馬甲式骨架蕾絲內衣</option>
+                  <option value="抹胸平口防走光內衣 (Strapless Bandeau Bra)">抹胸平口防走光內衣</option>
+                  <option value="極致鏤空綁帶性感內衣 (Hollow Strappy Bralette)">極致鏤空綁帶性感內衣</option>
+                  <option value="刺繡網紗高質感內衣 (Embroidered Mesh Bra)">刺繡網紗高質感內衣</option>
+                  <option value="掛頸式露背蕾絲內衣 (Halter Lace Bralette)">掛頸式露背蕾絲內衣</option>
+                </optgroup>
+                <optgroup label="── 機能包覆與大罩杯 ──">
+                  <option value="大罩杯高包覆全罩內衣 (Full Coverage Bra)">大罩杯高包覆全罩內衣</option>
+                  <option value="高脅邊雙膠條大胸顯小內衣 (Minimizer Bra)">高脅邊雙膠條大胸顯小內衣</option>
+                  <option value="調整型雙層防滑後背內衣 (Postural Adjustment Bra)">調整型雙層防滑後背內衣</option>
+                  <option value="四排扣高包覆平背內衣 (Multi-Hook Back Smoothing Bra)">四排扣高包覆平背內衣</option>
+                  <option value="全包式防震支撐大罩杯內衣 (Full Support Bra)">全包式防震支撐大罩杯內衣</option>
+                </optgroup>
+                <optgroup label="── 運動內衣與機能衣 ──">
+                  <option value="高強度防震跑步運動內衣 (High-Impact Sports Bra)">高強度防震跑步運動內衣</option>
+                  <option value="中強度瑜伽美背運動內衣 (Medium-Impact Yoga Bra)">中強度瑜伽美背運動內衣</option>
+                  <option value="拉鏈式前扣運動內衣 (Front-Zip Sports Bra)">拉鏈式前扣運動內衣</option>
+                  <option value="透氣網紗網球運動短版上衣 (Crop Sports Top)">透氣網紗網球運動短版上衣</option>
+                </optgroup>
+                <optgroup label="── 塑身衣與機能褲 ──">
+                  <option value="女性無痕高腰連身塑身衣 (Full Body Shaping Bodysuit)">無痕高腰連身塑身衣</option>
+                  <option value="高腰收腹平腹提臀褲 (High-Waist Shaping Panties)">高腰收腹平腹提臀褲</option>
+                  <option value="骨架加壓收腰腰封馬甲 (Waist Trainer Corset)">骨架加壓收腰腰封馬甲</option>
+                  <option value="無痕提臀大腿塑型褲 (Thigh Slimming Shaping Shorts)">無痕提臀大腿塑型褲</option>
+                  <option value="產後修復雙層加壓塑身褲 (Postpartum Recovery Shaper)">產後修復雙層加壓塑身裤</option>
+                  <option value="全連身開檔雕塑體態衣 (Open-Crotch Body Shaper)">全連身開檔雕塑體態衣</option>
+                </optgroup>
+                <optgroup label="── 睡衣與家居服 ──">
+                  <option value="女性性感吊帶真絲睡裙 (Silk Nightgown)">性感吊帶真絲睡裙</option>
+                  <option value="兩件式質感真絲家居睡衣套裝 (Two-Piece Silk Pajama Set)">兩件式質感真絲家居睡衣套裝</option>
+                  <option value="深V蕾絲拼接性感睡袍 (Lace Satin Robe)">深V蕾絲拼接性感睡袍</option>
+                  <option value="法式透視蕾絲薄紗睡裙 (Sheer Lace Nightgown)">法式透視蕾絲薄紗睡裙</option>
+                  <option value="天絲木代爾極簡家居服 (Modal Lounge Set)">天絲木代爾極簡家居服</option>
+                  <option value="長袖開襟真絲睡衣套裝 (Button-Down Silk Pajamas)">長袖開襟真絲睡衣套裝</option>
+                  <option value="性感露背蕾絲連身睡衣 (Backless Lace Teddy)">性感露背蕾絲連身睡衣</option>
+                  <option value="絨面保暖高質感睡衣套裝 (Velvet Pajama Set)">絨面保暖高質感睡衣套裝</option>
+                </optgroup>
+                <optgroup label="── 男士內著與機能褲 ──">
+                  <option value="男性3D囊袋透氣四角內褲 (Men's 3D Pouch Boxer Briefs)">男性3D囊袋透氣四角褲</option>
+                  <option value="冰絲超薄無痕三角內褲 (Ice Silk Men's Briefs)">冰絲超薄無痕三角內褲</option>
+                  <option value="莫代爾高彈親膚平口褲 (Modal Boxer Briefs)">莫代爾高彈親膚平口褲</option>
+                  <option value="運動防磨腿加長型四角褲 (Long Leg Sports Boxers)">運動防磨腿加長型四角褲</option>
+                  <option value="高腰收腹男士塑身平口褲 (Men's Shaping Boxers)">高腰收腹男士塑身平口褲</option>
+                  <option value="磁石機能石墨烯抗菌內褲 (Graphene Antibacterial Briefs)">磁石機能石墨烯抗菌內褲</option>
                 </optgroup>
               </select>
             </div>
 
             <div class="form-group">
-              <label>主打色彩 (Color)</label>
+              <label>主打色彩 (Color - 50種)</label>
               <select id="colorSelect" onchange="runUpdate()">
-                <option value="珍珠奶白 (Pearl Ivory White)" selected>珍珠奶白 (Ivory White)</option>
-                <option value="極致純黑 (Classic Onyx Black)">極致純黑 (Onyx Black)</option>
-                <option value="裸膚隱形色 (Nude Seamless Skin Tone)">裸膚隱形色 (Nude Skin Tone)</option>
-                <option value="溫柔奶茶色 (Warm Milk Tea Nude)">溫柔奶茶色 (Milk Tea Nude)</option>
-                <option value="莫蘭迪煙粉 (Morandi Dusty Pink)">莫蘭迪煙粉 (Dusty Pink)</option>
-                <option value="勃根地酒紅 (Burgundy Wine Red)">勃根地酒紅 (Burgundy Red)</option>
-                <option value="午夜深藍 (Midnight Royal Navy)">午夜深藍 (Midnight Navy)</option>
-                <option value="香檳鉑金 (Champagne Platinum Gold)">香檳鉑金 (Champagne Gold)</option>
+                <optgroup label="── 經典高雅色系 ──">
+                  <option value="珍珠奶白 (Pearl Ivory White)" selected>珍珠奶白 (Ivory White)</option>
+                  <option value="極致純黑 (Classic Onyx Black)">極致純黑 (Onyx Black)</option>
+                  <option value="香檳鉑金 (Champagne Gold)">香檳鉑金 (Champagne Gold)</option>
+                  <option value="深邃夜空黑 (Midnight Ebony)">深邃夜空黑 (Midnight Ebony)</option>
+                  <option value="純淨雪白 (Pure Snow White)">純淨雪白 (Pure Snow White)</option>
+                </optgroup>
+                <optgroup label="── 裸膚與大地色系 ──">
+                  <option value="裸膚隱形色 (Nude Seamless Skin Tone)">裸膚隱形色 (Nude Skin)</option>
+                  <option value="溫柔奶茶色 (Warm Milk Tea Nude)">溫柔奶茶色 (Milk Tea Nude)</option>
+                  <option value="燕麥拿鐵色 (Oatmeal Latte)">燕麥拿鐵色 (Oatmeal Latte)</option>
+                  <option value="摩卡棕褐 (Mocha Brown)">摩卡棕褐 (Mocha Brown)</option>
+                  <option value="焦糖瑪奇朵 (Caramel Macchiato)">焦糖瑪奇朵 (Caramel)</option>
+                  <option value="栗子烤棕 (Chestnut Brown)">栗子烤棕 (Chestnut)</option>
+                  <option value="灰陶土色 (Warm Terracotta)">灰陶土色 (Terracotta)</option>
+                  <option value="暖沙金棕 (Desert Sand Gold)">暖沙金棕 (Sand Gold)</option>
+                </optgroup>
+                <optgroup label="── 莫蘭迪與柔和粉紫色系 ──">
+                  <option value="莫蘭迪煙粉 (Morandi Dusty Pink)">莫蘭迪煙粉 (Dusty Pink)</option>
+                  <option value="櫻花柔粉 (Sakura Blossom Pink)">櫻花柔粉 (Sakura Pink)</option>
+                  <option value="玫瑰鹽粉 (Rose Salt Pink)">玫瑰鹽粉 (Rose Salt Pink)</option>
+                  <option value="芋泥紫灰 (Taro Purple Gray)">芋泥紫灰 (Taro Purple)</option>
+                  <option value="薰衣草灰紫 (Lavender Fog Purple)">薰衣草灰紫 (Lavender Purple)</option>
+                  <option value="法式玫瑰粉 (French Rose Pink)">法式玫瑰粉 (French Rose)</option>
+                  <option value="煙燻豆沙色 (Smoky Bean Paste Pink)">煙燻豆沙色 (Dusty Rose)</option>
+                  <option value="蜜桃烏龍色 (Peach Oolong Pink)">蜜桃烏龍色 (Peach Oolong)</option>
+                </optgroup>
+                <optgroup label="── 奢華濃郁色系 ──">
+                  <option value="勃根地酒紅 (Burgundy Wine Red)">勃根地酒紅 (Burgundy Red)</option>
+                  <option value="午夜深藍 (Midnight Royal Navy)">午夜深藍 (Midnight Navy)</option>
+                  <option value="寶石翡翠綠 (Emerald Gem Green)">寶石翡翠綠 (Emerald Green)</option>
+                  <option value="哥德暗黑紅 (Gothic Deep Crimson)">哥德暗黑紅 (Deep Crimson)</option>
+                  <option value="復古墨綠 (Vintage Forest Green)">復古墨綠 (Forest Green)</option>
+                  <option value="帝王紫 (Royal Imperial Purple)">帝王紫 (Imperial Purple)</option>
+                  <option value="鐵灰碳黑 (Charcoal Metallic Gray)">鐵灰碳黑 (Charcoal Gray)</option>
+                  <option value="深邃藍寶石 (Sapphire Royal Blue)">深邃藍寶石 (Sapphire Blue)</option>
+                </optgroup>
+                <optgroup label="── 清新自然藍綠色系 ──">
+                  <option value="鼠尾草綠 (Sage Leaf Green)">鼠尾草綠 (Sage Green)</option>
+                  <option value="霧氣灰藍 (Foggy Slate Blue)">霧氣灰藍 (Slate Blue)</option>
+                  <option value="薄荷沁綠 (Mint Refreshing Green)">薄荷沁綠 (Mint Green)</option>
+                  <option value="抹茶淺綠 (Matcha Muted Green)">抹茶淺綠 (Matcha Green)</option>
+                  <option value="天青冰藍 (Ice Cyan Blue)">天青冰藍 (Ice Cyan Blue)</option>
+                  <option value="綠松石藍 (Turquoise Ocean Blue)">綠松石藍 (Turquoise Blue)</option>
+                  <option value="迷霧橄欖綠 (Mist Olive Green)">迷霧橄欖綠 (Olive Green)</option>
+                </optgroup>
+                <optgroup label="── 亮眼馬卡龍與時尚色系 ──">
+                  <option value="檸檬奶油黃 (Lemon Cream Yellow)">檸檬奶油黃 (Lemon Yellow)</option>
+                  <option value="珊瑚蜜橙 (Coral Sunset Orange)">珊瑚蜜橙 (Coral Orange)</option>
+                  <option value="淺金杏黃 (Apricot Silk Gold)">淺金杏黃 (Apricot Gold)</option>
+                  <option value="微醺紫羅蘭 (Electric Violet)">微醺紫羅蘭 (Violet)</option>
+                  <option value="金屬玫瑰金 (Metallic Rose Gold)">金屬玫瑰金 (Rose Gold)</option>
+                  <option value="銀感灰鈦 (Galactic Titanium Silver)">銀感灰鈦 (Titanium Silver)</option>
+                  <option value="焦糖奶橙 (Caramel Milk Orange)">焦糖奶橙 (Milk Orange)</option>
+                  <option value="靜謐天藍 (Serenity Calm Blue)">靜謐天藍 (Serenity Blue)</option>
+                  <option value="奶油開心果綠 (Pistachio Cream Green)">奶油開心果綠 (Pistachio Green)</option>
+                  <option value="日落霞光粉 (Sunset Glow Pink)">日落霞光粉 (Sunset Pink)</option>
+                  <option value="復古薑黃 (Retro Mustard Yellow)">復古薑黃 (Mustard Yellow)</option>
+                  <option value="冰晶粉藍 (Crystal Frozen Blue)">冰晶粉藍 (Frozen Blue)</option>
+                </optgroup>
               </select>
             </div>
           </div>
 
           <div class="row">
             <div class="form-group">
-              <label>罩杯結構 (Cup Structure)</label>
+              <label>罩杯結構 (Cup Structure - 50種)</label>
               <select id="cupSelect" onchange="runUpdate()">
-                <option value="深V極致集中剪裁，搭配水液與空氣雙層襯墊 (Liquid Padding)" selected>【真水專用】水感空氣雙襯墊</option>
-                <option value="無鋼圈零感設計，Q彈軟凝膠立體支撐">無鋼圈 Q彈軟凝膠支撐</option>
-                <option value="記憶鈦合金軟鋼圈，溫柔集中不壓胸">記憶鈦合金軟鋼圈</option>
-                <option value="經典傳統C型穩定鋼圈，強力托高提胸">經典C型穩定高托鋼圈</option>
-                <option value="3/4 罩杯立體模杯，自然渾圓包覆">3/4 罩杯立體包覆</option>
-                <option value="無罩杯結構/睡衣/褲類 (N/A)">無罩杯結構 (N/A)</option>
+                <!-- 50 種罩杯結構細分 -->
+                <option value="深V極致集中剪裁，搭配水液與空氣雙層襯墊 (Liquid Air Dual Padding)" selected>01. 【真水專用】水感空氣雙襯墊</option>
+                <option value="無鋼圈零感設計，Q彈軟凝膠立體支撐條 (Soft Gel Band)">02. 無鋼圈 Q彈軟凝膠支撐</option>
+                <option value="記憶鈦合金軟鋼圈，順應體溫彈性貼合托高 (Memory Wire)">03. 記憶鈦合金軟鋼圈</option>
+                <option value="經典傳統C型穩定鋼圈，強力承托包覆 (Classic C-Wire)">04. 經典C型穩定高托鋼圈</option>
+                <option value="3/4 罩杯立體模杯，塑造渾圓自然胸型 (3/4 Molded Cup)">05. 3/4 罩杯立體包覆模杯</option>
+                <option value="1/2 平口半罩杯，可拆式肩帶防走光 (1/2 Half-Cup Bandeau)">06. 1/2 平口半罩杯設計</option>
+                <option value="全罩杯高脅邊完整包覆，防止胸部外擴晃動 (Full Coverage)">07. 全罩杯高包覆穩定防震</option>
+                <option value="法式極薄三角杯，無襯墊透氣輕盈 (French Triangle Cup)">08. 法式極薄透氣三角杯</option>
+                <option value="W型下扒強力托高提胸鋼圈 (W-Wire Lift Structure)">09. W型下扒集中托高鋼圈</option>
+                <option value="下厚上薄2.5cm上推爆乳襯墊 (Push-Up Thick Padding)">10. 下厚上薄 2.5cm 爆乳襯墊</option>
+                <option value="手托式掌型按摩立體胸墊 (Palm-shaped Hand Push Pad)">11. 手托式掌型按摩立體胸墊</option>
+                <option value="雙倍空氣氣墊輕量爆乳襯墊 (Air-Pad Cushion)">12. 雙倍空氣氣墊輕量爆乳墊</option>
+                <option value="直立棉高透氣輕盈防黃胸墊 (Vertical Cotton Cup)">13. 直立棉高透氣環保胸墊</option>
+                <option value="乳膠防菌立體蜂巢透氣杯 (Latex Breathable Cup)">14. 天然乳膠蜂巢透氣胸墊</option>
+                <option value="一體成型熱壓無痕杯 (Seamless One-Piece Molded)">15. 一體成型熱壓無痕模杯</option>
+                <option value="大罩杯減壓顯小薄杯 (Minimizer Ultra-Thin Cup)">16. 大罩杯減壓顯小薄杯</option>
+                <option value="深V低脊心無壓鋼圈 (Low-Center Front Underwire)">17. 深V低脊心無壓鋼圈</option>
+                <option value="高脅邊雙膠條穩定拉提杯 (High-Side Double Bone)">18. 高脅邊雙膠條穩定包覆杯</option>
+                <option value="四分之三薄紗單層透視杯 (Sheer Single Lace Cup)">19. 單層透視蕾絲薄紗杯</option>
+                <option value="前扣式集中擠溝罩杯 (Front-Closure Cleavage Cup)">20. 前扣式美背集中美胸杯</option>
+                <option value="極致微厚1.5cm每日自然托高杯 (Daily Lift Pad)">21. 每日自然托高 1.5cm 微厚杯</option>
+                <option value="爆乳3cm超厚下墊救星杯 (Extreme 3cm Push-Up Pad)">22. 救星級 3cm 超厚爆乳墊</option>
+                <option value="水滴型立體自然服貼罩杯 (Teardrop Shaped Cup)">23. 水滴型立體自然服貼杯</option>
+                <option value="抹胸式一字平口防走光內罩杯 (Bandeau Shelf Bra)">24. 抹胸一字平口內建罩杯</option>
+                <option value="背心式固定雙連體一體式胸墊 (Built-in Vest Pad)">25. 背心連體式固定連體胸墊</option>
+                <option value="軟質樹脂彈性鋼圈 (Resin Elastic Wire)">26. 軟質樹脂彈性舒適鋼圈</option>
+                <option value="3D人體工學曲線蜂巢杯 (3D Ergonomic Honeycomb)">27. 3D人體工學曲線蜂巢杯</option>
+                <option value="雙向交叉提拉胸部結構 (Cross-Pull Lift Structure)">28. 雙向交叉提拉胸部結構</option>
+                <option value="軟膠支撐果凍條無鋼圈 (Jelly-Strip Support)">29. 隱形果凍條軟膠無鋼圈</option>
+                <option value="無鋼圈軟質Q彈海棉墊 (Wireless Soft Sponge Pad)">30. 無鋼圈軟質Q彈海棉墊</option>
+                <option value="高透氣打孔超薄胸墊 (Perforated Ultra-Thin Pad)">31. 高透氣打孔超薄胸墊</option>
+                <option value="超輕量液體流動水感襯墊 (Ultra-Light Liquid Pad)">32. 超輕量流動水感爆乳襯墊</option>
+                <option value="雙層托高加壓平口杯 (Double-Layer Lift Cup)">33. 雙層托高加壓平口杯</option>
+                <option value="無鋼圈高彈力針織美背杯 (Seamless Knit Beauty Back)">34. 無鋼圈高彈力針織美背杯</option>
+                <option value="可拆卸式圓形透氣胸墊 (Removable Round Pad)">35. 可拆卸式圓形透氣胸墊</option>
+                <option value="可拆卸式水滴型防跑偏胸墊 (Removable Teardrop Pad)">36. 可拆卸式水滴防跑偏胸墊</option>
+                <option value="深V防下滑矽膠止滑邊罩杯 (Anti-Slip Silicone Cup)">37. 深V矽膠止滑防下滑罩杯</option>
+                <option value="微甜浪漫心型立體剪裁罩杯 (Heart-Shaped Cut Cup)">38. 浪漫心型立體剪裁罩杯</option>
+                <option value="側壓集中收副乳三片式剪裁杯 (3-Piece Side Cut)">39. 三片式剪裁側壓收副乳杯</option>
+                <option value="透氣網紗提胸拉帶罩杯 (Mesh Lift Strap Cup)">40. 透氣網紗提胸拉帶罩杯</option>
+                <option value="極簡無痕零壓一片式剪裁 (One-Piece Clean Cut)">41. 極簡無痕零壓一片式剪裁</option>
+                <option value="雙排扣前拉鏈高強度防震罩杯 (Front-Zip High Impact)">42. 前拉鏈高強度防震罩杯</option>
+                <option value="U型美背防滑托高罩杯 (U-Back Non-Slip Lift Cup)">43. U型美背防滑托高罩杯</option>
+                <option value="磁石微循環健康內建胸墊 (Magnetic Healthcare Pad)">44. 磁石微循環健康內建胸墊</option>
+                <option value="石墨烯抑菌透氣胸墊 (Graphene Antibacterial Pad)">45. 石墨烯抑菌透氣胸墊</option>
+                <option value="裸感隱形矽膠胸貼罩杯 (Nude Silicone Adhesive)">46. 裸感隱形矽膠胸貼罩杯</option>
+                <option value="充氣式可調節氣墊爆乳罩杯 (Inflatable Air Push-Up)">47. 充氣式可調節氣墊爆乳杯</option>
+                <option value="運動級高彈緊緻包覆胸墊 (Sports High Compression)">48. 運動級高彈緊緻包覆胸墊</option>
+                <option value="奢華刺繡複合三層罩杯 (Luxury Embroidered Triple Layer)">49. 奢華刺繡複合三層罩杯</option>
+                <option value="無罩杯結構/睡衣/褲類 (N/A)">50. 無罩杯結構/睡衣/褲類 (N/A)</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label>版型剪裁 (Cutting Feature)</label>
+              <label>版型剪裁 (Cutting Feature - 50種)</label>
               <select id="featureSelect" onchange="runUpdate()">
-                <option value="深V集中溝影，側邊加高雙膠條完美收納副乳" selected>深V集中 + 加高雙膠條收副乳</option>
-                <option value="高腰雙層加壓收腹，3D手托式立體提臀構造">高腰加壓平腹 + 3D提臀</option>
-                <option value="無痕熱壓貼合工藝，穿著完全不留痕跡">無痕熱壓貼合 (Seamless)</option>
-                <option value="3D立體囊袋人體工學剪裁，乾爽不緊繃">3D人體工學立體囊袋</option>
+                <!-- 50 種版型剪裁細分 -->
+                <option value="深V集中溝影，側邊加高雙膠條完美收納副乳 (Deep V Side Smoothing)" selected>01. 深V集中 + 加高雙膠條收副乳</option>
+                <option value="高腰雙層加壓收腹，3D手托式立體提臀構造 (High-Waist Shaping)">02. 高腰加壓平腹 + 3D提臀</option>
+                <option value="無痕熱壓貼合工藝，穿著完全不留痕跡 (Seamless Bonding)">03. 無痕熱壓貼合 (Seamless)</option>
+                <option value="3D立體囊袋人體工學剪裁，乾爽不緊繃 (3D Ergonomic Pouch)">04. 3D人體工學立體囊袋</option>
+                <option value="四排四扣高脇邊穩定支撐，平整後背贅肉 (4-Hooks Back Smoothing)">05. 四排四扣加寬平整後背</option>
+                <option value="美背交叉肩帶時尚設計，適合外露穿搭 (Cross Back Straps)">06. 美背交叉肩帶時尚外露設計</option>
+                <option value="懸浮式減壓肩帶，有效分散肩膀壓力 (Pressure Relief Straps)">07. 懸浮式減壓加寬肩帶</option>
+                <option value="高腰連身雕塑，腹部三層加壓平腹 (3-Layer Abdominal Control)">08. 連身三層加壓平腹塑身</option>
+                <option value="大腿加長防磨腿剪裁，透氣無痕 (Anti-Chafing Long Shorts)">09. 大腿加長防磨腿無痕剪裁</option>
+                <option value="骨架馬甲式收腰剪裁，重塑S曲線腰身 (Corset Waist Trainer)">10. 骨架馬甲式收腰 S 曲線</option>
+                <option value="掛頸露背美背綁帶設計 (Halter Neck Tie)">11. 掛頸露背美背綁帶設計</option>
+                <option value="抹胸防走光平口剪裁，多穿式可拆肩帶 (Convertible Strapless)">12. 抹胸防走光多穿式剪裁</option>
+                <option value="產後修復骨盆帶加壓收緊剪裁 (Postpartum Pelvis Recovery)">13. 產後修復骨盆加壓收緊</option>
+                <option value="開檔方便穿脫連身雕塑設計 (Open Crotch Shaper)">14. 開檔便捷設計連身雕塑</option>
+                <option value="U型大露背極致性感剪裁 (Low U-Back Cut)">15. U型大露背極致性感剪裁</option>
+                <option value="前扣式方便穿脫，秒速集中爆乳 (Front Closure Rapid Lift)">16. 前扣式秒速集中爆乳剪裁</option>
+                <option value="雙層防滑矽膠邊緣，平口防下滑 (Anti-Slip Silicone Edge)">17. 雙層防滑矽膠防下滑邊緣</option>
+                <option value="側壓提拉帶加強側包副乳 (Side-Press Lifting Panels)">18. 側壓提拉帶加強包覆副乳</option>
+                <option value="工字背高強度跑步運動防震剪裁 (Racerback High Impact)">19. 工字背高強度運動防震</option>
+                <option value="前拉鏈方便穿脫運動防震剪裁 (Front Zip Sports Cut)">20. 前拉鏈方便穿脫運動剪裁</option>
+                <option value="隱形高脅邊無縫拉提結構 (Invisible Side Smoothing)">21. 隱形高脅邊無縫拉提結構</option>
+                <option value="法式高叉顯腿長性感連身剪裁 (High-Cut Leg Teddy)">22. 法式高叉顯腿長連身剪裁</option>
+                <option value="微壓舒適睡衣鬆緊腰帶剪裁 (Relaxed Comfort Waistband)">23. 微壓舒適居家鬆緊腰帶</option>
+                <option value="立體桃心臀性感提臀線條 (Peach Buttock Lifter)">24. 立體桃心臀性感提臀線條</option>
+                <option value="雙層收胃壓腹高腰平口褲 (Double Abdominal Control)">25. 雙層收胃平腹高腰褲剪裁</option>
+                <option value="鏤空綁帶性感交叉幾何剪裁 (Hollow Strappy Cut)">26. 鏤空綁带交叉幾何性感剪裁</option>
+                <option value="背心式全包覆式舒壓無痕剪裁 (Full-Cover Tank Bra)">27. 背心式全包覆舒壓無痕剪裁</option>
+                <option value="三排三扣經典日常穩定版型 (3-Hooks Classic Fit)">28. 三排三扣經典日常穩定版型</option>
+                <option value="無鋼圈一片式超薄裁切 (One-Piece Ultra-Thin Cut)">29. 無鋼圈一片式超薄裁切</option>
+                <option value="可調節肩帶與胸圍彈性剪裁 (Adjustable Straps & Band)">30. 可調節肩帶與胸圍彈性剪裁</option>
+                <option value="寬幅下扒穩定不捲邊剪裁 (Wide Anti-Roll Underband)">31. 寬幅下扒穩定不捲邊剪裁</option>
+                <option value="蕾絲拼接透視露背性感剪裁 (Lace Sheer Backless)">32. 蕾絲拼接透視露背剪裁</option>
+                <option value="經典開襟長袖鈕扣睡衣剪裁 (Classic Button-Down Cut)">33. 經典開襟長袖鈕扣睡衣剪裁</option>
+                <option value="吊帶深V細肩帶可調式性感睡裙 (Adjustable Cami Slip)">34. 吊帶深V細肩帶性感睡裙</option>
+                <option value="和風繫帶睡袍優雅寬鬆剪裁 (Kimono Robe Tie Cut)">35. 和風繫帶睡袍優雅寬鬆剪裁</option>
+                <option value="男士高彈力加寬褲頭不勒腰 (Men's Wide Elastic Band)">36. 男士高彈力加寬不勒腰褲頭</option>
+                <option value="男士無縫一片式防夾臀剪裁 (Men's Anti-Wedgie Cut)">37. 男士無縫一片式防夾臀剪裁</option>
+                <option value="男士分離式雙囊袋乾爽剪裁 (Men's Dual Pouch Cut)">38. 男士分離式雙囊袋乾爽剪裁</option>
+                <option value="減壓防晃動X型美背交叉剪裁 (X-Back Support Cut)">39. 減壓防晃動 X 型美背交叉剪裁</option>
+                <option value="極致低腰性感隱形褲剪裁 (Ultra Low-Rise Cut)">40. 極致低腰性感隱形褲剪裁</option>
+                <option value="高腰全包覆溫宮防寒褲剪裁 (High-Waist Warm Uterus)">41. 高腰全包覆溫宮防寒褲剪裁</option>
+                <option value="側邊網紗拼接透氣機能剪裁 (Side Mesh Panel Cut)">42. 側邊網紗拼接透氣機能剪裁</option>
+                <option value="手托式集中雙向拉提剪裁 (Dual-Direction Lift Cut)">43. 手托式集中雙向拉提剪裁</option>
+                <option value="極致微壓居家舒緩適穿剪裁 (Micro-Compression Lounge)">44. 極致微壓居家舒緩適穿剪裁</option>
+                <option value="輕彈柔壓無痕無感滾邊剪裁 (Soft Elastic Edge Cut)">45. 輕彈柔壓無痕無感滾邊剪裁</option>
+                <option value="立體臀窩凹凸防扁臀提臀剪裁 (3D Buttock Shaping)">46. 立體臀窩防扁臀提臀剪裁</option>
+                <option value="微性感半透視高腰蕾絲剪裁 (Sheer High-Waist Lace)">47. 微性感半透視高腰蕾絲剪裁</option>
+                <option value="高包覆全托式防下垂剪裁 (Full Anti-Sagging Cut)">48. 高包覆全托式防下垂剪裁</option>
+                <option value="極致包覆胸部晃動衝擊剪裁 (Motion Control Fit)">49. 極致包覆運動衝擊防晃剪裁</option>
+                <option value="通用自然簡約流線剪裁 (Universal Modern Cut)">50. 通用自然簡約流線剪裁</option>
               </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label>材質布料 (可多選)</label>
+            <label>材質布料 (50種選擇 - 可多選)</label>
             <div class="tag-container">
+              <!-- 50 種材質布料多選 -->
               <label class="tag-item"><input type="checkbox" value="高密度防滲漏微纖維與液體襯墊" onchange="runUpdate()" class="mat-cb" checked> 真水防漏微纖維</label>
               <label class="tag-item"><input type="checkbox" value="法式精緻睫毛蕾絲 (Chantilly Lace)" onchange="runUpdate()" class="mat-cb" checked> 法式睫毛蕾絲</label>
               <label class="tag-item"><input type="checkbox" value="100%頂級桑蠶絲 (100% Mulberry Silk)" onchange="runUpdate()" class="mat-cb"> 100%頂級桑蠶絲</label>
               <label class="tag-item"><input type="checkbox" value="天絲木代爾面料 (Tencel Modal)" onchange="runUpdate()" class="mat-cb"> 天絲木代爾</label>
               <label class="tag-item"><input type="checkbox" value="銅氨絲極致沁涼纖維 (Cupro Fiber)" onchange="runUpdate()" class="mat-cb"> 銅氨絲沁涼纖維</label>
               <label class="tag-item"><input type="checkbox" value="冰絲涼感高彈微纖維 (Ice Silk)" onchange="runUpdate()" class="mat-cb"> 冰絲涼感微纖維</label>
+              <label class="tag-item"><input type="checkbox" value="石墨烯抗菌透氣底襯 (Graphene Fabric)" onchange="runUpdate()" class="mat-cb"> 石墨烯抗菌底襯</label>
+              <label class="tag-item"><input type="checkbox" value="高彈力萊卡面料 (Lycra Stretch)" onchange="runUpdate()" class="mat-cb"> 高彈力萊卡面料</label>
+              <label class="tag-item"><input type="checkbox" value="透氣超細網紗 (Breathable Mesh)" onchange="runUpdate()" class="mat-cb"> 透氣超細網紗</label>
+              <label class="tag-item"><input type="checkbox" value="奢華重磅真絲緞面 (Heavy Silk Satin)" onchange="runUpdate()" class="mat-cb"> 奢華重磅真絲緞面</label>
+              <label class="tag-item"><input type="checkbox" value="高彈力塑形膠骨 (Shaping Boning)" onchange="runUpdate()" class="mat-cb"> 高彈力塑形膠骨</label>
+              <label class="tag-item"><input type="checkbox" value="Q彈柔軟凝膠支撐條 (Soft Gel Support)" onchange="runUpdate()" class="mat-cb"> Q彈柔軟凝膠條</label>
+              <label class="tag-item"><input type="checkbox" value="精細刺繡花卉網紗 (Embroidered Lace)" onchange="runUpdate()" class="mat-cb"> 精細刺繡花卉網紗</label>
+              <label class="tag-item"><input type="checkbox" value="親膚有機純棉布料 (Organic Cotton)" onchange="runUpdate()" class="mat-cb"> 親膚有機純棉</label>
+              <label class="tag-item"><input type="checkbox" value="竹纖維抑菌天然面料 (Bamboo Fiber)" onchange="runUpdate()" class="mat-cb"> 竹纖維抑菌面料</label>
+              <label class="tag-item"><input type="checkbox" value="金屬光澤澤感絲絨 (Lustrous Velvet)" onchange="runUpdate()" class="mat-cb"> 光澤質感絲絨</label>
+              <label class="tag-item"><input type="checkbox" value="高微壓雕塑網布 (Powernet Fabric)" onchange="runUpdate()" class="mat-cb"> 高微壓雕塑網布</label>
+              <label class="tag-item"><input type="checkbox" value="吸濕排汗專業運動面料 (Dry-Fit Fabric)" onchange="runUpdate()" class="mat-cb"> 吸濕排汗運動面料</label>
+              <label class="tag-item"><input type="checkbox" value="無縫貼合熱溶膠膜 (Seamless Heat Bond)" onchange="runUpdate()" class="mat-cb"> 無縫熱壓膠膜</label>
+              <label class="tag-item"><input type="checkbox" value="柔感彈性雪紡布料 (Elastic Chiffon)" onchange="runUpdate()" class="mat-cb"> 柔感彈性雪紡</label>
+              <label class="tag-item"><input type="checkbox" value="記憶慢回彈高彈海綿 (Memory Foam)" onchange="runUpdate()" class="mat-cb"> 記憶慢回彈海綿</label>
+              <label class="tag-item"><input type="checkbox" value="天然防菌乳膠墊 (Natural Latex)" onchange="runUpdate()" class="mat-cb"> 天然防菌乳膠</label>
+              <label class="tag-item"><input type="checkbox" value="環保直立棉胸墊 (Eco Vertical Cotton)" onchange="runUpdate()" class="mat-cb"> 環保直立棉胸墊</label>
+              <label class="tag-item"><input type="checkbox" value="微絨保暖親膚面料 (Fleece-Lined Soft)" onchange="runUpdate()" class="mat-cb"> 微絨保暖親膚面料</label>
+              <label class="tag-item"><input type="checkbox" value="抑菌銀離子纖維 (Silver Ion Fabric)" onchange="runUpdate()" class="mat-cb"> 抑菌銀離子纖維</label>
+              <label class="tag-item"><input type="checkbox" value="高彈力尼龍混紡 (Nylon Spandex)" onchange="runUpdate()" class="mat-cb"> 高彈力尼龍混紡</label>
+              <label class="tag-item"><input type="checkbox" value="遠紅外線機能布料 (Far Infrared Fabric)" onchange="runUpdate()" class="mat-cb"> 遠紅外線機能布料</label>
+              <label class="tag-item"><input type="checkbox" value="輕盈透氣歐根紗 (Lightweight Organza)" onchange="runUpdate()" class="mat-cb"> 輕盈透氣歐根紗</label>
+              <label class="tag-item"><input type="checkbox" value="金絲亮片閃耀蕾絲 (Glitter Metallic Lace)" onchange="runUpdate()" class="mat-cb"> 金絲亮片閃耀蕾絲</label>
+              <label class="tag-item"><input type="checkbox" value="高質感提花錦綸 (Jacquard Nylon)" onchange="runUpdate()" class="mat-cb"> 高質感提花錦綸</label>
+              <label class="tag-item"><input type="checkbox" value="防下滑醫用級矽膠 (Medical Silicone)" onchange="runUpdate()" class="mat-cb"> 防下滑醫用級矽膠</label>
+              <label class="tag-item"><input type="checkbox" value="雙層高密壓腹網布 (Double Layer Mesh)" onchange="runUpdate()" class="mat-cb"> 雙層高密壓腹網布</label>
+              <label class="tag-item"><input type="checkbox" value="日系水洗軟質棉 (Washed Soft Cotton)" onchange="runUpdate()" class="mat-cb"> 日系水洗軟質棉</label>
+              <label class="tag-item"><input type="checkbox" value="四面高彈微纖維 (4-Way Stretch Micro)" onchange="runUpdate()" class="mat-cb"> 四面高彈微纖維</label>
+              <label class="tag-item"><input type="checkbox" value="親水性涼感聚酯 (Hydrophilic Cool)" onchange="runUpdate()" class="mat-cb"> 親水性涼感聚酯</label>
+              <label class="tag-item"><input type="checkbox" value="咖啡渣環保除臭纖維 (Coffee Ground Fabric)" onchange="runUpdate()" class="mat-cb"> 咖啡渣環保除臭纖維</label>
+              <label class="tag-item"><input type="checkbox" value="火山岩保暖發熱纖維 (Volcanic Thermal)" onchange="runUpdate()" class="mat-cb"> 火山岩發熱纖維</label>
+              <label class="tag-item"><input type="checkbox" value="海藻紗極致滋養纖維 (Seaweed Fiber)" onchange="runUpdate()" class="mat-cb"> 海藻紗滋養纖維</label>
+              <label class="tag-item"><input type="checkbox" value="膠原蛋白美肌纖維 (Collagen Infused)" onchange="runUpdate()" class="mat-cb"> 膠原蛋白美肌纖維</label>
+              <label class="tag-item"><input type="checkbox" value="柔滑人造絲縴維 (Smooth Rayon)" onchange="runUpdate()" class="mat-cb"> 柔滑人造絲纖維</label>
+              <label class="tag-item"><input type="checkbox" value="高針數密實羅紋布 (High-Gauge Ribbed)" onchange="runUpdate()" class="mat-cb"> 高針數密實羅紋布</label>
+              <label class="tag-item"><input type="checkbox" value="鏤空剪花蕾絲 (Laser-Cut Lace)" onchange="runUpdate()" class="mat-cb"> 鏤空剪花蕾絲</label>
+              <label class="tag-item"><input type="checkbox" value="超彈力橡筋織帶 (High Elastic Band)" onchange="runUpdate()" class="mat-cb"> 超彈力橡筋織帶</label>
+              <label class="tag-item"><input type="checkbox" value="輕薄防風機能運動面料 (Windproof Light)" onchange="runUpdate()" class="mat-cb"> 輕薄防風運動面料</label>
+              <label class="tag-item"><input type="checkbox" value="微壓減震三維彈性體 (3D Cushion Mesh)" onchange="runUpdate()" class="mat-cb"> 減震三維彈性網布</label>
+              <label class="tag-item"><input type="checkbox" value="超質感絲光棉 (Mercerized Cotton)" onchange="runUpdate()" class="mat-cb"> 超質感絲光棉</label>
+              <label class="tag-item"><input type="checkbox" value="磁石微循環健康貼片 (Magnetic Healthcare)" onchange="runUpdate()" class="mat-cb"> 磁石微循環貼片</label>
+              <label class="tag-item"><input type="checkbox" value="隱形高彈魚骨膠條 (Invisible Spiral Bone)" onchange="runUpdate()" class="mat-cb"> 隱形高彈魚骨膠條</label>
+              <label class="tag-item"><input type="checkbox" value="奢華皮粉色醋酸面料 (Acetate Fabric)" onchange="runUpdate()" class="mat-cb"> 奢華醋酸布料</label>
+              <label class="tag-item"><input type="checkbox" value="柔感麂皮絨面料 (Soft Suede Finish)" onchange="runUpdate()" class="mat-cb"> 柔感麂皮絨面料</label>
             </div>
           </div>
         </div>
@@ -136,17 +374,124 @@
         <div class="card">
           <div class="card-title">
             <span>2. 文案與 AI 靈感生成</span>
-            <button onclick="generateAiTitle()" type="button" class="btn">🎲 AI 換標題</button>
+            <button onclick="generateAiTitle()" type="button" class="btn">🎲 AI 隨機換標題 (50+庫)</button>
           </div>
 
           <div class="row">
             <div class="form-group">
-              <label>英文主標題 (Main Title)</label>
-              <input type="text" id="mainTitleInput" oninput="runUpdate()" value="LIQUID CURVE">
+              <label>英文主標題 (Main Title - 可選/自訂)</label>
+              <select id="mainTitleSelect" onchange="applyTitleSelect()">
+                <!-- 50 種英文標題選單 -->
+                <option value="LIQUID CURVE" selected>01. LIQUID CURVE</option>
+                <option value="AQUA CLEAVAGE">02. AQUA CLEAVAGE</option>
+                <option value="BREATHABLE SILK">03. BREATHABLE SILK</option>
+                <option value="FRENCH ROMANCE">04. FRENCH ROMANCE</option>
+                <option value="PURE COMFORT">05. PURE COMFORT</option>
+                <option value="SILK EMBRACE">06. SILK EMBRACE</option>
+                <option value="BODY SCULPTOR">07. BODY SCULPTOR</option>
+                <option value="FEATHERTOUCH">08. FEATHERTOUCH</option>
+                <option value="VELVET TOUCH">09. VELVET TOUCH</option>
+                <option value="SEAMLESS BARE">10. SEAMLESS BARE</option>
+                <option value="NUDITY SENSATION">11. NUDITY SENSATION</option>
+                <option value="DEEP V HOURGLASS">12. DEEP V HOURGLASS</option>
+                <option value="LIFT & SHAPE">13. LIFT & SHAPE</option>
+                <option value="INVISIBLE FIT">14. INVISIBLE FIT</option>
+                <option value="LUXURY LACE">15. LUXURY LACE</option>
+                <option value="CHANTILLY GLAM">16. CHANTILLY GLAM</option>
+                <option value="ROYAL COMFORT">17. ROYAL COMFORT</option>
+                <option value="AIR PUSH-UP">18. AIR PUSH-UP</option>
+                <option value="BOUNCE & FLEX">19. BOUNCE & FLEX</option>
+                <option value="S-CURVE POWER">20. S-CURVE POWER</option>
+                <option value="GENTLE SUPPORT">21. GENTLE SUPPORT</option>
+                <option value="ZERO PRESSURE">22. ZERO PRESSURE</option>
+                <option value="COOL ICE SILK">23. COOL ICE SILK</option>
+                <option value="SATIN NIGHTS">24. SATIN NIGHTS</option>
+                <option value="MIDNIGHT ALLURE">25. MIDNIGHT ALLURE</option>
+                <option value="ELEGANT SILHOUETTE">26. ELEGANT SILHOUETTE</option>
+                <option value="PERFECT FULLNESS">27. PERFECT FULLNESS</option>
+                <option value="SOFT GEL FLEX">28. SOFT GEL FLEX</option>
+                <option value="ULTRA LIGHT FIT">29. ULTRA LIGHT FIT</option>
+                <option value="DAILY CONFIDENCE">30. DAILY CONFIDENCE</option>
+                <option value="BOHO BRALETTE">31. BOHO BRALETTE</option>
+                <option value="HIGH IMPACT ACTIVE">32. HIGH IMPACT ACTIVE</option>
+                <option value="YOGA FLUIDITY">33. YOGA FLUIDITY</option>
+                <option value="WAIST SCULPTING">34. WAIST SCULPTING</option>
+                <option value="BUTT LIFT SHAPER">35. BUTT LIFT SHAPER</option>
+                <option value="POSTURE CORRECTOR">36. POSTURE CORRECTOR</option>
+                <option value="PURE COTTON TOUCH">37. PURE COTTON TOUCH</option>
+                <option value="BAMBOO FRESH">38. BAMBOO FRESH</option>
+                <option value="GRAPHENE CARE">39. GRAPHENE CARE</option>
+                <option value="DELICATE EMBROIDERY">40. DELICATE EMBROIDERY</option>
+                <option value="SHEER SEDUCTION">41. SHEER SEDUCTION</option>
+                <option value="VOGUE ESSENCE">42. VOGUE ESSENCE</option>
+                <option value="MINIMALIST BEAUTY">43. MINIMALIST BEAUTY</option>
+                <option value="CANDY COLOR VIBE">44. CANDY COLOR VIBE</option>
+                <option value="PASTEL DREAMS">45. PASTEL DREAMS</option>
+                <option value="SWEET ROSE SILK">46. SWEET ROSE SILK</option>
+                <option value="MODAL SOFTNESS">47. MODAL SOFTNESS</option>
+                <option value="GLAMOUR COUTURE">48. GLAMOUR COUTURE</option>
+                <option value="BEAUTY BACK LIFT">49. BEAUTY BACK LIFT</option>
+                <option value="AUTHENTIC CURVE">50. AUTHENTIC CURVE</option>
+              </select>
+              <input type="text" id="mainTitleInput" oninput="runUpdate()" value="LIQUID CURVE" style="margin-top:4px;" placeholder="也可手動輸入英文主標題">
             </div>
+
             <div class="form-group">
-              <label>中文副標題 (Subtitle)</label>
-              <input type="text" id="subTitleInput" oninput="runUpdate()" value="自然波動 雙倍爆乳">
+              <label>中文副標題 (Subtitle - 可選/自訂)</label>
+              <select id="subTitleSelect" onchange="applySubTitleSelect()">
+                <!-- 50 種中文標題選單 -->
+                <option value="自然波動 雙倍爆乳" selected>01. 自然波動 雙倍爆乳</option>
+                <option value="水感托高 渾圓完美">02. 水感托高 渾圓完美</option>
+                <option value="極致無痕 親膚呼吸">03. 極致無痕 親膚呼吸</option>
+                <option value="法式蕾絲 優雅綻放">04. 法式蕾絲 優雅綻放</option>
+                <option value="零感支撐 自由享受">05. 零感支撐 自由享受</option>
+                <option value="奢華真絲 溫柔呵護">06. 奢華真絲 溫柔呵護</option>
+                <option value="極致塑形 重塑曲線">07. 極致塑形 重塑曲線</option>
+                <option value="羽感裸膚 無感體驗">08. 羽感裸膚 無感體驗</option>
+                <option value="軟凝膠支撐 告別鋼圈">09. 軟凝膠支撐 告別鋼圈</option>
+                <option value="高脅邊包覆 完美收副乳">10. 高脅邊包覆 完美收副乳</option>
+                <option value="深V誘惑 打造自信美胸">11. 深V誘惑 打造自信美胸</option>
+                <option value="高腰收腹 平腹立體提臀">12. 高腰收腹 平腹立體提臀</option>
+                <option value="冰絲涼感 乾爽不黏膩">13. 冰絲涼感 乾爽不黏膩</option>
+                <option value="一體成型 隱形貼合外衣">14. 一體成型 隱形貼合外衣</option>
+                <option value="輕量氣墊 自然升級罩杯">15. 輕量氣墊 自然升級罩杯</option>
+                <option value="美背交叉 展現性感線條">16. 美背交叉 展現性感線條</option>
+                <option value="大罩杯減壓 渾圓不壓胸">17. 大罩杯減壓 渾圓不壓胸</option>
+                <option value="產後修復 輕鬆回復S曲線">18. 產後修復 輕鬆回復S曲線</option>
+                <option value="莫代爾親膚 極致居家體驗">19. 莫代爾親膚 極致居家體驗</option>
+                <option value="極致透視 展現女性魅力">20. 極致透視 展現女性魅力</option>
+                <option value="手托集中 秒速包覆托高">21. 手托集中 秒速包覆托高</option>
+                <option value="高強度防震 運動無拘無束">22. 高強度防震 運動無拘無束</option>
+                <option value="記憶軟鋼圈 貼合不壓骨">23. 記憶軟鋼圈 貼合不壓骨</option>
+                <option value="石墨烯抗菌 全天候健康守護">24. 石墨烯抗菌 全天候健康守護</option>
+                <option value="前扣秒穿 集中溝影即刻現">25. 前扣秒穿 集中溝影即刻現</option>
+                <option value="抹胸平口 穿搭防走光首選">26. 抹胸平口 穿搭防走光首選</option>
+                <option value="馬甲骨架 雕塑迷人蜂腰">27. 馬甲骨架 雕塑迷人蜂腰</option>
+                <option value="輕奢刺繡 彰顯高貴品味">28. 輕奢刺繡 彰顯高貴品味</option>
+                <option value="裸感軟凝膠 宛如第二層肌膚">29. 裸感軟凝膠 宛如第二層肌膚</option>
+                <option value="四季適穿 柔滑極致親膚">30. 四季適穿 柔滑極致親膚</option>
+                <option value="減壓止滑肩帶 告別下滑困擾">31. 減壓止滑肩帶 告別下滑困擾</option>
+                <option value="大腿加長防磨 舒適塑型褲">32. 大腿加長防磨 舒適塑型褲</option>
+                <option value="深V低脊心 告別胸骨壓迫">33. 深V低脊心 告別胸骨壓迫</option>
+                <option value="高微壓雕塑 輕鬆穿出好身材">34. 高微壓雕塑 輕鬆穿出好身材</option>
+                <option value="性感連身睡裙 浪漫夜晚首選">35. 性感連身睡裙 浪漫夜晚首選</option>
+                <option value="男士3D囊袋 乾爽透氣不緊繃">36. 男士3D囊袋 乾爽透氣不緊繃</option>
+                <option value="純棉有機撫觸 溫柔守護肌膚">37. 純棉有機撫觸 溫柔守護肌膚</option>
+                <option value="四排扣高包覆 平整後背贅肉">38. 四排扣高包覆 平整後背贅肉</option>
+                <option value="天絲木代爾 觸感如雲朵般柔軟">39. 天絲木代爾 觸感如雲朵般柔軟</option>
+                <option value="極致鏤空綁帶 時尚美背焦點">40. 極致鏤空綁帶 時尚美背焦點</option>
+                <option value="蜂巢透氣杯 全天候舒爽體驗">41. 蜂巢透氣杯 全天候舒爽體驗</option>
+                <option value="薄款背心式 無拘無束自由感">42. 薄款背心式 無拘無束自由感</option>
+                <option value="極速吸濕排汗 運動乾爽無負擔">43. 極速吸濕排汗 運動乾爽無負擔</option>
+                <option value="日系極簡美學 純粹高質感">44. 日系極簡美學 純粹高質感</option>
+                <option value="重磅真絲光澤 散發名媛氣質">45. 重磅真絲光澤 散發名媛氣質</option>
+                <option value="溫宮保暖高腰褲 溫柔呵護腹部">46. 溫宮保暖高腰褲 溫柔呵護腹部</option>
+                <option value="雙層加壓微塑 打造挺拔體態">47. 雙層加壓微塑 打造挺拔體態</option>
+                <option value="法式精緻剪裁 細節成就完美">48. 法式精緻剪裁 細節成就完美</option>
+                <option value="3D桃心提臀 展現迷人臀線">49. 3D桃心提臀 展現迷人臀線</option>
+                <option value="經典高奢設計 展現女性自信">50. 經典高奢設計 展現女性自信</option>
+              </select>
+              <input type="text" id="subTitleInput" oninput="runUpdate()" value="自然波動 雙倍爆乳" style="margin-top:4px;" placeholder="也可手動輸入中文副標題">
             </div>
           </div>
 
@@ -162,7 +507,7 @@
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <span style="font-size: 13px; color: #cbd5e1;">介紹短文段落</span>
-                <button type="button" onclick="generateAiDesc()" style="background: none; border: none; color: #f472b6; font-size: 12px; cursor: pointer; font-weight: bold;">✨ AI 生成短文</button>
+                <button type="button" onclick="generateAiDesc()" style="background: none; border: none; color: #f472b6; font-size: 12px; cursor: pointer; font-weight: bold;">✨ AI 隨機生成短文</button>
               </div>
               <input type="text" id="descInput" oninput="runUpdate()" placeholder="點擊右上角 AI 生成短文..." value="Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。">
             </div>
@@ -170,42 +515,236 @@
 
           <div class="row">
             <div class="form-group">
-              <label>字體風格</label>
+              <label>字體樣式 (Font Style - 50種)</label>
               <select id="fontStyleSelect" onchange="runUpdate()">
-                <option value="高奢 Vogue 經典襯線體">高奢 Vogue 襯線體</option>
-                <option value="日系 Kinfolk 極簡無襯線體">日系極簡無襯線體</option>
-                <option value="優美流線手寫草書體">優雅手寫草書體</option>
+                <!-- 50 種字體風格選單 -->
+                <option value="高奢 Vogue 經典襯線體 (Vogue Classic Serif)" selected>01. 高奢 Vogue 經典襯線體</option>
+                <option value="日系 Kinfolk 極簡無襯線體 (Kinfolk Modern Sans)">02. 日系 Kinfolk 極簡無襯線體</option>
+                <option value="優美流線手寫草書體 (Elegant Calligraphy Cursive)">03. 優美流線手寫草書體</option>
+                <option value="Bazaar 雜誌高對比襯線體 (Bazaar High-Contrast Serif)">04. Bazaar 雜誌高對比襯線體</option>
+                <option value="Elle 時尚極簡幾何無襯線體 (Elle Geometric Sans)">05. Elle 時尚極簡幾何無襯線體</option>
+                <option value="復古古典羅馬字體 (Retro Roman Serif)">06. 復古古典羅馬字體</option>
+                <option value="現代極簡細體字型 (Modern Minimalist Thin)">07. 現代極簡細體字型</option>
+                <option value="手繪法式浪漫字型 (French Romantic Script)">08. 手繪法式浪漫字型</option>
+                <option value="高級黑體粗體排版 (Bold Modern Gothic)">09. 高級黑體粗體排版</option>
+                <option value="哥德復古藝術字體 (Gothic Antique Font)">10. 哥德復古藝術字體</option>
+                <option value="極簡微粗粗體 (Bold Sans-Serif Minimal)">11. 極簡微粗無襯線體</option>
+                <option value="意大利時尚傾斜字體 (Italian Vogue Italic)">12. 意大利時尚傾斜字體</option>
+                <option value="日系明朝體高雅字型 (Japanese Mincho Serif)">13. 日系明朝體高雅字型</option>
+                <option value="高級標題宋體字型 (Luxury Title Songti)">14. 高級標題宋體字型</option>
+                <option value="法式手寫筆刷體 (French Brush Script)">15. 法式手寫筆刷體</option>
+                <option value="幾何圓體簡約字型 (Geometric Rounded Sans)">16. 幾何圓體簡約字型</option>
+                <option value="古典襯線斜體 (Classic Serif Italic)">17. 古典襯線斜體</option>
+                <option value="極致微細體 (Ultra Light Thin Font)">18. 極致微細體</option>
+                <option value="現代建築線條字體 (Architectural Line Font)">19. 現代建築線條字體</option>
+                <option value="經典 Garamond 襯線體 (Garamond Classic Serif)">20. 經典 Garamond 襯線體</option>
+                <option value="Bodoni 高對比時尚字體 (Bodoni High-Contrast)">21. Bodoni 高對比時尚字體</option>
+                <option value="Didot 巴黎高級訂製字體 (Didot Paris Haute)">22. Didot 巴黎高級訂製字體</option>
+                <option value="Futura 前衛幾何無襯線體 (Futura Avant-Garde)">23. Futura 前衛幾何無襯線體</option>
+                <option value="Helvetica 現代主義無襯線體 (Helvetica Neue)">24. Helvetica 現代主義無襯線體</option>
+                <option value="Baskerville 典雅古典體 (Baskerville Elegant)">25. Baskerville 典雅古典體</option>
+                <option value="手繪羽毛筆墨水字體 (Feather Pen Ink Script)">26. 手繪羽毛筆墨水字體</option>
+                <option value="優雅輕描線條字體 (Delicate Outline Font)">27. 優雅輕描線條字體</option>
+                <option value="電商促銷高醒目粗體 (E-Commerce High Impact)">28. 電商促銷高醒目粗體</option>
+                <option value="微甜可愛手寫字體 (Sweet Handwritten)">29. 微甜可愛手寫字體</option>
+                <option value="復古報紙排版字體 (Retro Newspaper Font)">30. 復古報紙排版字體</option>
+                <option value="歐式宮廷華麗字體 (European Palace Royal)">31. 歐式宮廷華麗字體</option>
+                <option value="輕奢霓虹光芒字體 (Light Luxury Neon Glow)">32. 輕奢霓虹光芒字體</option>
+                <option value="金屬立體浮雕字體 (Metallic 3D Embossed)">33. 金屬立體浮雕字體</option>
+                <option value="極簡黑體襯線混合字體 (Hybrid Serif Sans)">34. 極簡黑體襯線混合字體</option>
+                <option value="柔美水彩筆觸字體 (Soft Watercolor Brush)">35. 柔美水彩筆觸字體</option>
+                <option value="極致高冷鋼鐵無襯線體 (Industrial Cool Sans)">36. 極致高冷鋼鐵無襯線體</option>
+                <option value="美式復古標籤字體 (Vintage American Label)">37. 美式復古標籤字體</option>
+                <option value="微醺優雅草書體 (Cursive Elegant Script)">38. 微醺優雅草書體</option>
+                <option value="高級珠寶專用字體 (Luxury Jewelry Type)">39. 高級珠寶專用字體</option>
+                <option value="精緻香水品牌專用字體 (Perfume Brand Type)">40. 精緻香水品牌專用字體</option>
+                <option value="輕時尚簡約粗黑體 (Modern Fashion Bold)">41. 輕時尚簡約粗黑體</option>
+                <option value="自然木質溫潤字體 (Warm Natural Type)">42. 自然木質溫潤字體</option>
+                <option value="冷淡風灰度字體 (Muted Muted Gray Type)">43. 冷淡風灰度字體</option>
+                <option value="高級黑白對比字體 (Monochrome High-Contrast)">44. 高級黑白對比字體</option>
+                <option value="細緻空心線條字體 (Fine Outline Type)">45. 細緻空心線條字體</option>
+                <option value="現代藝術展覽字體 (Modern Art Gallery)">46. 現代藝術展覽字體</option>
+                <option value="高雅名媛手寫體 (High Society Script)">47. 高雅名媛手寫體</option>
+                <option value="微燙金壓紋字體 (Debossed Gold Foil Type)">48. 微燙金壓紋字體</option>
+                <option value="極致流線動態字體 (Dynamic Streamline Type)">49. 極致流線動態字體</option>
+                <option value="通用經典雜誌封面字體 (Universal Magazine Type)">50. 通用經典雜誌封面字體</option>
               </select>
             </div>
+
             <div class="form-group">
-              <label>文字色彩</label>
+              <label>文字色彩 (Font Color - 50種)</label>
               <select id="fontColorSelect" onchange="runUpdate()">
-                <option value="金屬燙金香檳金">燙金香檳金</option>
-                <option value="純淨極致白">純淨極致白</option>
-                <option value="深邃極致黑">深邃極致黑</option>
+                <!-- 50 種文字色彩選單 -->
+                <option value="金屬燙金香檳金 (Champagne Gold Foil)" selected>01. 金屬燙金香檳金</option>
+                <option value="純淨極致白 (Pure Crystal White)">02. 純淨極致白</option>
+                <option value="深邃極致黑 (Deep Onyx Black)">03. 深邃極致黑</option>
+                <option value="玫瑰金金屬光澤 (Rose Gold Metallic)">04. 玫瑰金金屬光澤</option>
+                <option value="白銀鉑金光澤 (Platinum Silver Metallic)">05. 白銀鉑金光澤</option>
+                <option value="溫柔奶茶裸色 (Warm Nude Milk Tea)">06. 溫柔奶茶裸色</option>
+                <option value="莫蘭迪煙粉色 (Dusty Rose Pink)">07. 莫蘭迪煙粉色</option>
+                <option value="勃根地深酒紅 (Burgundy Wine Red)">08. 勃根地深酒紅</option>
+                <option value="午夜深藍色 (Midnight Royal Blue)">09. 午夜深藍色</option>
+                <option value="復古墨綠色 (Vintage Forest Green)">10. 復古墨綠色</option>
+                <option value="珍珠母貝虹光 (Mother of Pearl)">11. 珍珠母貝虹光</option>
+                <option value="微光暖杏黃 (Warm Apricot Gold)">12. 微光暖杏黃</option>
+                <option value="薰衣草柔紫色 (Lavender Mist Purple)">13. 薰衣草柔紫色</option>
+                <option value="鼠尾草灰綠色 (Sage Gray Green)">14. 鼠尾草灰綠色</option>
+                <option value="深邃碳灰色 (Charcoal Metallic Gray)">15. 深邃碳灰色</option>
+                <option value="古銅金屬光澤 (Antique Bronze Metallic)">16. 古銅金屬光澤</option>
+                <option value="冰晶淺藍色 (Crystal Ice Blue)">17. 冰晶淺藍色</option>
+                <option value="蜜桃柔粉色 (Soft Peach Pink)">18. 蜜桃柔粉色</option>
+                <option value="焦糖褐金色 (Caramel Amber Gold)">19. 焦糖褐金色</option>
+                <option value="哥德暗紅 (Deep Gothic Crimson)">20. 哥德暗紅</option>
+                <option value="檸檬奶油淡黃 (Lemon Cream Yellow)">21. 檸檬奶油淡黃</option>
+                <option value="靜謐灰藍色 (Muted Fog Slate Blue)">22. 靜謐灰藍色</option>
+                <option value="燕麥高雅灰色 (Oatmeal Soft Gray)">23. 燕麥高雅灰色</option>
+                <option value="霓虹粉紅光芒 (Neon Glowing Pink)">24. 霓虹粉紅光芒</option>
+                <option value="微光的黃昏金 (Dusk Golden Glow)">25. 微光的黃昏金</option>
+                <option value="極致透明半透明白 (Semi-Transparent White)">26. 半透明霧面白</option>
+                <option value="極致半透明灰黑 (Semi-Transparent Black)">27. 半透明煙燻黑</option>
+                <option value="曜石黑金色彩 (Obsidian Gold Accent)">28. 曜石黑金色彩</option>
+                <option value="珊瑚蜜橙色 (Coral Sunset Orange)">29. 珊瑚蜜橙色</option>
+                <option value="微醺紫羅蘭色 (Electric Violet)">30. 微醺紫羅蘭色</option>
+                <option value="抹茶淡綠色 (Matcha Soft Green)">31. 抹茶淡綠色</option>
+                <option value="芋泥紫灰色 (Taro Purple Gray)">32. 芋泥紫灰色</option>
+                <option value="綠松石藍綠 (Turquoise Gem Green)">33. 綠松石藍綠</option>
+                <option value="薄荷沁綠色 (Fresh Mint Green)">34. 薄荷沁綠色</option>
+                <option value="流金歲月古金色 (Vintage Aged Gold)">35. 流金歲月古金色</option>
+                <option value="亮澤銀鈦色彩 (Bright Titanium Silver)">36. 亮澤銀鈦色彩</option>
+                <option value="櫻花粉白雙色 (Sakura Pink White)">37. 櫻花粉白雙色</option>
+                <option value="高雅陶土橙紅 (Terracotta Warm Red)">38. 高雅陶土橙紅</option>
+                <option value="灰陶咖棕色 (Taupe Brown Gray)">39. 灰陶咖棕色</option>
+                <option value="香檳粉金光澤 (Champagne Rose Gold)">40. 香檳粉金光澤</option>
+                <option value="深寶石藍 (Royal Sapphire Blue)">41. 深寶石藍</option>
+                <option value="帝王奢華紫 (Imperial Royal Purple)">42. 帝王奢華紫</option>
+                <option value="暖沙柔金 (Desert Warm Sand Gold)">43. 暖沙柔金</option>
+                <option value="日落霞光粉 (Sunset Glow Pink)">44. 日落霞光粉</option>
+                <option value="復古薑黃色 (Mustard Warm Yellow)">45. 復古薑黃色</option>
+                <option value="奶油開心果綠 (Pistachio Cream Green)">46. 奶油開心果綠</option>
+                <option value="灰綠橄欖色 (Olive Mist Green)">47. 灰綠橄欖色</option>
+                <option value="微醺紅酒紫 (Mulberry Wine Purple)">48. 微醺紅酒紫</option>
+                <option value="金屬鈦空灰 (Metallic Titanium Gray)">49. 金屬鈦空灰</option>
+                <option value="高光純白搭配金邊 (Pure White with Gold Edge)">50. 高光純白搭金邊</option>
               </select>
             </div>
           </div>
         </div>
 
-        <!-- 模組 3: 場景 -->
+        <!-- 模組 3: 場景與排版 -->
         <div class="card">
-          <div class="card-title">3. 排版與場景風格</div>
+          <div class="card-title">3. 排版與場景風格設定</div>
           <div class="row">
             <div class="form-group">
-              <label>雜誌排版風格</label>
+              <label>雜誌排版風格 (Layout - 50種)</label>
               <select id="layoutSelect" onchange="runUpdate()">
-                <option value="VOGUE時尚雜誌封面排版，主標題壓在畫面頂部">VOGUE 高奢雜誌封面</option>
-                <option value="日系 Kinfolk 極簡生活雜誌排版，大量的留白與簡約文字">Kinfolk 日系極簡留白</option>
-                <option value="高級電商海報排版，中央大標題搭配產品特寫">高級電商質感海報</option>
+                <!-- 50 種雜誌排版風格選單 -->
+                <option value="VOGUE時尚雜誌封面排版，主標題壓在畫面頂部 (Vogue Cover Layout)" selected>01. VOGUE 高奢雜誌封面排版</option>
+                <option value="日系 Kinfolk 極簡生活雜誌排版，大量的留白與簡約文字 (Kinfolk Minimalist)">02. Kinfolk 日系極簡留白排版</option>
+                <option value="高級電商海報排版，中央大標題搭配產品特寫 (E-Commerce Poster)">03. 高級電商質感海報排版</option>
+                <option value="Harper's BAZAAR 高對比高奢時尚封面 (BAZAAR Fashion Cover)">04. BAZAAR 雜誌封面排版</option>
+                <option value="ELLE 法式時尚典雅網格排版 (ELLE French Grid)">05. ELLE 法式時尚典雅排版</option>
+                <option value="極簡畫廊風格排版，下方標註精緻產品說明 (Art Gallery Minimal)">06. 極簡藝術畫廊風格排版</option>
+                <option value="復古報紙雙欄時尚排版 (Retro Newspaper Column)">07. 復古報紙雙欄時尚排版</option>
+                <option value="歐式精品目錄 Lookbook 雙面跨頁排版 (Luxury Lookbook)">08. 精品 Lookbook 目錄排版</option>
+                <option value="現代網頁 Hero Banner 首頁視覺排版 (Web Hero Banner)">09. 現代 Web Hero Banner 排版</option>
+                <option value="Instagram 品牌質感方形滿版排版 (IG Brand Full Layout)">10. Instagram 質感滿版排版</option>
+                <option value="高奢珠寶品牌廣告排版，文字細小精緻位於角落 (Jewelry Ad Minimal)">11. 高奢珠寶極簡角落標籤排版</option>
+                <option value="巴黎時裝週特刊封面排版 (Paris Fashion Week Special)">12. 巴黎時裝週特刊封面排版</option>
+                <option value="米蘭時尚誌跨頁對比排版 (Milan Fashion Spread)">13. 米蘭時尚誌對比排版</option>
+                <option value="日系 FUDGE 清新目錄雜誌排版 (FUDGE Japan Style)">14. FUDGE 日系清新目錄排版</option>
+                <option value="美式 Vogue Cosmopolitan 滿版時尚字體 (Cosmo Full Cover)">15. Cosmo 美式時尚字體壓圖排版</option>
+                <option value="極致微縮文字藝術排版 (Micro-Type Minimalist)">16. 極致微縮文字藝術排版</option>
+                <option value="對角線動態幾何排版 (Diagonal Dynamic Grid)">17. 對角線動態幾何排版</option>
+                <option value="雙色塊分割對比時尚排版 (Two-Tone Color Block Split)">18. 雙色塊分割對比時尚排版</option>
+                <option value="經典電影海報風格排版，底端標註大字 (Classic Cinema Poster)">19. 經典電影海報風格排版</option>
+                <option value="展覽級黑白高對比排版 (Monochrome Exhibition)">20. 展覽級黑白高對比排版</option>
+                <option value="高端香水品牌氣質排版 (Haute Perfume Ad Layout)">21. 高端香水品牌氣質排版</option>
+                <option value="三欄式產品細節說明排版 (Three-Column Detail Layout)">22. 三欄式產品細節說明排版</option>
+                <option value="中央圓形微縮標題排版 (Centered Badge Minimal)">23. 中央圓形標章極簡排版</option>
+                <option value="高奢飯店專刊質感排版 (Luxury Hotel Magazine)">24. 高奢飯店專刊質感排版</option>
+                <option value="獨立時尚雜誌 i-D 大膽文字壓圖 (i-D Avant-Garde Cover)">25. i-D 獨立雜誌大膽壓圖排版</option>
+                <option value="紐約時尚週簡約垂直文字排版 (Vertical Text NYFW)">26. 垂直文字幾何時尚排版</option>
+                <option value="高級內著品牌專屬精品目錄排版 (Lingerie Boutique Catalog)">27. 精品內著專屬目錄排版</option>
+                <option value="質感莫蘭迪色塊框線排版 (Morandi Frame Layout)">28. 莫蘭迪色塊框線排版</option>
+                <option value="微燙金燙銀標籤排版 (Gold Foil Debossed Label)">29. 微燙金標籤質感排版</option>
+                <option value="現代 Bauhaus 幾何構圖排版 (Bauhaus Modern Grid)">30. 包豪斯 Bauhaus 幾何構圖排版</option>
+                <option value="東京銀座奢華旗艦店視覺排版 (Ginza Luxury Flagship)">31. 東京銀座奢華視覺排版</option>
+                <option value="極簡純白框架留白排版 (Pure White Frame Border)">32. 純白框架留白極簡排版</option>
+                <option value="深色黑金高奢質感排版 (Dark Gold Luxury Layout)">33. 深色黑金高奢質感排版</option>
+                <option value="柔光模糊背景中央文字排版 (Soft Blur Glassmorphism)">34. 柔光模糊毛玻璃文字排版</option>
+                <option value="多重圖片疊加目錄排版 (Layered Collage Lookbook)">35. 多重拼貼 Lookbook 排版</option>
+                <option value="時尚手稿與照片混搭排版 (Fashion Sketch Hybrid)">36. 時尚手稿與照片混搭排版</option>
+                <option value="極致滿版人物無邊框排版 (Borderless Full Photo)">37. 極致滿版人物無邊框排版</option>
+                <option value="法式沙龍文學誌排版 (French Salon Literary)">38. 法式沙龍文學誌排版</option>
+                <option value="純英文大寫高密度排版 (All-Caps Dense Layout)">39. 純英文大寫高密度排版</option>
+                <option value="現代電商購物車 Banner 側邊文字 (Side Banner Layout)">40. 現代電商側邊文字 Banner</option>
+                <option value="溫暖日光影文案壓圖排版 (Sunlight Shadow Overlay)">41. 溫暖日光影文案壓圖排版</option>
+                <option value="高冷極簡灰色調視覺排版 (Cold Gray Minimalist)">42. 高冷極簡灰色調視覺排版</option>
+                <option value="極簡雙語對照標題排版 (Bilingual Header Alignment)">43. 極簡雙語對照標題排版</option>
+                <option value="古典文藝復興框線排版 (Renaissance Gold Border)">44. 古典文藝復興框線排版</option>
+                <option value="美式復古 Vibe 滿版封面 (Retro 90s Fashion Magazine)">45. 美式 90 年代復古雜誌封面</option>
+                <option value="高質感緞面紋理背景排版 (Satin Fabric Texture Backing)">46. 緞面紋理背景質感排版</option>
+                <option value="微醺暮光氛圍文案排版 (Twilight Mood Typography)">47. 微醺暮光氛圍文案排版</option>
+                <option value="時尚伸展台 Runway 特寫排版 (Runway Close-up Grid)">48. 時尚伸展台 RunWay 特寫排版</option>
+                <option value="輕奢水晶質感文字排版 (Crystal Glossy Layout)">49. 輕奢水晶質感文字排版</option>
+                <option value="通用經典商業視覺排版 (Universal Master Layout)">50. 通用經典商業視覺排版</option>
               </select>
             </div>
+
             <div class="form-group">
-              <label>場景與光影</label>
+              <label>場景與光影 (Scene & Lighting - 50種)</label>
               <select id="sceneSelect" onchange="runUpdate()">
-                <option value="場景為精品飯店套房，採用柔和的側光與暖色調環境光">精品飯店套房 + 奢華暖光</option>
-                <option value="場景為清晨的臥室，溫暖陽光透過白色窗紗灑落在柔軟被單上">清晨臥室 + 窗紗陽光</option>
-                <option value="純淨無縫純色背景攝影棚，使用均勻柔和的漫射光">純淨攝影棚 + 柔和漫射光</option>
+                <!-- 50 種場景與光影選單 -->
+                <option value="場景為精品飯店套房，採用柔和的側光與暖色調環境光 (Boutique Hotel Suite)" selected>01. 精品飯店套房 + 奢華暖光</option>
+                <option value="場景為清晨的臥室，溫暖陽光透過白色窗紗灑落在柔軟被單上 (Morning Sun Bedroom)">02. 清晨臥室 + 窗紗陽光</option>
+                <option value="純淨無縫純色背景攝影棚，使用均勻柔和的漫射光 (Studio Soft Diffusion)">03. 純淨攝影棚 + 柔和漫射光</option>
+                <option value="法式復古公寓，帶有精緻石膏線條牆面與百葉窗陽光 (French Retro Apartment)">04. 法式復古公寓 + 百葉窗光影</option>
+                <option value="極簡北歐風臥室，大面積落地窗與自然採光 (Nordic Minimalist Bedroom)">05. 極簡北歐臥室 + 落地窗自然光</option>
+                <option value="巴黎高奢飯店陽台，背景為遠處埃菲爾鐵塔夕陽 (Paris Hotel Balcony Sunset)">06. 巴黎飯店陽台 + 日落夕陽光</option>
+                <option value="高級水療 SPA 私人包廂，柔和燭光與溫暖暗光 (Luxury SPA Suite Lighting)">07. 高級 SPA 包廂 + 溫暖燭光</option>
+                <option value="現代豪宅大理石浴室，柔和高科技嵌入式燈光 (Marble Bathroom Modern)">08. 大理石浴室 + 柔和嵌入燈光</option>
+                <option value="日落時分黃金海灘，溫暖金黃色夕陽餘暉 (Golden Hour Sunset Beach)">09. 黃金海岸 + 金黃夕陽餘暉</option>
+                <option value="米色私人更衣室，溫柔暖色化妝鏡環形光 (Private Dressing Room)">10. 私人更衣室 + 溫柔化妝鏡光</option>
+                <option value="高質感灰色水泥工業風攝影棚，頂部硬光側影 (Industrial Studio Hard Light)">11. 工業風水泥棚 + 側邊硬影光</option>
+                <option value="奢華絲絨背景，搭配單點高光焦點照射 (Velvet Backdrop Spotlight)">12. 奢華絲絨背景 + 聚光燈聚焦</option>
+                <option value="熱帶度假村游泳池畔，陽光照射水面形成波光粼粼折射 (Poolside Water Reflection)">13. 度假村泳池畔 + 水波光影折射</option>
+                <option value="日式榻榻米茶室，透過紙拉門的柔和漫射自然光 (Japanese Shoji Soft Light)">14. 日式茶室 + 紙拉門柔和日光</option>
+                <option value="微醺酒吧暗色背景，帶有微弱藍紫色霓虹氛圍光 (Neon Twilight Bar)">15. 微醺暗色酒吧 + 霓虹氛圍光</option>
+                <option value="夢幻水晶燈宴會廳背景，帶有散景光斑效果 (Crystal Chandelier Bokeh)">16. 水晶燈宴會廳 + 夢幻散景光斑</option>
+                <option value="溫室花園，陽光穿透綠色植物葉片撒下斑駁光影 (Botanical Greenhouse Shadow)">17. 溫室花園 + 綠葉斑駁日光</option>
+                <option value="現代藝廊展廳，潔白無瑕牆面與精準展覽投射光 (Art Gallery Track Light)">18. 現代藝廊 + 展覽精準投射光</option>
+                <option value="高級真絲綢緞鋪陳背景，柔和金屬光澤流動 (Satin Fabric Drapes)">19. 絲綢緞面背景 + 柔和金屬流光</option>
+                <option value="暮光時分藍調時刻，窗外呈深邃浪漫藍色 (Blue Hour Twilight Bedroom)">20. 暮光藍調時刻 + 浪漫室內暗光</option>
+                <option value="奢華皇宮風格金碧輝煌室內，溫暖華麗燈光 (Royal Palace Golden Room)">21. 奢華皇宮室內 + 華麗金光</option>
+                <option value="米白色幾何雕塑台座，側邊自然柔光 (Geometric Sculpture Pedestal)">22. 米白雕塑台座 + 側面自然柔光</option>
+                <option value="雨天室內窗邊，玻璃窗上的水滴與柔和陰天光 (Rainy Window Soft Light)">23. 雨天窗邊 + 玻璃水滴柔光</option>
+                <option value="莫蘭迪色系背景牆，均勻商業無影光 (Morandi Flat Commercial Light)">24. 莫蘭迪牆面 + 商業無影柔光</option>
+                <option value="極簡微風飄動白色紗簾背景，自然光影飄動 (Breeze Curtains Flowing)">25. 微風紗簾背景 + 自然動態光影</option>
+                <option value="極致深邃純黑背景，僅以強烈側光勾勒廓線 (Dark Edge Contour Light)">26. 輪廓剪影棚 + 強烈側光勾勒</option>
+                <option value="純白羽毛鋪設場景，夢幻高調白亮光線 (High-Key Feather Dream)">27. 夢幻羽毛場景 + 高調白亮光</option>
+                <option value="極簡沙丘沙漠背景，強烈日光與高對比陰影 (Desert Dunes Strong Sun)">28. 沙丘沙漠背景 + 強烈日光高對比</option>
+                <option value="復古皮革沙發角落，暖橙色檯燈溫馨光線 (Retro Leather Sofa Corner)">29. 復古皮革沙發 + 暖橙檯燈光</option>
+                <option value="高空頂樓豪宅天際線，夜間城市霓虹燈光 (Rooftop Penthouse Skyline)">30. 頂樓豪宅天際線 + 城市夜景光</option>
+                <option value="夢幻粉色煙霧環繞，柔光漫射氛圍 (Pink Cloud Fog Atmosphere)">31. 粉色夢幻煙霧 + 柔和氛圍光</option>
+                <option value="優雅拱門建築長廊，陽光拉出長長幾何陰影 (Arch Corridor Shadows)">32. 拱門建築長廊 + 長幾何陰影</option>
+                <option value="奢華大理石洗手台鏡面，前置化妝燈照射 (Luxury Marble Vanity Mirror)">33. 大理石鏡面 + 前置化妝燈光</option>
+                <option value="溫暖木質調閣樓，陽光從天窗傾瀉而下 (Warm Wooden Loft Skylight)">34. 木質閣樓 + 天窗傾瀉日光</option>
+                <option value="極致高光冰晶背景，冷色調明亮商業光 (Ice Crystal High-Key Cold)">35. 冰晶高光背景 + 冷色調明亮光</option>
+                <option value="古典油畫風格場景，低飽和度重溫暖光 (Oil Painting Classic Chiaroscuro)">36. 古典油畫風格 + 溫暖明暗對比光</option>
+                <option value="奢華皮草鋪陳床榻，暗調性感光線 (Luxury Fur Blanket Dark Mood)">37. 奢華皮草床榻 + 暗調性感光</option>
+                <option value="海邊白色度假小屋，清晨微風與自然光 (Beach House Morning Breeze)">38. 海邊白屋 + 清晨自然海風光</option>
+                <option value="現代極簡清水模空間，單一光源側光 (Bare Concrete Single Light)">39. 清水模空間 + 單一側光源</option>
+                <option value="玫瑰花海鋪底場景，柔和夢幻粉紅光線 (Rose Flower Bed Dreamy)">40. 玫瑰花海鋪底 + 夢幻柔粉光</option>
+                <option value="微型水面倒影場景，帶有清澈漣漪光影 (Clear Water Ripples Mirror)">41. 微型水面倒影 + 清澈漣漪光影</option>
+                <option value="極致無痕灰階背景，商業時尚目錄光 (Classic Seamless Gray Studio)">42. 無痕灰階棚 + 時尚目錄光</option>
+                <option value="極簡莫蘭迪粉色背景，均勻雙光源 (Morandi Pink Dual Light)">43. 莫蘭迪粉牆 + 均勻雙光源</option>
+                <option value="奢華珍珠飾品陳列台，聚光燈強調細節 (Pearl Jewelry Showcase)">44. 珍珠陳列台 + 細節聚光燈</option>
+                <option value="高光璀璨閃耀背景，營造奢華派對感 (Sparkling Glitter Party Vibe)">45. 璀璨閃耀背景 + 奢華派對光</option>
+                <option value="日系清新白木質空間，溫和明亮日光 (Japanese White Wood Bright)">46. 日系白木質空間 + 明亮日光</option>
+                <option value="復古深色木質百葉窗，強烈條紋光影 (Dark Wooden Venetian Blinds)">47. 深色百葉窗 + 強烈條紋光影</option>
+                <option value="輕奢金屬幾何線條場景，現代燈帶打光 (Metallic Geometric LED Stripe)">48. 金屬幾何場景 + 現代 LED 燈光</option>
+                <option value="夢幻藍色星空夜景，帶有微弱星光照射 (Starry Night Sky Dream)">49. 藍色星空夜景 + 夢幻星光</option>
+                <option value="通用經典棚拍柔光場景 (Universal Classic Soft Studio)">50. 通用經典棚拍柔光場景</option>
               </select>
             </div>
           </div>
@@ -232,26 +771,104 @@
       { main: "AQUA CLEAVAGE", sub: "水感托高 渾圓完美" },
       { main: "BREATHABLE SILK", sub: "極致無痕 親膚呼吸" },
       { main: "FRENCH ROMANCE", sub: "法式蕾絲 優雅綻放" },
-      { main: "PURE COMFORT", sub: "零感支撐 自由享受" }
+      { main: "PURE COMFORT", sub: "零感支撐 自由享受" },
+      { main: "SILK EMBRACE", sub: "奢華真絲 溫柔呵護" },
+      { main: "BODY SCULPTOR", sub: "極致塑形 重塑曲線" },
+      { main: "FEATHERTOUCH", sub: "羽感裸膚 無感體驗" },
+      { main: "VELVET TOUCH", sub: "軟凝膠支撐 告別鋼圈" },
+      { main: "SEAMLESS BARE", sub: "高脅邊包覆 完美收副乳" },
+      { main: "NUDITY SENSATION", sub: "深V誘惑 打造自信美胸" },
+      { main: "DEEP V HOURGLASS", sub: "高腰收腹 平腹立體提臀" },
+      { main: "LIFT & SHAPE", sub: "冰絲涼感 乾爽不黏膩" },
+      { main: "INVISIBLE FIT", sub: "一體成型 隱形貼合外衣" },
+      { main: "LUXURY LACE", sub: "輕量氣墊 自然升級罩杯" },
+      { main: "CHANTILLY GLAM", sub: "美背交叉 展現性感線條" },
+      { main: "ROYAL COMFORT", sub: "大罩杯減壓 渾圓不壓胸" },
+      { main: "AIR PUSH-UP", sub: "產後修復 輕鬆回復S曲線" },
+      { main: "BOUNCE & FLEX", sub: "莫代爾親膚 極致居家體驗" },
+      { main: "S-CURVE POWER", sub: "極致透視 展現女性魅力" },
+      { main: "GENTLE SUPPORT", sub: "手托集中 秒速包覆托高" },
+      { main: "ZERO PRESSURE", sub: "高強度防震 運動無拘無束" },
+      { main: "COOL ICE SILK", sub: "記憶軟鋼圈 貼合不壓骨" },
+      { main: "SATIN NIGHTS", sub: "石墨烯抗菌 全天候健康守護" },
+      { main: "MIDNIGHT ALLURE", sub: "前扣秒穿 集中溝影即刻現" },
+      { main: "ELEGANT SILHOUETTE", sub: "抹胸平口 穿搭防走光首選" },
+      { main: "PERFECT FULLNESS", sub: "馬甲骨架 雕塑迷人蜂腰" },
+      { main: "SOFT GEL FLEX", sub: "輕奢刺繡 彰顯高貴品味" },
+      { main: "ULTRA LIGHT FIT", sub: "裸感軟凝膠 宛如第二層肌膚" },
+      { main: "DAILY CONFIDENCE", sub: "四季適穿 柔滑極致親膚" },
+      { main: "BOHO BRALETTE", sub: "減壓止滑肩帶 告別下滑困擾" },
+      { main: "HIGH IMPACT ACTIVE", sub: "大腿加長防磨 舒適塑型褲" },
+      { main: "YOGA FLUIDITY", sub: "深V低脊心 告別胸骨壓迫" },
+      { main: "WAIST SCULPTING", sub: "高微壓雕塑 輕鬆穿出好身材" },
+      { main: "BUTT LIFT SHAPER", sub: "性感連身睡裙 浪漫夜晚首選" },
+      { main: "POSTURE CORRECTOR", sub: "男士3D囊袋 乾爽透氣不緊繃" },
+      { main: "PURE COTTON TOUCH", sub: "純棉有機撫觸 溫柔守護肌膚" },
+      { main: "BAMBOO FRESH", sub: "四排扣高包覆 平整後背贅肉" },
+      { main: "GRAPHENE CARE", sub: "天絲木代爾 觸感如雲朵般柔軟" },
+      { main: "DELICATE EMBROIDERY", sub: "極致鏤空綁帶 時尚美背焦點" },
+      { main: "SHEER SEDUCTION", sub: "蜂巢透氣杯 全天候舒爽體驗" },
+      { main: "VOGUE ESSENCE", sub: "薄款背心式 無拘無束自由感" },
+      { main: "MINIMALIST BEAUTY", sub: "極速吸濕排汗 運動乾爽無負擔" },
+      { main: "CANDY COLOR VIBE", sub: "日系極簡美學 純粹高質感" },
+      { main: "PASTEL DREAMS", sub: "重磅真絲光澤 散發名媛氣質" },
+      { main: "SWEET ROSE SILK", sub: "溫宮保暖高腰褲 溫柔呵護腹部" },
+      { main: "MODAL SOFTNESS", sub: "雙層加壓微塑 打造挺拔體態" },
+      { main: "GLAMOUR COUTURE", sub: "法式精緻剪裁 細節成就完美" },
+      { main: "BEAUTY BACK LIFT", sub: "3D桃心提臀 展現迷人臀線" },
+      { main: "AUTHENTIC CURVE", sub: "經典高奢設計 展現女性自信" }
     ];
 
     var descDatabase = {
       zh: [
         "專為完美胸型設計，內建輕量液體與空氣雙層襯墊，貼合胸部律動，呈現自然渾圓深V溝影。",
         "無鋼圈零壓迫感，高彈力親膚透氣布料，全天候打造自然挺拔的極致舒適體驗。",
-        "法式高奢工藝剪裁，完美收納副乳與贅肉，打造優雅無瑕的完美身形線條。"
+        "法式高奢工藝剪裁，完美收納副乳與贅肉，打造優雅無瑕的完美身形線條。",
+        "嚴選100%頂級桑蠶絲布料，極致親膚絲滑，給予肌膚如雲朵般的奢華觸感。",
+        "果凍軟凝膠立體支撐，溫柔替代傳統鋼圈，托高集中同時享有零感自由。",
+        "高脅邊雙膠條完美包覆，輕鬆收納側邊副乳，打造渾圓挺拔的完美曲線。",
+        "極致無痕熱壓貼合技術，穿著緊身外衣完全不留痕跡，隨時展現自信美背。",
+        "高腰雙層加壓微收腹設計，彈力順應身形，輕鬆雕塑優雅S曲線。",
+        "透氣冰絲涼感微纖維，迅速帶走體表熱氣，保持全天候乾爽不黏膩。",
+        "3D人體工學立體包覆，給予胸部最穩固的承託，自然展現迷人溝影。"
       ],
       en: [
         "Engineered for optimal shaping, featuring fluid-air dual padding that gracefully mimics natural contours.",
         "Ultra-lightweight wireless support with breathable stretch fabric for zero-pressure daily comfort.",
-        "Exquisite French tailoring designed to accentuate natural curves with effortless elegance."
+        "Exquisite French tailoring designed to accentuate natural curves with effortless elegance.",
+        "Crafted from 100% Mulberry silk, offering an incomparably smooth and luxurious touch to your skin.",
+        "Innovative soft-gel structure providing gentle support and lifting without the constraint of underwires.",
+        "High side-coverage designed to smooth underarm bulge and refine your side silhouette flawlessly.",
+        "Seamless bonding technology creates a totally invisible fit under any tight-fitting outfit.",
+        "High-waisted compression design effortlessly controls tummy and shapes an elegant S-curve silhouette.",
+        "Ice-silk cooling microfiber rapidly wicks away moisture for all-day dry and breathable freshness.",
+        "3D ergonomic contouring offers maximum lifting and a naturally full cleavage effect."
       ],
       bilingual: [
         "Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。",
         "Zero-pressure wireless design for all-day comfort. 無鋼圈零感體驗，全天候完美托高。",
-        "French haute couture tailoring for flawless silhouette. 法式高奢工藝，勾勒極致優雅線條。"
+        "French haute couture tailoring for flawless silhouette. 法式高奢工藝，勾勒極致優雅線條。",
+        "100% Mulberry silk material for cloud-like touch. 100%頂級桑蠶絲，極致親膚絲滑體驗。",
+        "Soft-gel support replaces traditional wires effortlessly. 軟凝膠立體支撐，托高同時享有無感自由。",
+        "High side-smoothing panels for sleek side profiles. 加高側邊包覆，完美收納副乳打造立體線條。",
+        "Seamless edge finishing for completely invisible wear. 貼合無痕工藝，穿著緊身外衣完美無痕。",
+        "High-waist shaping feature for smooth tummy control. 高腰加壓剪裁，輕鬆平腹塑造S曲線。",
+        "Ice-silk cooling technology stays dry all day long. 冰絲涼感纖維，極速透氣維持全天乾爽。",
+        "3D ergonomic molding for enhanced natural volume. 3D立體模杯剪裁，自然升級渾圓罩杯。"
       ]
     };
+
+    function applyTitleSelect() {
+      var val = document.getElementById('mainTitleSelect').value;
+      document.getElementById('mainTitleInput').value = val;
+      runUpdate();
+    }
+
+    function applySubTitleSelect() {
+      var val = document.getElementById('subTitleSelect').value;
+      document.getElementById('subTitleInput').value = val;
+      runUpdate();
+    }
 
     function runUpdate() {
       try {
@@ -309,6 +926,13 @@
 
     function generateAiTitle() {
       var rand = Math.floor(Math.random() * titleDatabase.length);
+      
+      var mainSel = document.getElementById('mainTitleSelect');
+      var subSel = document.getElementById('subTitleSelect');
+      
+      if (mainSel && mainSel.options[rand]) mainSel.selectedIndex = rand;
+      if (subSel && subSel.options[rand]) subSel.selectedIndex = rand;
+      
       document.getElementById('mainTitleInput').value = titleDatabase[rand].main;
       document.getElementById('subTitleInput').value = titleDatabase[rand].sub;
       runUpdate();
