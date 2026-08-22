@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v6.2</title>
+  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v6.3</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; }
@@ -46,7 +46,7 @@
 
   <div class="container">
     <header>
-      <h1>👙 內睡衣/塑身衣 AI商品圖 v6.2</h1>
+      <h1>👙 內睡衣/塑身衣 AI商品圖 v6.3</h1>
       <p class="sub">商品內容圖AI指令生成</p>
     </header>
 
@@ -636,6 +636,37 @@
         <!-- 模組 3: 場景、排版與框線 -->
         <div class="card">
           <div class="card-title">3. 排版、框線與場景風格設定</div>
+
+          <!-- 新增小圓標標籤設定區 -->
+          <div class="form-group" style="background-color:#0f172a; padding:10px; border-radius:6px; border:1px solid #334155; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label style="margin-bottom:0; color:#f472b6; font-weight:bold;">🏷️ 材質功能小圓標 (Material Badge)</label>
+              <label class="toggle-label"><input type="checkbox" id="includeBadgeToggle" onchange="runUpdate()"> 生成材質功能小圓標</label>
+            </div>
+            <div class="row">
+              <div>
+                <label style="font-size:11px; color:#94a3b8;">小圓標位置 (Placement)</label>
+                <select id="badgePositionSelect" onchange="runUpdate()">
+                  <option value="畫面留白空位處 (Empty Space Area)" selected>畫面留白空位處</option>
+                  <option value="畫面下方區域 (Bottom Area)">畫面下方區域</option>
+                  <option value="畫面左下角 (Bottom-Left Corner)">畫面左下角</option>
+                  <option value="畫面右下角 (Bottom-Right Corner)">畫面右下角</option>
+                  <option value="畫面右上角 (Top-Right Corner)">畫面右上角</option>
+                  <option value="畫面左上角 (Top-Left Corner)">畫面左上角</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px; color:#94a3b8;">圓標視覺風格 (Style)</label>
+                <select id="badgeStyleSelect" onchange="runUpdate()">
+                  <option value="精緻質感小圓標 (Elegant Circular Badge)" selected>精緻質感小圓標</option>
+                  <option value="半透明毛玻璃圓標 (Frosted Glass Badge)">半透明毛玻璃圓標</option>
+                  <option value="奢華燙金邊框圓標 (Gold Foil Edge Badge)">奢華燙金邊框圓標</option>
+                  <option value="日系極簡極細線條圓標 (Minimalist Fine Line Badge)">日系極簡極細線條圓標</option>
+                  <option value="金屬立體浮雕小圓標 (3D Embossed Metallic Badge)">金屬立體浮雕小圓標</option>
+                </select>
+              </div>
+            </div>
+          </div>
           
           <!-- 新增框線與外框設定區 -->
           <div class="form-group">
@@ -945,160 +976,164 @@
       bilingual: [
         "Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。",
         "Zero-pressure wireless design for all-day comfort. 無鋼圈零感體驗，全天候完美托高。",
-        "French haute couture tailoring for flawless silhouette. 法式高奢工藝，勾勒極致優雅線條。",
-        "100% Mulberry silk material for cloud-like touch. 100%頂級桑蠶絲，極致親膚絲滑體驗。",
-        "Soft-gel support replaces traditional wires effortlessly. 軟凝膠立體支撐，托高同時享有無感自由。",
-        "High side-smoothing panels for sleek side profiles. 加高側邊包覆，完美收納副乳打造立體線條。",
-        "Seamless edge finishing for completely invisible wear. 貼合無痕工藝，穿著緊身外衣完美無痕。",
-        "High-waist shaping feature for smooth tummy control. 高腰加壓剪裁，輕鬆平腹塑造S曲線。",
-        "Ice-silk cooling technology stays dry all day long. 冰絲涼感纖維，極速透氣維持全天乾爽。",
-        "3D ergonomic molding for enhanced natural volume. 3D立體模杯剪裁，自然升級渾圓罩杯。"
+        "French haute couture tailoring for flawless silhouette. 法式高奢工藝，勾勒優雅無瑕身形。",
+        "100% Mulberry silk for luxurious skin-touch. 100%頂級桑蠶絲，給予如雲朵般奢華觸感。",
+        "Soft-gel support replaces underwires gently. 果凍軟凝膠支撐，享受無鋼圈托高自由。",
+        "High side-coverage smooths underarm seamlessly. 高脅邊包覆收納副乳，打造完美側邊曲線。",
+        "Seamless bonding for completely invisible wear. 無痕熱壓貼合，穿著緊身外衣完美隱形。",
+        "High-waist double compression sculpts S-curve. 高腰雙層加壓收腹，輕鬆雕塑優雅S曲線。",
+        "Ice-silk cool microfiber stays fresh all day. 冰絲涼感微纖維，全天候保持乾爽透氣。",
+        "3D ergonomic support for natural full cleavage. 3D立體包覆，給予胸部穩定承託與自然溝影。"
       ]
     };
 
     function applyTitleSelect() {
-      var val = document.getElementById('mainTitleSelect').value;
-      document.getElementById('mainTitleInput').value = val;
+      var val = document.getElementById("mainTitleSelect").value;
+      document.getElementById("mainTitleInput").value = val;
       runUpdate();
     }
 
     function applySubTitleSelect() {
-      var val = document.getElementById('subTitleSelect').value;
-      document.getElementById('subTitleInput').value = val;
+      var val = document.getElementById("subTitleSelect").value;
+      document.getElementById("subTitleInput").value = val;
       runUpdate();
     }
 
-    function runUpdate() {
-      try {
-        var catSelect = document.getElementById('categorySelect');
-        var cat = catSelect.value;
-        var catTextClean = catSelect.options[catSelect.selectedIndex].text;
-
-        var col = document.getElementById('colorSelect').value;
-        var cup = document.getElementById('cupSelect').value;
-        var feat = document.getElementById('featureSelect').value;
-
-        var matElements = document.getElementsByClassName('mat-cb');
-        var matList = [];
-        var matCleanList = [];
-        for (var i = 0; i < matElements.length; i++) {
-          if (matElements[i].checked) {
-            matList.push(matElements[i].value);
-            matCleanList.push(matElements[i].parentNode.innerText.trim());
-          }
-        }
-        var matStr = matList.length > 0 ? matList.join('與') : '高質感親膚布料';
-
-        var mainT = document.getElementById('mainTitleInput').value || 'LIQUID CURVE';
-        var subT = document.getElementById('subTitleInput').value || '自然波動 雙倍爆乳';
-        var descT = document.getElementById('descInput').value || '';
-
-        var fontS = document.getElementById('fontStyleSelect').value;
-        var fontC = document.getElementById('fontColorSelect').value;
-
-        var pos = document.getElementById('positionSelect').value;
-        var layout = document.getElementById('layoutSelect').value;
-        var scene = document.getElementById('sceneSelect').value;
-
-        // 判斷開關
-        var incCategory = document.getElementById('includeCategoryText').checked;
-        var incMaterial = document.getElementById('includeMaterialText').checked;
-        var incBorder = document.getElementById('includeBorderToggle').checked;
-        var borderStyle = document.getElementById('borderStyleSelect').value;
-
-        var categoryTextFormatted = '';
-        if (incCategory) {
-          categoryTextFormatted = '\n- 畫面包含商品類別標籤字樣：「' + catTextClean + '」';
-        }
-
-        var materialTextFormatted = '';
-        if (incMaterial && matCleanList.length > 0) {
-          materialTextFormatted = '\n- 畫面包含材質特性說明字樣：「' + matCleanList.join(' / ') + '」';
-        }
-
-        var descTextFormatted = '';
-        if (descT.trim() !== '') {
-          descTextFormatted = '\n- 畫面包含精細排版的商品介紹短文：「' + descT.trim() + '」';
-        }
-
-        var borderTextFormatted = '';
-        if (incBorder) {
-          borderTextFormatted = '\n- 邊框與線條設計：選用「' + borderStyle + '」進行點綴包覆，增加畫面精細視覺質感。';
-        }
-
-        var fullPrompt = '專業商業攝影，' + layout + '。\n\n' +
-          '【主體描述】：\n' +
-          '畫面主體為一件 ' + col + ' 的 ' + cat + '。\n' +
-          '罩杯結構：' + cup + '。\n' +
-          '剪裁特點：' + feat + '。\n' +
-          '材質採用 ' + matStr + '，展現極致細節與質感。\n' +
-          '由專業模特兒穿著展示，呈現優美的剪裁與線條。\n\n' +
-          '【文字排版、邊框與位置指令】：\n' +
-          '畫面上清楚地排版著文字與邊框線條：\n' +
-          '- 英文大標題字樣為 "' + mainT + '"\n' +
-          '- 中文副標題字樣為 "' + subT + '"' + 
-          categoryTextFormatted + 
-          materialTextFormatted + 
-          descTextFormatted + 
-          borderTextFormatted + '\n' +
-          '📍 排版位置與構圖：' + pos + '。\n' +
-          '字體樣式：採用 ' + fontS + '。\n' +
-          '色彩細節：文字色彩為 ' + fontC + '，整體具備頂級商業海報設計感。\n\n' +
-          '【場景與光影】：\n' +
-          scene + '。光影立體，色彩還原度高。\n\n' +
-          '8k解析度，超清細節，照片級真實感，高級時尚大片風格。 --ar 3:4 --v 6.0 --style raw';
-
-        document.getElementById('finalPrompt').value = fullPrompt;
-      } catch (err) {
-        console.error("生成錯誤:", err);
-      }
-    }
-
     function generateAiTitle() {
-      var rand = Math.floor(Math.random() * titleDatabase.length);
-      
-      var mainSel = document.getElementById('mainTitleSelect');
-      var subSel = document.getElementById('subTitleSelect');
-      
-      if (mainSel && mainSel.options[rand]) mainSel.selectedIndex = rand;
-      if (subSel && subSel.options[rand]) subSel.selectedIndex = rand;
-      
-      document.getElementById('mainTitleInput').value = titleDatabase[rand].main;
-      document.getElementById('subTitleInput').value = titleDatabase[rand].sub;
+      var randIndex = Math.floor(Math.random() * titleDatabase.length);
+      var item = titleDatabase[randIndex];
+      document.getElementById("mainTitleInput").value = item.main;
+      document.getElementById("subTitleInput").value = item.sub;
+      document.getElementById("mainTitleSelect").value = item.main;
+      document.getElementById("subTitleSelect").value = item.sub;
       runUpdate();
     }
 
     function generateAiDesc() {
-      var langSelect = document.getElementById('langSelect');
-      var lang = langSelect ? langSelect.value : 'bilingual';
+      var lang = document.getElementById("langSelect").value;
+      var arr = descDatabase[lang] || descDatabase.zh;
+      var randIndex = Math.floor(Math.random() * arr.length);
+      document.getElementById("descInput").value = arr[randIndex];
+      runUpdate();
+    }
+
+    function getSelectedMaterials() {
+      var cbs = document.querySelectorAll(".mat-cb:checked");
+      var list = [];
+      cbs.forEach(function(cb) {
+        list.push(cb.value);
+      });
+      return list;
+    }
+
+    function runUpdate() {
+      var category = document.getElementById("categorySelect").value;
+      var color = document.getElementById("colorSelect").value;
+      var cup = document.getElementById("cupSelect").value;
+      var feature = document.getElementById("featureSelect").value;
+      var materials = getSelectedMaterials();
       
-      var list = descDatabase[lang] || descDatabase['bilingual'] || descDatabase['zh'];
-      var randomIndex = Math.floor(Math.random() * list.length);
+      var mainTitle = document.getElementById("mainTitleInput").value.trim();
+      var subTitle = document.getElementById("subTitleInput").value.trim();
+      var desc = document.getElementById("descInput").value.trim();
       
-      var targetInput = document.getElementById('descInput');
-      if (targetInput) {
-        targetInput.value = list[randomIndex];
-        runUpdate();
+      var fontStyle = document.getElementById("fontStyleSelect").value;
+      var fontColor = document.getElementById("fontColorSelect").value;
+      
+      var includeBorder = document.getElementById("includeBorderToggle").checked;
+      var borderStyle = document.getElementById("borderStyleSelect").value;
+      
+      var includeBadge = document.getElementById("includeBadgeToggle").checked;
+      var badgePosition = document.getElementById("badgePositionSelect").value;
+      var badgeStyle = document.getElementById("badgeStyleSelect").value;
+      
+      var position = document.getElementById("positionSelect").value;
+      var layout = document.getElementById("layoutSelect").value;
+      var scene = document.getElementById("sceneSelect").value;
+      
+      var includeCategory = document.getElementById("includeCategoryText").checked;
+      var includeMaterial = document.getElementById("includeMaterialText").checked;
+
+      var prompt = "生成一張極致高奢時尚風格的商品宣傳海報照片，詳細規格如下：\n\n";
+      
+      prompt += "【商品主題】\n";
+      prompt += "• 類別：" + category + "\n";
+      prompt += "• 色彩：" + color + "\n";
+      prompt += "• 罩杯結構：" + cup + "\n";
+      prompt += "• 版型剪裁：" + feature + "\n";
+      if(materials.length > 0) {
+        prompt += "• 材質布料：" + materials.join("、 ") + "\n";
       }
+      prompt += "\n";
+
+      prompt += "【畫面排版與風格】\n";
+      prompt += "• 排版風格：" + layout + "\n";
+      prompt += "• 文字位置：" + position + "\n";
+      prompt += "• 場景光影：" + scene + "\n";
+      
+      if(includeBorder) {
+        prompt += "• 框線外框：" + borderStyle + "\n";
+      } else {
+        prompt += "• 框線外框：不使用框線 (無邊框滿版視覺)\n";
+      }
+      
+      if(includeBadge) {
+        prompt += "• 材質功能小圓標：是，請在「" + badgePosition + "」生成一個標註商品材質與功能的" + badgeStyle + "，圓標內印有材質機能簡短說明圖示與文字\n";
+      }
+      prompt += "\n";
+
+      prompt += "【畫面文字與視覺排版】\n";
+      prompt += "• 字體樣式：" + fontStyle + "\n";
+      prompt += "• 文字色彩：" + fontColor + "\n";
+      
+      if(mainTitle) {
+        prompt += "• 英文主標題 (Main Title)：\"" + mainTitle + "\"\n";
+      }
+      if(subTitle) {
+        prompt += "• 中文副標題 (Subtitle)：\"" + subTitle + "\"\n";
+      }
+      if(desc) {
+        prompt += "• 產品說明短文 (Description)：\"" + desc + "\"\n";
+      }
+      
+      var extraText = [];
+      if(includeCategory) {
+        extraText.push("商品類別名稱 (\"" + category.split(' (')[0] + "\")");
+      }
+      if(includeMaterial && materials.length > 0) {
+        extraText.push("材質標籤 (\"" + materials.map(m => m.split(' (')[0]).join(", ") + "\")");
+      }
+      
+      if(extraText.length > 0) {
+        prompt += "• 額外納入排版文案：" + extraText.join("、 ") + "\n";
+      }
+      
+      prompt += "\n【視覺畫質要求】\n";
+      prompt += "8k 解析度，商業攝影棚光影，頂級時尚雜誌封面質感，細節極致清晰，色彩飽和自然，文字排版精準優雅。";
+
+      document.getElementById("finalPrompt").value = prompt;
     }
 
     function copyPromptText() {
-      var target = document.getElementById('finalPrompt');
-      target.select();
-      document.execCommand('copy');
+      var textarea = document.getElementById("finalPrompt");
+      textarea.select();
+      document.execCommand("copy");
       
-      var btn = document.getElementById('copyBtn');
-      btn.innerText = '✅ 已成功複製！';
-      btn.style.backgroundColor = '#059669';
+      var btn = document.getElementById("copyBtn");
+      var originalText = btn.innerText;
+      btn.innerText = "✅ 已成功複製 Prompt！";
+      btn.style.backgroundColor = "#059669";
+      
       setTimeout(function() {
-        btn.innerText = '📋 複製完整指令';
-        btn.style.backgroundColor = '#db2777';
+        btn.innerText = originalText;
+        btn.style.backgroundColor = "#db2777";
       }, 2000);
     }
 
-    window.onload = function() { runUpdate(); };
-    setTimeout(runUpdate, 300);
-    setTimeout(runUpdate, 1000);
+    // 初始化執行
+    window.onload = function() {
+      runUpdate();
+    };
   </script>
 </body>
 </html>
