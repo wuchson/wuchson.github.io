@@ -160,10 +160,10 @@
               </select>
             </div>
             <div class="form-group">
-              <label style="display:flex; justify-content:space-between; align-items:center;">
-                <span>介紹短文段落</span>
-                <a href="javascript:void(0)" onclick="generateAiDesc()" style="color:#f472b6; font-size:11px;">✨ AI 生成短文</a>
-              </label>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="margin:0;">介紹短文段落</label>
+                <button type="button" onclick="generateAiDesc()" style="background:none; border:none; color:#f472b6; font-size:11px; cursor:pointer; padding:0;">✨ AI 生成短文</button>
+              </div>
               <input type="text" id="descInput" oninput="runUpdate()" placeholder="點擊右上角 AI 生成短文..." value="Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。">
             </div>
           </div>
@@ -303,9 +303,14 @@
     }
 
     function generateAiDesc() {
-      var lang = document.getElementById('langSelect').value;
-      document.getElementById('descInput').value = descDatabase[lang] || descDatabase['zh'];
-      runUpdate();
+      var langSelect = document.getElementById('langSelect');
+      var lang = langSelect ? langSelect.value : 'zh';
+      var targetInput = document.getElementById('descInput');
+      
+      if (targetInput) {
+        targetInput.value = descDatabase[lang] || descDatabase['zh'];
+        runUpdate();
+      }
     }
 
     function copyPromptText() {
@@ -322,7 +327,6 @@
       }, 2000);
     }
 
-    // 啟動多重保險，確保一定會觸發並顯示內容
     window.onload = function() { runUpdate(); };
     setTimeout(runUpdate, 300);
     setTimeout(runUpdate, 1000);
