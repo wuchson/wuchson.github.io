@@ -160,9 +160,9 @@
               </select>
             </div>
             <div class="form-group">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <label style="margin:0;">介紹短文段落</label>
-                <button type="button" onclick="generateAiDesc()" style="background:none; border:none; color:#f472b6; font-size:11px; cursor:pointer; padding:0;">✨ AI 生成短文</button>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 13px; color: #cbd5e1;">介紹短文段落</span>
+                <button type="button" onclick="generateAiDesc()" style="background: none; border: none; color: #f472b6; font-size: 12px; cursor: pointer; font-weight: bold;">✨ AI 生成短文</button>
               </div>
               <input type="text" id="descInput" oninput="runUpdate()" placeholder="點擊右上角 AI 生成短文..." value="Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。">
             </div>
@@ -236,9 +236,21 @@
     ];
 
     var descDatabase = {
-      zh: "專為完美胸型設計，內建輕量液體與空氣雙層襯墊，貼合胸部律動，呈現自然渾圓深V溝影。",
-      en: "Engineered for optimal shaping, featuring fluid-air dual padding that gracefully mimics natural contours.",
-      bilingual: "Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。"
+      zh: [
+        "專為完美胸型設計，內建輕量液體與空氣雙層襯墊，貼合胸部律動，呈現自然渾圓深V溝影。",
+        "無鋼圈零壓迫感，高彈力親膚透氣布料，全天候打造自然挺拔的極致舒適體驗。",
+        "法式高奢工藝剪裁，完美收納副乳與贅肉，打造優雅無瑕的完美身形線條。"
+      ],
+      en: [
+        "Engineered for optimal shaping, featuring fluid-air dual padding that gracefully mimics natural contours.",
+        "Ultra-lightweight wireless support with breathable stretch fabric for zero-pressure daily comfort.",
+        "Exquisite French tailoring designed to accentuate natural curves with effortless elegance."
+      ],
+      bilingual: [
+        "Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。",
+        "Zero-pressure wireless design for all-day comfort. 無鋼圈零感體驗，全天候完美托高。",
+        "French haute couture tailoring for flawless silhouette. 法式高奢工藝，勾勒極致優雅線條。"
+      ]
     };
 
     function runUpdate() {
@@ -304,11 +316,14 @@
 
     function generateAiDesc() {
       var langSelect = document.getElementById('langSelect');
-      var lang = langSelect ? langSelect.value : 'zh';
-      var targetInput = document.getElementById('descInput');
+      var lang = langSelect ? langSelect.value : 'bilingual';
       
+      var list = descDatabase[lang] || descDatabase['bilingual'] || descDatabase['zh'];
+      var randomIndex = Math.floor(Math.random() * list.length);
+      
+      var targetInput = document.getElementById('descInput');
       if (targetInput) {
-        targetInput.value = descDatabase[lang] || descDatabase['zh'];
+        targetInput.value = list[randomIndex];
         runUpdate();
       }
     }
