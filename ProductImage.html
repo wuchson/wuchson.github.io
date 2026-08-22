@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ULTIMATE MASTER 內睡衣 AI 生成器 v6.0 (終極修復版)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; }
+    .container { max-width: 1300px; margin: 0 auto; }
+    header { border-bottom: 1px solid #334155; padding-bottom: 12px; margin-bottom: 20px; }
+    h1 { color: #f472b6; font-size: 22px; font-weight: bold; }
+    p.sub { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+    
+    .grid { display: flex; flex-wrap: wrap; gap: 20px; }
+    .col-left { flex: 1 1 650px; display: flex; flex-direction: column; gap: 16px; }
+    .col-right { flex: 1 1 420px; }
+    
+    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+    .card-title { font-size: 15px; font-weight: bold; color: #f472b6; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 13px; color: #cbd5e1; margin-bottom: 4px; }
+    select, input, textarea { width: 100%; background-color: #0f172a; border: 1px solid #475569; border-radius: 6px; padding: 8px; color: #ffffff; font-size: 13px; outline: none; }
+    select:focus, input:focus, textarea:focus { border-color: #f472b6; }
+    
+    .row { display: flex; gap: 12px; }
+    .row > div { flex: 1; }
+    
+    .btn { background-color: #db2777; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .btn:hover { background-color: #be185d; }
+    .btn-copy { width: 100%; padding: 12px; font-size: 15px; margin-top: 12px; background-color: #db2777; }
+    
+    .tag-container { display: flex; flex-wrap: wrap; gap: 6px; max-height: 180px; overflow-y: auto; background-color: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155; }
+    .tag-item { display: inline-flex; align-items: center; font-size: 12px; background-color: #1e293b; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; cursor: pointer; color: #cbd5e1; }
+    .tag-item input { width: auto; margin-right: 5px; }
+    
+    textarea.prompt-box { width: 100%; height: 520px; font-family: monospace; font-size: 13px; color: #6ee7b7; background-color: #020617; border: 1px solid #334155; line-height: 1.5; resize: vertical; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>👙 ULTIMATE MASTER 內睡衣 AI 生成器 v6.0 (終極強效版)</h1>
+      <p class="sub">全域自動監聽 + 輪詢強檢機制：完美修復指令顯示與 AI 文字更新問題。</p>
+    </header>
+
+    <div class="grid">
+      
+      <!-- 左側設定區 -->
+      <div class="col-left">
+        
+        <!-- 模組 1: 商品屬性 -->
+        <div class="card">
+          <div class="card-title">1. 商品類別與材質細節</div>
+          
+          <div class="row">
+            <div class="form-group">
+              <label>商品類別 (Category)</label>
+              <select id="categorySelect">
+                <optgroup label="── 女性內衣 ──">
+                  <option value="女性水感爆乳集中內衣 (Liquid Push-Up Bra)" selected>女性真水爆乳內衣 (Liquid Push-Up Bra)</option>
+                  <option value="女性法式蕾絲三角杯內衣 (Lace Bralette)">女性法式蕾絲三角杯 (Lace Bralette)</option>
+                  <option value="女性無痕無鋼圈貼合內衣 (Seamless Wireless Bra)">女性無痕無鋼圈內衣 (Seamless Wireless)</option>
+                  <option value="女性記憶軟鋼圈托高內衣 (Soft-Wire Push-Up Bra)">女性軟鋼圈托高內衣 (Soft-Wire)</option>
+                  <option value="女性大罩杯高包覆全罩內衣 (Full Coverage Bra)">女性大罩杯高包覆內衣 (Full Coverage)</option>
+                  <option value="女性美背交叉肩帶內衣 (Cross-Back Beauty Bra)">女性美背交叉內衣 (Cross-Back Bra)</option>
+                  <option value="女性前扣式聚攏爆乳內衣 (Front-Closure Push-Up Bra)">女性前扣式聚攏內衣 (Front-Closure)</option>
+                  <option value="女性平口無肩帶防滑內衣 (Strapless Bra)">女性平口無肩帶內衣 (Strapless Bra)</option>
+                  <option value="女性深V性感半罩杯內衣 (Deep V Half-Cup Bra)">女性深V半罩杯內衣 (Half-Cup Bra)</option>
+                  <option value="女性哺乳托高內衣 (Maternity Nursing Bra)">女性專業哺乳內衣 (Nursing Bra)</option>
+                </optgroup>
+                <optgroup label="── 運動內衣 ──">
+                  <option value="高強度防震跑步運動內衣 (High-Impact Sports Bra)">高強度防震運動內衣 (High-Impact)</option>
+                  <option value="中強度瑜珈親膚運動內衣 (Yoga Sports Bra)">中強度瑜珈運動內衣 (Yoga Bra)</option>
+                  <option value="低強度日常休閒運動小背心 (Low-Impact Crop Bra)">低強度休閒運動背心 (Low-Impact)</option>
+                  <option value="拉鍊式前扣運動背心 (Front-Zip Sports Bra)">拉鍊式前扣運動背心 (Front-Zip)</option>
+                </optgroup>
+                <optgroup label="── 女性內褲 ──">
+                  <option value="女性極致無痕熱壓三角褲 (Seamless Panties)">女性無痕熱壓三角褲 (Seamless)</option>
+                  <option value="女性性感法式丁字褲 (French Lace Thong)">女性法式蕾絲丁字褲 (Thong)</option>
+                  <option value="女性高腰收腹平口內褲 (High-Waist Briefs)">女性高腰平口內褲 (High-Waist Briefs)</option>
+                  <option value="女性日系純棉中腰三角褲 (Mid-Waist Cotton Briefs)">女性純棉中腰三角褲 (Cotton Briefs)</option>
+                  <option value="女性石墨烯抑菌生理褲 (Period Care Briefs)">女性石墨烯抑菌生理褲 (Period Care)</option>
+                </optgroup>
+                <optgroup label="── 男士內著 ──">
+                  <option value="男性3D囊袋透氣四角內褲 (Men's 3D Pouch Boxer Briefs)">男性3D囊袋四角褲 (Boxer Briefs)</option>
+                  <option value="男性莫代爾無痕平口內褲 (Men's Seamless Trunks)">男性莫代爾平口褲 (Seamless Trunks)</option>
+                  <option value="男性冰絲涼感運動四角褲 (Men's Cooling Sports Boxers)">男性冰絲涼感運動褲 (Cooling Boxers)</option>
+                  <option value="男性純棉經典三角內褲 (Men's Cotton Briefs)">男性純棉經典三角褲 (Cotton Briefs)</option>
+                  <option value="男性寬鬆阿羅哈四角褲 (Men's Loose Boxer Shorts)">男性寬鬆阿羅哈褲 (Boxer Shorts)</option>
+                </optgroup>
+                <optgroup label="── 塑身衣與塑身褲 ──">
+                  <option value="女性無痕高腰連身塑身衣 (Full Body Shaping Bodysuit)">女性連身塑身衣 (Shaping Bodysuit)</option>
+                  <option value="女性高腰收腹平腹提臀褲 (High-Waist Shaping Panties)">女性高腰收腹提臀褲 (Shaping Panties)</option>
+                  <option value="女性雕塑馬甲連身內衣 (Corset Shapewear Top)">女性雕塑馬甲塑身衣 (Corset Top)</option>
+                  <option value="女性提臀塑身五分褲 (Mid-Thigh Sculpting Shorts)">女性提臀塑身五分褲 (Sculpting Shorts)</option>
+                </optgroup>
+                <optgroup label="── 睡衣與睡褲 ──">
+                  <option value="女性性感吊帶真絲睡裙 (Silk Nightgown)">女性性感真絲吊帶睡裙 (Silk Nightgown)</option>
+                  <option value="女性兩件式質感家居睡衣套裝 (Two-Piece Silk Pajama Set)">女性真絲家居睡衣套裝 (Pajama Set)</option>
+                  <option value="女性法式蕾絲透視薄紗睡袍 (Lace Kimono Robe)">女性法式蕾絲薄紗睡袍 (Robe)</option>
+                  <option value="女性長袖純棉家居服套裝 (Cotton Sleepwear Set)">女性長袖純棉家居服 (Cotton Set)</option>
+                  <option value="男性法蘭絨溫暖睡衣套裝 (Men's Flannel Pajamas)">男性法蘭絨溫暖睡衣 (Flannel Set)</option>
+                  <option value="男性真絲奢華長袖睡袍 (Men's Luxury Silk Robe)">男性真絲長袖睡袍 (Men's Silk Robe)</option>
+                  <option value="男女通用寬鬆居家睡褲 (Unisex Lounge Sleep Pants)">男女通用寬鬆居家睡褲 (Lounge Pants)</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>主打色彩 (Color)</label>
+              <select id="colorSelect">
+                <optgroup label="── 高奢經典色 ──">
+                  <option value="珍珠奶白 (Pearl Ivory White)" selected>珍珠奶白 (Ivory White)</option>
+                  <option value="極致純黑 (Classic Onyx Black)">極致純黑 (Onyx Black)</option>
+                  <option value="裸膚隱形色 (Nude Seamless Skin Tone)">裸膚隱形色 (Nude Skin Tone)</option>
+                  <option value="溫柔奶茶色 (Warm Milk Tea Nude)">溫柔奶茶色 (Milk Tea Nude)</option>
+                  <option value="香檳鉑金 (Champagne Platinum Gold)">香檳鉑金 (Champagne Gold)</option>
+                </optgroup>
+                <optgroup label="── 浪漫粉紫與莫蘭迪 ──">
+                  <option value="莫蘭迪煙粉 (Morandi Dusty Pink)">莫蘭迪煙粉 (Dusty Pink)</option>
+                  <option value="法式玫瑰粉 (French Rose Pink)">法式玫瑰粉 (French Rose)</option>
+                  <option value="薰衣草灰紫 (Lavender Dust Purple)">薰衣草灰紫 (Lavender Purple)</option>
+                  <option value="勃根地酒紅 (Burgundy Wine Red)">勃根地酒紅 (Burgundy Red)</option>
+                  <option value="櫻花柔粉 (Sakura Blossom Pink)">櫻花柔粉 (Sakura Pink)</option>
+                </optgroup>
+                <optgroup label="── 高級冷調與大地色 ──">
+                  <option value="午夜深藍 (Midnight Royal Navy)">午夜深藍 (Midnight Navy)</option>
+                  <option value="鼠尾草翡翠綠 (Sage Emerald Green)">鼠尾草翡翠綠 (Sage Green)</option>
+                  <option value="霧藍煙燻灰 (Smoky Fog Blue)">霧藍煙燻灰 (Smoky Blue)</option>
+                  <option value="焦糖瑪奇朵 (Caramel Macchiato Brown)">焦糖瑪奇朵 (Caramel Brown)</option>
+                  <option value="復古燕麥色 (Vintage Oat Beige)">復古燕麥色 (Oat Beige)</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label>罩杯與鋼圈結構 (Cup & Wire)</label>
+              <select id="cupSelect">
+                <option value="深V極致集中剪裁，搭配水液與空氣雙層襯墊 (Liquid Padding)" selected>【真水專用】水感空氣雙襯墊 (Liquid Padding)</option>
+                <option value="無鋼圈零感設計，Q彈軟凝膠立體支撐">無鋼圈 Q彈軟凝膠支撐 (Wireless Gel Support)</option>
+                <option value="記憶鈦合金軟鋼圈，溫柔集中不壓胸">記憶鈦合金軟鋼圈 (Soft Memory Wire)</option>
+                <option value="經典傳統C型穩定鋼圈，強力托高提胸">經典C型穩定高托鋼圈 (Classic Steel Wire)</option>
+                <option value="3/4 罩杯立體模杯，自然渾圓包覆">3/4 罩杯立體包覆 (3/4 Molded Cup)</option>
+                <option value="1/2 法式半罩杯，打造性感平直胸線">1/2 法式性感半罩杯 (1/2 Half Cup)</option>
+                <option value="全罩杯高包覆剪裁，完美收納副乳">全罩杯收納包覆 (Full Coverage Cup)</option>
+                <option value="下厚上薄爆乳罩杯，自然提升2罩杯">下厚上薄爆乳罩杯 (Push-Up Padded Cup)</option>
+                <option value="無襯墊極薄單層蕾絲罩杯 (Unlined Lace)">極薄單層透視蕾絲罩杯 (Unlined Lace)</option>
+                <option value="不適用/褲類/睡衣無罩杯結構 (N/A)">不適用 / 無罩杯結構 (N/A)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>版型剪裁特徵 (Feature)</label>
+              <select id="featureSelect">
+                <option value="深V集中溝影，側邊加高雙膠條完美收納副乳" selected>深V集中 + 加高雙膠條收副乳</option>
+                <option value="高腰雙層加壓收腹，3D手托式立體提臀構造">高腰加壓平腹 + 3D提臀</option>
+                <option value="無痕熱壓貼合工藝，穿著完全不留痕跡">無痕熱壓貼合 (Seamless)</option>
+                <option value="3D立體囊袋人體工學剪裁，乾爽不緊繃">3D人體工學立體囊袋 (U-Pouch)</option>
+                <option value="工字美背剪裁，有效分散肩部壓力">工字美背 + 減壓寬肩帶 (Racerback)</option>
+                <option value="斜裁45度流線垂墜工藝，修飾身形曲線">斜裁45度流線垂墜 (Fluid Bias Cut)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>材質布料庫 (可多選)</label>
+            <div class="tag-container">
+              <label class="tag-item"><input type="checkbox" value="高密度防滲漏微纖維與液體襯墊" class="mat-cb" checked> 真水防漏微纖維</label>
+              <label class="tag-item"><input type="checkbox" value="法式精緻睫毛蕾絲 (Chantilly Lace)" class="mat-cb" checked> 法式睫毛蕾絲</label>
+              <label class="tag-item"><input type="checkbox" value="100%頂級桑蠶絲 (100% Mulberry Silk)" class="mat-cb"> 100%頂級桑蠶絲</label>
+              <label class="tag-item"><input type="checkbox" value="天絲木代爾面料 (Tencel Modal)" class="mat-cb"> 天絲木代爾</label>
+              <label class="tag-item"><input type="checkbox" value="長絨匹馬棉 (Pima Cotton)" class="mat-cb"> 長絨匹馬棉</label>
+              <label class="tag-item"><input type="checkbox" value="銅氨絲極致沁涼纖維 (Cupro Fiber)" class="mat-cb"> 銅氨絲沁涼纖維</label>
+              <label class="tag-item"><input type="checkbox" value="冰絲涼感高彈微纖維 (Ice Silk)" class="mat-cb"> 冰絲涼感微纖維</label>
+              <label class="tag-item"><input type="checkbox" value="石墨烯抑菌底襠布料 (Graphene Lining)" class="mat-cb"> 石墨烯抗菌底襠</label>
+              <label class="tag-item"><input type="checkbox" value="水溶立體刺繡蕾絲 (Water-Soluble Lace)" class="mat-cb"> 水溶立體刺繡蕾絲</label>
+              <label class="tag-item"><input type="checkbox" value="高透氣蜂巢六角網布 (Honeycombed Mesh)" class="mat-cb"> 蜂巢透氣網布</label>
+              <label class="tag-item"><input type="checkbox" value="萊卡超彈力纖維 (LYCRA Elastane)" class="mat-cb"> 萊卡超彈力纖維</label>
+              <label class="tag-item"><input type="checkbox" value="竹炭吸濕排汗功能布料" class="mat-cb"> 竹炭吸濕排汗布</label>
+              <label class="tag-item"><input type="checkbox" value="奢華重磅真絲緞面 (Heavy Silk Satin)" class="mat-cb"> 奢華重磅真絲緞面</label>
+              <label class="tag-item"><input type="checkbox" value="親膚柔軟法蘭絨 (Soft Flannel)" class="mat-cb"> 柔軟法蘭絨</label>
+              <label class="tag-item"><input type="checkbox" value="高彈力收腹網紗加壓布" class="mat-cb"> 高彈力加壓網紗</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 模組 2: 文案與 AI 生成 -->
+        <div class="card">
+          <div class="card-title">
+            <span>2. 文案與 AI 靈感生成</span>
+            <button id="btnGenTitle" type="button" class="btn">🎲 AI 換標題</button>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label>英文主標題 (Main Title)</label>
+              <input type="text" id="mainTitleInput" value="LIQUID CURVE">
+            </div>
+            <div class="form-group">
+              <label>中文副標題 (Subtitle)</label>
+              <input type="text" id="subTitleInput" value="自然波動 雙倍爆乳">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label>短文語言 (Language)</label>
+              <select id="langSelect">
+                <option value="zh">繁體中文</option>
+                <option value="en">純英文</option>
+                <option value="bilingual" selected>中英雙語</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span>介紹短文段落</span>
+                <button id="btnGenDesc" type="button" style="background:none; border:none; color:#f472b6; font-size:11px; cursor:pointer;">✨ AI 生成短文</button>
+              </label>
+              <input type="text" id="descInput" placeholder="點擊右上方按鈕生成短文..." value="Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label>字體風格</label>
+              <select id="fontStyleSelect">
+                <option value="高奢 Vogue 經典襯線體">高奢 Vogue 襯線體</option>
+                <option value="日系 Kinfolk 極簡無襯線體">日系極簡無襯線體</option>
+                <option value="優美流線手寫草書體">優雅手寫草書體</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>文字色彩</label>
+              <select id="fontColorSelect">
+                <option value="金屬燙金香檳金">燙金香檳金</option>
+                <option value="純淨極致白">純淨極致白</option>
+                <option value="深邃極致黑">深邃極致黑</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 模組 3: 場景 -->
+        <div class="card">
+          <div class="card-title">3. 排版與場景風格</div>
+          <div class="row">
+            <div class="form-group">
+              <label>雜誌排版風格</label>
+              <select id="layoutSelect">
+                <option value="VOGUE時尚雜誌封面排版，主標題壓在畫面頂部">VOGUE 高奢雜誌封面</option>
+                <option value="日系 Kinfolk 極簡生活雜誌排版，大量的留白與簡約文字">Kinfolk 日系極簡留白</option>
+                <option value="ELLE 潮流時尚大牌海報風格">ELLE 潮流時尚海報</option>
+                <option value="高級電商海報排版，中央大標題搭配產品特寫">高級電商質感海報</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>場景與光影</label>
+              <select id="sceneSelect">
+                <option value="場景為精品飯店套房，採用柔和的側光與暖色調環境光">精品飯店套房 + 奢華暖光</option>
+                <option value="場景為清晨的臥室，溫暖陽光透過白色窗紗灑落在柔軟被單上">清晨臥室 + 窗紗陽光</option>
+                <option value="純淨無縫純色背景攝影棚，使用均勻柔和的漫射光">純淨攝影棚 + 柔和漫射光</option>
+                <option value="極簡現代大理石空間，搭配優雅的水波紋光影">極簡大理石 + 水波紋光影</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 右側結果區 -->
+      <div class="col-right">
+        <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+          <div class="card-title">最終 AI 中文指令 (Prompt)</div>
+          <p style="font-size:11px; color:#94a3b8; margin-bottom:8px;">即時自動連動生成 Prompt：</p>
+          <textarea id="finalPrompt" class="prompt-box" readonly></textarea>
+          <button id="copyBtn" type="button" class="btn btn-copy">📋 複製完整指令</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    var titleDatabase = [
+      { main: "LIQUID CURVE", sub: "自然波動 雙倍爆乳" },
+      { main: "AQUA CLEAVAGE", sub: "水感托高 渾圓完美" },
+      { main: "BREATHABLE SILK", sub: "極致無痕 親膚呼吸" },
+      { main: "FRENCH ROMANCE", sub: "法式蕾絲 優雅綻放" },
+      { main: "PURE COMFORT", sub: "零感支撐 自由享受" },
+      { main: "SCULPT & BODY", sub: "重塑曲線 完美包覆" },
+      { main: "NIGHT ELEGANCE", sub: "盛夏絲語 奢華睡感" },
+      { main: "COOLING TOUCH", sub: "冰感銅氨 瞬間降溫" }
+    ];
+
+    var descDatabase = {
+      zh: "專為完美胸型設計，內建輕量液體與空氣雙層襯墊，貼合胸部律動，呈現自然渾圓深V溝影。",
+      en: "Engineered for optimal shaping, featuring fluid-air dual padding that gracefully mimics natural contours.",
+      bilingual: "Engineered for optimal shaping, featuring fluid-air dual padding. 專為完美胸型設計，呈現自然渾圓深V溝影。"
+    };
+
+    function getVal(id) {
+      var el = document.getElementById(id);
+      return el ? el.value : '';
+    }
+
+    function runUpdate() {
+      try {
+        var cat = getVal('categorySelect') || '女性真水爆乳內衣';
+        var col = getVal('colorSelect') || '珍珠奶白';
+        var cup = getVal('cupSelect') || '水感空氣雙襯墊';
+        var feat = getVal('featureSelect') || '深V集中';
+
+        var matElements = document.getElementsByClassName('mat-cb');
+        var matList = [];
+        for (var i = 0; i < matElements.length; i++) {
+          if (matElements[i].checked) {
+            matList.push(matElements[i].value);
+          }
+        }
+        var matStr = matList.length > 0 ? matList.join('與') : '高質感親膚布料';
+
+        var mainT = getVal('mainTitleInput') || 'LIQUID CURVE';
+        var subT = getVal('subTitleInput') || '自然波動 雙倍爆乳';
+        var descT = getVal('descInput') || '';
+
+        var fontS = getVal('fontStyleSelect') || '高奢 Vogue 經典襯線體';
+        var fontC = getVal('fontColorSelect') || '金屬燙金香檳金';
+
+        var layout = getVal('layoutSelect') || 'VOGUE時尚雜誌封面排版';
+        var scene = getVal('sceneSelect') || '精品飯店套房';
+
+        var descTextFormatted = '';
+        if (descT.trim() !== '') {
+          descTextFormatted = '\n- 畫面下方包含精細排版的商品介紹短文：「' + descT.trim() + '」';
+        }
+
+        var fullPrompt = '專業商業攝影，' + layout + '。\n\n' +
+          '【主體描述】：\n' +
+          '畫面主體為一件 ' + col + ' 的 ' + cat + '。\n' +
+          '罩杯與鋼圈結構：' + cup + '。\n' +
+          '剪裁特點：' + feat + '。\n' +
+          '材質採用 ' + matStr + '，展現極致細節與質感。\n' +
+          '由專業模特兒穿著展示，呈現優美的剪裁與線條。\n\n' +
+          '【文字排版與藝術指令】：\n' +
+          '畫面上清楚地排版著文字：\n' +
+          '- 英文大標題字樣為 "' + mainT + '"\n' +
+          '- 中文副標題字樣為 "' + subT + '"' + descTextFormatted + '\n' +
+          '字體樣式：採用 ' + fontS + '。\n' +
+          '色彩細節：文字色彩為 ' + fontC + '，整體具備頂級商業海報設計感。\n\n' +
+          '【場景與光影】：\n' +
+          scene + '。光影立體，色彩還原度高。\n\n' +
+          '8k解析度，超清細節，照片級真實感，高級時尚大片風格。 --ar 3:4 --v 6.0 --style raw';
+
+        var target = document.getElementById('finalPrompt');
+        if (target) {
+          target.value = fullPrompt;
+        }
+      } catch (err) {
+        console.error("生成錯誤:", err);
+      }
+    }
+
+    // 事件監聽與 AI 生成機制
+    document.addEventListener('DOMContentLoaded', function() {
+      // 1. 全域 Change 與 Input 事件捕捉 (事件委派)
+      document.body.addEventListener('change', runUpdate);
+      document.body.addEventListener('input', runUpdate);
+
+      // 2.
