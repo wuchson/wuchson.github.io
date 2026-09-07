@@ -1060,44 +1060,89 @@
       </select>
     </div>
 
-    <div class="form-group">
-      <label>拍攝視角與構圖</label>
-      <select id="angle">
-        <option value="正面中景胸部至腰部特寫，清晰展示內衣細節與杯型">中景特寫（胸腰區，強調杯型細節）</option>
-        <option value="正面中景胸部至膝蓋特寫，清晰展示內衣細節與杯型">中景特寫（胸腰區至膝蓋，強調杯型細節）</option>
-        <option value="正面全身照，完美呈現整體內衣套裝與身材比例">正面全身照（展示整體套裝）</option>
-        <option value="面向右方側身45度特寫，強調側收副乳與側邊包覆效果">面向右方45度側向特寫（強調側收與線條）</option>
-        <option value="面向左方側身45度特寫，強調側收副乳與側邊包覆效果">面向左方45度側向特寫（強調側收與線條）</option>
-        <option value="背部與肩帶線條特寫構圖，強調背部美型">背部特寫（強調肩帶/美背設計）</option>
-        <option value="俯拍視角（High-angle），展現慵懶臥姿與性感線條">俯拍視角（展現慵懶曲線）</option>
-        <option value="仰拍仰角視角（Low-angle），展現高挑氣場與逆天長腿">仰拍視角（高挑氣場/長腿）</option>
-        <option value="超微距極近特寫（Macro），展現蕾絲花紋與刺繡布料質感">超微距特寫（蕾絲/刺繡布料細節）</option>
-        <option value="特寫腰部與內褲邊帶細節，展現剪裁與無痕質感">腰部與內褲邊帶特寫（展示無痕）</option>
-        <option value="鏡子反射構圖（Mirror Reflection），同時呈現正面與背面">鏡子反射構圖（同時呈現正背面）</option>
-        <option value="第一人稱視角（POV），彷彿對面伴侶拍攝的視角">第一人稱視角POV（伴侶感）</option>
-        <option value="框架構圖（Framing），透過門縫或紗簾隱約拍攝">框架構圖（門縫/紗簾窺探感）</option>
-        <option value="對角線動態構圖，拉長人體線條">對角線構圖（拉長肢體線條）</option>
-        <option value="中心對稱黃金構圖，極致平衡質感">中心對稱黃金構圖（極致典雅）</option>
-        <option value="三分法構圖，人物放置於畫面左側或右側">三分法構圖（留白雜誌感）</option>
-        <option value="特寫鎖骨與胸罩上沿杯型細節">鎖骨與上杯型特寫（展示胸型）</option>
-        <option value="九宮格動態特寫，捕捉連續微動作">九宮格連續動態特寫</option>
-        <option value="廣角透視視角，強調環境氛圍與空間感">廣角透視視角（強調環境氛圍）</option>
-        <option value="長焦鏡頭壓縮感，景深極淺，背景完美虛化">長焦淺景深（背景完美虛化）</option>
-        <option value="平視眼平視角（Eye-level），建立直接真實親近感">平視視角（真實親近感）</option>
-        <option value="過肩視角（Over-the-shoulder），帶有互動親密感">過肩視角（互動親密感）</option>
-        <option value="切頭構圖（無臉模特），專注於內衣商品本身細節">切頭無臉構圖（專注商品本身）</option>
-        <option value="特寫臀部與褲腳無痕剪裁細節">特寫臀部與褲腳細節（展示褲腳無痕）</option>
-        <option value="魚眼鏡頭前衛視角（Fisheye），潮酷大片質感">魚眼前衛視角（潮酷大片）</option>
-        <option value="高空垂直向下90度平視俯拍（Flatlay Perspective）">90度垂直俯拍（Flatlay感）</option>
-        <option value="側顏與肩膀特寫構圖">側顏與肩膀特寫構圖</option>
-        <option value="特寫手部撫摸布料的觸感細節">手部撫摸布料特寫（展示觸感）</option>
-        <option value="雙人對比構圖（若有兩位模特）">雙人對比展示構圖</option>
-        <option value="動態模糊（Motion Blur）捕捉滑落罩衫瞬時">動態模糊抓拍（時尚隨性）</option>
-        <option value="極致留白大空鏡構圖">極致留白大空鏡構圖</option>
-        <option value="特寫鋼圈與底圍支撐結構">特寫鋼圈與底圍支撐結構</option>
-        <option value="">無顯示（不指定視角）</option>
-      </select>
-    </div>
+    <!-- 拍攝視角與構圖（分類優化版） -->
+    <div class="section-title">7. 拍攝視角與構圖（分類優化版）</div>
+
+    <div class="form-group"><label>① 景別與拍攝範圍</label><select id="shotSize">
+      <option value="正面完整全身構圖，完整呈現模特兒身材比例與整套內衣商品">全身照（完整展示）</option>
+      <option value="三分之二全身構圖，兼顧身材比例與商品展示">3/4全身照</option>
+      <option value="膝蓋以上中全身構圖，呈現內衣套裝與腿部比例">膝蓋以上構圖</option>
+      <option value="腰部以上半身構圖，聚焦上半身內衣設計">腰部以上半身</option>
+      <option value="胸部至腰部中景特寫，清晰展示罩杯與下圍細節">胸腰中景特寫</option>
+      <option value="胸部至膝蓋構圖，兼顧胸罩與內褲完整展示">胸部至膝蓋構圖</option>
+      <option value="切頭無臉商品構圖，集中於內衣商品與身材線條">無臉商品展示</option>
+      <option value="超近距離微距局部構圖，展示布料、蕾絲與車縫細節">超微距商品細節</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>② 攝影機拍攝視角</label><select id="cameraAngle">
+      <option value="攝影機位於人物眼睛高度的平視視角，畫面自然真實且具有親近感">平視視角</option>
+      <option value="正面平視拍攝，人物正對鏡頭，畫面穩定清晰">正面平視</option>
+      <option value="斜側平視拍攝，增加立體層次">斜側平視</option>
+      <option value="攝影機位於人物上方的微俯拍視角，呈現自然線條">微俯拍</option>
+      <option value="高角度俯拍視角，從上方向下拍攝，營造時尚大片感">高角度俯拍</option>
+      <option value="攝影機從正上方九十度垂直向下拍攝">90度垂直俯拍</option>
+      <option value="攝影機略低於人物視線的微仰拍角度，增加人物氣場">微仰拍</option>
+      <option value="低角度仰拍視角，展現高挑身材與時尚氣場">低角度仰拍</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>③ 人物展示方向與角度</label><select id="modelDirection">
+      <option value="模特兒正面面向鏡頭，完整展示內衣正面設計與杯型">正面展示</option>
+      <option value="模特兒身體向右微轉三十度，展示側邊剪裁">右側30度</option>
+      <option value="模特兒身體向左微轉三十度，展示側邊剪裁">左側30度</option>
+      <option value="模特兒面向右方側身四十五度，展示側收與身材曲線">右側45度（側收）</option>
+      <option value="模特兒面向左方側身四十五度，展示側收與身材曲線">左側45度（側收）</option>
+      <option value="模特兒完全向右側身九十度，展示側邊包覆與線條">右側90度</option>
+      <option value="模特兒完全向左側身九十度，展示側邊包覆與線條">左側90度</option>
+      <option value="模特兒背對鏡頭，展示背扣、肩帶與美背設計">正背面展示</option>
+      <option value="模特兒背向鏡頭並自然回頭看向攝影機">背面回眸</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>④ 商品重點展示</label><select id="productFocus">
+      <option value="畫面重點聚焦胸罩罩杯立體結構與胸型包覆效果">罩杯與杯型</option>
+      <option value="畫面重點展示上胸線條與自然包覆效果">上胸與包覆</option>
+      <option value="畫面重點展示側收、副乳包覆與側邊剪裁">側收與副乳包覆</option>
+      <option value="畫面重點展示鋼圈、下圍與支撐結構">鋼圈與下圍支撐</option>
+      <option value="畫面重點展示肩帶材質與調節設計">肩帶細節</option>
+      <option value="畫面重點展示蕾絲刺繡、花紋與布料質感">蕾絲花紋</option>
+      <option value="畫面重點展示內褲腰頭與腰部貼合效果">內褲腰頭</option>
+      <option value="畫面重點展示褲腳無痕剪裁與服貼效果">褲腳無痕</option>
+      <option value="超近距離展示布料纖維紋理與細緻材質">布料微距紋理</option>
+      <option value="手部自然觸摸商品布料，呈現柔軟親膚質感">手部觸摸布料</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>⑤ 專業構圖方式</label><select id="composition">
+      <option value="主體置中構圖，人物位於畫面中央，清晰突出商品">主體置中</option>
+      <option value="採用三分法構圖，視覺焦點位於黃金交叉位置">三分法構圖</option>
+      <option value="採用中央對稱構圖，畫面平衡且具有典雅感">中央對稱</option>
+      <option value="採用對角線構圖，利用身體線條形成時尚張力">對角線構圖</option>
+      <option value="大面積留白構圖，保留文字與品牌排版空間">留白雜誌構圖</option>
+      <option value="電商商品主圖滿版構圖，人物與商品清晰突出">電商主圖滿版</option>
+      <option value="利用門框、窗框或場景元素形成框架式構圖">框架式構圖</option>
+      <option value="利用前景元素形成遮擋與景深層次">前景遮擋構圖</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>⑥ 鏡頭焦段與攝影效果</label><select id="lensEffect">
+      <option value="使用標準鏡頭拍攝，自然呈現人物比例與商品細節">標準鏡頭</option>
+      <option value="使用35mm鏡頭拍攝，具有時尚街拍與環境人像氛圍">35mm時尚街拍</option>
+      <option value="使用50mm標準人像鏡頭拍攝，人物比例自然">50mm自然人像</option>
+      <option value="使用85mm專業商業人像鏡頭拍攝，背景自然虛化">85mm商業人像</option>
+      <option value="使用廣角鏡頭拍攝，增加空間感與畫面張力">廣角鏡頭</option>
+      <option value="使用長焦鏡頭拍攝，壓縮背景並突出人物">長焦鏡頭</option>
+      <option value="使用微距鏡頭拍攝，展示布料與工藝">微距鏡頭 Macro</option>
+      <option value="使用淺景深效果，背景柔和虛化">超淺景深</option>
+      <option value="背景產生自然散景光斑，營造高級攝影氛圍">背景散景 Bokeh</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>⑦ 創意與特殊拍攝視角</label><select id="creativeAngle">
+      <option value="利用鏡面反射拍攝人物與商品，形成時尚雙重視覺">鏡面反射</option>
+      <option value="從人物肩膀後方拍攝，形成自然過肩視角">過肩視角</option>
+      <option value="採用第一人稱視角拍攝，營造沉浸式視覺體驗">第一人稱 POV</option>
+      <option value="利用薄紗窗簾作為前景，形成朦朧柔焦質感">紗簾前景</option>
+      <option value="以連續動作呈現不同姿勢，形成時尚多畫面">連續動作構圖</option>
+      <option value="兩位模特兒並列展示不同商品或不同角度">雙人商品對比</option>
+      <option value="捕捉自然走動或轉身瞬間，呈現真實動態感">自然動態抓拍</option>
+      <option value="加入適度動態模糊，營造時尚大片瞬間感">動態模糊 Motion Blur</option>
+      <option value="">無指定</option></select></div>
 
     <div class="form-group">
       <label>畫面質感與風格</label>
@@ -1173,7 +1218,7 @@
     'aspectRatio', 'modelGender', 'modelNationality', 'skinTone', 'bodyType', 
     'hairStyle', 'imgRef', 'outfitStyle', 'topOutfit', 'bottomOutfit', 
     'outerwear', 'jewelry', 'footwear', 'foodItem', 'teaTableSetting', 
-    'environment', 'timeOfDay', 'expression', 'pose', 'angle', 'styleQuality'
+    'environment', 'timeOfDay', 'expression', 'pose', 'shotSize', 'cameraAngle', 'modelDirection', 'productFocus', 'composition', 'lensEffect', 'creativeAngle', 'styleQuality'
   ];
 
   function generatePrompt() {
@@ -1200,7 +1245,13 @@
     const time = document.getElementById('timeOfDay').value;
     const expr = document.getElementById('expression').value;
     const pose = document.getElementById('pose').value;
-    const angle = document.getElementById('angle').value;
+    const shotSize = document.getElementById('shotSize').value;
+    const cameraAngle = document.getElementById('cameraAngle').value;
+    const modelDirection = document.getElementById('modelDirection').value;
+    const productFocus = document.getElementById('productFocus').value;
+    const composition = document.getElementById('composition').value;
+    const lensEffect = document.getElementById('lensEffect').value;
+    const creativeAngle = document.getElementById('creativeAngle').value;
     const style = document.getElementById('styleQuality').value;
 
     if (top === '無顯示' || top === '無') top = '';
@@ -1277,7 +1328,15 @@
       parts.push(`姿勢神態：${actionParts.join('，')}`);
     }
 
-    if (angle) parts.push(`拍攝視角：${angle}`);
+    let angleParts = [];
+    if (shotSize) angleParts.push(`景別：${shotSize}`);
+    if (cameraAngle) angleParts.push(`攝影視角：${cameraAngle}`);
+    if (modelDirection) angleParts.push(`人物方向：${modelDirection}`);
+    if (productFocus) angleParts.push(`商品重點：${productFocus}`);
+    if (composition) angleParts.push(`構圖方式：${composition}`);
+    if (lensEffect) angleParts.push(`鏡頭效果：${lensEffect}`);
+    if (creativeAngle) angleParts.push(`特殊視角：${creativeAngle}`);
+    if (angleParts.length > 0) parts.push(`拍攝視角與構圖：${angleParts.join('，')}`);
     if (style) parts.push(`畫面質感風格：${style}`);
 
     let prompt = parts.length > 0 
