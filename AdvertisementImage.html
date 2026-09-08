@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 廣告底圖指令生成器｜專業版</title>
+<style>
+:root{--o:#f47b20;--g:#ffb23e;--bg:#fff7ec;--line:#eadbc8;--ink:#2b2118}
+*{box-sizing:border-box}body{margin:0;font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;background:linear-gradient(135deg,#fff8ef,#ffe8c5);color:var(--ink)}
+header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:30px 20px}.wrap{max-width:1450px;margin:auto}h1{margin:0;font-size:30px}header p{margin:8px 0 0}
+.app{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 20px 42px}.panel{background:#fffcf8;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 30px #8d5b2818}
+.title{font-size:20px;font-weight:800;margin:4px 0 18px;padding-bottom:10px;border-bottom:2px solid #ffe0bd}.group{margin-bottom:19px}label{display:block;font-weight:800;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;font:inherit;color:var(--ink)}
+.checks{display:flex;flex-wrap:wrap;gap:8px}.check{display:flex;gap:6px;align-items:center;padding:8px 10px;background:#fff8ef;border:1px solid var(--line);border-radius:999px;font-size:14px}.check input{accent-color:var(--o)}
+.preview{position:sticky;top:16px}.previewbox{background:#1c120c;padding:16px;border-radius:17px}#prompt{min-height:700px;background:#130d09;color:#ffe9c9;border-color:#4c301d;line-height:1.7}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}button{padding:13px;border:0;border-radius:12px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(135deg,var(--o),var(--g));color:#fff}.secondary{background:#fff1df;color:#8a4212}.dark{background:#4b2814;color:#fff}
+.tip{background:#fff0dc;border-left:4px solid var(--o);padding:12px;border-radius:9px;color:#74431b;line-height:1.6;font-size:14px}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.preview{position:static}}@media(max-width:600px){h1{font-size:24px}.app{padding:14px}.panel{padding:16px}.grid,.actions{grid-template-columns:1fr}#prompt{min-height:500px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>🎨 AI 廣告底圖指令生成器｜專業版</h1><p>電商促銷・節慶活動・品牌形象・商品廣告背景，一鍵組合 AI 圖像生成指令。</p></div></header>
+<div class="wrap app">
+<main class="panel">
+
+<div class="title">① 圖片尺寸與用途</div>
+<div class="grid">
+<div class="group"><label>圖片比例</label><select id="ratio">
+<option value="直式 3:4，高解析度電商內容圖">直式 3:4｜電商內容圖</option><option value="直式 4:5，高解析度 IG 廣告版面">直式 4:5｜IG 貼文</option><option value="直式 9:16，高解析度手機全螢幕廣告">直式 9:16｜限動／手機</option><option value="正方形 1:1，高解析度商品廣告版面">正方形 1:1</option><option value="橫式 16:9，高解析度網站與活動 Banner">橫式 16:9｜Banner</option></select></div>
+<div class="group"><label>廣告用途</label><select id="use">
+<option value="電商促銷活動主視覺">電商促銷</option><option value="新品上市廣告主視覺">新品上市</option><option value="品牌形象廣告主視覺">品牌形象</option><option value="節慶活動宣傳主視覺">節慶活動</option><option value="商品展示專用廣告背景">商品展示底圖</option></select></div>
+</div>
+
+<div class="title">② 廣告主題與活動氛圍</div>
+<div class="grid">
+<div class="group"><label>活動主題</label><select id="theme">
+<option value="9.9 購物節與人氣商品活動">9.9 購物節</option><option value="雙11購物狂歡節">雙11</option><option value="雙12年末購物節">雙12</option><option value="周年慶大型優惠活動">周年慶</option><option value="新品上市與限量發售活動">新品上市</option><option value="限時優惠與搶購活動">限時優惠</option><option value="春節節慶活動">春節</option><option value="情人節浪漫活動">情人節</option><option value="母親節感謝活動">母親節</option><option value="父親節感謝活動">父親節</option><option value="中秋節團圓活動">中秋節</option><option value="聖誕節節慶活動">聖誕節</option></select></div>
+<div class="group"><label>整體氛圍</label><select id="mood">
+<option value="明亮、熱鬧、歡樂、充滿購物節慶祝氛圍">熱鬧歡樂</option><option value="高級、精緻、奢華、具有精品廣告質感">精品奢華</option><option value="時尚、現代、潮流、具有商業視覺張力">時尚潮流</option><option value="溫暖、療癒、柔和、具有生活感">溫暖療癒</option><option value="清新、簡約、乾淨、具有高級留白感">清新極簡</option><option value="未來科技感、明亮光效與立體視覺">科技未來感</option></select></div>
+</div>
+
+<div class="title">③ 色彩與背景風格</div>
+<div class="grid">
+<div class="group"><label>主色系</label><select id="colors">
+<option value="橘色與金色">橘金（推薦）</option><option value="紅色與金色">紅金</option><option value="香檳金與奶油白">香檳金</option><option value="粉色與玫瑰金">粉金</option><option value="深黑色與金色">黑金</option><option value="深藍色與銀色">藍銀</option><option value="紫色與藍色霓虹光">紫藍科技</option><option value="奶油白與淺金色">奶油簡約</option><option value="深綠色與金色">深綠金</option></select></div>
+<div class="group"><label>視覺風格</label><select id="style">
+<option value="高級 3D CGI 商業廣告設計">高級 3D CGI</option><option value="精緻立體紙雕與藝術裝飾設計">立體紙雕風</option><option value="精品百貨櫥窗式視覺設計">精品櫥窗風</option><option value="現代電商促銷海報設計">電商促銷風</option><option value="極簡高級品牌廣告設計">極簡品牌風</option><option value="夢幻柔光與珠光材質設計">夢幻珠光風</option></select></div>
+</div>
+
+<div class="title">④ 廣告版面與留白區 ⭐</div>
+<div class="grid">
+<div class="group"><label>版面配置</label><select id="layout">
+<option value="上方為大型活動標題展示區，中間保留主要內容空間，四周以裝飾元素襯托">上方標題＋中央留白</option><option value="中央保留最大面積乾淨留白區域，左右與四角配置裝飾元素">中央大面積留白</option><option value="左側保留文字與資訊區域，右側規劃商品展示空間">左文字＋右商品</option><option value="右側保留文字與資訊區域，左側規劃商品展示空間">右文字＋左商品</option><option value="中央規劃大型商品展示區，上方保留標題，下方保留活動資訊">中央商品主視覺</option><option value="四周裝飾，中間乾淨留白，適合後製加入商品與文字">四周裝飾＋中間留白</option></select></div>
+<div class="group"><label>文字控制</label><select id="text">
+<option value="不要生成任何可辨識文字、數字、Logo 或亂碼，只保留乾淨的文字預留區域">完全不要文字（推薦）</option><option value="不要生成文字，保留上方大型標題留白區">上方標題留白</option><option value="不要生成文字，保留中央大型留白區">中央留白</option><option value="不要生成文字，保留左側資訊留白區">左側留白</option><option value="不要生成文字，保留右側資訊留白區">右側留白</option></select></div>
+</div>
+
+<div class="title">⑤ 背景裝飾元素（可多選）</div>
+<div class="checks" id="decos">
+<label class="check"><input type="checkbox" value="精緻禮物盒與蝴蝶結">禮物盒</label><label class="check"><input type="checkbox" value="大型立體氣球">氣球</label><label class="check"><input type="checkbox" value="購物袋與優惠吊牌">購物袋</label><label class="check"><input type="checkbox" value="金色彩帶與緞帶">彩帶／緞帶</label><label class="check"><input type="checkbox" value="閃耀珍珠與立體球體">珍珠球體</label><label class="check"><input type="checkbox" value="花朵與精緻花藝裝飾">花朵</label><label class="check"><input type="checkbox" value="購物節慶三角旗與派對裝飾">派對旗幟</label><label class="check"><input type="checkbox" value="漂浮星星與閃耀裝飾">星星</label><label class="check"><input type="checkbox" value="高級商品展示底座或平台">展示底座</label>
+</div>
+
+<div class="title">⑥ 光影與特效（可多選）</div>
+<div class="checks" id="effects">
+<label class="check"><input type="checkbox" value="柔和金色光暈">光暈</label><label class="check"><input type="checkbox" value="閃耀星光與高光">星光</label><label class="check"><input type="checkbox" value="細緻漂浮粒子">粒子</label><label class="check"><input type="checkbox" value="流動絲綢般光線">流動光線</label><label class="check"><input type="checkbox" value="聚光燈式中心光源">聚光燈</label><label class="check"><input type="checkbox" value="柔焦鏡頭光斑">柔焦光斑</label><label class="check"><input type="checkbox" value="高級鏡面反射光澤">鏡面光澤</label>
+</div>
+
+<div class="title">⑦ 裝飾位置與複雜度</div>
+<div class="grid">
+<div class="group"><label>裝飾物位置</label><select id="position">
+<option value="主要集中於左下角與右側，避免遮擋中央留白區">左右側＋角落</option><option value="四個角落均勻配置，中央完全保留乾淨">四角裝飾</option><option value="集中於左右兩側邊緣，形成框景效果">左右框景</option><option value="集中於下方，形成商品舞台與底部裝飾">下方集中</option><option value="元素少量漂浮於四周，畫面保持高度乾淨">四周少量漂浮</option></select></div>
+<div class="group"><label>背景複雜度</label><select id="density">
+<option value="適中豐富，但保持清楚層次與大量可用留白">適中（推薦）</option><option value="極簡乾淨，只有少量高級裝飾">極簡</option><option value="簡約設計，裝飾元素適量">簡約</option><option value="豐富熱鬧，具有明顯節慶促銷感">豐富</option><option value="豪華滿版裝飾，但仍保留主要內容區">豪華滿版</option></select></div>
+</div>
+
+<div class="title">⑧ 商品預留與自訂需求</div>
+<div class="grid">
+<div class="group"><label>商品展示區</label><select id="product">
+<option value="不放入商品，只生成純廣告背景與商品預留空間">純底圖，不放商品</option><option value="中央保留大型商品展示區，但不要生成實際商品">中央商品預留區</option><option value="左側保留商品展示區，但不要生成實際商品">左側商品預留區</option><option value="右側保留商品展示區，但不要生成實際商品">右側商品預留區</option><option value="下方保留商品展示平台，但不要生成實際商品">下方商品預留區</option></select></div>
+<div class="group"><label>畫面品質</label><select id="quality"><option value="超高解析度、精緻細節、商業級廣告視覺、專業棚拍光影">商業級超高品質</option><option value="高解析度、清晰乾淨、適合電商與社群使用">高品質電商</option><option value="精緻藝術設計、細膩材質與高級視覺">精品藝術品質</option></select></div>
+</div>
+<div class="group"><label>自訂補充需求（選填）</label><textarea id="custom" placeholder="例如：中央留白更大、不要太多氣球、右下角要有禮物籃、整體偏明亮橘金色……"></textarea></div>
+<div class="tip">💡 想接近你提供的範例風格，可選：<b>橘金＋高級3D CGI＋上方標題／中央留白＋禮物盒＋氣球＋珍珠球體＋流動光線＋四周適度裝飾＋完全不要文字</b>。</div>
+</main>
+
+<aside class="panel preview">
+<div class="title">✨ AI 生成指令預覽</div>
+<div class="previewbox"><textarea id="prompt" readonly></textarea></div>
+<div class="actions"><button class="primary" id="copy">📋 複製指令</button><button class="secondary" id="save">💾 儲存設定</button><button class="dark" id="reset">↺ 重設</button></div>
+</aside>
+</div>
+
+<script>
+const fields=['ratio','use','theme','mood','colors','style','layout','text','position','density','product','quality','custom'];
+const get=id=>document.getElementById(id).value.trim();
+const checks=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value);
+function make(){
+ const d=checks('decos'),e=checks('effects');
+ const lines=[
+ '【AI 廣告底圖生成指令】','',
+ '請生成一張全新的專業商業廣告底圖。',
+ '圖片比例與規格：'+get('ratio')+'。',
+ '廣告用途：'+get('use')+'。',
+ '活動主題：'+get('theme')+'。',
+ '',
+ '【整體視覺風格】',
+ '主要色彩採用'+get('colors')+'為核心配色，色彩協調、具有高級層次與商業視覺吸引力。',
+ '整體氛圍呈現'+get('mood')+'。',
+ '設計風格為'+get('style')+'。',
+ '',
+ '【版面配置】',
+ get('layout')+'。',
+ get('text')+'。',
+ get('product')+'。',
+ d.length?'【背景裝飾元素】\n加入：'+d.join('、')+'。裝飾物需精緻自然地融入畫面，避免過度雜亂與遮擋主要留白區域。':'',
+ e.length?'【光影與視覺特效】\n加入：'+e.join('、')+'，營造細緻、明亮、有層次的高級廣告氛圍。':'',
+ '',
+ '【裝飾配置】',
+ '裝飾元素'+get('position')+'。',
+ '背景複雜度設定為'+get('density')+'。',
+ '',
+ '【重要限制】',
+ '不要生成任何品牌 Logo、錯誤文字、亂碼、水印或不可辨識字樣。',
+ '畫面必須保留清楚、乾淨、可供後續自行加入商品、標題與促銷資訊的空間。',
+ '所有裝飾元素需保持合理比例、立體層次與自然光影，不要遮擋主要內容區。',
+ get('quality')+'。'
+ ];
+ if(get('custom')) lines.push('','【額外自訂需求】',get('custom'));
+ lines.push('','整體完成效果需像專業電商大型活動主視覺、品牌商業廣告背景，可直接作為後續商品合成與文字排版使用。');
+ document.getElementById('prompt').value=lines.filter(x=>x!==''||true).join('\n');
+}
+function save(){const x={};fields.forEach(id=>x[id]=get(id));['decos','effects'].forEach(id=>x[id]=checks(id));localStorage.setItem('adBgTool',JSON.stringify(x));alert('設定已儲存！')}
+function load(){try{const x=JSON.parse(localStorage.getItem('adBgTool'));if(!x)return;fields.forEach(id=>{if(x[id]!=null)document.getElementById(id).value=x[id]});['decos','effects'].forEach(id=>document.querySelectorAll('#'+id+' input').forEach(c=>c.checked=(x[id]||[]).includes(c.value)))}catch(e){}}
+document.querySelectorAll('select,input,textarea').forEach(x=>x.addEventListener('input',make));
+document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(document.getElementById('prompt').value);document.getElementById('copy').textContent='✓ 已複製';setTimeout(()=>document.getElementById('copy').textContent='📋 複製指令',1500)};
+document.getElementById('save').onclick=save;
+document.getElementById('reset').onclick=()=>{if(confirm('確定要重設所有選項嗎？')){document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);document.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);document.getElementById('custom').value='';localStorage.removeItem('adBgTool');make()}};
+load();make();
+</script>
+</body></html>
