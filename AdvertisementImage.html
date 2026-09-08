@@ -10,7 +10,7 @@
 header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:30px 20px}.wrap{max-width:1450px;margin:auto}h1{margin:0;font-size:30px}header p{margin:8px 0 0}
 .app{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 20px 42px}.panel{background:#fffcf8;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 30px #8d5b2818}
 .title{font-size:20px;font-weight:800;margin:4px 0 18px;padding-bottom:10px;border-bottom:2px solid #ffe0bd}.group{margin-bottom:19px}label{display:block;font-weight:800;margin-bottom:8px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;font:inherit;color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}select,input[type=number],textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;font:inherit;color:var(--ink)}
 .checks{display:flex;flex-wrap:wrap;gap:8px}.check{display:flex;gap:6px;align-items:center;padding:8px 10px;background:#fff8ef;border:1px solid var(--line);border-radius:999px;font-size:14px}.check input{accent-color:var(--o)}
 .preview{position:sticky;top:16px}.previewbox{background:#1c120c;padding:16px;border-radius:17px}#prompt{min-height:700px;background:#130d09;color:#ffe9c9;border-color:#4c301d;line-height:1.7}
 .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}button{padding:13px;border:0;border-radius:12px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(135deg,var(--o),var(--g));color:#fff}.secondary{background:#fff1df;color:#8a4212}.dark{background:#4b2814;color:#fff}
@@ -25,8 +25,32 @@ header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:3
 
 <div class="title">① 圖片尺寸與用途</div>
 <div class="grid">
-<div class="group"><label>圖片比例</label><select id="ratio">
-<option value="直式 3:4，高解析度電商內容圖">直式 3:4｜電商內容圖</option><option value="直式 4:5，高解析度 IG 廣告版面">直式 4:5｜IG 貼文</option><option value="直式 9:16，高解析度手機全螢幕廣告">直式 9:16｜限動／手機</option><option value="正方形 1:1，高解析度商品廣告版面">正方形 1:1</option><option value="橫式 16:9，高解析度網站與活動 Banner">橫式 16:9｜Banner</option></select></div>
+<div class="group">
+<label>圖片尺寸比例</label>
+<select id="ratio">
+<option value="直式 2:3，高解析度商業廣告版面">直式 2:3</option>
+<option value="直式 3:4，高解析度電商內容圖">直式 3:4｜電商內容圖</option>
+<option value="直式 4:5，高解析度 IG 廣告版面">直式 4:5｜IG 貼文</option>
+<option value="直式 5:8，高解析度行動廣告版面">直式 5:8</option>
+<option value="直式 9:16，高解析度手機全螢幕廣告">直式 9:16｜限動／手機</option>
+<option value="直式 10:16，高解析度行動裝置廣告">直式 10:16</option>
+<option value="正方形 1:1，高解析度商品廣告版面">正方形 1:1</option>
+<option value="橫式 3:2，高解析度商業廣告版面">橫式 3:2</option>
+<option value="橫式 4:3，高解析度傳統廣告版面">橫式 4:3</option>
+<option value="橫式 16:9，高解析度網站與活動 Banner">橫式 16:9｜Banner</option>
+<option value="橫式 16:10，高解析度網站與桌面廣告">橫式 16:10</option>
+<option value="超寬橫式 21:9，高解析度電影感廣告 Banner">超寬 21:9</option>
+<option value="自訂尺寸">✏️ 自訂尺寸（請填寫下方寬高）</option>
+</select>
+<div id="customSizeBox" style="margin-top:10px;padding:10px;border:1px dashed #f0b16f;border-radius:10px;background:#fff8ef">
+<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:#8a4212">✏️ 自訂圖片尺寸（px）</div>
+<div class="grid" style="gap:8px">
+<input id="customWidth" type="number" min="1" placeholder="寬度，例如 1280">
+<input id="customHeight" type="number" min="1" placeholder="高度，例如 250">
+</div>
+<div style="font-size:12px;color:#8b765f;margin-top:7px">輸入寬度與高度後，Prompt 會自動加入實際像素尺寸與圖片方向。</div>
+</div>
+</div>
 <div class="group"><label>廣告用途</label><select id="use">
 <option value="電商促銷活動主視覺">電商促銷</option><option value="新品上市廣告主視覺">新品上市</option><option value="品牌形象廣告主視覺">品牌形象</option><option value="節慶活動宣傳主視覺">節慶活動</option><option value="商品展示專用廣告背景">商品展示底圖</option></select></div>
 </div>
@@ -91,15 +115,31 @@ header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:3
 </div>
 
 <script>
-const fields=['ratio','use','theme','mood','colors','style','layout','text','position','density','product','quality','custom'];
+const fields=['ratio','use','theme','mood','colors','style','layout','text','position','density','product','quality','custom','customWidth','customHeight'];
 const get=id=>document.getElementById(id).value.trim();
 const checks=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value);
+function imageSizeDescription(){
+ const ratio=get('ratio');
+ const w=parseInt(get('customWidth'),10), h=parseInt(get('customHeight'),10);
+ if(ratio==='自訂尺寸'){
+   if(w>0&&h>0){
+     const direction=w>h?'橫式':w<h?'直式':'正方形';
+     return `自訂實際圖片尺寸：${w} × ${h} pixels，${direction}廣告版面`;
+   }
+   return '使用自訂圖片尺寸，請依照下方設定的寬度與高度 pixels 生成';
+ }
+ if(w>0&&h>0){
+   const direction=w>h?'橫式':w<h?'直式':'正方形';
+   return `${ratio}；實際輸出尺寸指定為 ${w} × ${h} pixels，${direction}廣告版面`;
+ }
+ return ratio;
+}
 function make(){
  const d=checks('decos'),e=checks('effects');
  const lines=[
  '【AI 廣告底圖生成指令】','',
  '請生成一張全新的專業商業廣告底圖。',
- '圖片比例與規格：'+get('ratio')+'。',
+ '圖片比例與規格：'+imageSizeDescription()+'。',
  '廣告用途：'+get('use')+'。',
  '活動主題：'+get('theme')+'。',
  '',
@@ -134,7 +174,7 @@ function load(){try{const x=JSON.parse(localStorage.getItem('adBgTool'));if(!x)r
 document.querySelectorAll('select,input,textarea').forEach(x=>x.addEventListener('input',make));
 document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(document.getElementById('prompt').value);document.getElementById('copy').textContent='✓ 已複製';setTimeout(()=>document.getElementById('copy').textContent='📋 複製指令',1500)};
 document.getElementById('save').onclick=save;
-document.getElementById('reset').onclick=()=>{if(confirm('確定要重設所有選項嗎？')){document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);document.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);document.getElementById('custom').value='';localStorage.removeItem('adBgTool');make()}};
+document.getElementById('reset').onclick=()=>{if(confirm('確定要重設所有選項嗎？')){document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);document.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);document.getElementById('custom').value='';document.getElementById('customWidth').value='';document.getElementById('customHeight').value='';localStorage.removeItem('adBgTool');make()}};
 load();make();
 </script>
 </body></html>
