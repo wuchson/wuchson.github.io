@@ -11,7 +11,7 @@ header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:3
 .app{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 20px 42px}.panel{background:#fffcf8;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 30px #8d5b2818}
 .title{font-size:20px;font-weight:800;margin:4px 0 18px;padding-bottom:10px;border-bottom:2px solid #ffe0bd}.group{margin-bottom:19px}label{display:block;font-weight:800;margin-bottom:8px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}select,input[type=number],textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;font:inherit;color:var(--ink)}
-.checks{display:flex;flex-wrap:wrap;gap:8px}.check{display:flex;gap:6px;align-items:center;padding:8px 10px;background:#fff8ef;border:1px solid var(--line);border-radius:999px;font-size:14px}.check input{accent-color:var(--o)}
+.subhead{font-size:15px;font-weight:800;color:#8a4212;margin:14px 0 8px;padding-left:2px}.checks{display:flex;flex-wrap:wrap;gap:8px}.check{display:flex;gap:6px;align-items:center;padding:8px 10px;background:#fff8ef;border:1px solid var(--line);border-radius:999px;font-size:14px}.check input{accent-color:var(--o)}
 .preview{position:sticky;top:16px}.previewbox{background:#1c120c;padding:16px;border-radius:17px}#prompt{min-height:700px;background:#130d09;color:#ffe9c9;border-color:#4c301d;line-height:1.7}
 .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}button{padding:13px;border:0;border-radius:12px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(135deg,var(--o),var(--g));color:#fff}.secondary{background:#fff1df;color:#8a4212}.dark{background:#4b2814;color:#fff}
 .tip{background:#fff0dc;border-left:4px solid var(--o);padding:12px;border-radius:9px;color:#74431b;line-height:1.6;font-size:14px}
@@ -80,32 +80,80 @@ header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:3
 </div>
 
 <div class="title">⑤ 背景裝飾元素（可多選）</div>
-<div class="checks" id="decos">
+
+<div class="subhead">🎁 商業促銷元素</div>
+<div class="checks" id="decosBusiness">
 <label class="check"><input type="checkbox" value="精緻禮物盒與蝴蝶結">禮物盒</label>
 <label class="check"><input type="checkbox" value="大型立體氣球">氣球</label>
 <label class="check"><input type="checkbox" value="購物袋與優惠吊牌">購物袋</label>
 <label class="check"><input type="checkbox" value="金色彩帶與緞帶">彩帶／緞帶</label>
-<label class="check"><input type="checkbox" value="閃耀珍珠與立體球體">珍珠球體</label>
-<label class="check"><input type="checkbox" value="花朵與精緻花藝裝飾">花朵</label>
 <label class="check"><input type="checkbox" value="購物節慶三角旗與派對裝飾">派對旗幟</label>
-<label class="check"><input type="checkbox" value="漂浮星星與閃耀裝飾">星星</label>
-<label class="check"><input type="checkbox" value="高級商品展示底座或平台">展示底座</label>
-<label class="check"><input type="checkbox" value="金色紙屑與閃亮碎紙">金色紙屑</label>
-<label class="check"><input type="checkbox" value="漂浮花瓣與細緻花瓣雨">花瓣</label>
-<label class="check"><input type="checkbox" value="購物車與精緻購物籃">購物車／購物籃</label>
 <label class="check"><input type="checkbox" value="優惠券卡片與促銷徽章">優惠券／徽章</label>
 <label class="check"><input type="checkbox" value="金幣與高級獎章裝飾">金幣／獎章</label>
+<label class="check"><input type="checkbox" value="購物車與精緻購物籃">購物車／購物籃</label>
+<label class="check"><input type="checkbox" value="高級商品展示底座或平台">展示底座</label>
+</div>
+
+<div class="subhead">🔷 幾何立體元素</div>
+<div class="checks" id="decosGeometry">
+<label class="check"><input type="checkbox" value="高級立體圓球與圓形幾何體">立體圓球</label>
+<label class="check"><input type="checkbox" value="立體方塊與正方體幾何造型">立體方塊</label>
+<label class="check"><input type="checkbox" value="立體圓柱與幾何柱體">立體圓柱</label>
+<label class="check"><input type="checkbox" value="立體三角錐與三角形幾何體">立體三角錐</label>
+<label class="check"><input type="checkbox" value="立體六角柱與六邊形幾何體">立體六角柱</label>
+<label class="check"><input type="checkbox" value="精緻菱形與鑽石切面幾何體">菱形幾何</label>
+<label class="check"><input type="checkbox" value="多面體與高級切面幾何造型">多面體</label>
+<label class="check"><input type="checkbox" value="立體幾何切面與斜切造型">幾何切面</label>
+<label class="check"><input type="checkbox" value="立體幾何階梯與層疊結構">幾何階梯</label>
+<label class="check"><input type="checkbox" value="懸浮幾何平台與立體展示台">幾何平台</label>
+</div>
+
+<div class="subhead">⭕ 幾何線條／框架</div>
+<div class="checks" id="decosFrames">
+<label class="check"><input type="checkbox" value="高級金色圓環與立體圓形框架">金色圓環</label>
+<label class="check"><input type="checkbox" value="多層同心圓與層疊圓形框架">多層同心圓</label>
+<label class="check"><input type="checkbox" value="優雅橢圓環與立體橢圓框架">橢圓環</label>
+<label class="check"><input type="checkbox" value="高級立體幾何框架">幾何框架</label>
+<label class="check"><input type="checkbox" value="多層矩形與方形框架">多層矩形框</label>
+<label class="check"><input type="checkbox" value="六角形幾何框架">六角形框架</label>
+<label class="check"><input type="checkbox" value="斜切幾何線條與動態斜線">斜切幾何線條</label>
+<label class="check"><input type="checkbox" value="立體折線與連續幾何線條">立體折線</label>
+</div>
+
+<div class="subhead">✨ 透明／玻璃幾何</div>
+<div class="checks" id="decosGlass">
+<label class="check"><input type="checkbox" value="透明玻璃球與高級折射效果">透明玻璃球</label>
+<label class="check"><input type="checkbox" value="透明玻璃方塊與立體折射">透明玻璃方塊</label>
+<label class="check"><input type="checkbox" value="半透明幾何板與懸浮玻璃薄片">透明幾何板</label>
+<label class="check"><input type="checkbox" value="高級水晶多面體與切面折射">水晶多面體</label>
+<label class="check"><input type="checkbox" value="半透明幾何薄片與玻璃碎片">幾何薄片</label>
+<label class="check"><input type="checkbox" value="透明玻璃幾何框與精品展示結構">玻璃幾何框</label>
+<label class="check"><input type="checkbox" value="透明壓克力幾何體與精品展示材質">壓克力幾何體</label>
+</div>
+
+<div class="subhead">⚡ 科技／未來幾何</div>
+<div class="checks" id="decosTech">
+<label class="check"><input type="checkbox" value="立體線框球體與科技網格">線框球體</label>
+<label class="check"><input type="checkbox" value="發光六角形科技網格">發光六角網格</label>
+<label class="check"><input type="checkbox" value="科技幾何網格與數位線條">科技網格</label>
+<label class="check"><input type="checkbox" value="HUD 風格幾何框與數位介面線條">HUD 幾何框</label>
+<label class="check"><input type="checkbox" value="發光幾何環與未來感光圈">發光幾何環</label>
+<label class="check"><input type="checkbox" value="霓虹管與未來感發光幾何元素">霓虹元素</label>
+<label class="check"><input type="checkbox" value="漂浮幾何碎片與懸浮立體小物">幾何碎片</label>
+<label class="check"><input type="checkbox" value="全息投影與發光科技面板">全息投影</label>
+</div>
+
+<div class="subhead">🌸 氛圍／裝飾元素</div>
+<div class="checks" id="decosMood">
+<label class="check"><input type="checkbox" value="閃耀珍珠與立體球體">珍珠球體</label>
+<label class="check"><input type="checkbox" value="花朵與精緻花藝裝飾">花朵</label>
+<label class="check"><input type="checkbox" value="漂浮星星與閃耀裝飾">星星</label>
+<label class="check"><input type="checkbox" value="金色紙屑與閃亮碎紙">金色紙屑</label>
+<label class="check"><input type="checkbox" value="漂浮花瓣與細緻花瓣雨">花瓣</label>
 <label class="check"><input type="checkbox" value="高級水晶球與透明玻璃球">水晶／玻璃球</label>
-<label class="check"><input type="checkbox" value="金色圓環與立體幾何造型">金色圓環</label>
-<label class="check"><input type="checkbox" value="透明壓克力板與玻璃方塊">透明壓克力</label>
+<label class="check"><input type="checkbox" value="綠葉、枝葉與自然植物裝飾">綠葉</label>
 <label class="check"><input type="checkbox" value="大理石材質裝飾與高級石材">大理石</label>
 <label class="check"><input type="checkbox" value="絲綢布幔與高級絨布背景">絲綢／絨布</label>
-<label class="check"><input type="checkbox" value="綠葉、枝葉與自然植物裝飾">綠葉</label>
-<label class="check"><input type="checkbox" value="立體圓柱、方塊與幾何切面">幾何體</label>
-<label class="check"><input type="checkbox" value="漂浮平台與階梯式展示舞台">漂浮平台</label>
-<label class="check"><input type="checkbox" value="科技網格、HUD 線條與數位電路紋理">科技網格</label>
-<label class="check"><input type="checkbox" value="全息投影與發光科技面板">全息投影</label>
-<label class="check"><input type="checkbox" value="霓虹管與未來感發光幾何元素">霓虹元素</label>
 </div>
 
 <div class="title">⑥ 光影與特效（可多選）</div>
@@ -185,7 +233,7 @@ header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:3
 <div class="group"><label>畫面品質</label><select id="quality"><option value="超高解析度、精緻細節、商業級廣告視覺、專業棚拍光影">商業級超高品質</option><option value="高解析度、清晰乾淨、適合電商與社群使用">高品質電商</option><option value="精緻藝術設計、細膩材質與高級視覺">精品藝術品質</option></select></div>
 </div>
 <div class="group"><label>自訂補充需求（選填）</label><textarea id="custom" placeholder="例如：中央留白更大、不要太多氣球、右下角要有禮物籃、整體偏明亮橘金色……"></textarea></div>
-<div class="tip">💡 想接近高級電商主視覺，可選：<b>橘金＋高級3D CGI＋中央留白＋禮物盒＋水晶球＋金色圓環＋體積光＋景深＋四周適度框景＋完全不要文字</b>。</div>
+<div class="tip">💡 想接近高級電商主視覺，可選：<b>橘金＋高級3D CGI＋中央留白＋禮物盒＋透明玻璃球＋金色圓環＋六角形幾何框架＋體積光＋景深＋四周適度框景＋完全不要文字</b>。</div>
 </main>
 
 <aside class="panel preview">
@@ -216,7 +264,7 @@ function imageSizeDescription(){
  return ratio;
 }
 function make(){
- const d=checks('decos'),e=checks('effects'),m=checks('materials'),c=checks('composition');
+ const d=['decosBusiness','decosGeometry','decosFrames','decosGlass','decosTech','decosMood'].flatMap(checks),e=checks('effects'),m=checks('materials'),c=checks('composition');
  const lines=[
  '【AI 廣告底圖生成指令】','',
  '請生成一張全新的專業商業廣告底圖。',
@@ -252,8 +300,8 @@ function make(){
  lines.push('','整體完成效果需像專業電商大型活動主視覺、品牌商業廣告背景，可直接作為後續商品合成與文字排版使用。');
  document.getElementById('prompt').value=lines.filter(x=>x!==''||true).join('\n');
 }
-function save(){const x={};fields.forEach(id=>x[id]=get(id));['decos','effects','materials','composition'].forEach(id=>x[id]=checks(id));localStorage.setItem('adBgTool',JSON.stringify(x));alert('設定已儲存！')}
-function load(){try{const x=JSON.parse(localStorage.getItem('adBgTool'));if(!x)return;fields.forEach(id=>{if(x[id]!=null)document.getElementById(id).value=x[id]});['decos','effects','materials','composition'].forEach(id=>document.querySelectorAll('#'+id+' input').forEach(c=>c.checked=(x[id]||[]).includes(c.value)))}catch(e){}}
+function save(){const x={};fields.forEach(id=>x[id]=get(id));['decosBusiness','decosGeometry','decosFrames','decosGlass','decosTech','decosMood','effects','materials','composition'].forEach(id=>x[id]=checks(id));localStorage.setItem('adBgTool',JSON.stringify(x));alert('設定已儲存！')}
+function load(){try{const x=JSON.parse(localStorage.getItem('adBgTool'));if(!x)return;fields.forEach(id=>{if(x[id]!=null)document.getElementById(id).value=x[id]});['decosBusiness','decosGeometry','decosFrames','decosGlass','decosTech','decosMood','effects','materials','composition'].forEach(id=>document.querySelectorAll('#'+id+' input').forEach(c=>c.checked=(x[id]||[]).includes(c.value)))}catch(e){}}
 document.querySelectorAll('select,input,textarea').forEach(x=>x.addEventListener('input',make));
 document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(document.getElementById('prompt').value);document.getElementById('copy').textContent='✓ 已複製';setTimeout(()=>document.getElementById('copy').textContent='📋 複製指令',1500)};
 document.getElementById('save').onclick=save;
