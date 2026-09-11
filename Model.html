@@ -269,7 +269,7 @@
 <div class="container">
   <header>
     <span class="badge">PROMPT GENERATOR</span>
-    <h1>AI 貼身衣物拍攝指令生成器 <br><span style="font-size: 1.1rem; font-weight: 400; color: var(--text-sub);">(海量擴充版)</span></h1>
+    <h1>AI 貼身衣物拍攝指令生成器 <br><span style="font-size: 1.1rem; font-weight: 400; color: var(--text-sub);">(海量擴充版｜髮型・髮色分類優化)</span></h1>
   </header>
 
   <div class="grid">
@@ -467,54 +467,219 @@
     </div>
 
     <div class="form-group">
-      <label>髮型與髮色</label>
+      <label>髮型分類與長度</label>
       <select id="hairStyle">
-        <option value="蓬鬆隨性且帶有空氣感的法式微捲長髮">法式微捲蓬鬆長髮</option>
-        <option value="可愛帶有空氣瀏海的雙馬尾/高丸子頭">空氣瀏海 / 可愛高丸子頭</option>
-        <option value="帥氣俐落的濕髮感齊肩短髮（Wet-look）">帥氣濕髮感齊肩短髮</option>
-        <option value="慵懶自然的法式高包頭，散落微絲髮碎髮">慵懶法式包頭散落碎髮</option>
-        <option value="唯美黑咖色大波浪捲髮，垂在胸前">唯美黑咖色大波浪長髮</option>
-        <option value="唯美黑咖色1位大波浪捲髮，1位黑咖夢幻染髮隨意微捲">唯美黑咖色2位模特兒髮型</option>
-        <option value="浪漫金黃色大波浪捲髮，垂在胸前">金黃色浪漫大波浪長髮</option>
-        <option value="烏黑亮麗的垂直發亮長直髮，清純俐落">烏黑亮麗極致長直髮</option>
-        <option value="亞麻棕色羊毛捲/復古小捲髮，熱情可愛">亞麻棕色羊毛捲/小捲髮</option>
-        <option value="精緻短髮耳後剪，展現俐落天鵝頸">耳後精緻短髮（突顯天鵝頸）</option>
-        <option value="性感俐落的高馬尾，甩動感十足">性感俐落高馬尾</option>
-        <option value="黑色/咖色夢幻染髮隨意微捲">黑色/咖色夢幻微捲髮</option>
-        <option value="粉白色/奶茶色夢幻染髮隨意微捲">粉白/奶茶色夢幻微捲髮</option>
-        <option value="白金色極短髮，極具酷颯時尚感">白金色酷颯極短髮</option>
-        <option value="復古手推波浪髮型（1920s Vintage Wave）">復古手推波浪髮型</option>
-        <option value="低調內斂的低馬尾，帶有絲綢髮帶綁飾">低馬尾搭絲綢髮帶</option>
-        <option value="半紮公主頭，帶有甜美弧度">甜美半紮公主頭</option>
-        <option value="隨性抓夾髮型，散發居家感">隨性鯊魚抓夾髮型（居家感）</option>
-        <option value="雙麻花辮，充滿田園鄉村可愛感">田園雙麻花辮（可愛感）</option>
-        <option value="深褐色隨性中分中長髮，極簡知性">深褐色隨性中分中長髮</option>
-        <option value="焦糖栗色側分波浪髮，遮住半邊臉微露性感">焦糖栗色側分遮臉波浪髮</option>
-        <option value="男士韓系柔和四六分蓋頭，自然蓬鬆線條，順滑黑髮，呈現清秀少年感的溫暖帥氣風格">韓系柔和四六分蓋頭（溫暖少年）</option>
-        <option value="男士韓系俐落中分逗號瀏海，髮根立體蓬鬆，黑髮質感，展現精緻帥氣與清冷偶像氣場">韓系俐落中分逗號瀏海（偶像氣場）</option>
-        <option value="男士歐美微捲蓬鬆紋理蓋頭（Textured Crop），亞麻棕髮色，自然微亂層次感，展現隨性玩酷風格">蓬鬆歐美紋理蓋頭（隨性玩酷）</option>
-        <option value="男士美式兩側漸層剪裁（French Crop Drop Fade），頂部豐富碎髮紋理，兩側推爽俐落，玩酷率性">俐落兩側漸層短蓋頭（美式率性）</option>
-        <option value="男士高層次蓬鬆三七分後梳，瀏海自然微垂，線條感鮮明，兼具帥氣與知性商務氣質">高層次蓬鬆後梳頭（知性帥氣）</option>
-        <option value="男士俐落商務後梳飛機頭，露額展現五官與眉眼，兩側乾淨推剪，自信強大的CEO領袖氣場">俐落商務後梳飛機頭（CEO氣場）</option>
-        <option value="男士韓系俐落紋理剪裁，自然線條感，側邊乾淨，時尚街頭風格">男士韓系紋理剪</option>
-        <option value="男士經典復古油頭，精緻三七分線，兩側漸層推剪，展現紳士氣質">男士經典復古油頭</option>
-        <option value="男士隨性日系中分捲髮，微捲蓬鬆感，展現慵懶藝術氣息">男士日系中分捲髮</option>
-        <option value="男士美式短碎髮，俐落短髮搭配極短漸層推高，陽剛硬派風格">男士美式短碎髮寸頭</option>
-        <option value="男士個性狼尾髮型，前短後長，具層次感與叛逆街頭氛圍">男士個性狼尾髮型</option>
-        <option value="男士自然逗號瀏海，前額微捲，韓系帥氣潮流風格">男士韓系逗號瀏海</option>
-        <option value="男士：韓系紋理碎瀏海短髮">男士：韓系紋理碎瀏海短髮</option>
-        <option value="男士：經典復古美式油頭（Slick Back）">男士：美式復古油頭</option>
-        <option value="男士：日系清爽蓬鬆微捲髮">男士：日系清爽蓬鬆微捲髮</option>
-        <option value="男士：俐落寸頭/寸髮，極具硬漢陽光感">男士：俐落陽光寸頭</option>
-        <option value="蓬鬆微濕的剛睡醒頭（Bedhead Look）">剛睡醒微濕隨性髮（Bedhead）</option>
-        <option value="橘紅色/海妖紅耀眼波浪長髮">橘紅耀眼海妖波浪髮</option>
-        <option value="銀灰色超現代前衛微捲長髮">銀灰色超現代前衛長髮</option>
-        <option value="微濕貼額頭的時尚大片造型髮">時尚大片微濕貼額造型髮</option>
-        <option value="編織細小蕾絲髮辮的精緻髮型">細小蕾絲編髮精緻髮型</option>
-        <option value="溫暖蜜桃粉色蓬鬆中長髮">蜜桃粉色蓬鬆中長髮</option>
-        <option value="薄荷淺綠色前衛叛逆短髮">薄荷淺綠前衛叛逆短髮</option>
-        <option value="自然黑髮帶有太陽光金燦光澤">自然黑髮帶陽光光澤</option>
         <option value="">無顯示（不指定髮型）</option>
+
+        <optgroup label="━━ 女生｜長髮 ━━">
+          <option value="柔順自然的超長直髮，髮尾平順，帶有細緻光澤">極簡超長直髮</option>
+          <option value="中分絲滑長直髮，髮絲自然垂落，俐落高級">中分絲滑長直髮</option>
+          <option value="八字瀏海搭配柔順長髮，臉側自然修飾">八字瀏海長髮</option>
+          <option value="空氣瀏海搭配柔順長髮，輕盈自然">空氣瀏海長髮</option>
+          <option value="法式慵懶大波浪長髮，波紋柔軟自然，帶有空氣感">法式慵懶大波浪</option>
+          <option value="韓系大彎長髮，髮尾向外自然彎曲，精緻柔美">韓系大彎長髮</option>
+          <option value="日系輕盈S型長捲髮，層次自然，髮絲蓬鬆">日系S型長捲髮</option>
+          <option value="低層次長髮，髮尾輕盈，呈現自然垂墜感">低層次柔順長髮</option>
+          <option value="高層次長髮，臉側有輕盈修飾層次，髮尾自然外翻">高層次長髮</option>
+          <option value="狼尾感長髮，前短後長，多層次髮尾，時髦個性">女性長版狼尾</option>
+          <option value="法式自然羊毛捲長髮，蓬鬆柔軟，帶有復古浪漫氣息">法式羊毛捲長髮</option>
+          <option value="復古大卷長髮，捲度飽滿但不僵硬，具有電影感">復古大卷長髮</option>
+          <option value="側分長髮搭配柔和大波浪，成熟優雅且有時尚大片感">側分大波浪長髮</option>
+          <option value="長髮搭配輕盈碎瀏海，髮尾自然微彎，甜美清新">碎瀏海長髮</option>
+          <option value="自然黑長髮搭配髮尾微捲，乾淨清透的日系風格">日系黑長髮微捲</option>
+          <option value="光澤感長髮搭配自然中分，髮絲細緻柔順，商業型錄質感">高光澤中分長髮</option>
+        </optgroup>
+
+        <optgroup label="━━ 女生｜中長髮 ━━">
+          <option value="鎖骨長度中長髮，髮尾輕盈微彎，乾淨俐落">鎖骨中長髮</option>
+          <option value="韓系鎖骨髮，搭配自然八字瀏海，柔和修飾臉型">韓系鎖骨髮</option>
+          <option value="日系中長層次髮，髮尾外翻，輕盈有活力">日系層次中長髮</option>
+          <option value="法式中長髮，蓬鬆自然，帶有隨性感與空氣感">法式慵懶中長髮</option>
+          <option value="肩下微捲中長髮，捲度自然，呈現柔和浪漫感">肩下微捲髮</option>
+          <option value="中分直順中長髮，線條簡潔，極簡高級">中分直順中長髮</option>
+          <option value="外翹鮑伯中長髮，髮尾輕盈向外，時髦俏皮">外翹中長髮</option>
+          <option value="內彎中長髮，髮尾自然包覆臉側，溫柔精緻">內彎中長髮</option>
+          <option value="高層次中長髮，臉側碎髮自然垂落，增加立體感">高層次中長髮</option>
+          <option value="羽毛剪中長髮，髮尾輕盈呈羽毛狀層次，現代時髦">羽毛剪中長髮</option>
+          <option value="狼尾感中長髮，層次鮮明，前短後長，帶有街頭感">女性中長狼尾</option>
+          <option value="中長髮搭配空氣瀏海，髮尾柔和微捲，清新甜美">空氣瀏海中長髮</option>
+          <option value="中長髮搭配法式碎瀏海，輕盈自然，帶有文藝感">法式碎瀏海中長髮</option>
+          <option value="中長髮搭配韓系逗號弧度瀏海，精緻時尚">韓系弧形瀏海中長髮</option>
+          <option value="微濕感中長髮，髮絲貼合自然，具有高級時裝大片感">微濕感中長髮</option>
+        </optgroup>
+
+        <optgroup label="━━ 女生｜短髮 ━━">
+          <option value="俐落耳下短髮，髮尾平整，露出清晰下顎線">耳下俐落短髮</option>
+          <option value="法式短鮑伯，輕微內彎，搭配自然瀏海，簡約優雅">法式短鮑伯</option>
+          <option value="韓系短鮑伯，髮尾整齊柔順，乾淨精緻">韓系短鮑伯</option>
+          <option value="日系輕盈短鮑伯，髮尾微微外翹，可愛自然">日系短鮑伯</option>
+          <option value="下巴長度鮑伯髮，線條乾淨俐落，現代感強">下巴鮑伯短髮</option>
+          <option value="法式蓬鬆短髮，帶有自然碎髮與輕盈層次">法式蓬鬆短髮</option>
+          <option value="耳後短髮，兩側整潔，露出頸部線條，清爽高級">耳後短髮</option>
+          <option value="短層次Pixie精靈短髮，髮頂蓬鬆，俐落時髦">Pixie精靈短髮</option>
+          <option value="柔和Pixie短髮，保留額前碎瀏海，精緻文青">柔和Pixie短髮</option>
+          <option value="中性短髮，線條俐落自然，帶有現代極簡時尚感">中性極簡短髮</option>
+          <option value="短髮搭配輕薄空氣瀏海，清新甜美">空氣瀏海短髮</option>
+          <option value="短髮搭配側分長瀏海，成熟俐落，具有時尚大片感">側分長瀏海短髮</option>
+          <option value="濕髮感短鮑伯，髮絲具有自然光澤與時裝感">Wet-look短鮑伯</option>
+          <option value="復古卷短髮，柔軟波浪貼合頭型，具有復古電影感">復古波浪短髮</option>
+          <option value="俐落短碎髮，髮尾有輕微層次，個性清爽">短碎髮</option>
+        </optgroup>
+
+        <optgroup label="━━ 女生｜瀏海與臉側層次 ━━">
+          <option value="自然八字瀏海，從中間向兩側柔和分開">自然八字瀏海</option>
+          <option value="輕薄空氣瀏海，髮絲細緻透氣，額頭若隱若現">輕薄空氣瀏海</option>
+          <option value="法式碎瀏海，長短不一且自然輕盈">法式碎瀏海</option>
+          <option value="韓系長瀏海，柔和貼合臉側，具有修飾輪廓效果">韓系長瀏海</option>
+          <option value="日系眉上短瀏海，俏皮清新，髮絲自然柔軟">日系眉上瀏海</option>
+          <option value="輕盈側分瀏海，帶有自然弧度與成熟氣質">側分弧形瀏海</option>
+          <option value="臉側高層次修飾髮絲，自然包覆輪廓，增加立體感">臉側修飾層次</option>
+          <option value="Curtain Bangs窗簾瀏海，從中間自然分開並延伸至顴骨">Curtain Bangs窗簾瀏海</option>
+        </optgroup>
+
+        <optgroup label="━━ 女生｜綁髮與造型 ━━">
+          <option value="高馬尾，髮絲蓬鬆自然，俐落有活力">蓬鬆高馬尾</option>
+          <option value="低馬尾，髮絲柔順，搭配少量自然碎髮">法式低馬尾</option>
+          <option value="半紮公主頭，頭頂自然蓬鬆，髮尾微捲">半紮公主頭</option>
+          <option value="半丸子頭，保留自然披髮，輕鬆時髦">半丸子頭</option>
+          <option value="低丸子頭，搭配自然碎髮，簡約優雅">法式低丸子頭</option>
+          <option value="高丸子頭，頭頂蓬鬆，搭配少量碎髮，清爽可愛">蓬鬆高丸子頭</option>
+          <option value="慵懶鯊魚夾盤髮，髮絲自然垂落，居家高級感">慵懶鯊魚夾盤髮</option>
+          <option value="絲帶低馬尾，髮尾自然微捲，浪漫柔美">絲帶低馬尾</option>
+          <option value="雙低馬尾，髮絲柔軟自然，日系甜美感">日系雙低馬尾</option>
+          <option value="雙麻花辮，編髮鬆軟自然，帶有田園感">鬆軟雙麻花辮</option>
+          <option value="單側法式編髮，沿頭型自然編織，優雅精緻">單側法式編髮</option>
+          <option value="低側辮，髮絲自然蓬鬆，帶有法式浪漫氣質">法式低側辮</option>
+          <option value="低盤髮搭配兩側碎髮，乾淨優雅，適合高級型錄">低盤髮＋碎髮</option>
+        </optgroup>
+
+        <optgroup label="━━ 女生｜特殊／時裝造型 ━━">
+          <option value="復古1920年代手推波浪髮，波紋俐落精緻">1920s手推波浪</option>
+          <option value="90年代復古大捲髮，蓬鬆有彈性，具有港風電影感">90s復古大捲</option>
+          <option value="Y2K細直長髮搭配兩側細辮，時髦俏皮">Y2K細辮長髮</option>
+          <option value="微濕貼髮造型，髮絲具有自然光澤，時裝秀後台感">時裝微濕髮</option>
+          <option value="高光澤背梳造型，露出額頭與臉部輪廓，極簡高級">高光澤背梳髮</option>
+          <option value="細緻小辮點綴長髮，其他髮絲保持自然披落">細辮點綴長髮</option>
+          <option value="自然蓬鬆Bedhead剛睡醒髮，帶有輕微凌亂層次">Bedhead隨性髮</option>
+          <option value="高層次Shag剪，髮尾碎而輕盈，具有獨立時髦感">Shag高層次髮</option>
+          <option value="Butterfly Cut蝴蝶層次長髮，臉側短層次搭配長髮尾">Butterfly蝴蝶剪</option>
+          <option value="柔和狼尾Shag，前短後長且髮尾輕盈，現代街頭感">Shag狼尾髮</option>
+        </optgroup>
+
+        <optgroup label="━━ 男生｜中長髮 ━━">
+          <option value="韓系自然中分中長髮，髮根蓬鬆，髮尾微彎">韓系中分中長髮</option>
+          <option value="日系中分微捲中長髮，蓬鬆柔和，慵懶文藝">日系中分微捲</option>
+          <option value="韓系逗號瀏海中長髮，髮根立體，線條自然">韓系逗號瀏海</option>
+          <option value="男士紋理燙中長髮，髮絲蓬鬆，具有自然層次">男士紋理燙</option>
+          <option value="男士輕狼尾，前短後長，髮尾自然外翹，潮流感">男士輕狼尾</option>
+          <option value="男士日系蓬鬆中長髮，瀏海自然垂落，清爽少年感">日系蓬鬆中長髮</option>
+          <option value="男士Curtain中分髮，兩側自然垂落，復古時髦">男士Curtain中分</option>
+        </optgroup>
+
+        <optgroup label="━━ 男生｜短髮 ━━">
+          <option value="韓系紋理短髮，髮根蓬鬆，碎瀏海自然有層次">韓系紋理短髮</option>
+          <option value="韓系短蓋頭，柔和四六分，髮絲順滑自然">韓系四六分短蓋頭</option>
+          <option value="美式French Crop短髮，兩側乾淨漸層，頂部碎髮有紋理">French Crop短髮</option>
+          <option value="低漸層短髮，兩側乾淨，頂部保留自然蓬鬆度">低漸層短髮</option>
+          <option value="高漸層短髮，俐落清爽，現代男士商業感">高漸層短髮</option>
+          <option value="日系自然短碎髮，髮尾輕盈，清爽柔和">日系短碎髮</option>
+          <option value="俐落寸頭，輪廓乾淨，簡潔陽光">俐落寸頭</option>
+          <option value="經典側分短髮，髮根自然蓬鬆，成熟知性">經典側分短髮</option>
+          <option value="經典Slick Back後梳髮，線條整潔，成熟俐落">Slick Back後梳</option>
+          <option value="自然蓬鬆Textured Crop紋理短髮，輕微凌亂但乾淨">Textured Crop紋理短髮</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>髮色與染髮效果</label>
+      <select id="hairColor">
+        <option value="">自然髮色／不指定髮色</option>
+
+        <optgroup label="━━ 自然黑／深色系 ━━">
+          <option value="自然黑色髮，黑亮但不死黑，具有細緻自然光澤">自然黑</option>
+          <option value="深黑咖啡色髮，柔和低調，具有高級光澤">黑咖</option>
+          <option value="深巧克力棕髮色，溫暖柔和，質感自然">深巧克力棕</option>
+          <option value="深可可棕髮色，低飽和沉穩，具有高級感">深可可棕</option>
+          <option value="冷調深棕色髮，帶有微微灰感，乾淨時髦">冷調深棕</option>
+          <option value="藍黑色髮，深黑基底帶有低調冷藍光澤">藍黑</option>
+        </optgroup>
+
+        <optgroup label="━━ 棕色／奶茶系 ━━">
+          <option value="自然栗棕色髮，溫暖柔和，日常耐看">栗棕</option>
+          <option value="摩卡棕髮色，濃郁柔和，具有咖啡色絲絨質感">摩卡棕</option>
+          <option value="焦糖棕髮色，帶有溫暖金棕光澤">焦糖棕</option>
+          <option value="榛果棕髮色，柔和自然，帶有細緻暖色調">榛果棕</option>
+          <option value="奶茶棕髮色，低飽和柔霧，清新溫柔">奶茶棕</option>
+          <option value="燕麥奶茶棕，米灰與棕色融合，低飽和高級">燕麥奶茶棕</option>
+          <option value="玫瑰棕髮色，棕色中帶有柔和粉紅調">玫瑰棕</option>
+          <option value="莓果棕髮色，深棕融合低調紅紫調">莓果棕</option>
+          <option value="蜜糖棕髮色，溫暖透亮，陽光下帶金色光澤">蜜糖棕</option>
+          <option value="亞麻棕髮色，棕色融合自然灰米色調">亞麻棕</option>
+        </optgroup>
+
+        <optgroup label="━━ 金色／淺色系 ━━">
+          <option value="自然蜂蜜金髮色，柔和金棕光澤，不過度鮮豔">蜂蜜金</option>
+          <option value="香檳金髮色，低飽和柔亮，精緻高級">香檳金</option>
+          <option value="奶油金髮色，柔和溫暖，具有乾淨光澤">奶油金</option>
+          <option value="米金髮色，帶有柔霧米色調，清透高級">米金</option>
+          <option value="冷亞麻金髮色，帶有自然灰霧感">冷亞麻金</option>
+          <option value="灰金髮色，低飽和冷調，具有時尚雜誌感">灰金</option>
+          <option value="白金髮色，明亮冷調，具有前衛時尚感">白金</option>
+          <option value="珍珠金髮色，金色中帶有柔和珍珠光澤">珍珠金</option>
+        </optgroup>
+
+        <optgroup label="━━ 冷霧／灰調系 ━━">
+          <option value="霧灰棕髮色，棕色融合柔和灰霧調">霧灰棕</option>
+          <option value="冷灰棕髮色，低飽和且乾淨俐落">冷灰棕</option>
+          <option value="煙燻灰髮色，深灰與棕黑自然融合">煙燻灰</option>
+          <option value="銀灰髮色，具有柔和金屬光澤，前衛高級">銀灰</option>
+          <option value="珍珠灰髮色，灰色融合柔和白銀光澤">珍珠灰</option>
+          <option value="霧藍灰髮色，灰色中帶低調冷藍調">霧藍灰</option>
+        </optgroup>
+
+        <optgroup label="━━ 紅棕／酒紅系 ━━">
+          <option value="自然紅棕髮色，棕色融合低調暖紅調">紅棕</option>
+          <option value="楓糖紅棕髮色，溫暖紅棕與金棕融合">楓糖紅棕</option>
+          <option value="玫瑰紅棕髮色，低飽和玫瑰色融入棕髮">玫瑰紅棕</option>
+          <option value="莓果酒紅髮色，深紅中帶有低調紫調">莓果酒紅</option>
+          <option value="深酒紅髮色，沉穩濃郁，適合時尚大片">深酒紅</option>
+          <option value="海妖紅髮色，鮮明紅橘調搭配自然波浪">海妖紅</option>
+        </optgroup>
+
+        <optgroup label="━━ 粉／紫／藍／綠時髦染 ━━">
+          <option value="蜜桃粉髮色，低飽和柔和粉橘調">蜜桃粉</option>
+          <option value="櫻花粉髮色，柔和淡粉，清甜夢幻">櫻花粉</option>
+          <option value="玫瑰粉棕髮色，粉色融入自然棕色">玫瑰粉棕</option>
+          <option value="薰衣草紫髮色，柔和灰紫調，清透夢幻">薰衣草紫</option>
+          <option value="莓果紫髮色，深紫紅調，成熟時髦">莓果紫</option>
+          <option value="霧霾藍髮色，低飽和灰藍調，冷感時尚">霧霾藍</option>
+          <option value="深海藍黑髮色，黑色基底帶有低調藍光">深海藍黑</option>
+          <option value="薄荷綠髮色，低飽和柔霧綠，清新前衛">薄荷綠</option>
+          <option value="鼠尾草綠髮色，灰綠低飽和，質感文藝">鼠尾草綠</option>
+        </optgroup>
+
+        <optgroup label="━━ 染髮技法／光影效果 ━━">
+          <option value="自然挑染，主色維持原髮色，少量細緻高光線條">自然細挑染</option>
+          <option value="臉周框染，臉側加入細緻淺色高光，其他髮絲保持自然">Face-framing框染</option>
+          <option value="柔和Balayage漸層染，髮根較深、髮尾自然變淺">Balayage漸層染</option>
+          <option value="低調Ombré漸層染，髮根深色向髮尾柔和過渡">Ombré漸層染</option>
+          <option value="奶茶棕底搭配細緻米金高光，光線下自然閃耀">奶茶棕米金高光</option>
+          <option value="深棕底搭配焦糖高光，層次自然立體">焦糖細挑染</option>
+          <option value="黑咖底搭配玫瑰棕細高光，低調精緻">玫瑰棕細挑染</option>
+          <option value="自然髮根搭配柔霧淺色髮尾，漸層自然不突兀">柔霧髮尾染</option>
+          <option value="雙色染髮，兩種低飽和色調自然融合，時髦但不誇張">低飽和雙色染</option>
+          <option value="陽光照射下呈現自然金色高光，不改變整體基礎髮色">陽光自然高光</option>
+        </optgroup>
+
+        <optgroup label="━━ 男士常用髮色 ━━">
+          <option value="自然黑色髮，髮絲健康有光澤，乾淨俐落">男士自然黑</option>
+          <option value="深黑咖啡髮色，低調成熟，具有自然光澤">男士黑咖</option>
+          <option value="深冷棕髮色，低飽和且現代時髦">男士冷棕</option>
+          <option value="亞麻棕髮色，自然灰米調，清爽有層次">男士亞麻棕</option>
+          <option value="灰棕髮色，低飽和冷調，具有韓系時尚感">男士灰棕</option>
+          <option value="霧感奶茶棕髮色，柔和清爽，日系自然">男士奶茶棕</option>
+        </optgroup>
       </select>
     </div>
 
@@ -1465,7 +1630,7 @@
   // 需要被儲存與還原的欄位 ID 清單
   const fieldIds = [
     'aspectRatio', 'modelGender', 'modelNationality', 'skinTone', 'bodyType', 
-    'hairStyle', 'imgRef', 'outfitStyle', 'topOutfit', 'bottomOutfit', 
+    'hairStyle', 'hairColor', 'imgRef', 'outfitStyle', 'topOutfit', 'bottomOutfit', 
     'outerwear', 'jewelry', 'footwear', 'foodItem', 'outdoorPose', 'outdoorProp', 'teaTableSetting', 'floralProp', 'plushProp', 'lifestyleProp', 'seasonalProp', 'propBalance', 
     'environment', 'timeOfDay', 'expression', 'pose', 'shotSize', 'cameraAngle', 'modelDirection', 'productFocus', 'composition', 'lensEffect', 'creativeAngle', 'styleQuality'
   ];
@@ -1525,6 +1690,7 @@
     if (skinTone) modelParts.push(`擁有${skinTone}`);
     if (bodyVal) modelParts.push(`體型特徵為${bodyVal}`);
     if (hairStyle) modelParts.push(`髮型為${hairStyle}`);
+     if (hairColor) modelParts.push(`髮色為${hairColor}`);
 
     if (modelParts.length > 0) {
       parts.push(`模特兒設定：${modelParts.join('，')}`);
