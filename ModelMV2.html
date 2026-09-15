@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 模特兒動態廣告影片指令生成器｜專業版</title>
+<style>
+:root{--o:#d94f70;--g:#f3a7b9;--bg:#fff7fa;--line:#ead6dc;--ink:#2b2024}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;background:linear-gradient(135deg,#fffafd,#fdebef);color:var(--ink)}
+header{background:linear-gradient(120deg,var(--o),var(--g));color:#fff;padding:30px 20px}
+.wrap{max-width:1450px;margin:auto}
+h1{margin:0;font-size:30px}
+header p{margin:8px 0 0}
+.app{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;padding:24px 20px 42px}
+.panel{background:#fffcfd;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 30px #8d285018}
+.title{font-size:20px;font-weight:800;margin:4px 0 18px;padding-bottom:10px;border-bottom:2px solid #f4d8df}
+.group{margin-bottom:19px}
+label{display:block;font-weight:800;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+select,input[type=number],textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;font:inherit;color:var(--ink)}
+.subhead{font-size:15px;font-weight:800;color:#a23755;margin:14px 0 8px;padding-left:2px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.check{display:flex;gap:6px;align-items:center;padding:8px 10px;background:#fff7fa;border:1px solid var(--line);border-radius:999px;font-size:14px}
+.check input{accent-color:var(--o)}
+.preview{position:sticky;top:16px}
+.previewbox{background:#211318;padding:16px;border-radius:17px}
+#prompt{min-height:760px;background:#160e11;color:#ffe8ee;border-color:#58303b;line-height:1.7}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+button{padding:13px;border:0;border-radius:12px;font-weight:800;cursor:pointer}
+.primary{background:linear-gradient(135deg,var(--o),var(--g));color:#fff}
+.secondary{background:#fdebf0;color:#9a3150}
+.dark{background:#4a202d;color:#fff}
+.tip{background:#fff0f4;border-left:4px solid var(--o);padding:12px;border-radius:9px;color:#743247;line-height:1.6;font-size:14px}
+.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#fff0f4;color:#a23755;font-size:12px;margin-left:5px}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.preview{position:static}}
+@media(max-width:600px){h1{font-size:24px}.app{padding:14px}.panel{padding:16px}.grid,.actions{grid-template-columns:1fr}#prompt{min-height:560px}}
+.seriesbox{margin-top:14px;background:#211318;padding:16px;border-radius:17px}
+#seriesPrompt{width:100%;min-height:500px;background:#160e11;color:#ffe8ee;border:1px solid #58303b;border-radius:12px;padding:12px;font:inherit;line-height:1.7}
+@media(max-width:600px){#seriesPrompt{min-height:420px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>🎬 AI 模特兒動態廣告影片指令生成器｜專業版</h1>
+<p>電商商品・內衣服飾・美妝・生活用品・品牌形象，一鍵組合「人物＋動作＋鏡位＋運鏡＋光影＋場景」AI 影片生成指令。</p>
+</div></header>
+
+<div class="wrap app">
+<main class="panel">
+
+<div class="title">① 影片規格與用途</div>
+<div class="grid">
+<div class="group"><label>影片比例</label><select id="ratio">
+<option value="直式 9:16，手機全螢幕短影音">直式 9:16｜Reels／Shorts／TikTok</option>
+<option value="直式 4:5，社群廣告版面">直式 4:5｜IG／FB</option>
+<option value="正方形 1:1，電商社群廣告">正方形 1:1</option>
+<option value="橫式 16:9，YouTube與網站廣告">橫式 16:9｜YouTube／網站</option>
+<option value="橫式 4:3，傳統商業廣告">橫式 4:3</option>
+<option value="超寬 21:9，電影感品牌廣告">超寬 21:9</option>
+</select></div>
+<div class="group"><label>影片長度</label><select id="duration">
+<option value="5秒，節奏明快，單一核心動作">5 秒｜快速廣告</option>
+<option value="8秒，動作完整且自然">8 秒</option>
+<option value="10秒，適合商品展示與人物動態">10 秒｜推薦</option>
+<option value="15秒，包含開場、展示、結尾三段節奏">15 秒｜完整廣告</option>
+<option value="20秒，具有較完整故事與鏡頭轉場">20 秒</option>
+</select></div>
+<div class="group"><label>廣告用途</label><select id="use">
+<option value="電商商品促銷短影音">電商促銷</option>
+<option value="新品上市與商品展示">新品上市</option>
+<option value="品牌形象與時尚廣告">品牌形象</option>
+<option value="社群短影音與限時動態">社群短影音</option>
+<option value="商品功能與特色展示">商品特色展示</option>
+<option value="節慶活動與促銷宣傳">節慶促銷</option>
+</select></div>
+<div class="group"><label>影片節奏</label><select id="pace">
+<option value="自然流暢、優雅從容、動作連續">自然優雅</option>
+<option value="明快俐落、節奏清楚、具有商業廣告張力">明快商業</option>
+<option value="慢動作質感、柔和流動、電影感">慢動作電影感</option>
+<option value="活潑輕快、青春自然、具有社群短影音節奏">青春活潑</option>
+<option value="高級沉穩、極簡克制、精品廣告節奏">精品沉穩</option>
+</select></div>
+</div>
+
+<div class="title">② 模特兒設定</div>
+<div class="grid">
+<div class="group"><label>模特兒類型</label><select id="model">
+<option value="成年女性時尚模特兒，約20至30歲">成年女性｜時尚</option>
+<option value="成年女性商業模特兒，約20至35歲">成年女性｜商業</option>
+<option value="成年男性時尚模特兒，約20至35歲">成年男性｜時尚</option>
+<option value="成年男性商業模特兒，約20至35歲">成年男性｜商業</option>
+<option value="成年男女雙人時尚模特兒">成年男女｜雙人</option>
+</select></div>
+<div class="group"><label>整體氣質</label><select id="vibe">
+<option value="清新自然、甜美柔和、親切有朝氣">日系清新甜美</option>
+<option value="精緻時尚、冷調高級、俐落自信">韓系時尚高級</option>
+<option value="成熟優雅、知性從容、具有名媛質感">法式優雅</option>
+<option value="青春活力、自然可愛、社群感強">青春活力</option>
+<option value="高級冷豔、沉穩自信、精品廣告氣質">高冷精品</option>
+<option value="溫柔療癒、生活化、自然親和">溫柔生活感</option>
+</select></div>
+<div class="group"><label>髮型</label><select id="hair">
+<option value="柔順自然長髮，髮絲隨動作輕盈擺動">柔順長髮</option>
+<option value="自然微捲長髮，具有柔和蓬鬆度">微捲長髮</option>
+<option value="鎖骨中長髮，髮尾自然彎曲">鎖骨中長髮</option>
+<option value="法式大波浪長髮">法式大波浪</option>
+<option value="高馬尾，俐落有活力">高馬尾</option>
+<option value="低馬尾，簡約優雅">低馬尾</option>
+<option value="半紮公主頭，甜美自然">半紮公主頭</option>
+<option value="俐落短髮，時尚清爽">俐落短髮</option>
+<option value="由AI依服裝與場景自動選擇最適合的流行髮型">AI 自動搭配</option>
+</select></div>
+<div class="group"><label>妝容與表情</label><select id="makeup">
+<option value="乾淨自然妝容，微微微笑，眼神柔和">自然微笑</option>
+<option value="精緻韓系妝容，自信眼神，表情自然">韓系自信</option>
+<option value="法式淡妝，優雅從容，淡淡微笑">法式優雅</option>
+<option value="明亮有活力，笑容自然，具有親和力">活潑親切</option>
+<option value="高級淡妝，沉穩自信，鏡頭感強">精品冷感</option>
+</select></div>
+</div>
+
+<div class="title">③ 穿搭與商品呈現</div>
+<div class="grid">
+<div class="group"><label>服裝／商品類型</label><select id="outfit">
+<option value="時尚內衣或無鋼圈內衣套裝，強調布料與版型質感">內衣</option>
+<option value="女性時尚服飾，呈現自然穿搭效果">女裝</option>
+<option value="男性日常服飾，呈現俐落穿搭效果">男裝</option>
+<option value="運動服飾，強調活動時的自然動態">運動服</option>
+<option value="美妝產品搭配模特兒示範使用">美妝</option>
+<option value="生活用品搭配人物情境展示">生活用品</option>
+<option value="依自訂需求設定商品">自訂商品</option>
+</select></div>
+<div class="group"><label>商品展示方式</label><select id="product">
+<option value="人物自然穿著或使用商品，商品細節清楚可見">自然穿著／使用</option>
+<option value="人物先展示商品，再自然穿上或使用商品">拿取→展示→使用</option>
+<option value="人物動作以商品為視覺核心，避免身體遮擋商品">商品重點展示</option>
+<option value="搭配局部特寫，清楚呈現材質、車縫、蕾絲或功能細節">材質細節特寫</option>
+<option value="人物與商品同時完整入鏡，保持電商型錄般乾淨構圖">人物＋完整商品</option>
+</select></div>
+<div class="group"><label>服裝動態</label><select id="fabric">
+<option value="布料自然隨身體移動產生輕微擺動，不誇張">自然布料擺動</option>
+<option value="蕾絲、薄紗或柔軟面料產生細緻流動感">柔軟面料流動</option>
+<option value="衣襬與髮絲受到微風輕輕帶動">微風動態</option>
+<option value="服裝保持穩定，只呈現人物自然動作">穩定乾淨</option>
+</select></div>
+<div class="group"><label>自訂商品／服裝</label><input id="customOutfit" type="text" placeholder="例如：黑色法式蕾絲內衣、米白針織洋裝……"></div>
+</div>
+
+<div class="title">④ 模特兒動作與姿勢 <span class="badge">可多選</span></div>
+<div class="subhead">🚶 全身／走動</div>
+<div class="checks" id="actionsFull">
+<label class="check"><input type="checkbox" value="模特兒自然向鏡頭走來，步伐輕盈穩定">向鏡頭走來</label>
+<label class="check"><input type="checkbox" value="模特兒由側面自然走過鏡頭，再回頭看向鏡頭">側走回眸</label>
+<label class="check"><input type="checkbox" value="模特兒慢慢轉身，展示服裝正面、側面與背面">慢慢轉身</label>
+<label class="check"><input type="checkbox" value="模特兒自然走動並輕輕整理衣襬">走動整理衣襬</label>
+<label class="check"><input type="checkbox" value="模特兒站定後自然轉身展示整體穿搭">站定轉身</label>
+<label class="check"><input type="checkbox" value="模特兒向前走兩步後停下，自然看向鏡頭">走兩步停下</label>
+</div>
+<div class="subhead">💃 上半身／商品互動</div>
+<div class="checks" id="actionsUpper">
+<label class="check"><input type="checkbox" value="模特兒輕輕整理肩帶或衣領，動作自然不做作">整理肩帶／衣領</label>
+<label class="check"><input type="checkbox" value="模特兒輕撫服裝表面，展示布料柔軟質感">輕撫布料</label>
+<label class="check"><input type="checkbox" value="模特兒雙手自然放在腰側並微微轉動身體">腰側展示</label>
+<label class="check"><input type="checkbox" value="模特兒輕輕撥動頭髮後看向鏡頭">撥髮看鏡頭</label>
+<label class="check"><input type="checkbox" value="模特兒自然抬手、伸展或調整袖口">抬手／整理袖口</label>
+<label class="check"><input type="checkbox" value="模特兒拿起商品並向鏡頭展示，之後自然放回">拿取展示商品</label>
+</div>
+<div class="subhead">🪑 坐姿／生活感</div>
+<div class="checks" id="actionsSit">
+<label class="check"><input type="checkbox" value="模特兒優雅坐下，再自然調整坐姿看向鏡頭">坐下看鏡頭</label>
+<label class="check"><input type="checkbox" value="模特兒坐著輕輕整理頭髮或服裝">坐姿整理</label>
+<label class="check"><input type="checkbox" value="模特兒坐在椅子上自然轉身展示服裝">坐姿轉身</label>
+<label class="check"><input type="checkbox" value="模特兒在生活場景中自然走動、坐下並與商品互動">生活情境動作</label>
+</div>
+
+<div class="title">⑤ 鏡頭景別與視角</div>
+<div class="grid">
+<div class="group"><label>主要景別</label><select id="shot">
+<option value="全身景，完整呈現模特兒與服裝">全身</option>
+<option value="膝上中景，兼顧人物動作與服裝">中景</option>
+<option value="腰部以上半身景，強調人物與上身商品">半身</option>
+<option value="胸口以上近景，強調臉部、妝容與服裝細節">近景</option>
+<option value="商品局部微距特寫，清楚呈現材質細節">商品特寫</option>
+<option value="全身、半身與局部特寫交替剪輯">多景別混剪</option>
+</select></div>
+<div class="group"><label>拍攝角度</label><select id="angle">
+<option value="正面平視鏡頭">正面平視</option>
+<option value="微側45度角，呈現自然立體輪廓">微側45度</option>
+<option value="側面視角，強調人物輪廓與服裝線條">側面</option>
+<option value="背面視角，再自然轉身回到正面">背面→正面</option>
+<option value="略低機位，呈現高級時尚廣告氣勢">低機位</option>
+<option value="略高機位，畫面輕盈柔和">高機位</option>
+</select></div>
+</div>
+
+<div class="title">⑥ AI 運鏡方式 <span class="badge">可多選</span></div>
+<div class="checks" id="camera">
+<label class="check"><input type="checkbox" value="鏡頭緩慢向前推進，逐步靠近模特兒">推鏡 Push In</label>
+<label class="check"><input type="checkbox" value="鏡頭緩慢向後拉遠，展現完整人物與環境">拉鏡 Pull Out</label>
+<label class="check"><input type="checkbox" value="鏡頭平順地由左向右橫移">橫向移動</label>
+<label class="check"><input type="checkbox" value="鏡頭平順地由右向左橫移">反向橫移</label>
+<label class="check"><input type="checkbox" value="鏡頭繞著模特兒進行小幅度環繞">環繞運鏡</label>
+<label class="check"><input type="checkbox" value="鏡頭跟隨模特兒走動，保持人物穩定位於畫面中心">跟拍</label>
+<label class="check"><input type="checkbox" value="鏡頭從人物腳部或商品開始，平滑向上移動至臉部">由下往上</label>
+<label class="check"><input type="checkbox" value="鏡頭由臉部向下平滑移動至商品細節">由上往下</label>
+<label class="check"><input type="checkbox" value="鏡頭先聚焦商品，再自然拉焦到人物">商品→人物拉焦</label>
+<label class="check"><input type="checkbox" value="電影感慢速推進與輕微景深變化">電影慢推</label>
+</div>
+
+<div class="title">⑦ 拍攝場景與氛圍</div>
+<div class="grid">
+<div class="group"><label>場景</label><select id="scene">
+<option value="高級簡潔商業攝影棚，乾淨背景">高級攝影棚</option>
+<option value="明亮自然的現代住宅室內空間">現代居家</option>
+<option value="高級精品飯店或精品更衣空間">精品飯店／更衣室</option>
+<option value="法式咖啡館與生活街景">法式街景</option>
+<option value="明亮日系房間，搭配自然窗光">日系房間</option>
+<option value="現代城市街道與時尚建築">城市街景</option>
+<option value="夢幻花藝與柔和自然背景">花藝場景</option>
+<option value="極簡純色背景，突出人物與商品">極簡純背景</option>
+</select></div>
+<div class="group"><label>氛圍</label><select id="mood">
+<option value="明亮、清新、自然、舒服，具有高級電商質感">清新自然</option>
+<option value="精緻、奢華、優雅、具有精品時尚廣告質感">精品奢華</option>
+<option value="甜美、柔和、青春、浪漫">甜美浪漫</option>
+<option value="活潑、明亮、充滿社群短影音活力">活潑潮流</option>
+<option value="溫暖、柔和、療癒、生活感">溫暖生活</option>
+<option value="冷調、俐落、現代、具有時尚大片氣勢">時尚冷調</option>
+</select></div>
+</div>
+
+<div class="title">⑧ 光影與影片質感 <span class="badge">可多選</span></div>
+<div class="checks" id="effects">
+<label class="check"><input type="checkbox" value="柔和自然窗光">自然窗光</label>
+<label class="check"><input type="checkbox" value="柔和大型柔光箱商業棚拍光">柔光棚拍</label>
+<label class="check"><input type="checkbox" value="細緻輪廓光勾勒人物髮絲與肩部">輪廓光</label>
+<label class="check"><input type="checkbox" value="柔焦背景與自然散景">柔焦散景</label>
+<label class="check"><input type="checkbox" value="高級電影感 Cinematic Lighting">電影感光影</label>
+<label class="check"><input type="checkbox" value="自然鏡頭耀光與高光反射">Lens Flare</label>
+<label class="check"><input type="checkbox" value="柔和漂浮光塵與空氣微粒">光塵</label>
+<label class="check"><input type="checkbox" value="高級 HDR 動態範圍與細膩皮膚光澤">HDR</label>
+<label class="check"><input type="checkbox" value="高級商業攝影景深效果">景深</label>
+<label class="check"><input type="checkbox" value="真實自然的皮膚質感與細緻光澤">自然膚質</label>
+</div>
+
+<div class="title">⑨ 動態細節與影片穩定</div>
+<div class="grid">
+<div class="group"><label>人物動態</label><select id="motion">
+<option value="人物動作連續、自然、流暢，身體比例與五官保持穩定">自然流暢</option>
+<option value="人物動作細緻柔和，適度慢動作，呈現高級時尚感">高級慢動作</option>
+<option value="人物動作較明快，但每個動作仍清楚自然">明快動態</option>
+<option value="人物與頭髮、衣料、配件產生真實物理動態">真實物理動態</option>
+</select></div>
+<div class="group"><label>鏡頭穩定</label><select id="stability">
+<option value="專業穩定器拍攝，畫面平順無晃動">穩定器</option>
+<option value="高級手持電影感，只有非常輕微自然呼吸感">電影手持</option>
+<option value="固定機位，人物在畫面中完成自然動作">固定機位</option>
+<option value="穩定器＋輕微推拉移動，保持商業廣告級穩定">穩定器動態</option>
+</select></div>
+</div>
+
+<div class="title">⑩ 影片節奏／鏡頭流程</div>
+<div class="grid">
+<div class="group"><label>開場</label><select id="opening">
+<option value="從人物完整身影開始，立即建立視覺主體">人物開場</option>
+<option value="從商品局部細節特寫開始，再帶到人物">商品特寫開場</option>
+<option value="從人物背影開始，慢慢轉身面向鏡頭">回眸開場</option>
+<option value="從場景空鏡開始，再平順帶入人物">場景→人物</option>
+</select></div>
+<div class="group"><label>結尾</label><select id="ending">
+<option value="人物停下並自然看向鏡頭，畫面穩定停留">人物定格</option>
+<option value="最後以商品細節特寫收尾，方便後製加入文字">商品特寫</option>
+<option value="人物自然微笑，鏡頭輕輕拉遠結束">微笑拉遠</option>
+<option value="最後保留乾淨留白畫面，方便加入品牌與促銷資訊">留白收尾</option>
+</select></div>
+</div>
+
+
+      <div class="title">⑪ 故事型 MV／穿搭情境 <span class="badge">全新</span></div>
+      <div class="grid">
+        <div class="group"><label>故事主題</label><select id="story">
+          <option value="晨間出門準備：從房間、穿搭、拿包到走出門，建立輕生活故事">晨間出門</option>
+          <option value="城市午後約會：整理穿搭、拿取隨身物、走進街景，呈現自然時尚感">城市約會</option>
+          <option value="週末咖啡時光：室內生活片段與戶外街景交錯，強調穿搭細節">週末咖啡</option>
+          <option value="下班後夜生活：室內換裝、鏡前整理、城市夜景與回眸，節奏更時尚">夜間出門</option>
+          <option value="旅行出發：整理行李、穿上服裝、拿起包包、走向旅途，具有故事感">旅行出發</option>
+          <option value="精品時尚 MV：以人物情緒、服裝線條、商品特寫與藝術化運鏡串成視覺故事">精品 MV</option>
+          <option value="日常穿搭日記：自然生活片段、穿搭、走動與商品互動，真實而舒服">穿搭日記</option>
+          <option value="由 AI 自動設計一個符合商品定位的完整穿搭故事">AI 自動設計</option>
+        </select></div>
+        <div class="group"><label>故事結構</label><select id="storyFlow">
+          <option value="開場建立人物與場景 → 穿搭準備 → 商品細節 → 行走互動 → 完整造型收尾">五段式故事</option>
+          <option value="場景氛圍 → 人物出場 → 商品特寫 → 穿搭動作 → 回眸定格">電影式五鏡頭</option>
+          <option value="商品細節開場 → 人物穿著 → 動作展示 → 場景移動 → 品牌留白">商品導向</option>
+          <option value="人物生活片段 → 自然穿搭 → 近景細節 → 情緒表情 → 乾淨收尾">生活紀實</option>
+        </select></div>
+        <div class="group"><label>人物樣貌變化</label><select id="appearance">
+          <option value="本支影片使用與前一支不同的成年模特兒臉型、五官比例、髮色與整體氣質">明顯不同人物</option>
+          <option value="更換成年模特兒的臉型、眉眼、髮型與妝容，但維持同一商品定位">同定位新人物</option>
+          <option value="由 AI 依服裝風格自動設計全新的成年模特兒外觀">AI 自動變化</option>
+        </select></div>
+        <div class="group"><label>場景變化</label><select id="sceneVar">
+          <option value="每支影片使用不同但符合品牌調性的場景，避免重複">每支不同場景</option>
+          <option value="同一故事內使用室內、街景與近景空間三種層次">三場景串接</option>
+          <option value="以同一場景為主，透過不同角度、時間與景深創造變化">同場景多角度</option>
+        </select></div>
+      </div>
+
+      <div class="subhead">🎞️ 特效與轉場</div>
+      <div class="checks" id="transitions">
+        <label class="check"><input type="checkbox" value="利用自然遮擋物完成無縫轉場，例如人物經過鏡頭前方">遮擋轉場</label>
+        <label class="check"><input type="checkbox" value="利用服裝或頭髮的移動做 Match Cut">服裝 Match Cut</label>
+        <label class="check"><input type="checkbox" value="商品局部特寫與下一鏡完整穿搭做形狀或動作連接">商品連接轉場</label>
+        <label class="check"><input type="checkbox" value="利用輕微速度變化，在動作高潮處短暫慢動作">速度變化</label>
+        <label class="check"><input type="checkbox" value="自然光影閃過鏡頭形成柔和電影轉場">光影轉場</label>
+        <label class="check"><input type="checkbox" value="極輕微動態景深與焦點轉移，避免人工特效感">動態拉焦</label>
+        <label class="check"><input type="checkbox" value="細緻空氣微粒、髮絲與衣料動態，保持真實物理效果">微粒／材質動態</label>
+      </div>
+
+      <div class="subhead">🎥 進階拍攝手法</div>
+      <div class="checks" id="cinema">
+        <label class="check"><input type="checkbox" value="前景遮擋構圖，利用門框、植物或家具增加畫面層次">前景遮擋</label>
+        <label class="check"><input type="checkbox" value="低角度跟拍，強調人物步伐與穿搭氣勢">低角度跟拍</label>
+        <label class="check"><input type="checkbox" value="半環繞人物拍攝，保持商品與人物比例穩定">半環繞</label>
+        <label class="check"><input type="checkbox" value="由商品細節開始微距拍攝，再自然拉焦到人物">微距拉焦</label>
+        <label class="check"><input type="checkbox" value="長鏡頭感，讓人物完成一段連續自然動作">長鏡頭</label>
+        <label class="check"><input type="checkbox" value="攝影機與人物平行移動，背景產生自然視差">平行移動</label>
+        <label class="check"><input type="checkbox" value="輕微 Dolly Zoom 氛圍感，但保持人物與商品比例自然">輕微 Dolly Zoom</label>
+      </div>
+
+      <div class="subhead">👗 商品一致性鎖定</div>
+      <div class="checks" id="consistency">
+        <label class="check"><input type="checkbox" value="以使用者提供的1至3張商品參考圖片作為唯一商品外觀依據">鎖定參考商品</label>
+        <label class="check"><input type="checkbox" value="正面、側面、背面與細節以參考圖片為準，不自行創造不存在的設計">多角度一致</label>
+        <label class="check"><input type="checkbox" value="商品顏色、材質、版型、縫線、蕾絲、印花、Logo位置與比例全程固定">顏色版型鎖定</label>
+        <label class="check"><input type="checkbox" value="人物更換但商品完全不更換，所有影片維持同一款商品">換人不換商品</label>
+        <label class="check"><input type="checkbox" value="商品不可被手臂、頭髮、道具或陰影長時間遮住，重要細節需安排清楚展示鏡頭">避免遮擋商品</label>
+      </div>
+
+      <div class="group">
+        <label>參考圖片數量</label><select id="refCount">
+          <option value="使用者提供1張商品參考圖">1張｜正面主圖</option>
+          <option value="使用者提供2張商品參考圖，正反面或不同角度互相校正">2張｜正反／角度</option>
+          <option value="使用者提供3張商品參考圖，包含正面、背面與細節圖">3張｜完整鎖定</option>
+        </select>
+      </div>
+
+      <div class="title">⑫ 重要限制與自訂需求</div>
+
+<div class="group">
+<label>自訂補充需求</label>
+<textarea id="custom" placeholder="例如：模特兒手不要遮住商品、動作慢一點、臉部保持一致、不要誇張性感姿勢、背景不要太複雜、最後停留1秒方便加字……"></textarea>
+</div>
+<div class="tip">
+💡 推薦電商組合：<b>成年模特兒＋自然微笑＋自然走動＋整理服裝＋多景別混剪＋跟拍＋慢推＋柔光棚拍＋景深＋穩定器＋商品特寫結尾</b>。
+</div>
+
+</main>
+
+<aside class="panel preview">
+<div class="title">✨ AI 動態廣告影片指令預覽</div>
+<div class="previewbox"><textarea id="prompt" readonly></textarea></div>
+<div class="actions">
+<button class="primary" id="copy">📋 複製指令</button>
+<button class="secondary" id="save">💾 儲存設定</button>
+<button class="dark" id="reset">↺ 重設</button><button class="secondary" id="series">🎬 生成多套故事</button>
+</div>
+  <div class="seriesbox" id="seriesbox">
+    <div class="title">🎬 多套故事提案</div>
+    <textarea id="seriesPrompt" readonly placeholder="按「生成多套故事」後，這裡會自動產生多套不同人物、場景、運鏡與節奏的影片指令。"></textarea>
+  </div>
+</aside>
+</div>
+
+<script>
+const fields=['ratio','duration','use','pace','model','vibe','hair','makeup','outfit','product','fabric','customOutfit','shot','angle','scene','mood','motion','stability','opening','ending','story','storyFlow','appearance','sceneVar','refCount','custom'];
+const get=id=>document.getElementById(id).value.trim();
+const checks=id=>[...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value);
+
+function make(){
+ const actions=['actionsFull','actionsUpper','actionsSit'].flatMap(checks);
+ const camera=checks('camera'), effects=checks('effects'), transitions=checks('transitions'), cinema=checks('cinema'), consistency=checks('consistency');
+
+ const customOutfit=get('customOutfit');
+ const outfitText=customOutfit ? customOutfit : get('outfit');
+
+ const lines=[
+ '【AI 模特兒動態廣告影片生成指令】','',
+ '請生成一支全新的專業商業模特兒動態廣告影片。',
+ '影片比例：'+get('ratio')+'。',
+ '影片長度：'+get('duration')+'。',
+ '廣告用途：'+get('use')+'。',
+ '影片節奏：'+get('pace')+'。',
+ '',
+ '【模特兒設定】',
+ get('model')+'。',
+ '整體氣質：'+get('vibe')+'。',
+ '髮型：'+get('hair')+'。',
+ '妝容與表情：'+get('makeup')+'。',
+ '',
+ '【服裝與商品】',
+ '服裝／商品：'+outfitText+'。',
+ '商品呈現方式：'+get('product')+'。',
+ '服裝動態：'+get('fabric')+'。',
+ '',
+ actions.length?'【人物動作】\n依序自然完成：'+actions.join('；')+'。動作之間必須連續銜接，不要突然跳動。':'【人物動作】\n以自然站姿與輕微身體動態為主，動作連續、優雅且符合商業廣告拍攝。',
+ '',
+ '【鏡頭與視角】',
+ '主要景別：'+get('shot')+'。',
+ '拍攝角度：'+get('angle')+'。',
+ camera.length?'運鏡方式：'+camera.join('；')+'。':'運鏡方式：以穩定、平順的商業廣告運鏡為主。',
+ '',
+ '【場景與氛圍】',
+ '場景：'+get('scene')+'。',
+ '整體氛圍：'+get('mood')+'。',
+ '',
+ effects.length?'【光影與影片質感】\n加入：'+effects.join('、')+'，呈現真實、細膩、高級的商業影片質感。':'【光影與影片質感】\n採用專業商業攝影光線，人物與商品清晰自然。',
+ '',
+ '【影片流程】',
+ '開場：'+get('opening')+'。',
+ '中段：人物自然完成主要動作，同時清楚展示服裝與商品細節。',
+ '結尾：'+get('ending')+'。',
+'',
+'【故事型 MV 設計】',
+'故事主題：'+get('story')+'。',
+'故事流程：'+get('storyFlow')+'。',
+'人物樣貌變化：'+get('appearance')+'。',
+'場景變化：'+get('sceneVar')+'。',
+transitions.length?'特效與轉場：'+transitions.join('；')+'。':'特效與轉場：以自然、低存在感的電影式轉場為主。',
+cinema.length?'進階拍攝手法：'+cinema.join('；')+'。':'進階拍攝手法：以商業時尚影片的平順運鏡與自然景別變化為主。',
+'',
+'【商品一致性與參考圖鎖定】',
+'參考圖規格：'+get('refCount')+'。',
+consistency.length?'商品一致性要求：'+consistency.join('；')+'。':'商品一致性要求：以使用者提供的商品參考圖片為最高優先，商品外觀全程一致。',
+'無論人物、妝髮、場景、光影或運鏡如何變化，都不得改變參考商品本身的設計。',
+
+ '',
+ '【AI 動態一致性要求】',
+ '人物臉部、五官、髮型、身體比例、手部與服裝在整段影片中保持一致，不要發生人物身份漂移。',
+ '手指、手臂、腿部與身體動作必須符合自然人體結構，不出現多餘手指、肢體變形或不合理關節。',
+ '人物動作必須符合真實物理規律，走路、轉身、抬手、撥髮與衣料擺動自然連續。',
+ '鏡頭移動平順，避免突然跳鏡、畫面抖動、人物瞬移、背景扭曲或物件穿模。',
+ '商品版型、顏色、圖案、材質與細節必須保持穩定，不要在影片中自行變形或更換設計。',
+  '商品參考圖片優先於模型想像；若參考圖細節與一般服裝常識不同，仍以參考圖為準。',
+  '不同人物與不同場景可以改變，但商品不可因人物更換而變色、換款、換材質、增加或刪除細節。',
+  '同一支影片內保持商品尺寸比例合理，避免拉伸、縮短、融入身體或產生穿模。',
+ '保持高解析度、真實皮膚質感、自然光影、專業商業攝影品質。',
+ '不要生成水印、Logo、亂碼、錯誤文字或不可辨識字樣；若需要文字，保留乾淨畫面供後製加入。',
+ '',
+ '【負面限制】',
+ '避免僵硬機械式動作、誇張肢體、快速不自然甩動、臉部變形、手部錯誤、衣服變形、商品變色、背景閃爍、畫面抖動、突然變焦、人物消失或新增人物。',
+ get('custom') ? '': ''
+ ];
+
+ if(get('custom')) lines.push('','【額外自訂需求】',get('custom'));
+
+ lines.push('','整體完成效果需像專業品牌電商動態廣告影片，人物自然、商品清楚、運鏡流暢、光影高級，可直接用於 AI 影片生成工具。');
+
+ document.getElementById('prompt').value=lines.filter(x=>x!==undefined).join('\n');
+}
+
+function save(){
+ const x={};
+ fields.forEach(id=>x[id]=get(id));
+ ['actionsFull','actionsUpper','actionsSit','camera','effects','transitions','cinema','consistency'].forEach(id=>x[id]=checks(id));
+ localStorage.setItem('modelVideoTool',JSON.stringify(x));
+ alert('設定已儲存！');
+}
+
+function load(){
+ try{
+  const x=JSON.parse(localStorage.getItem('modelVideoTool'));
+  if(!x)return;
+  fields.forEach(id=>{if(x[id]!=null)document.getElementById(id).value=x[id]});
+  ['actionsFull','actionsUpper','actionsSit','camera','effects','transitions','cinema','consistency'].forEach(id=>{
+   document.querySelectorAll('#'+id+' input').forEach(c=>c.checked=(x[id]||[]).includes(c.value))
+  });
+ }catch(e){}
+}
+
+document.querySelectorAll('select,input,textarea').forEach(x=>x.addEventListener('input',make));
+document.getElementById('copy').onclick=async()=>{
+ try{
+  await navigator.clipboard.writeText(document.getElementById('prompt').value);
+  document.getElementById('copy').textContent='✓ 已複製';
+  setTimeout(()=>document.getElementById('copy').textContent='📋 複製指令',1500);
+ }catch(e){alert('複製失敗，請直接選取右側指令文字複製。')}
+};
+document.getElementById('save').onclick=save;
+document.getElementById('reset').onclick=()=>{
+ if(confirm('確定要重設所有選項嗎？')){
+  document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);
+  document.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);
+  document.querySelectorAll('input[type=text],textarea').forEach(x=>x.value='');
+  localStorage.removeItem('modelVideoTool');
+  make();
+ }
+};
+
+function makeSeries(){
+  const base=document.getElementById('prompt').value;
+  const stories=[
+    '故事A｜晨光生活感：清晨窗光＋整理頭髮＋穿搭＋拿取商品＋走向門口；穩定器跟拍、自然推鏡、商品細節收尾。',
+    '故事B｜城市時尚感：室內鏡前整理→街景出場→側走回眸→商品特寫；平行移動、半環繞、淺景深，節奏明快。',
+    '故事C｜精品電影感：商品微距開場→人物慢慢轉身→服裝線條展示→低機位行走→定格；電影慢推、輪廓光、光影轉場。',
+    '故事D｜週末生活感：咖啡館→座位互動→起身走動→街景；前景遮擋、拉焦、柔和自然光，呈現真實生活氛圍。',
+    '故事E｜旅行出發感：整理隨身物品→穿搭完成→拿包出門→戶外行走→回頭微笑；跟拍、由下往上、自然風與布料動態。',
+    '故事F｜社群短影音感：快速商品特寫→人物出場→連續穿搭動作→完整造型；節奏明快，加入輕微速度變化。'
+  ];
+  const consistency='所有版本都必須以使用者提供的1至3張商品參考圖片為唯一商品外觀依據：顏色、版型、材質、縫線、圖案、Logo與比例完全一致；人物可以完全不同，但商品不得變形、變色、換款或新增不存在的細節。';
+  document.getElementById('seriesPrompt').value=
+    '【AI 多套故事型 MV 影片生成指令】\n\n'+
+    stories.map(s=>s+'\n'+consistency+'\n'+
+      '人物：每套使用不同的成年模特兒臉型、五官、髮型、妝容與氣質；不要在同一套內發生身份漂移。\n'+
+      '動態：手部、手指、腿部、衣料、髮絲與配件符合真實物理規律，動作連續自然。\n'+
+      '畫面：專業商業攝影、穩定運鏡、高解析度、自然膚質、乾淨背景與清楚商品展示。\n'+
+      '負面限制：避免人物變臉、肢體錯誤、商品遮擋、商品變色、衣服變形、背景閃爍、突然跳鏡、鏡頭抖動、人物瞬移。\n'
+    ).join('\n------------------------------\n\n')+
+    '\n【本次完整基礎設定】\n'+base;
+}
+document.getElementById('series').onclick=()=>{make();makeSeries();};
+
+load();
+make();
+</script>
+</body>
+</html>
