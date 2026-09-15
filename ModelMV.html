@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 模特兒動態廣告影片指令生成器</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#20242b;--sub:#6d7480;--line:#e5e7eb;--accent:#7c3aed;--accent2:#5b21b6;--soft:#f3eefe;--radius:16px;}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--text)}
+.container{max-width:1180px;margin:0 auto;padding:28px 20px 50px} header{text-align:center;margin-bottom:26px}.badge{display:inline-block;background:#ede9fe;color:var(--accent2);padding:7px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.08em}h1{margin:12px 0 7px;font-size:30px}header p{margin:0;color:var(--sub)}
+.notice{background:var(--soft);border:1px solid #ddd0ff;padding:14px 18px;border-radius:14px;margin-bottom:20px;line-height:1.7;color:#4c3a79}
+.section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:0 4px 16px rgba(20,20,30,.035)}.section-title{font-size:18px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}.section-title span{font-size:12px;background:#f1f5f9;color:#64748b;padding:4px 8px;border-radius:999px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.full{grid-column:1/-1}.field label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}.field small{display:block;color:var(--sub);font-size:12px;margin-top:5px;line-height:1.5}select,textarea,input{width:100%;border:1px solid #d9dde5;border-radius:10px;padding:11px 12px;background:#fff;color:var(--text);font:inherit;outline:none}select:focus,textarea:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.1)}textarea{resize:vertical;min-height:95px;line-height:1.65}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stage{border:1px dashed #cfd4dd;border-radius:12px;padding:13px;background:#fafafa}.stage b{display:block;margin-bottom:8px;color:var(--accent2)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.btn{border:0;border-radius:10px;padding:12px 18px;font-weight:800;cursor:pointer;font:inherit}.primary{background:var(--accent);color:#fff}.primary:hover{background:var(--accent2)}.secondary{background:#fff;border:1px solid #d9dde5;color:var(--text)}
+.output{background:#111827;color:#f9fafb;border-radius:16px;padding:18px}.output h2{font-size:17px;margin:0 0 10px}.output textarea{background:#0b1220;color:#e5e7eb;border:1px solid #263244;min-height:360px}
+@media(max-width:760px){.grid,.timeline{grid-template-columns:1fr}.container{padding:18px 12px}.section{padding:16px}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header><span class="badge">VIDEO PROMPT GENERATOR</span><h1>AI 模特兒動態廣告影片指令生成器</h1><p>專門用於模特兒＋商品參考圖＋故事場景＋動作＋鏡頭運動的 AI 影片指令</p></header>
+<div class="notice"><b>使用方式：</b>你的商品通常有 2～3 張參考圖，例如「第1張＝正面、第2張＝背面、第3張＝細節」。生成器會把它們視為<strong>同一件商品的不同角度</strong>，並依照故事時間軸安排展示，不再有「照片指令／影片指令」上下分開的問題。</div>
+
+<div class="section"><div class="section-title">1. 影片基本設定 <span>影片核心</span></div><div class="grid">
+<div class="field"><label>影片畫幅</label><select id="videoRatio"><option>直式 9:16（IG Reels／TikTok／短影音／蝦皮）</option><option>直式 4:5（Instagram 廣告）</option><option>橫式 16:9（YouTube／品牌廣告）</option><option>方形 1:1（社群廣告）</option><option>電影寬幅 21:9（品牌形象影片）</option></select></div>
+<div class="field"><label>影片長度</label><select id="videoDuration"><option>5秒</option><option selected>8秒</option><option>10秒</option><option>15秒</option><option>30秒</option></select></div>
+<div class="field"><label>影片節奏</label><select id="videoPacing"><option>慢節奏、優雅流暢、精品時尚廣告感</option><option selected>自然中速、動作清楚、節奏明快但不急促</option><option>明快俐落、快速吸睛、適合短影音</option><option>配合音樂節拍，動作與鏡頭節奏同步</option><option>舒緩夢幻、慢動作質感、情緒細膩</option></select></div>
+<div class="field"><label>影片廣告目的</label><select id="videoGoal"><option>商品展示：清楚展示正面、背面、側面與材質</option><option>品牌形象：高級時尚、建立品牌氛圍</option><option>電商轉換：前段吸睛、中段展示商品、結尾強化記憶</option><option>IG／TikTok短影音：前2秒快速建立視覺吸引力</option></select></div>
+<div class="field full"><label>影片整體風格</label><select id="videoStyle"><option>高級時尚商業廣告、真實攝影質感、自然人物動態</option><option>精品時裝大片、電影感燈光、優雅慢動作</option><option>青春潮流短影音、明亮活潑、節奏感強</option><option>浪漫女性時尚廣告、柔光、薄紗、花朵與微風</option><option>極簡高級電商廣告、乾淨背景、商品優先</option><option>音樂MV風格、舞台燈光、節奏性走位與舞蹈</option></select></div>
+</div></div>
+
+<div class="section"><div class="section-title">2. 商品參考圖片 <span>2～3張商品圖</span></div><div class="grid">
+<div class="field"><label>商品圖片數量</label><select id="imageCount"><option>2張商品參考圖</option><option selected>3張商品參考圖</option></select></div>
+<div class="field"><label>多圖一致性規則</label><select id="imageRule"><option selected>2～3張圖片視為同一件商品，只是不同角度；顏色、材質、蕾絲、版型、肩帶與細節全程一致</option><option>以第一張為主要外觀基準，第二張補足背面，第三張補足細節</option><option>依時間軸依序展示正面→背面→細節，但禁止把圖片解讀成不同商品</option></select></div>
+<div class="field"><label>第一張商品圖</label><select id="productImage1"><option selected>第一張＝正面：鎖定正面版型、顏色、蕾絲、肩帶與整體外觀</option><option>第一張＝背面：鎖定後背剪裁、肩帶與背扣</option><option>第一張＝細節：鎖定蕾絲、布料、車縫與材質</option></select></div>
+<div class="field"><label>第二張商品圖</label><select id="productImage2"><option selected>第二張＝背面：鎖定後背剪裁、肩帶、背扣與包覆版型</option><option>第二張＝正面：鎖定胸罩正面版型、顏色與蕾絲</option><option>第二張＝側面：鎖定側面線條、包覆度與剪裁</option><option>第二張＝細節：鎖定材質、蕾絲與車縫</option></select></div>
+<div class="field"><label>第三張商品圖</label><select id="productImage3"><option selected>第三張＝細節：鎖定蕾絲、布料、車縫、肩帶與材質</option><option>第三張＝正面：鎖定正面版型與顏色</option><option>第三張＝背面：鎖定後背剪裁與肩帶</option><option>第三張＝側面：鎖定側面版型與包覆</option><option>沒有第三張商品圖</option></select></div>
+<div class="field full"><label>商品展示策略</label><select id="productStrategy"><option selected>先用人物動態建立吸引力，再依序展示正面、轉身背面、最後用近景展示蕾絲與材質</option><option>開場直接商品特寫，之後拉遠揭示模特兒，再以360度動態展示商品</option><option>以故事動作為主，商品展示自然融入走位、轉身、舞蹈與鏡頭環繞</option></select></div>
+</div></div>
+
+<div class="section"><div class="section-title">3. 模特兒設定 <span>人物一致性</span></div><div class="grid">
+<div class="field"><label>模特兒人數與年齡</label><select id="modelGender"><option selected>1位年輕女性模特兒（約20–25歲）</option><option>1位輕熟女性模特兒（約26–32歲）</option><option>1位成熟女性模特兒（約33–40歲）</option><option>2位年輕女性模特兒（約20–25歲）</option><option>2位不同臉型女性模特兒（約26–32歲）</option></select></div>
+<div class="field"><label>模特兒臉部特徵</label><select id="modelFace"><option selected>台灣清秀東亞五官、自然溫柔神韻</option><option>台灣精緻小臉、明亮眼神、自然甜美</option><option>韓系精緻五官、時尚冷感、俐落氣質</option><option>日系柔和五官、清新甜美、自然無辜感</option><option>中國系精緻五官、優雅大氣、成熟時尚</option></select></div>
+<div class="field"><label>髮型與髮色</label><select id="hair"><option selected>黑棕色自然大波浪長髮，髮絲隨動作與微風自然擺動</option><option>黑棕色鬆捲長髮，自然垂落肩前</option><option>半扎公主頭，髮絲輕盈自然</option><option>俐落長直髮，隨走動產生自然晃動</option><option>低馬尾，走動時髮尾自然擺動</option></select></div>
+<div class="field"><label>膚色與身形</label><select id="body"><option selected>自然透亮肌膚、健康勻稱身形、比例自然</option><option>白皙珍珠肌、纖細高挑、自然時尚比例</option><option>健康自然膚色、修長勻稱、生活感身形</option><option>成熟優雅身形、自然曲線、精品模特氣質</option></select></div>
+<div class="field full"><label>人物一致性要求</label><textarea id="modelConsistency">整支影片使用同一位模特兒，臉部五官、髮型、髮色、膚色、身形、年齡感與妝容保持一致，不變臉、不換人、不突然增加人物。</textarea></div>
+</div></div>
+
+<div class="section"><div class="section-title">4. 故事場景 <span>故事性廣告</span></div><div class="grid">
+<div class="field"><label>故事場景類型</label><select id="storyScene"><option selected>精品時裝伸展台：模特兒從入口登場，走上舞台展示商品</option><option>大型舞台舞蹈：聚光燈、舞台煙霧與音樂節奏，模特兒以簡潔舞蹈展示服裝</option><option>時尚MV舞台：霓虹燈、節奏燈光、舞台走位與鏡頭運動</option><option>夢幻花園舞台：花叢、薄紗、花瓣、微風與柔和聚光燈</option><option>高級飯店房間：窗邊、床邊、鏡前與室內走位，生活感時尚廣告</option><option>高級化妝間：鏡前整理頭髮與服裝，再走向主場景</option><option>城市夜景街道：霓虹燈、城市光影、模特兒自然行走</option><option>咖啡館日常：走入咖啡館、坐下、起身、走向窗邊</option><option>海邊度假：沙灘、海風、白色披巾、自然走動與回眸</option><option>極簡攝影棚：從商品細節開始，逐漸帶出完整人物與服裝</option></select></div>
+<div class="field"><label>故事情緒</label><select id="storyMood"><option selected>自信、優雅、高級、具有精品品牌氣場</option><option>青春、活潑、俐落、充滿短影音吸引力</option><option>浪漫、柔和、夢幻、女性時尚氛圍</option><option>神秘、冷調、前衛、精品大片氣質</option><option>自然、舒適、生活化、高級生活品牌感</option></select></div>
+<div class="field"><label>故事發展方式</label><select id="storyFlow"><option selected>建立場景 → 模特兒登場 → 核心動作 → 商品多角度展示 → 商品細節收尾</option><option>商品特寫開場 → 拉遠看到人物 → 故事動作 → 轉身展示背面 → 品牌定格</option><option>人物登場 → 舞蹈／走位 → 360度展示 → 鏡頭推近商品 → 品牌收尾</option><option>安靜開場 → 日常互動 → 情緒累積 → 優雅高潮動作 → 柔和結尾</option></select></div>
+<div class="field"><label>場景動態元素</label><select id="sceneMotion"><option selected>微風吹動髮絲、薄紗、窗簾與植物，背景人物與道具保持自然連續</option><option>舞台聚光燈掃過人物，少量煙霧緩慢流動，配合音樂節奏變化</option><option>花瓣緩慢飄落、花朵與葉片輕晃、柔光自然變化</option><option>城市燈光與霓虹自然閃耀，背景保持穩定不跳動</option><option>海風帶動頭髮與披巾，光線與環境保持真實連續</option></select></div>
+<div class="field full"><label>故事細節／自訂場景</label><textarea id="customStory" placeholder="例如：舞台中央有一條長形光帶，模特兒從右側走入，音樂節拍亮起聚光燈，最後站在中央展示商品……"></textarea></div>
+</div></div>
+
+<div class="section"><div class="section-title">5. 故事性動作設計 <span>人物動態</span></div><div class="grid">
+<div class="field"><label>開場動作</label><select id="action1"><option selected>模特兒從場景入口自然走入，步伐穩定，逐漸接近鏡頭</option><option>模特兒站在舞台暗處，聚光燈亮起後抬頭並向前走</option><option>從商品細節開始，模特兒伸手整理肩帶後進入完整畫面</option><option>模特兒從鏡面前轉身，回眸後向場景中央走去</option><option>模特兒隨音樂節拍做一個簡潔優雅的舞蹈起手式</option></select></div>
+<div class="field"><label>中段核心動作</label><select id="action2"><option selected>自然走位後轉身，依序展示正面、側面與背面</option><option>做簡潔時尚舞蹈：轉身、側步、手臂動作與自然定點</option><option>360度緩慢旋轉，讓服裝正面、側面與背面完整呈現</option><option>走到鏡前整理頭髮與肩帶，再回眸看向鏡頭</option><option>坐下、自然起身，再沿著場景小徑向前走</option><option>輕撥頭髮、整理衣襬、轉身回望，形成自然生活感</option></select></div>
+<div class="field"><label>結尾動作</label><select id="action3"><option selected>模特兒停下自然看向鏡頭，鏡頭推近商品細節後定格</option><option>完成最後一個舞蹈定點，聚光燈集中於人物與商品</option><option>輕輕回眸後保持自然站姿，完整呈現服裝版型</option><option>模特兒走出畫面，鏡頭留下乾淨品牌留白</option><option>模特兒伸手輕觸衣料，鏡頭停留在蕾絲與材質細節</option></select></div>
+<div class="field"><label>動作幅度</label><select id="motionIntensity"><option selected>自然細膩，動作幅度適中，符合真實人體運動</option><option>時尚張力較強，動作明顯但不誇張</option><option>舞蹈感較強，節奏鮮明但保持人體結構正確</option><option>優雅慢動作，幅度小、重視服裝與情緒</option></select></div>
+<div class="field"><label>人物視線與表情</label><select id="expression"><option selected>自然自信，視線在鏡頭與動作方向之間自然切換</option><option>高冷時尚，眼神俐落，偶爾直視鏡頭</option><option>清新甜美，自然微笑，帶有生活感</option><option>成熟優雅，神情沉穩，具有精品廣告氣場</option></select></div>
+</div></div>
+
+<div class="section"><div class="section-title">6. 鏡頭運動 <span>Camera Motion</span></div><div class="grid">
+<div class="field"><label>開場鏡頭</label><select id="camera1"><option selected>wide establishing shot，先建立完整場景，再緩慢向人物靠近</option><option>close-up商品特寫，從蕾絲與材質開始，再拉遠看到人物</option><option>smooth dolly in，鏡頭緩慢推近正在登場的模特兒</option><option>gentle pan，水平移動鏡頭跟隨模特兒進入畫面</option></select></div>
+<div class="field"><label>中段鏡頭</label><select id="camera2"><option selected>smooth tracking shot，平行跟拍模特兒走位，保持人物穩定</option><option>slow orbit 180 degrees，平滑環繞人物展示正面到背面</option><option>side tracking，從側面跟隨人物移動，展示服裝側面線條</option><option>gentle orbit 360 degrees，緩慢環繞人物完成完整商品展示</option><option>camera crane movement，鏡頭輕微升降增加舞台空間感</option></select></div>
+<div class="field"><label>結尾鏡頭</label><select id="camera3"><option selected>slow dolly push-in，從人物中景逐漸推近胸罩、蕾絲與肩帶細節</option><option>macro close-up，直接進入商品材質與蕾絲細節</option><option>slow pull-back，從商品近景拉遠回到完整品牌畫面</option><option>locked-off，最後穩定停留在人物與商品完整構圖</option></select></div>
+<div class="field"><label>鏡頭速度</label><select id="cameraSpeed"><option selected>平滑、穩定、自然速度，避免突然加速或急停</option><option>慢速電影感，鏡頭移動柔和</option><option>中速時尚廣告節奏，配合人物動作</option><option>快速但受控，適合短影音節拍</option></select></div>
+<div class="field"><label>鏡頭視角</label><select id="cameraAngle"><option selected>自然視平線，接近真實時尚廣告攝影</option><option>輕微低角度，增加模特兒與舞台氣勢</option><option>輕微高角度，呈現柔和時尚感</option><option>側後方視角，強調轉身與背面商品展示</option></select></div>
+</div></div>
+
+<div class="section"><div class="section-title">7. 商品動態與服裝物理 <span>避免AI變形</span></div><div class="grid">
+<div class="field"><label>服裝動態</label><select id="fabricMotion"><option selected>蕾絲、肩帶與布料隨身體移動產生細微自然位移，版型始終一致</option><option>走動時布料產生輕微自然晃動，邊緣受微風影響</option><option>舞蹈時服裝跟隨身體產生真實物理運動，但不拉長、不變形</option><option>服裝保持高度穩定，只允許符合身體動作的自然位移</option></select></div>
+<div class="field"><label>髮絲動態</label><select id="hairMotion"><option selected>髮絲隨走動、轉身與微風自然擺動，保持髮型與髮色一致</option><option>轉身時髮絲產生自然甩動，結束後回到原本髮型</option><option>舞台風帶動髮絲，動態明顯但自然</option><option>髮絲動態很小，以穩定商品展示為優先</option></select></div>
+<div class="field"><label>環境物理</label><select id="physics"><option selected>所有布料、頭髮、薄紗、植物與道具遵循自然重力與風力，不漂浮、不穿模</option><option>舞台燈光與薄霧緩慢流動，人物與背景保持穩定</option><option>花瓣、葉片與披巾有自然風向與落下軌跡</option><option>室內窗簾、植物與衣料產生非常細微的空氣流動</option></select></div>
+<div class="field"><label>動態穩定程度</label><select id="stability"><option selected>高穩定：人物與商品一致性優先</option><option>平衡：保留自然動態與電影感</option><option>高動態：允許較明顯鏡頭與舞蹈運動，但商品仍需穩定</option></select></div>
+</div></div>
+
+<div class="section"><div class="section-title">8. 三段式時間軸 <span>自動故事分鏡</span></div><div class="timeline">
+<div class="stage"><b>① 開場</b><select id="time1"><option selected>建立場景＋模特兒登場＋前2秒吸引注意</option><option>商品細節特寫＋鏡頭拉遠揭示人物</option><option>舞台燈光亮起＋模特兒開始走位</option><option>安靜生活場景＋人物自然活動</option></select></div>
+<div class="stage"><b>② 發展</b><select id="time2"><option selected>核心動作＋走位／轉身＋展示正面與背面</option><option>舞蹈動作＋鏡頭環繞＋展示服裝</option><option>生活互動＋整理服裝＋自然回眸</option><option>360度旋轉＋側面與背面商品展示</option></select></div>
+<div class="stage"><b>③ 收尾</b><select id="time3"><option selected>商品細節特寫＋人物定格＋品牌留白</option><option>舞蹈定點＋聚光燈＋商品完整構圖</option><option>背面展示後回眸＋鏡頭推近蕾絲細節</option><option>人物走出畫面＋商品／品牌畫面留下</option></select></div>
+</div><small style="display:block;color:#6d7480;margin-top:10px">影片會依照影片秒數自動理解為「開場 → 發展 → 收尾」，不再使用照片式的靜態姿勢描述。</small></div>
+
+<div class="section"><div class="section-title">9. 結尾與品牌畫面 <span>最後一幕</span></div><div class="grid">
+<div class="field"><label>結尾畫面</label><select id="ending"><option selected>人物＋商品完整構圖，最後1秒穩定停留</option><option>商品蕾絲與材質近拍，最後1秒停留</option><option>人物回眸定格，保留右側品牌文字空間</option><option>人物走出畫面，只留下乾淨場景與商品氛圍</option><option>純商品視覺收尾，方便後製商品名稱與Logo</option></select></div>
+<div class="field"><label>品牌留白位置</label><select id="logoSpace"><option selected>右側留白</option><option>左側留白</option><option>上方留白</option><option>下方留白</option><option>不預留品牌留白</option></select></div>
+</div></div>
+
+<div class="section"><div class="section-title">10. AI影片一致性與負面限制 <span>必加</span></div><div class="field"><label>固定限制指令</label><textarea id="constraints">同一件商品全程保持一致：不得變色、換款、換材質、改變蕾絲花紋、肩帶位置或版型；2～3張商品參考圖只代表同一件商品的不同角度。人物臉部、髮型、髮色、膚色、身形與服裝保持一致。動作符合人體結構，手指自然，避免多餘手腳、肢體扭曲、關節錯位、穿模、重影、變臉、換人、突然換裝。鏡頭運動平滑連續，避免閃爍、背景跳動、物件瞬間消失或新增、服裝紋理漂移、AI塑膠感。所有頭髮、布料、薄紗、花瓣與環境元素遵循自然物理。</textarea></div></div>
+
+<div class="actions"><button class="btn primary" onclick="generatePrompt()">✨ 生成動態影片指令</button><button class="btn secondary" onclick="copyPrompt()">📋 複製指令</button><button class="btn secondary" onclick="exportSettings()">⬇️ 匯出設定</button><button class="btn secondary" onclick="triggerImport()">⬆️ 匯入設定</button><input id="importFileInput" type="file" accept="application/json" style="display:none" onchange="handleImport(event)"></div>
+
+<div class="output"><h2>🎬 AI 動態廣告影片完整指令</h2><textarea id="output" readonly placeholder="選擇條件後按「生成動態影片指令」"></textarea></div>
+</div>
+<script>
+const fieldIds=['videoRatio','videoDuration','videoPacing','videoGoal','videoStyle','imageCount','imageRule','productImage1','productImage2','productImage3','productStrategy','modelGender','modelFace','hair','body','modelConsistency','storyScene','storyMood','storyFlow','sceneMotion','customStory','action1','action2','action3','motionIntensity','expression','camera1','camera2','camera3','cameraSpeed','cameraAngle','fabricMotion','hairMotion','physics','stability','time1','time2','time3','ending','logoSpace','constraints'];
+const $=id=>document.getElementById(id)?.value?.trim()||'';
+function generatePrompt(){
+ const parts=[];
+ parts.push(`這是一支${$('videoDuration')}的${$('videoRatio')}商業動態廣告影片，整支影片必須是連續、自然、有故事性的影片，不是靜態照片拼接`);
+ parts.push(`影片節奏：${$('videoPacing')}；整體風格：${$('videoStyle')}；廣告目的：${$('videoGoal')}`);
+ parts.push(`商品參考圖共${$('imageCount')}：${$('productImage1')}；${$('productImage2')}${$('imageCount').includes('3')?'；'+$('productImage3'):''}。${$('imageRule')}。商品展示策略：${$('productStrategy')}`);
+ parts.push(`模特兒：${$('modelGender')}，${$('modelFace')}，${$('hair')}，${$('body')}。人物一致性：${$('modelConsistency')}`);
+ let scene=`故事場景：${$('storyScene')}；故事情緒：${$('storyMood')}；故事發展：${$('storyFlow')}；場景動態：${$('sceneMotion')}`; if($('customStory')) scene+=`；自訂故事細節：${$('customStory')}`; parts.push(scene);
+ parts.push(`故事動作時間軸：開場動作「${$('action1')}」；中段核心動作「${$('action2')}」；結尾動作「${$('action3')}」。動作幅度：${$('motionIntensity')}；人物表情與視線：${$('expression')}`);
+ parts.push(`鏡頭時間軸：開場${$('camera1')}；中段${$('camera2')}；結尾${$('camera3')}。鏡頭速度：${$('cameraSpeed')}；主要視角：${$('cameraAngle')}`);
+ parts.push(`商品與人物動態物理：服裝${$('fabricMotion')}；髮絲${$('hairMotion')}；環境${$('physics')}；動態穩定程度：${$('stability')}`);
+ parts.push(`三段式分鏡：①開場：${$('time1')}；②發展：${$('time2')}；③收尾：${$('time3')}`);
+ parts.push(`結尾畫面：${$('ending')}；${$('logoSpace')}可保留乾淨品牌排版空間`);
+ parts.push(`AI影片固定限制：${$('constraints')}`);
+ parts.push('影片要求：商品參考圖中的同一件商品必須在整支影片中保持完全一致，第一張、第二張、第三張僅作為正面、背面、細節等角度參考；鏡頭可以改變角度，但不能讓商品設計發生變化。動作、鏡頭、服裝與場景必須連續銜接，避免任何突然跳切造成的AI生成感。');
+ document.getElementById('output').value='【AI模特兒動態廣告影片生成指令】\n'+parts.join('。\n')+'。';
+}
+function copyPrompt(){const o=document.getElementById('output');if(!o.value){generatePrompt()}o.select();document.execCommand('copy');alert('動態影片指令已複製！')}
+function exportSettings(){const c={};fieldIds.forEach(id=>{const e=document.getElementById(id);if(e)c[id]=e.value});const blob=new Blob([JSON.stringify(c,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='video_prompt_config_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href)}
+function triggerImport(){document.getElementById('importFileInput').click()}
+function handleImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const c=JSON.parse(ev.target.result);fieldIds.forEach(id=>{const el=document.getElementById(id);if(el&&Object.prototype.hasOwnProperty.call(c,id))el.value=c[id]});generatePrompt();alert('影片生成器設定已成功匯入！')}catch(err){alert('JSON 設定檔格式錯誤！')}e.target.value=''};r.readAsText(f)}
+window.onload=generatePrompt;
+</script>
+</body></html>
