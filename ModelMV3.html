@@ -294,28 +294,28 @@ button:active{
 
 <div class="grid">
   <div class="group">
-    <label>1. 女生氣質 (20款)</label>
+    <label>1. 女生氣質 (52款)</label>
     <select id="gender"></select>
   </div>
   <div class="group">
-    <label>2. 五官臉型 (20款)</label>
+    <label>2. 五官臉型 (52款)</label>
     <select id="faceShape"></select>
   </div>
 </div>
 
 <div class="grid">
   <div class="group">
-    <label>3. 髮型髮色 (25款)</label>
+    <label>3. 髮型髮色 (52款)</label>
     <select id="hairStyle"></select>
   </div>
   <div class="group">
-    <label>4. 嬌小身型 (20款)</label>
+    <label>4. 嬌小身型 (52款)</label>
     <select id="bodyType"></select>
   </div>
 </div>
 
 <div class="group">
-  <label>5. 甜美穿搭風格 (20款)</label>
+  <label>5. 甜美穿搭風格 (52款)</label>
   <select id="outfit"></select>
 </div>
 
@@ -324,7 +324,7 @@ button:active{
 
 <div class="grid">
   <div class="group">
-    <label>萌系曲風 (20款)</label>
+    <label>萌系曲風 (52款)</label>
     <select id="musicType"></select>
   </div>
   <div class="group">
@@ -361,7 +361,7 @@ button:active{
     </select>
   </div>
   <div class="group">
-    <label>可愛舞蹈類型 (20款)</label>
+    <label>可愛舞蹈類型 (52款)</label>
     <select id="dance"></select>
   </div>
 </div>
@@ -377,7 +377,7 @@ button:active{
     </select>
   </div>
   <div class="group">
-    <label>可愛夢幻場景 (20款)</label>
+    <label>可愛夢幻場景 (52款)</label>
     <select id="scene"></select>
   </div>
 </div>
@@ -465,7 +465,7 @@ button:active{
 </div>
 
 <script>
-/* 資料庫設定 */
+/* 資料庫設定 (每項均已擴充至 50 款以上可愛風格) */
 const OPTIONS_DB = {
   gender: [
     "甜美日系元氣少女 (Sweet Japanese energetic girl)",
@@ -487,7 +487,39 @@ const OPTIONS_DB = {
     "可愛兔系軟萌少女 (Cute bunny-like soft girl)",
     "清爽夏日汽水系少女 (Fresh summer soda vibe girl)",
     "夢幻天使風白發美少女 (Angelical white-haired cute girl)",
-    "可愛水手服萌妹 (Adorably sweet sailor uniform girl)"
+    "可愛水手服萌妹 (Adorably sweet sailor uniform girl)",
+    "軟萌小倉鼠系少女 (Cute hamster-like fluffy girl)",
+    "甜美櫻桃汽水少女 (Sweet cherry soda aesthetic girl)",
+    "精靈系溫柔小仙女 (Ethereal gentle fairy girl)",
+    "棉花糖系甜柔美少女 (Marshmallow soft pastel girl)",
+    "小鹿般清純無辜少女 (Bambi-like innocent eyes girl)",
+    "粉萌小狐狸系少女 (Cute pink fox-like adorable girl)",
+    "夢幻海洋人魚美少女 (Dreamy mermaid pastel girl)",
+    "可愛小羊羔絨感少女 (Fluffy lamb-like cute girl)",
+    "蜜桃烏龍茶系甜妹 (Peach Oolong sweet aesthetic girl)",
+    "萌系電競遊戲美少女 (Cute gamer girl pastel aesthetic)",
+    "日系森女系小清新少女 (Japanese Mori style cute girl)",
+    "粉色夢幻星空少女 (Pastel starry night dreamy girl)",
+    "甜美焦糖奶凍少女 (Sweet caramel pudding girl)",
+    "軟萌小鴨子主題少女 (Cute duckling aesthetic girl)",
+    "萌系元氣啦啦隊少女 (Cute energetic cheerleader girl)",
+    "夢幻雲朵系甜美少女 (Dreamy cloud pastel girl)",
+    "軟萌奶油小熊少女 (Creamy cute teddy bear girl)",
+    "日系甜妹打工仔造型 (Cute Japanese cafe staff girl)",
+    "粉萌小狗系療癒少女 (Adorable puppy-like comforting girl)",
+    "可愛小章魚萌系少女 (Cute octopus vibe adorable girl)",
+    "甜美抹茶拿鐵系少女 (Sweet matcha latte style girl)",
+    "夢幻彩虹糖果美少女 (Dreamy rainbow candy girl)",
+    "嬌小可人小蘿莉風 (Petite sweet innocent loli girl)",
+    "可愛軟萌奶貓系少女 (Soft adorable kitten girl)",
+    "甜美水果派對少女 (Sweet fruit party aesthetic girl)",
+    "夢幻水晶星願少女 (Dreamy crystal wish girl)",
+    "萌系樂團吉他手少女 (Cute anime band guitarist girl)",
+    "可愛小水母夢幻少女 (Dreamy jellyfish aesthetic girl)",
+    "粉嫩馬卡龍甜點少女 (Pastel macaron sweet girl)",
+    "甜美萌系魔法學園生 (Cute magical academy student)",
+    "可愛雪人造型軟萌妹 (Cute snowman fluffy winter girl)",
+    "夢幻泡泡甜妹 (Dreamy bubble fairy sweet girl)"
   ],
   faceShape: [
     "圓潤可愛鵝蛋臉，大光澤大眼睛 (Cute puppy face, glossy big innocent eyes)",
@@ -509,7 +541,39 @@ const OPTIONS_DB = {
     "日系動漫經典萌系臉龐 (Classic Japanese anime moe face)",
     "微萌眨眼表情的活潑臉龐 (Playful winking cute expression face)",
     "帶著溫柔無辜眼神的面孔 (Innocent starry-eyed gaze face)",
-    "可愛貓咪嘴角線條臉型 (Cat-smile mouth corners face shape)"
+    "可愛貓咪嘴角線條臉型 (Cat-smile mouth corners face shape)",
+    "圓滾滾蘋果肌可愛臉龐 (Cute apple cheeks smile face)",
+    "甜美咬唇輕抿可愛臉型 (Cute slight lip-biting expression)",
+    "萌萌眨單眼吐舌頭表情 (Playful wink with tongue sticking out)",
+    "溫柔水汪汪無辜大眼睛 (Soft watery innocent big eyes)",
+    "帶有可愛愛心瞳孔的眼眸 (Cute heart-shaped pupil sparkle eyes)",
+    "微笑微露上排小白牙甜臉 (Sweet smile showing top teeth)",
+    "精緻小巧軟萌蘿莉臉型 (Delicate small cute loli face)",
+    "軟萌氣鼓鼓包子臉表情 (Cute pouting puffed cheeks face)",
+    "充滿星光閃爍的美少女眼 (Starry sparkling bright eyes)",
+    "自然微笑帶有甜美臥蠶 (Sweet smile with cute aegyo sal)",
+    "帶有甜美小腮紅的幼態臉 (Youthful innocent face with pink blush)",
+    "清秀俏皮精靈般面孔 (Cute playful elf-like facial features)",
+    "困倦呆萌眼睛微微半張臉 (Cute sleepy droopy eyes expression)",
+    "萌感滿分小巧瓜子臉 (Cute petite V-shaped face)",
+    "甜美嬌羞微紅臉頰表情 (Sweet shy blushing facial expression)",
+    "微開開心笑顏可愛臉龐 (Joyful open-mouth cheerful face)",
+    "帶著夢幻微光的呆萌臉龐 (Dreamy glowing cute expression)",
+    "雙眼閃爍星星圖案表情 (Sparkling star-eyed cute face)",
+    "粉嫩水潤嘟嘟嘴唇臉型 (Glossy plump pink lips cute face)",
+    "帶有小貼紙裝飾的甜美臉 (Sweet face with cute cheek stickers)",
+    "軟萌小兔牙表情可愛臉 (Cute bunny teeth smile face)",
+    "無辜垂眼狗狗系可愛臉型 (Droopy puppy-eyes cute face)",
+    "甜美自然空氣感無瑕臉龐 (Fresh natural radiant cute face)",
+    "微嘟嘴帶著小酒窩臉龐 (Dimpled pouting cute face)",
+    "帶有小傷膏貼的俏皮臉龐 (Playful face with cute band-aid on nose)",
+    "可愛貓爪畫在臉頰的萌臉 (Cute face with drawn cat whiskers)",
+    "甜美溫柔微笑仙女臉型 (Gentle smiling angelic face)",
+    "帶有夢幻淚滴亮片的臉龐 (Glitter teardrop sparkle cute face)",
+    "萌感十足的小嘴巴精緻臉 (Tiny cute mouth refined face)",
+    "靈動好奇大眼萌系臉龐 (Curious bright big-eyed face)",
+    "甜美燦爛滿面笑容臉龐 (Radiant full sweet smile face)",
+    "軟萌無辜眨眼表情小臉 (Soft innocent winking face)"
   ],
   hairStyle: [
     "夢幻粉紫色雙馬尾綁絲帶 (Dreamy pink-purple twin tails with silk ribbons)",
@@ -536,7 +600,34 @@ const OPTIONS_DB = {
     "柔粉色微捲短髮帶貓耳發飾 (Soft pink short curls with cat ear clips)",
     "亮金色雙馬尾綁蕾絲飾品 (Bright blonde pigtails with lace bows)",
     "夢幻漸層七彩光澤髮 (Pastel rainbow iridescent hair)",
-    "甜美珍珠發夾修飾長直發 (Long straight hair with cute pearl hairpins)"
+    "甜美珍珠發夾修飾長直發 (Long straight hair with cute pearl hairpins)",
+    "軟萌蓬鬆蛋捲頭帶小夾子 (Fluffy egg-roll perm with cute clips)",
+    "櫻桃紅甜美短髮羽毛剪 (Cherry red sweet cute layered bob)",
+    "奶白色雙丸子頭垂絲帶 (Cream white space buns with long ribbons)",
+    "粉藍雙色拼接雙馬尾 (Split pink & blue pastel twin tails)",
+    "自然蓬鬆側邊單馬尾 (Casual fluffy side ponytail with bow)",
+    "萌系羊角辮扎粉色蝴蝶結 (Cute ram-horn braids with pink ties)",
+    "薄荷奶綠波浪中長髮 (Mint green pastel wavy medium hair)",
+    "淺粉色齊瀏海短髮波波頭 (Light pink straight bob with flat bangs)",
+    "焦糖甜棕半馬尾帶大髮圈 (Caramel brown half-up with scrunchie)",
+    "夢幻紫羅蘭色微捲雙馬尾 (Violet purple soft curly pigtails)",
+    "日系貓咪耳朵編髮造型 (Japanese cat-ear braided hairstyle)",
+    "軟萌白桃粉高雙馬尾 (Soft peach pastel high twin tails)",
+    "經典黑髮雙麻花辮綁紅絲帶 (Black double braids with red ribbons)",
+    "薰衣草紫微捲中分長髮 (Lavender purple wavy parted hair)",
+    "可愛短髮羽毛剪帶貓爪髮夾 (Cute fluffy short hair with cat paw clips)",
+    "夢幻銀月光色波浪長髮 (Moonlight silver iridescent wavy long hair)",
+    "奶油黃微捲雙低馬尾 (Creamy yellow soft low pigtails)",
+    "粉色漸層橘黃微捲髮 (Pink to pastel orange sunset wavy hair)",
+    "萌系短髮扎雙頂角小辮 (Cute short hair with top mini pigtails)",
+    "柔和巧克力棕微捲長髮 (Soft chocolate brown wavy long hair)",
+    "天空藍漸層粉色長雙馬尾 (Sky blue to pink ombre long pigtails)",
+    "可愛側邊高馬尾帶星形髮夾 (Side high ponytail with star clips)",
+    "甜美檸檬黃蓬鬆短髮 (Sweet lemon yellow fluffy short bob)",
+    "夢幻粉色水波紋長髮 (Dreamy pink water-ripple wavy hair)",
+    "蓬鬆法式雙麻花辮 (Fluffy French double braids pastel style)",
+    "可愛白金短髮帶萌萌兔耳髮帶 (Platinum blonde short hair with bunny headband)",
+    "軟萌蜂蜜棕微捲半扎頭 (Honey brown soft wavy half-up bun)"
   ],
   bodyType: [
     "嬌小可愛，活力萌感黃金比例 (Petite, adorable and lively proportions)",
@@ -558,7 +649,39 @@ const OPTIONS_DB = {
     "可愛比例的元氣美少女身形 (Energetic cute anime girl proportion)",
     "軟萌好抱的可愛比例 (Soft sweet cozy girl build)",
     "輕盈舞者纖細比例 (Slim lightweight dancer build)",
-    "甜美可愛小仙女身材 (Sweet adorable fairy body proportion)"
+    "甜美可愛小仙女身材 (Sweet adorable fairy body proportion)",
+    "嬌小可愛 150cm 萌妹比例 (Cute 150cm petite girl proportion)",
+    "纖細柔軟少女自然曲線 (Slender flexible natural girl curve)",
+    "Q 版 3 頭身極致萌化身材 (Ultra cute 3-head chibi body frame)",
+    "輕盈苗條偶像舞台身材 (Lightweight slim idol stage build)",
+    "萌系軟綿綿棉花糖身形 (Soft pillowy marshmallow girl frame)",
+    "靈巧可愛小兔般身型 (Nimble bunny-like cute proportion)",
+    "甜美修長少女線條 (Sweet elongated girl silhouette)",
+    "嬌小圓潤可愛感架構 (Petite soft rounded adorable frame)",
+    "青春元氣運動員少女線條 (Youthful active girl figure)",
+    "輕盈優雅羽毛般身型 (Feather-light delicate girl frame)",
+    "二次元經典 1:7 可愛黃金比例 (Anime classic 1:7 cute golden ratio)",
+    "嬌小修長精靈身型 (Petite slender pixie-like build)",
+    "甜美可愛蘿莉塔身材 (Sweet cute Lolita fashion fit frame)",
+    "軟萌好動小松鼠般身型 (Cute energetic squirrel-like frame)",
+    "靈動優雅小天鵝比例 (Graceful little swan dancer proportion)",
+    "嬌小可愛短腿萌感身材 (Cute petite adorable proportion)",
+    "纖細可愛二次元偶像身形 (Slender anime idol proportions)",
+    "軟萌活潑啦啦隊員身型 (Cute bouncy cheerleader build)",
+    "修長優雅甜妹身形 (Slender gentle sweet girl frame)",
+    "嬌小帶有可愛感的身材 (Compact adorable youthful frame)",
+    "輕盈柔美自然少女骨架 (Light delicate girl frame)",
+    "萌感滿分可愛小熊比例 (Fluffy cute bear-like proportion)",
+    "甜美勻稱體操少女身型 (Sweet well-balanced gymnast build)",
+    "嬌小俏皮貓咪比例 (Petite playful feline girl frame)",
+    "纖細靈動魔法少女身形 (Slender nimble magical girl frame)",
+    "軟萌柔軟瑜伽美少女線條 (Soft flexible yoga sweet girl build)",
+    "青春活力短跑美少女身材 (Youthful energetic runner girl frame)",
+    "嬌小精緻洋娃娃身材 (Petite refined doll-like proportion)",
+    "輕盈優雅水中花身型 (Ethereal graceful fluid girl frame)",
+    "軟萌可愛呆萌小鳥比例 (Cute tiny bird-like delicate frame)",
+    "甜美輕盈樂團主唱身型 (Sweet lightweight band lead build)",
+    "嬌小勻稱萌感舞台比例 (Petite balanced cute stage proportion)"
   ],
   outfit: [
     "甜美草莓粉色蕾絲百褶裙舞者套裝 (Sweet strawberry pink lace pleated skirt outfit)",
@@ -580,7 +703,39 @@ const OPTIONS_DB = {
     "牛仔藍色甜酷吊帶短裙與小白鞋 (Denim sweet overall dress with white sneakers)",
     "粉藍撞色可愛運動風套裝 (Pastel pink & blue colorblock athletic wear)",
     "洛麗塔甜美糖果甜點主題洋裝 (Sweet Lolita candy & dessert theme dress)",
-    "透明冰塊質感甜美閃亮舞台套裝 (Iridescent pastel translucent stage outfit)"
+    "透明冰塊質感甜美閃亮舞台套裝 (Iridescent pastel translucent stage outfit)",
+    "可愛企鵝主題連帽斗篷與短裙 (Cute penguin theme hooded cape & skirt)",
+    "粉色格紋吊帶裙搭配白色泡泡袖上衣 (Pink plaid pinafore with puff-sleeve blouse)",
+    "夢幻水蜜桃色蕾絲晚禮服短裙 (Pastel peach lace mini party dress)",
+    "甜美冰淇淋主題軟萌連身裙 (Sweet ice cream theme pastel dress)",
+    "可愛小黃鴨主題雨衣與雨靴套裝 (Cute yellow duck raincoat & boots outfit)",
+    "日系萌系巫女服裝 (Cute Japanese miko shrine maiden outfit)",
+    "甜美露肩毛衣搭配百褶短裙 (Sweet off-shoulder sweater with pleated skirt)",
+    "可愛小熊耳朵茸茸連身裝 (Fluffy teddy bear ears jumpsuit)",
+    "薰衣草紫甜美夢幻女團服 (Lavender purple sweet idol stage suit)",
+    "粉嫩櫻花季和服短裙 (Sakura pink short kimono dress)",
+    "美式復古啦啦隊運動套裝 (Retro sweet cheerleader crop top & skirt)",
+    "可愛獨角獸彩虹色連身裙 (Unicorn rainbow pastel tulle dress)",
+    "甜美露背繫帶粉色連身裙 (Sweet pink backless tie-up dress)",
+    "軟萌奶熊圖案衛衣與百褶裙 (Soft fluffy bear printed sweatshirt & skirt)",
+    "夢幻星空珍珠刺繡洋装 (Pastel starry sky pearl embroidered dress)",
+    "可愛小紅帽風格蕾絲斗篷裝 (Cute Little Red Riding Hood lace dress)",
+    "甜美汽水泡泡露腰女團服 (Sweet soda bubble crop top stage outfit)",
+    "粉色皮革甜酷機車外套與短裙 (Pink faux-leather jacket & mini skirt)",
+    "可愛貓爪主題泡泡袖連身裙 (Cute cat-paw puff sleeve dress)",
+    "夢幻海洋貝殼蕾絲洋裝 (Pastel ocean seashell lace dress)",
+    "甜美奶茶色針織連身裙配長靴 (Milk tea color knit dress with boots)",
+    "可愛天使翅膀主題白粉紗裙 (Angel wings pastel white & pink tulle dress)",
+    "日系童話風格甜美吊帶裙 (Japanese fairytale sweet pinafore dress)",
+    "粉色蕾絲邊連體泳衣配罩衫 (Pink lace swimsuit with cute cover-up)",
+    "可愛小羊羔絨厚外套配短褲 (Cute fluffy lamb jacket with shorts)",
+    "夢幻糖果色運動連帽衫裝 (Pastel candy-colored sporty hoodie outfit)",
+    "甜美碎花夏日吊帶洋裙 (Sweet floral summer sundress)",
+    "可愛二次元網球風短裙套裝 (Cute tennis core pastel top & skirt)",
+    "粉色光澤珍珠羽絨服配雪地靴 (Pink glossy pearl puffer jacket & snow boots)",
+    "甜美夢幻精靈蕾絲羽翼洋裝 (Sweet fairy lace winged dress)",
+    "可愛小草莓連體牛仔褲裝 (Cute strawberry embroidered denim overalls)",
+    "粉嫩星星亮片夢幻舞台裙 (Pastel star sequin dreamy stage dress)"
   ],
   musicType: [
     "Cute Pop 可愛流行樂 (輕快、萌感強烈)",
@@ -590,7 +745,51 @@ const OPTIONS_DB = {
     "Lofi 軟萌治癒系音樂",
     "Electro-Pop 粉嫩電音舞曲",
     "Bubblegum Pop 泡泡糖流行樂",
-    "告白甜妹流行單曲"
+    "告白甜妹流行單曲",
+    "Future Bass 甜美未來電音",
+    "City Pop 甜美復古都市流行",
+    "Kawaii Bass 萌系重低音舞曲",
+    "Cute Rap 軟萌饒舌舞曲",
+    "Chiptune 8-Bit 復古遊戲萌音",
+    "Tropical House 夢幻夏日電音",
+    "Pastel EDM 粉嫩電音搖滾",
+    "Hyperpop 甜美超流行電音",
+    "Acoustic Cute 軟萌木吉他輕音樂",
+    "Sweet Waltz 夢幻圓舞曲",
+    "Eurobeat 萌系飆速舞曲",
+    "Glitchcore 甜美電子舞曲",
+    "Cute Rock 萌系搖滾流行樂",
+    "Swing Jazz 可愛搖擺爵士",
+    "Bossa Nova 軟萌小野麗莎風",
+    "Samba 歡樂萌系桑巴舞曲",
+    "Vocaloid 甜美合成器動漫歌",
+    "Lullaby Cute 治癒搖籃曲風格",
+    "Carnival Cute 狂歡節萌系樂",
+    "Pastel Synthwave 夢幻合成波",
+    "Acapella Cute 軟萌純人聲合唱",
+    "Ukulele Cute 烏克麗麗甜美彈唱",
+    "80s Retro Cute 八零年代萌曲",
+    "Cute Funk 俏皮放克舞曲",
+    "Dream Pop 夢幻泡泡流行樂",
+    "Chibi Beat Q 版歡樂打擊樂",
+    "Sweet Techno 甜美科技電音",
+    "Lounge Cute 軟萌沙龍輕音樂",
+    "Game OST 萌系遊戲主題曲",
+    "Lolita Classical 夢幻古典樂",
+    "K-Indie Cute 韓系獨立甜美歌",
+    "Cat Whistle Cute 貓咪哨音萌曲",
+    "Marshmallow Chill 軟萌棉花糖音樂",
+    "Picnic Folk 郊遊萌系民謠",
+    "Starlight Disco 星空迪斯可",
+    "Cherry Blossom Melody 櫻花旋律",
+    "Toy Box March 玩具盒進行曲",
+    "Melody Box Cute 八音盒夢幻曲",
+    "Sweet Reggae 甜美雷鬼舞曲",
+    "Soda Pop Dance 汽水泡泡舞曲",
+    "Bunny Hop EDM 兔兔跳跳電音",
+    "Pastel Piano 夢幻鋼琴甜曲",
+    "Angel Harmony 天使和聲萌樂",
+    "Magic Spell Cute 魔法咒語歌"
   ],
   dance: [
     "萌系唱歌對嘴 + 甜美比心手勢舞 (Lip-syncing while doing cute heart gesture dance)",
@@ -600,7 +799,51 @@ const OPTIONS_DB = {
     "二次元宅舞 (甜美俏皮連貫跳躍與轉圈)",
     "軟萌捧臉與眨眼互動舞 (Cupping cheeks gesture & cute winking dance)",
     "兔子跳躍萌系編舞 (Bunny hop cute choreography)",
-    "可愛轉圈與裙擺飄逸舞 (Cute spinning around with swirling skirt)"
+    "可愛轉圈與裙擺飄逸舞 (Cute spinning around with swirling skirt)",
+    "手指舞與比心連擊 (Finger dance with rapid heart gesture combo)",
+    "貓咪伸懶腰與輕踏步舞 (Cat stretch & cute gentle step dance)",
+    "夢幻芭蕾微旋轉手勢舞 (Pastel ballet spin & hand gesture dance)",
+    "可愛嘟嘴與托腮擺動舞 (Cute pouting & chin-resting dance)",
+    "草莓派對歡快小跳步 (Strawberry party happy bouncy dance)",
+    "萌系wink眨眼連擊手勢舞 (Wink combo & cute hand dance)",
+    "軟萌小熊擺動舞 (Cute fluffy bear swaying dance)",
+    "眨眼比槍打中你心舞 (Wink & finger-gun cute heart dance)",
+    "可愛踩拍子踢腿舞 (Cute rhythmic kick & step dance)",
+    "魔法棒揮舞變身舞 (Magical wand waving cute transformation dance)",
+    "汽水泡泡跳躍手勢舞 (Soda bubble bounce gesture dance)",
+    "甜美小手拍拍舞 (Sweet cute hand clapping dance)",
+    "萌系喵咪洗臉動作舞 (Cute cat washing face hand movement)",
+    "少女元氣啦啦隊跳躍舞 (Youthful cheerful pom-pom dance)",
+    "軟萌頭頂比大愛心舞 (Cute big heart gesture above head)",
+    "夢幻羽毛飄逸手勢舞 (Dreamy feather-light hand dance)",
+    "可愛雙手托臉搖擺舞 (Cute head-tilted cheek cupping sway)",
+    "甜美眨眼微跳轉身舞 (Sweet wink mini-jump & turn dance)",
+    "兔子耳手勢搖晃舞 (Bunny ears hand gesture wiggle dance)",
+    "二次元萌系踏步擺臂舞 (Cute anime marching arm-swing dance)",
+    "甜美比心並向前送吻 (Heart gesture with cute blown kiss)",
+    "可愛小鴨跳躍搖屁股舞 (Cute duckling waddle & bounce dance)",
+    "夢幻彩虹手指畫心舞 (Rainbow finger-heart drawing dance)",
+    "軟萌點頭與搖頭擺動舞 (Soft cute head nod & shake sway)",
+    "可愛躲貓貓遮臉舞 (Cute peek-a-boo face-covering dance)",
+    "甜美輕輕踢腳尖手勢舞 (Sweet gentle toe-tap hand dance)",
+    "萌系微醺搖晃手勢舞 (Cute gentle tipsy sway dance)",
+    "可愛企鵝搖擺踩步舞 (Cute penguin waddle step dance)",
+    "夢幻流星指划舞 (Dreamy shooting star finger dance)",
+    "甜美捏臉頰萌感擺動舞 (Cute cheek pinching sway dance)",
+    "二次元閃耀比心轉圈舞 (Anime sparkling heart spin dance)",
+    "軟萌抓氣球跳躍舞 (Cute grabbing balloon bounce dance)",
+    "可愛小狗搖尾巴手勢舞 (Cute puppy tail-wagging hand dance)",
+    "甜美手指比愛心連發舞 (Rapid sweet finger heart dance)",
+    "夢幻水滴輕觸手勢舞 (Dreamy raindrop touch hand dance)",
+    "可愛輕輕摸頭殺擺擺舞 (Cute patting head gentle sway dance)",
+    "軟萌小羊咩咩擺動舞 (Cute lamb gentle dance)",
+    "甜美吹泡泡手勢舞 (Sweet bubble blowing hand gesture dance)",
+    "萌系閃亮眼睛指面舞 (Cute bright eyes pointing dance)",
+    "可愛轉圈裙擺飛揚跳躍 (Cute cheerful spin with swirling skirt)",
+    "夢幻精靈飛翔手勢舞 (Dreamy fairy flying hand movement)",
+    "軟萌角落躲藏偷看舞 (Cute hiding & peeking gesture dance)",
+    "甜美心形手指舞連擊 (Sweet double-heart combo dance)",
+    "可愛跳躍雙手比 V 舞 (Cute bounce with double peace sign)"
   ],
   scene: [
     "粉色夢幻糖果城堡世界 (Pastel pink dream candy castle world)",
@@ -610,7 +853,51 @@ const OPTIONS_DB = {
     "夢幻草莓冰淇淋遊樂園 (Strawberry ice cream pastel amusement park)",
     "粉色霓虹燈光甜美舞蹈棚 (Sweet studio with soft pink neon line lights)",
     "K-Pop 粉色璀璨舞台 (Pastel LED screens, sparkling confetti)",
-    "日系可愛貓咪咖啡廳 (Cute Japanese cat cafe filled with pastel decor)"
+    "日系可愛貓咪咖啡廳 (Cute Japanese cat cafe filled with pastel decor)",
+    "夢幻粉色水母海洋館 (Dreamy pink jellyfish aquarium)",
+    "粉嫩星空甜點露台 (Pastel starry night dessert balcony)",
+    "可愛熊熊絨毛玩具王國 (Cute teddy bear plushie kingdom)",
+    "夢幻水蜜桃果園草地 (Dreamy peach orchard grassy field)",
+    "粉色夢幻芭蕾舞教室 (Pastel pink ballet dance studio)",
+    "可愛魔法少女圖書館 (Cute magical girl fantasy library)",
+    "夢幻冰雪粉色水晶宮殿 (Dreamy pastel pink ice crystal palace)",
+    "粉嫩花海中的陽光溫室 (Pastel greenhouse full of blooming flowers)",
+    "可愛二次元甜品展覽館 (Cute anime dessert exhibition hall)",
+    "夢幻彩虹氣球熱氣球天空 (Pastel rainbow hot-air balloon sky)",
+    "粉色復古美式甜甜圈店 (Pink retro American donut shop)",
+    "可愛草莓蛋糕城堡內景 (Cute strawberry cake castle interior)",
+    "夢幻粉色海灘與棉花糖雲 (Pastel pink beach with marshmallow clouds)",
+    "可愛貓耳圖案電競房間 (Cute cat-ear themed gaming setup room)",
+    "粉嫩流星雨飄落的夜空 (Pastel shooting star night sky)",
+    "夢幻星光水晶舞台 (Dreamy starry crystal glowing stage)",
+    "可愛草莓野餐草坪 (Cute strawberry picnic lawn with pastel blankets)",
+    "粉色夢幻蒸汽波旋轉木馬 (Pastel vaporwave carousel merry-go-round)",
+    "可愛二次元動漫課堂 (Cute anime classroom during sunset)",
+    "夢幻粉紫薰衣草花海 (Dreamy lavender & pink flower field)",
+    "粉色閃亮泡泡海洋舞台 (Pastel glowing bubble ocean stage)",
+    "可愛天使雲朵宮殿 (Cute angel cloud palace in pastel sky)",
+    "夢幻甜妹戶外露營帳篷 (Dreamy sweet girl pastel camping site)",
+    "粉嫩櫻花樹下的公園椅子 (Park bench under blooming sakura trees)",
+    "可愛獨角獸夢幻森林 (Cute unicorn dreamy fantasy forest)",
+    "夢幻月光粉色露台 (Dreamy moonlight pastel pink terrace)",
+    "粉色少女心雜貨舖 (Cute pink kawaii goods store interior)",
+    "可愛奶油小狗咖啡館 (Cute cream puppy themed cafe)",
+    "夢幻閃耀水晶星願池 (Pastel sparkling crystal wish fountain)",
+    "粉嫩糖果色溜冰場 (Pastel candy-colored roller skating rink)",
+    "可愛日系屋頂花園 (Cute Japanese rooftop garden with pastel sunset)",
+    "夢幻冰淇淋車大街 (Dreamy pastel ice cream truck street)",
+    "粉色可愛火車車廂 (Pastel pink cute train carriage interior)",
+    "可愛粉色霓虹街角 (Cute pink neon street corner at night)",
+    "夢幻泡泡糖彩虹橋 (Dreamy bubblegum rainbow bridge)",
+    "粉嫩精靈水池公園 (Pastel fairy pond with lotus blossoms)",
+    "可愛二次元音樂錄音室 (Cute anime recording studio setup)",
+    "夢幻星空童話城堡庭院 (Pastel fairytale castle courtyard)",
+    "粉色可愛羽毛夢境 (Pastel pink dreamscape filled with feathers)",
+    "可愛喵咪爪爪星舞台 (Cute cat paw-shaped star stage)",
+    "夢幻閃爍珠光粉展廳 (Pastel sparkling pearl pink showroom)",
+    "粉嫩彩虹糖果雨街道 (Pastel rainbow candy rain street)",
+    "可愛小羊草地夢幻牧場 (Cute fluffy sheep green pastel meadow)",
+    "夢幻宇宙星河粉色飛船 (Pastel galaxy pink spaceship interior)"
   ]
 };
 
