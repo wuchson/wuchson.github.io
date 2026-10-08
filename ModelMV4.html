@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 可愛美少年唱歌跳舞 MV 生成器 (圖生影版)</title>
+
+<style>
+:root{
+  --pink:#3b82f6;
+  --pink2:#93c5fd;
+  --bg:#f2f7ff;
+  --line:#d7e6fb;
+  --ink:#172033;
+  --dark:#0f172a;
+  --accent:#2563eb;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;
+  background:linear-gradient(135deg,#f8fbff,#e8f1ff);
+  color:var(--ink);
+}
+
+header{
+  background:linear-gradient(120deg,var(--pink),var(--pink2));
+  color:white;
+  padding:24px 20px;
+  text-align:center;
+}
+
+.wrap{
+  max-width:1300px;
+  margin:auto;
+}
+
+h1{
+  margin:0;
+  font-size:26px;
+}
+
+header p{
+  margin:8px 0 0;
+  opacity:.95;
+  font-size:14px;
+}
+
+.app{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+  padding:24px 20px 42px;
+}
+
+.panel{
+  background:#ffffff;
+  border:2px solid var(--line);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 10px 30px #3b82f615;
+}
+
+.title{
+  font-size:18px;
+  font-weight:800;
+  margin:12px 0 16px;
+  padding-bottom:8px;
+  border-bottom:2px dashed #f7d6e0;
+  color:#2563eb;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  font-weight:800;
+  margin-bottom:6px;
+  font-size:13px;
+  color:#522835;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+select,
+input[type=text],
+textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 12px;
+  background:#fff5f7;
+  font:inherit;
+  color:var(--ink);
+  font-size:13px;
+}
+
+textarea{
+  resize:vertical;
+}
+
+.checks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  background:#eef5ff;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:12px;
+}
+
+.check input{
+  accent-color:var(--pink);
+}
+
+.preview{
+  position:sticky;
+  top:16px;
+}
+
+.tab-btn-group{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.tab-btn{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  border:2px solid var(--pink2);
+  background:#fff;
+  color:var(--ink);
+  font-weight:800;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.tab-btn.active{
+  background:var(--pink);
+  color:#fff;
+  border-color:var(--pink);
+}
+
+.previewbox{
+  background:var(--dark);
+  padding:14px;
+  border-radius:20px;
+}
+
+#prompt{
+  min-height:300px;
+  background:#08111f;
+  color:#dbeafe;
+  border-color:#1e3a5f;
+  line-height:1.5;
+  font-size:13px;
+}
+
+/* 模擬生成 Canvas 區域 */
+.sim-area{
+  margin-top:16px;
+  background:#eff6ff;
+  border:2px dashed var(--pink2);
+  border-radius:18px;
+  padding:14px;
+  text-align:center;
+}
+
+.canvas-container{
+  position:relative;
+  width:100%;
+  max-width:260px;
+  height:360px;
+  margin:10px auto;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  background:#222;
+}
+
+#simCanvas{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:rgba(255,107,149,0.85);
+  color:#fff;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:bold;
+  backdrop-filter:blur(4px);
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+button{
+  padding:10px;
+  border:0;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:13px;
+  transition:transform 0.1s, background 0.2s;
+}
+
+button:active{
+  transform:scale(0.98);
+}
+
+.primary{
+  background:linear-gradient(135deg,var(--pink),var(--pink2));
+  color:#fff;
+  box-shadow:0 4px 12px #3b82f640;
+}
+
+.secondary{
+  background:#eef5ff;
+  color:#2563eb;
+}
+
+.success{
+  background:#28a745;
+  color:#fff;
+}
+
+.dark{
+  background:#172554;
+  color:#fff;
+}
+
+@media(max-width:1000px){
+  .app{ grid-template-columns:1fr; }
+  .preview{ position:static; }
+}
+
+@media(max-width:600px){
+  .grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="wrap">
+<h1>💙 ⚡ AI 萌系美少年 MV 生成器 (先圖後影版) 🎀</h1>
+<p>先生成高畫質美少年角色圖，再自動轉為動態唱跳 MV！完美解決變臉問題。</p>
+</div>
+</header>
+
+<div class="wrap app">
+
+<main class="panel">
+
+<!-- 一鍵靈感 -->
+<div style="background:#eef5ff; border:1px solid #bfdbfe; padding:12px; border-radius:16px; margin-bottom:15px; display:flex; gap:8px;">
+  <button class="primary" style="flex:1" onclick="randomizeCharacter()">🎲 隨機可愛男生造型</button>
+  <button class="secondary" style="flex:1" onclick="randomizeAll()">✨ 潮流全隨機 (含舞蹈)</button>
+</div>
+
+<!-- ① 人物造型 -->
+<div class="title">
+  <span>① 可愛男生造型 (繪圖標準設定)</span>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>1. 男生氣質 (52款)</label>
+    <select id="gender"></select>
+  </div>
+  <div class="group">
+    <label>2. 五官臉型 (51款)</label>
+    <select id="faceShape"></select>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>3. 髮型髮色 (51款)</label>
+    <select id="hairStyle"></select>
+  </div>
+  <div class="group">
+    <label>4. 男生身型 (51款)</label>
+    <select id="bodyType"></select>
+  </div>
+</div>
+
+<div class="group">
+  <label>5. 男生穿搭風格 (51款)</label>
+  <select id="outfit"></select>
+</div>
+
+<!-- ② 音樂與唱歌 -->
+<div class="title">② 音樂與唱跳風格</div>
+
+<div class="grid">
+  <div class="group">
+    <label>萌系曲風 (52款)</label>
+    <select id="musicType"></select>
+  </div>
+  <div class="group">
+    <label>音樂節奏</label>
+    <select id="beat">
+      <option value="輕快節奏 (120-135 BPM)，充滿活力的萌系跳躍">輕快活力 (120-135 BPM)</option>
+      <option value="中快輕盈 (100-120 BPM)，適合俏皮手勢舞">中快輕盈 (100-120 BPM)</option>
+      <option value="軟萌律動 (80-100 BPM)，自然可愛擺動">軟萌律動 (80-100 BPM)</option>
+      <option value="夢幻溫柔 (60-80 BPM)，治癒系抒情搖擺">夢幻溫柔 (60-80 BPM)</option>
+    </select>
+  </div>
+</div>
+
+<div class="group">
+  <label>指定歌曲名稱/關鍵字 (選填)</label>
+  <input id="song" type="text" placeholder="例如：可愛日系動漫歌、抖音熱門萌舞曲……">
+</div>
+
+<!-- ③ 美術視覺與舞蹈 -->
+<div class="title">③ 美術視覺與潮流舞蹈</div>
+
+<div class="grid">
+  <div class="group">
+    <label>可愛美術風格 (10款)</label>
+    <select id="artStyle">
+      <option value="精緻 3D 卡通動畫風格 (Disney / Pixar 3D cute animation style)">3D 迪士尼/皮克斯可愛風</option>
+      <option value="可愛 Q 版 3D 角色 (Chibi 3D style, cute big head proportion)">Q 版大頭 3D 角色</option>
+      <option value="日系二次元萌系動漫 (Japanese Moe Anime style, vibrant coloring)">日系二次元萌系動漫</option>
+      <option value="超寫實清爽真人少年 (Photorealistic handsome Korean/Japanese boy, 8k)">寫實清爽美少年 (Photorealistic)</option>
+      <option value="粉嫩黏土手作風 (Cute claymation pastel art style)">粉嫩黏土手作風</option>
+      <option value="夢幻柔光水彩插畫風 (Soft pastel watercolor anime style)">夢幻柔光水彩風</option>
+      <option value="韓系 3D 虛擬甜美偶像 (Korean 3D Virtual Idol, cute aesthetic)">韓系 3D 甜美虛擬偶像</option>
+      <option value="復古 90 年代少年漫畫風 (90s retro shojo anime style)">90年代少年漫畫風</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>潮流舞蹈類型 (52款)</label>
+    <select id="dance"></select>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>舞蹈萌度強度</label>
+    <select id="dancePower">
+      <option value="活力爆棚，動作俐落帥氣">活力帥氣爆棚</option>
+      <option value="輕鬆自然，帶有街頭感的小幅度律動">街頭隨性律動</option>
+      <option value="溫柔清爽，充滿自然笑容與流暢擺動">溫柔治癒系</option>
+      <option value="活力四射，充滿跳躍感的少年元氣">元氣少年活力</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>舞台與夢幻場景 (52款)</label>
+    <select id="scene"></select>
+  </div>
+</div>
+
+<!-- ④ 鏡頭與表演細節 -->
+<div class="title">④ 鏡頭運鏡與動態細節</div>
+
+<div class="grid">
+  <div class="group">
+    <label>MV 運鏡風格</label>
+    <select id="camera">
+      <option value="流行潮流 MV 動態運鏡 (眨眼特寫與全景萌舞靈活切換)">潮流 MV 動態運鏡</option>
+      <option value="男友視角跟拍鏡頭 (POV cute follow camera shot)">第一人稱跟拍視角</option>
+      <option value="特寫可愛面部與手勢舞 (Close-up cute gestures shot)">手勢舞近景特寫</option>
+      <option value="輕柔環繞運鏡 (Soft orbiting camera angle)">輕柔微環繞運鏡</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>影片畫面比例</label>
+    <select id="ratio">
+      <option value="9:16 直式 (TikTok / Shorts / Reels)">9:16 直式</option>
+      <option value="16:9 橫式 (YouTube / MV)">16:9 橫式</option>
+      <option value="1:1 正方形">1:1 正方形</option>
+    </select>
+  </div>
+</div>
+
+<div class="checks">
+  <label class="check"><input type="checkbox" value="嘴型精準呈現歌詞與自然口型 (Perfect male lip-sync)" checked>自然對嘴口型</label>
+  <label class="check"><input type="checkbox" value="演唱時眼神自然有魅力，對著鏡頭微笑與眨眼" checked>帥氣眼神與互動</label>
+  <label class="check"><input type="checkbox" value="面部保持清爽自然，帶有陽光少年感微笑" checked>自然笑容與少年感表情</label>
+  <label class="check"><input type="checkbox" value="頭髮與服裝隨身體擺動產生自然流動的真實物理效果" checked>自然髮絲與服裝物理</label>
+  <label class="check"><input type="checkbox" value="副歌部分展現帥氣比心、手指與街舞手勢招牌動作" checked>招牌帥氣手勢舞</label>
+</div>
+
+<!-- ⑤ 自訂 -->
+<div class="title">⑤ 額外補充說明</div>
+<textarea id="custom" rows="2" placeholder="例如：露出小虎牙、戴耳環、黑色手鍊……"></textarea>
+
+</main>
+
+<!-- 右側 Prompt 與模擬生成區 -->
+<aside class="panel preview">
+
+<!-- 頁籤切換 -->
+<div class="tab-btn-group">
+  <button class="tab-btn active" id="tabImg" onclick="switchTab('img')">📷 階段 1：生成照片 Prompt</button>
+  <button class="tab-btn" id="tabVid" onclick="switchTab('vid')">🎬 階段 2：圖轉影片 Prompt</button>
+</div>
+
+<div class="previewbox">
+  <textarea id="prompt" readonly></textarea>
+</div>
+
+<!-- 模擬 AI 先圖後影互動區 -->
+<div class="sim-area">
+  <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#2563eb;">🌸 先圖後影：一鍵體驗流程 🌸</div>
+  
+  <div class="canvas-container">
+    <canvas id="simCanvas" width="260" height="360"></canvas>
+    <div class="badge" id="simBadge">1. 等待生成圖片</div>
+  </div>
+
+  <div style="display:flex; gap:6px; margin-top:8px;">
+    <button class="primary" style="flex:1;" onclick="generateImage()">🖼️ 步驟 1：生成角色照片</button>
+    <button class="success" style="flex:1;" id="btnAnim" onclick="generateVideo()" disabled>🎥 步驟 2：自動生成 MV 影片</button>
+  </div>
+  <div style="margin-top:6px;">
+    <input type="file" id="customImgUpload" accept="image/*" style="display:none;" onchange="loadCustomImage(event)">
+    <button class="secondary" style="width:100%; font-size:11px; padding:6px;" onclick="document.getElementById('customImgUpload').click()">📤 或上傳您自己生好的男生圖片</button>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="primary" id="copy">📋 複製當前指令</button>
+  <button class="secondary" id="save">💾 儲存設定</button>
+  <button class="secondary" id="exportSettings">📤 匯出設定</button>
+  <button class="secondary" id="importSettings">📥 匯入設定</button>
+  <input id="importFile" type="file" accept=".json,application/json" style="display:none">
+  <button class="dark" id="reset" style="grid-column: span 2;">↺ 重設所有設定</button>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+/* 資料庫設定 (每項均已擴充至 50 款以上可愛風格) */
+const OPTIONS_DB = {
+  gender: [
+    "日系陽光元氣男孩 (Energetic Japanese cute boy)",
+    "韓系清爽少年偶像 (Fresh Korean male idol)",
+    "溫柔奶油系暖男 (Soft gentle cream-tone boy)",
+    "俏皮貓系可愛少年 (Playful cat-like cute boy)",
+    "清新校園系少年 (Fresh Japanese schoolboy)",
+    "活力街頭潮流男孩 (Energetic streetwear boy)",
+    "陽光運動系少年 (Sunny athletic boy)",
+    "文青氣質系男孩 (Artistic gentle boy)",
+    "甜酷 Y2K 少年 (Y2K sweet-cool boy)",
+    "可愛樂團吉他手少年 (Cute anime band guitarist boy)",
+    "韓系 C 位男團少年 (K-pop boy group center)",
+    "溫柔犬系少年 (Gentle puppy-like boy)",
+    "清爽短髮校草少年 (Fresh short-haired school idol)",
+    "復古港風少年 (Retro Hong Kong-inspired boy)",
+    "日系森系文藝少年 (Japanese Mori-style boy)",
+    "可愛奶茶系少年 (Milk-tea aesthetic boy)",
+    "酷帥電競少年 (Cool gamer boy)",
+    "陽光棒球少年 (Sunny baseball boy)",
+    "青春籃球少年 (Youthful basketball boy)",
+    "街舞潮流少年 (Street dance boy)",
+    "夢幻白髮少年 (Dreamy silver-haired boy)",
+    "溫柔鋼琴王子 (Gentle piano prince)",
+    "清爽海洋系少年 (Fresh ocean-inspired boy)",
+    "可愛小熊系少年 (Cute teddy-bear boy)",
+    "貓系冷酷少年 (Cool cat-like boy)",
+    "活潑小狐狸系少年 (Playful fox-like boy)",
+    "校園風學生會少年 (School council boy)",
+    "咖啡廳店員系少年 (Cute cafe staff boy)",
+    "陽光旅人系少年 (Sunny traveler boy)",
+    "溫柔學長系少年 (Gentle senior student)",
+    "夢幻魔法學院少年 (Fantasy magic academy boy)",
+    "可愛動漫主角少年 (Cute anime protagonist boy)",
+    "精靈系少年 (Gentle elf-like boy)",
+    "少年感白襯衫造型 (Youthful white-shirt boy)",
+    "清新牛仔系男孩 (Fresh denim boy)",
+    "運動休閒系男孩 (Casual sporty boy)",
+    "韓系微捲髮少年 (Korean soft-wave-haired boy)",
+    "復古唱片店少年 (Retro record-store boy)",
+    "甜酷機能風少年 (Sweet-cool techwear boy)",
+    "校園樂團主唱少年 (School band vocalist boy)",
+    "可愛兔系少年 (Cute bunny-like boy)",
+    "夢幻星空系少年 (Dreamy starlight boy)",
+    "溫暖陽光系鄰家男孩 (Warm boy-next-door)",
+    "帥氣舞台偶像少年 (Handsome stage idol boy)",
+    "清爽汽水系少年 (Fresh soda aesthetic boy)",
+    "可愛恐龍系少年 (Cute dinosaur-themed boy)",
+    "冬日毛衣系少年 (Cozy winter sweater boy)",
+    "海邊衝浪少年 (Beach surfer boy)",
+    "青春跑者少年 (Youthful runner boy)",
+    "Q版萌系男孩 (Cute chibi boy)",
+    "精緻動漫美少年 (Refined anime bishonen boy)",
+    "活力短髮萌系男孩 (Energetic short-haired cute boy)"
+  ],
+  faceShape: [
+    "清秀鵝蛋臉，大而明亮的眼睛 (Clean oval face with bright eyes)",
+    "柔和心形臉，溫暖微笑 (Soft heart-shaped face with warm smile)",
+    "可愛嬰兒肥圓臉 (Cute youthful round face)",
+    "立體貓系眉眼，俏皮笑容 (Defined cat-like eyes with playful smile)",
+    "清爽自然少年臉 (Fresh natural youthful face)",
+    "微張嘴巴的陽光笑臉 (Bright open-mouth smile)",
+    "露出小虎牙的可愛笑容 (Cute smile with tiny fang)",
+    "清亮眼神與溫柔笑眼 (Bright eyes with gentle eye-smile)",
+    "水汪汪大眼少年感臉龐 (Youthful face with sparkling eyes)",
+    "乾淨俐落極簡五官 (Clean minimalist facial features)",
+    "微微紅潤的青春臉龐 (Fresh youthful flushed cheeks)",
+    "淡淡雀斑的自然少年臉 (Natural youthful face with subtle freckles)",
+    "精緻動漫美少年五官 (Refined anime bishonen features)",
+    "俏皮微嘟嘴表情 (Playful slight pout)",
+    "笑起來有小酒窩的臉龐 (Sweet dimples when smiling)",
+    "溫柔清秀的少年臉 (Gentle handsome youthful face)",
+    "日系動漫經典少年臉 (Classic Japanese anime boy face)",
+    "單眼眨眼的俏皮表情 (Playful wink)",
+    "溫柔無辜的大眼神情 (Gentle innocent gaze)",
+    "微笑嘴角上揚的清爽臉型 (Fresh smile with lifted mouth corners)",
+    "圓潤可愛的蘋果肌少年臉 (Cute youthful apple cheeks)",
+    "自信陽光燦笑臉 (Confident sunny smile)",
+    "輕抿嘴唇的安靜少年臉 (Quiet face with subtle lips)",
+    "明亮星光感眼眸 (Bright sparkling eyes)",
+    "溫柔垂眼犬系臉龐 (Gentle puppy-eye face)",
+    "清爽濃眉少年五官 (Fresh defined eyebrows)",
+    "精緻小巧少年臉型 (Delicate youthful face)",
+    "氣鼓鼓可愛表情 (Cute puffed-cheek expression)",
+    "自然笑顏露上排小白牙 (Natural smile showing upper teeth)",
+    "帶有活力的少年笑臉 (Energetic youthful smile)",
+    "柔和臥蠶與清澈眼神 (Soft aegyo-sal with clear eyes)",
+    "清秀精靈般五官 (Cute elf-like features)",
+    "半瞇眼的慵懶少年表情 (Relaxed sleepy-eyed expression)",
+    "俐落下顎線與少年感五官 (Clean jawline with youthful features)",
+    "害羞微紅臉頰的少年 (Shy youthful blush)",
+    "開心大笑的元氣少年 (Joyful energetic laugh)",
+    "夢幻柔光少年臉 (Dreamy softly lit youthful face)",
+    "星光閃爍動漫眼睛 (Sparkling anime eyes)",
+    "自然水潤嘴唇與乾淨五官 (Natural lips and clean features)",
+    "小貼紙點綴的可愛少年臉 (Cute face with tiny cheek sticker)",
+    "小虎牙笑容少年 (Youthful smile with tiny fang)",
+    "狗狗系垂眼可愛臉 (Cute puppy-like eyes)",
+    "乾淨無瑕自然少年臉 (Fresh flawless youthful face)",
+    "小酒窩俏皮微笑 (Playful smile with dimples)",
+    "鼻樑貼小創可貼的俏皮造型 (Playful tiny nose bandage)",
+    "臉頰小閃電塗鴉裝飾 (Tiny lightning cheek doodle)",
+    "溫柔微笑王子系臉型 (Gentle prince-like face)",
+    "眼角微亮細閃的舞台妝感 (Subtle stage sparkle around eyes)",
+    "精緻小嘴與清秀輪廓 (Refined small mouth and clean features)",
+    "好奇明亮大眼少年 (Curious bright-eyed boy)",
+    "燦爛自信滿面笑容 (Radiant confident smile)"
+  ],
+  hairStyle: [
+    "黑色蓬鬆短髮，空氣感瀏海 (Fluffy black short hair with airy bangs)",
+    "奶茶棕微捲短髮 (Milk-tea brown soft wavy short hair)",
+    "日系碎髮短髮 (Japanese textured short hair)",
+    "韓系中分微捲髮 (Korean middle-part soft waves)",
+    "亞麻金短髮 (Flaxen blonde short hair)",
+    "銀白色蓬鬆短髮 (Fluffy silver-white short hair)",
+    "深棕自然旁分短髮 (Natural dark-brown side-part hair)",
+    "黑色狼尾短髮 (Black modern wolf-cut hair)",
+    "可愛短髮搭配髮夾 (Cute short hair with simple clip)",
+    "高蓬鬆短髮造型 (High-volume fluffy short hair)",
+    "深藍黑色微捲髮 (Deep blue-black wavy hair)",
+    "蜂蜜棕自然捲髮 (Honey brown natural waves)",
+    "栗色蓬鬆短髮 (Chestnut fluffy short hair)",
+    "霧灰色層次短髮 (Ash-gray layered short hair)",
+    "淺金色中長髮微捲 (Light blonde medium wavy hair)",
+    "黑色日系姬髮男生版 (Japanese layered straight boy hair)",
+    "天空藍漸層短髮 (Sky-blue gradient short hair)",
+    "棕色側分蓬鬆髮 (Brown fluffy side-part hair)",
+    "黑色自然捲微長髮 (Natural black slightly long curls)",
+    "奶油金短髮帶碎瀏海 (Cream blonde textured bangs)",
+    "巧克力棕蓬鬆中長髮 (Chocolate brown fluffy medium hair)",
+    "紫灰色潮流短髮 (Purple-gray trendy short hair)",
+    "銀灰色中分長瀏海 (Silver-gray middle-part fringe)",
+    "黑茶色韓系逗號瀏海 (Black-tea Korean comma hair)",
+    "深棕色微分線短髮 (Dark-brown subtle part short hair)",
+    "奶油白短髮帶自然捲 (Cream-white short curls)",
+    "薄荷綠漸層短髮 (Mint-green gradient short hair)",
+    "紅棕色層次狼尾 (Red-brown layered wolf cut)",
+    "藍黑色高蓬鬆髮型 (Blue-black voluminous hair)",
+    "金棕色自然微捲中長髮 (Golden-brown medium waves)",
+    "黑色短髮搭細髮帶 (Black short hair with slim headband)",
+    "灰紫色柔和微捲髮 (Soft gray-purple waves)",
+    "淺栗色蓬鬆中長髮 (Light chestnut fluffy medium hair)",
+    "日系短髮兩側自然蓬鬆 (Japanese airy side-volume hair)",
+    "銀藍色漸層短髮 (Silver-blue gradient short hair)",
+    "焦糖棕短髮微捲 (Caramel brown wavy short hair)",
+    "自然黑髮搭白色髮夾 (Natural black hair with white clip)",
+    "霧藍灰層次短髮 (Mist blue-gray layered hair)",
+    "深咖啡色韓系短髮 (Dark coffee Korean short hair)",
+    "金色蓬鬆短髮帶微捲 (Golden fluffy slightly wavy hair)",
+    "黑色微長瀏海遮眉造型 (Black medium fringe hair)",
+    "白金色潮流短髮 (Platinum blonde trendy short hair)",
+    "棕黑色自然捲短髮 (Brown-black natural curls)",
+    "紫黑色層次短髮 (Purple-black layered short hair)",
+    "海軍藍短髮微捲 (Navy blue soft wavy hair)",
+    "蜜糖棕中分微捲髮 (Honey-brown middle-part waves)",
+    "霧粉棕短髮 (Dusty rose-brown short hair)",
+    "淺灰銀短髮 (Light gray-silver short hair)",
+    "黑色俐落油頭舞台造型 (Sleek black stage hairstyle)",
+    "蓬鬆法式短捲髮男生版 (Fluffy French curls for boys)",
+    "可愛白金短髮帶細髮箍 (Platinum short hair with slim headband)"
+  ],
+  bodyType: [
+    "清瘦修長少年比例 (Slim youthful boy proportions)",
+    "陽光運動型勻稱身材 (Balanced athletic boy build)",
+    "纖細輕盈舞者身形 (Slim lightweight dancer build)",
+    "可愛 Q 版大頭小身體比例 (Cute chibi boy proportions)",
+    "高挑修長偶像身形 (Tall slender idol frame)",
+    "肩膀微寬的青春少年身形 (Youthful slightly broad shoulders)",
+    "活力跑者運動員體型 (Energetic runner build)",
+    "精瘦街舞少年身形 (Lean street-dancer build)",
+    "韓系男團修長比例 (K-pop boy-group proportions)",
+    "日系校園少年自然身形 (Natural Japanese schoolboy build)",
+    "小巧可愛少年比例 (Compact cute boy proportions)",
+    "溫柔纖細學長身形 (Slim gentle senior-student build)",
+    "青春活力舞台偶像比例 (Youthful stage-idol frame)",
+    "柔和自然少年骨架 (Soft natural youthful frame)",
+    "高挑 C 位男團比例 (Tall center-idol proportions)",
+    "靈活敏捷貓系少年身形 (Nimble cat-like boy build)",
+    "元氣動漫主角身形 (Energetic anime protagonist build)",
+    "舒服自然鄰家男孩比例 (Boy-next-door proportions)",
+    "輕盈舞者修長身形 (Long lightweight dancer frame)",
+    "王子系優雅修長身形 (Elegant prince-like build)",
+    "嬌小可愛 160cm 少年比例 (Cute petite boy proportions)",
+    "自然精瘦少年線條 (Natural lean youthful frame)",
+    "Q版 3 頭身極致萌化身形 (Ultra-cute 3-head chibi boy)",
+    "輕盈苗條舞台身材 (Lightweight slim stage build)",
+    "軟萌小熊系圓潤少年身形 (Soft teddy-bear boy build)",
+    "靈巧兔系少年比例 (Nimble bunny-like boy frame)",
+    "修長動漫美少年線條 (Slender anime bishonen silhouette)",
+    "青春籃球少年體型 (Youthful basketball build)",
+    "短跑選手活力身形 (Energetic sprinter build)",
+    "羽毛般輕盈少年比例 (Feather-light youthful frame)",
+    "二次元經典 1:7 男性比例 (Anime 1:7 male proportion)",
+    "精瘦精靈系少年身形 (Slim elf-like boy build)",
+    "潮流偶像修長比例 (Trendy idol proportions)",
+    "小巧俐落街舞少年身形 (Compact street-dancer build)",
+    "柔韌瑜伽舞者少年線條 (Flexible dancer build)",
+    "元氣短跑少年身形 (Energetic runner frame)",
+    "精緻洋娃娃系男孩比例 (Refined doll-like boy proportion)",
+    "優雅游泳選手少年身形 (Graceful swimmer build)",
+    "可愛小鳥系纖細少年比例 (Delicate bird-like boy frame)",
+    "樂團主唱修長身形 (Slender band-vocalist build)",
+    "街頭滑板少年體型 (Skater boy build)",
+    "足球少年運動身形 (Youthful soccer build)",
+    "吉他手自然修長比例 (Natural guitarist frame)",
+    "電競少年纖細身形 (Slim gamer build)",
+    "帥氣舞台表演者比例 (Handsome performer build)",
+    "溫暖鄰家男孩體型 (Warm boy-next-door build)",
+    "潮流模特修長比例 (Trendy model-like build)",
+    "休閒運動少年身形 (Casual sporty build)",
+    "可愛動漫男主角比例 (Cute anime male-lead build)",
+    "精緻少年王子比例 (Refined young-prince proportions)",
+    "勻稱青春男孩身形 (Balanced youthful boy build)"
+  ],
+  outfit: [
+    "白色襯衫＋黑色長褲的清爽校園造型 (White shirt and black trousers)",
+    "韓系男團休閒舞台服 (K-pop casual stage outfit)",
+    "黑白街頭潮流帽T＋寬褲 (Street hoodie and wide pants)",
+    "日系學院風針織背心＋襯衫 (Japanese academy vest and shirt)",
+    "牛仔外套＋白T＋休閒長褲 (Denim jacket, white tee and pants)",
+    "運動風棒球外套＋球鞋 (Sporty varsity jacket and sneakers)",
+    "黑色機能風外套＋工裝褲 (Black techwear jacket and cargo pants)",
+    "奶油色針織毛衣＋卡其長褲 (Cream sweater and khaki pants)",
+    "復古 Y2K 寬版上衣＋牛仔褲 (Retro Y2K oversized top and jeans)",
+    "可愛貓咪圖案衛衣＋束口褲 (Cute cat sweatshirt and joggers)",
+    "校園樂團主唱舞台服 (School band vocalist stage outfit)",
+    "清爽水手風男生版制服 (Fresh sailor-inspired boy uniform)",
+    "韓系西裝外套＋白T (Korean blazer with white tee)",
+    "休閒棒球服＋短褲 (Casual baseball jersey and shorts)",
+    "街舞寬鬆運動套裝 (Oversized street-dance tracksuit)",
+    "咖啡廳店員圍裙＋白襯衫 (Cafe staff apron and white shirt)",
+    "溫柔奶茶色風衣＋針織衫 (Milk-tea trench coat and knitwear)",
+    "新中式立領上衣＋長褲 (Modern Chinese stand-collar outfit)",
+    "復古唱片店襯衫＋西裝褲 (Retro record-store shirt and trousers)",
+    "天空藍運動外套＋白色長褲 (Sky-blue sports jacket and white pants)",
+    "白色連帽外套＋牛仔褲 (White hoodie jacket and jeans)",
+    "黑色皮衣＋素色上衣＋長褲 (Black leather jacket and trousers)",
+    "薄荷綠棒球外套＋白T (Mint varsity jacket and white tee)",
+    "夢幻星空印花衛衣＋工裝褲 (Starlight graphic sweatshirt and cargo pants)",
+    "可愛小熊毛衣＋直筒褲 (Cute teddy sweater and straight pants)",
+    "日系短版外套＋高腰長褲 (Japanese cropped jacket and trousers)",
+    "運動風足球球衣＋短褲 (Sporty soccer jersey and shorts)",
+    "校園風連帽外套＋長褲 (Campus hoodie and pants)",
+    "溫柔卡其襯衫＋白T (Soft khaki shirt and white tee)",
+    "潮流拼色外套＋寬版牛仔褲 (Color-block jacket and wide jeans)",
+    "灰色針織衫＋白色襯衫 (Gray knit sweater and white shirt)",
+    "藍色牛仔套裝＋白球鞋 (Blue denim set and white sneakers)",
+    "韓系高領毛衣＋寬褲 (Korean turtleneck and wide trousers)",
+    "白襯衫＋針織領帶＋黑褲 (White shirt, knit tie and black pants)",
+    "潮流無袖背心＋工裝長褲 (Trendy sleeveless top and cargo pants)",
+    "海邊度假襯衫＋休閒短褲 (Beach resort shirt and shorts)",
+    "滑板少年寬鬆 T 恤＋牛仔褲 (Skater oversized tee and jeans)",
+    "冬日毛衣＋圍巾＋長褲 (Winter sweater, scarf and trousers)",
+    "機能風背心＋連帽上衣＋工裝褲 (Techwear vest, hoodie and cargos)",
+    "樂團吉他手皮外套＋黑褲 (Band guitarist jacket and black pants)",
+    "復古棒球外套＋直筒牛仔褲 (Retro varsity jacket and straight jeans)",
+    "陽光海灘短袖襯衫＋短褲 (Sunny beach shirt and shorts)",
+    "可愛恐龍印花衛衣＋運動褲 (Cute dinosaur sweatshirt and joggers)",
+    "夢幻銀灰舞台服＋長版外套 (Silver-gray stage outfit)",
+    "韓系寬鬆西裝＋球鞋 (Oversized Korean suit with sneakers)",
+    "日系文青襯衫＋寬褲 (Japanese artsy shirt and wide pants)",
+    "黑金舞台表演服 (Black-and-gold performance outfit)",
+    "清爽白T＋藍色長褲 (Fresh white tee and blue trousers)",
+    "冬季羽絨外套＋毛帽 (Winter puffer jacket and beanie)",
+    "王子系白襯衫＋深色長褲 (Young-prince white shirt and dark trousers)",
+    "可愛男團彩色舞台服 (Colorful cute boy-group stage outfit)"
+  ],
+  musicType: [
+    "Cute Pop 可愛流行樂 (輕快、萌感強烈)",
+    "J-Pop 日系萌系動漫歌曲",
+    "K-Pop 甜美女團舞曲",
+    "Disco 復古歡樂萌舞曲",
+    "Lofi 軟萌治癒系音樂",
+    "Electro-Pop 粉嫩電音舞曲",
+    "Bubblegum Pop 泡泡糖流行樂",
+    "告白甜妹流行單曲",
+    "Future Bass 甜美未來電音",
+    "City Pop 甜美復古都市流行",
+    "Kawaii Bass 萌系重低音舞曲",
+    "Cute Rap 軟萌饒舌舞曲",
+    "Chiptune 8-Bit 復古遊戲萌音",
+    "Tropical House 夢幻夏日電音",
+    "Pastel EDM 粉嫩電音搖滾",
+    "Hyperpop 甜美超流行電音",
+    "Acoustic Cute 軟萌木吉他輕音樂",
+    "Sweet Waltz 夢幻圓舞曲",
+    "Eurobeat 萌系飆速舞曲",
+    "Glitchcore 甜美電子舞曲",
+    "Cute Rock 萌系搖滾流行樂",
+    "Swing Jazz 可愛搖擺爵士",
+    "Bossa Nova 軟萌小野麗莎風",
+    "Samba 歡樂萌系桑巴舞曲",
+    "Vocaloid 甜美合成器動漫歌",
+    "Lullaby Cute 治癒搖籃曲風格",
+    "Carnival Cute 狂歡節萌系樂",
+    "Pastel Synthwave 夢幻合成波",
+    "Acapella Cute 軟萌純人聲合唱",
+    "Ukulele Cute 烏克麗麗甜美彈唱",
+    "80s Retro Cute 八零年代萌曲",
+    "Cute Funk 俏皮放克舞曲",
+    "Dream Pop 夢幻泡泡流行樂",
+    "Chibi Beat Q 版歡樂打擊樂",
+    "Sweet Techno 甜美科技電音",
+    "Lounge Cute 軟萌沙龍輕音樂",
+    "Game OST 萌系遊戲主題曲",
+    "Lolita Classical 夢幻古典樂",
+    "K-Indie Cute 韓系獨立甜美歌",
+    "Cat Whistle Cute 貓咪哨音萌曲",
+    "Marshmallow Chill 軟萌棉花糖音樂",
+    "Picnic Folk 郊遊萌系民謠",
+    "Starlight Disco 星空迪斯可",
+    "Cherry Blossom Melody 櫻花旋律",
+    "Toy Box March 玩具盒進行曲",
+    "Melody Box Cute 八音盒夢幻曲",
+    "Sweet Reggae 甜美雷鬼舞曲",
+    "Soda Pop Dance 汽水泡泡舞曲",
+    "Bunny Hop EDM 兔兔跳跳電音",
+    "Pastel Piano 夢幻鋼琴甜曲",
+    "Angel Harmony 天使和聲萌樂",
+    "Magic Spell Cute 魔法咒語歌"
+  ],
+  dance: [
+    "萌系唱歌對嘴 + 甜美比心手勢舞 (Lip-syncing while doing cute heart gesture dance)",
+    "TikTok 超萌招牌貓爪舞 (俏皮貓耳與喵咪拳頭動作)",
+    "K-Pop 甜美女團招牌舞蹈 (輕快腳步與甜美笑容擺動)",
+    "可愛萌系跳躍舞 (輕盈小跳躍與開心眨眼)",
+    "二次元宅舞 (甜美俏皮連貫跳躍與轉圈)",
+    "軟萌捧臉與眨眼互動舞 (Cupping cheeks gesture & cute winking dance)",
+    "兔子跳躍萌系編舞 (Bunny hop cute choreography)",
+    "可愛轉圈與服裝飄逸舞 (Cute spinning with flowing outfit)",
+    "手指舞與比心連擊 (Finger dance with rapid heart gesture combo)",
+    "貓咪伸懶腰與輕踏步舞 (Cat stretch & cute gentle step dance)",
+    "夢幻芭蕾微旋轉手勢舞 (Pastel ballet spin & hand gesture dance)",
+    "可愛嘟嘴與托腮擺動舞 (Cute pouting & chin-resting dance)",
+    "草莓派對歡快小跳步 (Strawberry party happy bouncy dance)",
+    "萌系wink眨眼連擊手勢舞 (Wink combo & cute hand dance)",
+    "軟萌小熊擺動舞 (Cute fluffy bear swaying dance)",
+    "眨眼比槍打中你心舞 (Wink & finger-gun cute heart dance)",
+    "可愛踩拍子踢腿舞 (Cute rhythmic kick & step dance)",
+    "魔法棒揮舞變身舞 (Magical wand waving cute transformation dance)",
+    "汽水泡泡跳躍手勢舞 (Soda bubble bounce gesture dance)",
+    "甜美小手拍拍舞 (Sweet cute hand clapping dance)",
+    "萌系喵咪洗臉動作舞 (Cute cat washing face hand movement)",
+    "青春啦啦隊跳躍舞 (Youthful cheerful pom-pom dance)",
+    "軟萌頭頂比大愛心舞 (Cute big heart gesture above head)",
+    "夢幻羽毛飄逸手勢舞 (Dreamy feather-light hand dance)",
+    "可愛雙手托臉搖擺舞 (Cute head-tilted cheek cupping sway)",
+    "甜美眨眼微跳轉身舞 (Sweet wink mini-jump & turn dance)",
+    "兔子耳手勢搖晃舞 (Bunny ears hand gesture wiggle dance)",
+    "二次元萌系踏步擺臂舞 (Cute anime marching arm-swing dance)",
+    "甜美比心並向前送吻 (Heart gesture with cute blown kiss)",
+    "可愛小鴨跳躍搖屁股舞 (Cute duckling waddle & bounce dance)",
+    "夢幻彩虹手指畫心舞 (Rainbow finger-heart drawing dance)",
+    "軟萌點頭與搖頭擺動舞 (Soft cute head nod & shake sway)",
+    "可愛躲貓貓遮臉舞 (Cute peek-a-boo face-covering dance)",
+    "甜美輕輕踢腳尖手勢舞 (Sweet gentle toe-tap hand dance)",
+    "萌系微醺搖晃手勢舞 (Cute gentle tipsy sway dance)",
+    "可愛企鵝搖擺踩步舞 (Cute penguin waddle step dance)",
+    "夢幻流星指划舞 (Dreamy shooting star finger dance)",
+    "甜美捏臉頰萌感擺動舞 (Cute cheek pinching sway dance)",
+    "二次元閃耀比心轉圈舞 (Anime sparkling heart spin dance)",
+    "軟萌抓氣球跳躍舞 (Cute grabbing balloon bounce dance)",
+    "可愛小狗搖尾巴手勢舞 (Cute puppy tail-wagging hand dance)",
+    "甜美手指比愛心連發舞 (Rapid sweet finger heart dance)",
+    "夢幻水滴輕觸手勢舞 (Dreamy raindrop touch hand dance)",
+    "可愛輕輕摸頭殺擺擺舞 (Cute patting head gentle sway dance)",
+    "軟萌小羊咩咩擺動舞 (Cute lamb gentle dance)",
+    "甜美吹泡泡手勢舞 (Sweet bubble blowing hand gesture dance)",
+    "萌系閃亮眼睛指面舞 (Cute bright eyes pointing dance)",
+    "可愛轉圈跳躍舞 (Cute cheerful spin and bounce)",
+    "夢幻精靈飛翔手勢舞 (Dreamy fairy flying hand movement)",
+    "軟萌角落躲藏偷看舞 (Cute hiding & peeking gesture dance)",
+    "甜美心形手指舞連擊 (Sweet double-heart combo dance)",
+    "可愛跳躍雙手比 V 舞 (Cute bounce with double peace sign)"
+  ],
+  scene: [
+    "粉色夢幻糖果城堡世界 (Pastel pink dream candy castle world)",
+    "粉嫩櫻花雨飄落的日系街道 (Japanese street with falling cherry blossom petals)",
+    "夢幻粉紫色甜點奶油房間 (Pastel pink & purple dessert cream room)",
+    "可愛雲朵與彩虹城堡天空 (Dreamy clouds & rainbow pastel sky)",
+    "夢幻草莓冰淇淋遊樂園 (Strawberry ice cream pastel amusement park)",
+    "粉色霓虹燈光甜美舞蹈棚 (Sweet studio with soft pink neon line lights)",
+    "K-Pop 粉色璀璨舞台 (Pastel LED screens, sparkling confetti)",
+    "日系可愛貓咪咖啡廳 (Cute Japanese cat cafe filled with pastel decor)",
+    "夢幻粉色水母海洋館 (Dreamy pink jellyfish aquarium)",
+    "粉嫩星空甜點露台 (Pastel starry night dessert balcony)",
+    "可愛熊熊絨毛玩具王國 (Cute teddy bear plushie kingdom)",
+    "夢幻水蜜桃果園草地 (Dreamy peach orchard grassy field)",
+    "粉色夢幻芭蕾舞教室 (Pastel pink ballet dance studio)",
+    "可愛魔法學院圖書館 (Cute magical girl fantasy library)",
+    "夢幻冰雪粉色水晶宮殿 (Dreamy pastel pink ice crystal palace)",
+    "粉嫩花海中的陽光溫室 (Pastel greenhouse full of blooming flowers)",
+    "可愛二次元甜品展覽館 (Cute anime dessert exhibition hall)",
+    "夢幻彩虹氣球熱氣球天空 (Pastel rainbow hot-air balloon sky)",
+    "粉色復古美式甜甜圈店 (Pink retro American donut shop)",
+    "可愛草莓蛋糕城堡內景 (Cute strawberry cake castle interior)",
+    "夢幻粉色海灘與棉花糖雲 (Pastel pink beach with marshmallow clouds)",
+    "可愛貓耳圖案電競房間 (Cute cat-ear themed gaming setup room)",
+    "粉嫩流星雨飄落的夜空 (Pastel shooting star night sky)",
+    "夢幻星光水晶舞台 (Dreamy starry crystal glowing stage)",
+    "可愛草莓野餐草坪 (Cute strawberry picnic lawn with pastel blankets)",
+    "粉色夢幻蒸汽波旋轉木馬 (Pastel vaporwave carousel merry-go-round)",
+    "可愛二次元動漫課堂 (Cute anime classroom during sunset)",
+    "夢幻粉紫薰衣草花海 (Dreamy lavender & pink flower field)",
+    "粉色閃亮泡泡海洋舞台 (Pastel glowing bubble ocean stage)",
+    "可愛天使雲朵宮殿 (Cute angel cloud palace in pastel sky)",
+    "夢幻甜妹戶外露營帳篷 (Dreamy sweet girl pastel camping site)",
+    "粉嫩櫻花樹下的公園椅子 (Park bench under blooming sakura trees)",
+    "可愛獨角獸夢幻森林 (Cute unicorn dreamy fantasy forest)",
+    "夢幻月光粉色露台 (Dreamy moonlight pastel pink terrace)",
+    "夢幻潮流雜貨舖 (Cute pink kawaii goods store interior)",
+    "可愛奶油小狗咖啡館 (Cute cream puppy themed cafe)",
+    "夢幻閃耀水晶星願池 (Pastel sparkling crystal wish fountain)",
+    "粉嫩糖果色溜冰場 (Pastel candy-colored roller skating rink)",
+    "可愛日系屋頂花園 (Cute Japanese rooftop garden with pastel sunset)",
+    "夢幻冰淇淋車大街 (Dreamy pastel ice cream truck street)",
+    "粉色可愛火車車廂 (Pastel pink cute train carriage interior)",
+    "可愛粉色霓虹街角 (Cute pink neon street corner at night)",
+    "夢幻泡泡糖彩虹橋 (Dreamy bubblegum rainbow bridge)",
+    "粉嫩精靈水池公園 (Pastel fairy pond with lotus blossoms)",
+    "可愛二次元音樂錄音室 (Cute anime recording studio setup)",
+    "夢幻星空童話城堡庭院 (Pastel fairytale castle courtyard)",
+    "粉色可愛羽毛夢境 (Pastel pink dreamscape filled with feathers)",
+    "可愛喵咪爪爪星舞台 (Cute cat paw-shaped star stage)",
+    "夢幻閃爍珠光粉展廳 (Pastel sparkling pearl pink showroom)",
+    "粉嫩彩虹糖果雨街道 (Pastel rainbow candy rain street)",
+    "可愛小羊草地夢幻牧場 (Cute fluffy sheep green pastel meadow)",
+    "夢幻宇宙星河粉色飛船 (Pastel galaxy pink spaceship interior)"
+  ]
+};
+
+let currentTab = 'img';
+
+function initOptions(){
+  for(let key in OPTIONS_DB){
+    const select = document.getElementById(key);
+    if(!select) continue;
+    select.innerHTML = "";
+    OPTIONS_DB[key].forEach((item, index) => {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.textContent = `${index + 1}. ${item}`;
+      select.appendChild(opt);
+    });
+  }
+}
+
+const get = id => document.getElementById(id).value.trim();
+const checked = () => [...document.querySelectorAll('.check input:checked')].map(x=>x.value);
+
+function switchTab(tab){
+  currentTab = tab;
+  document.getElementById('tabImg').classList.toggle('active', tab === 'img');
+  document.getElementById('tabVid').classList.toggle('active', tab === 'vid');
+  makePrompt();
+}
+
+function makePrompt(){
+  const song = get('song') || '青春熱門單曲';
+  const options = checked();
+
+  if(currentTab === 'img'){
+    // 專門給 Midjourney / DALL-E 用的靜態生圖 Prompt
+    const lines = [
+      '【階段 1：AI 美少年角色靜態照片 Prompt (Text-to-Image)】',
+      '（可用於 Midjourney / DALL-E / Stable Diffusion 等生成高品質角色立繪圖）',
+      '',
+      '【角色繪製核心特徵】',
+      '・氣質造型：' + get('gender'),
+      '・五官臉型：' + get('faceShape'),
+      '・髮型髮色：' + get('hairStyle'),
+      '・身材比例：' + get('bodyType'),
+      '・男生穿搭：' + get('outfit'),
+      '・美術風格：' + get('artStyle'),
+      '・場景背景：' + get('scene'),
+      '・畫面規格：' + get('ratio') + ' 正面全身/半身立繪，高畫質柔光燈光，精緻自然男性面部細節。',
+      get('custom') ? '・細節補充：' + get('custom') : '',
+      '',
+      '【繪圖參數 Prompt】',
+      `${get('gender')}, ${get('hairStyle')}, ${get('outfit')}, ${get('scene')}, ${get('artStyle')}, masterpiece, best quality, ultra-detailed, cute handsome front view portrait --ar 9:16`
+    ];
+    document.getElementById('prompt').value = lines.join('\n');
+  } else {
+    // 專門給 Kling / Runway 用的圖生影片 Prompt
+    const lines = [
+      '【階段 2：圖轉唱跳影片 Prompt (Image-to-Video)】',
+      '（將階段 1 生成的照片上傳至 Kling / Runway / Luma 後貼入以下指令）',
+      '',
+      '【動態舞蹈與對嘴表演指令】',
+      '・音樂風格：' + get('musicType') + ' (節奏: ' + get('beat') + ')',
+      '・唱跳對嘴：人物根據音樂節奏做精準對嘴 (Accurate lip-syncing)，搭配自然微笑、帥氣眼神與輕微眨眼。',
+      '・舞蹈動作：' + get('dance') + ' (' + get('dancePower') + ')。',
+      '・運鏡風格：' + get('camera'),
+      '・物理流動：' + (options.length ? options.join('；') : '頭髮與服裝隨舞蹈自然擺動') + '。',
+      '・品質維護：保持人物臉孔與服裝與原圖 100% 一致，無變臉，動態流暢 60fps。'
+    ];
+    document.getElementById('prompt').value = lines.join('\n');
+  }
+}
+
+/* 隨機抽籤功能 */
+function randomizeCharacter(){
+  ['gender', 'faceShape', 'hairStyle', 'bodyType', 'outfit', 'artStyle'].forEach(key => {
+    const sel = document.getElementById(key);
+    if(sel){
+      sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+    }
+  });
+  makePrompt();
+}
+
+function randomizeAll(){
+  randomizeCharacter();
+  ['musicType', 'dance', 'scene'].forEach(key => {
+    const sel = document.getElementById(key);
+    if(sel){
+      sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+    }
+  });
+  makePrompt();
+}
+
+/* Canvas 模擬 AI 生成圖片與動畫機制 */
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+let currentImgData = null;
+let animTimer = null;
+let isAnimating = false;
+
+// 初始化畫布
+function initCanvas(){
+  ctx.fillStyle = "#eef5ff";
+  ctx.fillRect(0,0,260,360);
+  ctx.fillStyle = "#ff6b95";
+  ctx.font = "bold 14px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("✨ 點擊下方「生成角色照片」", 130, 170);
+  ctx.fillText("體驗先圖後影自動流程", 130, 195);
+}
+
+function generateImage(){
+  if(isAnimating) stopAnimation();
+  document.getElementById('simBadge').textContent = "1. 已生成角色圖片";
+  
+  // 繪製模擬的 AI 萌系美少年卡片
+  ctx.fillStyle = "#ffdae3";
+  ctx.fillRect(0,0,260,360);
+  
+  // 背景星光裝飾
+  ctx.fillStyle = "#ffffff";
+  for(let i=0; i<15; i++){
+    ctx.beginPath();
+    ctx.arc(Math.random()*260, Math.random()*360, Math.random()*3+1, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // 美少年頭髮
+  ctx.fillStyle = "#ff7597";
+  ctx.beginPath();
+  ctx.arc(130, 130, 75, 0, Math.PI*2);
+  ctx.fill();
+
+  // 臉型
+  ctx.fillStyle = "#fff0e6";
+  ctx.beginPath();
+  ctx.arc(130, 140, 50, 0, Math.PI*2);
+  ctx.fill();
+
+  // 腮紅
+  ctx.fillStyle = "#ffb3c6";
+  ctx.beginPath();
+  ctx.arc(105, 150, 10, 0, Math.PI*2);
+  ctx.arc(155, 150, 10, 0, Math.PI*2);
+  ctx.fill();
+
+  // 眼睛
+  ctx.fillStyle = "#3d242b";
+  ctx.beginPath();
+  ctx.arc(110, 135, 7, 0, Math.PI*2);
+  ctx.arc(150, 135, 7, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(112, 133, 2.5, 0, Math.PI*2);
+  ctx.arc(152, 133, 2.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // 甜美微笑
+  ctx.strokeStyle = "#2563eb";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(130, 150, 8, 0.1*Math.PI, 0.9*Math.PI);
+  ctx.stroke();
+
+  // 裙裝主體
+  ctx.fillStyle = "#ff477e";
+  ctx.beginPath();
+  ctx.moveTo(95, 185);
+  ctx.lineTo(165, 185);
+  ctx.lineTo(185, 290);
+  ctx.lineTo(75, 290);
+  ctx.closePath();
+  ctx.fill();
+
+  // 儲存快照
+  currentImgData = ctx.getImageData(0, 0, 260, 360);
+  document.getElementById('btnAnim').disabled = false;
+}
+
+function generateVideo(){
+  if(!currentImgData) return;
+  document.getElementById('simBadge').textContent = "2. 🎬 唱跳 MV 播放中";
+  stopAnimation();
+  
+  let frame = 0;
+  isAnimating = true;
+  
+  animTimer = setInterval(() => {
+    frame++;
+    ctx.putImageData(currentImgData, 0, 0);
+    
+    // 模擬動態擺動與對嘴效果
+    const offsetY = Math.sin(frame * 0.15) * 6;
+    const eyeWink = Math.sin(frame * 0.1) > 0.8;
+    
+    // 清除區域重新繪製擺動頭部
+    ctx.fillStyle = "#fff0e6";
+    ctx.beginPath();
+    ctx.arc(130, 140 + offsetY, 50, 0, Math.PI*2);
+    ctx.fill();
+
+    // 腮紅
+    ctx.fillStyle = "#ffb3c6";
+    ctx.beginPath();
+    ctx.arc(105, 150 + offsetY, 10, 0, Math.PI*2);
+    ctx.arc(155, 150 + offsetY, 10, 0, Math.PI*2);
+    ctx.fill();
+
+    // 眨眼/大眼
+    ctx.fillStyle = "#3d242b";
+    if(eyeWink){
+      ctx.fillRect(103, 133 + offsetY, 14, 3);
+      ctx.beginPath();
+      ctx.arc(150, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(110, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.arc(150, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // 萌感嘴型變化 (唱歌對嘴)
+    const mouthOpen = Math.abs(Math.sin(frame * 0.2)) * 6 + 3;
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath();
+    ctx.ellipse(130, 155 + offsetY, 6, mouthOpen, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // 飄落愛心特效
+    ctx.fillStyle = "rgba(255, 107, 149, 0.7)";
+    const heartY = (frame * 4) % 360;
+    ctx.beginPath();
+    ctx.arc((frame*3)%260, heartY, 6, 0, Math.PI*2);
+    ctx.fill();
+
+  }, 50);
+}
+
+function stopAnimation(){
+  if(animTimer) clearInterval(animTimer);
+  isAnimating = false;
+}
+
+function loadCustomImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const img = new Image();
+  img.onload = () => {
+    stopAnimation();
+    ctx.drawImage(img, 0, 0, 260, 360);
+    currentImgData = ctx.getImageData(0, 0, 260, 360);
+    document.getElementById('simBadge').textContent = "1. 自訂圖片已上傳";
+    document.getElementById('btnAnim').disabled = false;
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+/* 即時監聽選項 */
+document.querySelectorAll('select, input[type=text], textarea, input[type=checkbox]').forEach(el => {
+  el.addEventListener('input', makePrompt);
+  el.addEventListener('change', makePrompt);
+});
+
+/* 複製 Prompt */
+document.getElementById('copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(document.getElementById('prompt').value);
+    const btn = document.getElementById('copy');
+    btn.textContent = '✓ 已複製當前指令';
+    setTimeout(() => { btn.textContent = '📋 複製當前指令'; }, 1500);
+  } catch(e) {
+    alert('複製失敗，請手動複製右側指令。');
+  }
+};
+
+/* 儲存/匯出/匯入/重設 */
+function getSettingsData(){
+  const data = { version:5, settings:{} };
+  document.querySelectorAll('select, input[type=text], textarea').forEach(el => {
+    data.settings[el.id] = el.value;
+  });
+  data.settings.checks = checked();
+  return data;
+}
+
+document.getElementById('save').onclick = () => {
+  localStorage.setItem('danceMVGenerator_img2vid', JSON.stringify(getSettingsData()));
+  alert('可愛設定已儲存！');
+};
+
+document.getElementById('exportSettings').onclick = () => {
+  const blob = new Blob([JSON.stringify(getSettingsData(), null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Cute_Girl_MV_ImageToVideo_Settings.json';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById('importSettings').onclick = () => document.getElementById('importFile').click();
+
+document.getElementById('importFile').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const raw = JSON.parse(reader.result);
+      const data = raw.settings || raw;
+      Object.keys(data).forEach(id => {
+        const el = document.getElementById(id);
+        if(el && id !== 'checks') el.value = data[id];
+      });
+      makePrompt();
+      alert('可愛設定匯入成功！');
+    } catch(e) { alert('格式錯誤。'); }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('reset').onclick = () => {
+  if(!confirm('確定要重設為初始可愛設定嗎？')) return;
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type=text], textarea').forEach(el => el.value = '');
+  stopAnimation();
+  initCanvas();
+  makePrompt();
+};
+
+/* 啟動 */
+initOptions();
+initCanvas();
+makePrompt();
+</script>
+
+</body>
+</html>
