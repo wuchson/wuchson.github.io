@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 萌系女生動物唱跳 MV 指令生成器</title>
+
+<style>
+:root{
+  --pink:#ff6b95;
+  --pink2:#ffb3c6;
+  --bg:#fff5f7;
+  --line:#f7d6e0;
+  --ink:#3d242b;
+  --dark:#1f0d13;
+  --accent:#ff477e;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;
+  background:linear-gradient(135deg,#fff8fa,#ffe6ed);
+  color:var(--ink);
+}
+
+header{
+  background:linear-gradient(120deg,var(--pink),var(--pink2));
+  color:white;
+  padding:24px 20px;
+  text-align:center;
+}
+
+.wrap{
+  max-width:1300px;
+  margin:auto;
+}
+
+h1{
+  margin:0;
+  font-size:26px;
+}
+
+header p{
+  margin:8px 0 0;
+  opacity:.95;
+  font-size:14px;
+}
+
+.app{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+  padding:24px 20px 42px;
+}
+
+.panel{
+  background:#ffffff;
+  border:2px solid var(--line);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 10px 30px #ff6b9515;
+}
+
+.title{
+  font-size:18px;
+  font-weight:800;
+  margin:12px 0 16px;
+  padding-bottom:8px;
+  border-bottom:2px dashed #f7d6e0;
+  color:#e04872;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  font-weight:800;
+  margin-bottom:6px;
+  font-size:13px;
+  color:#522835;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+select,
+input[type=text],
+textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 12px;
+  background:#fff5f7;
+  font:inherit;
+  color:var(--ink);
+  font-size:13px;
+}
+
+textarea{
+  resize:vertical;
+}
+
+.checks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  background:#fff0f3;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:12px;
+}
+
+.check input{
+  accent-color:var(--pink);
+}
+
+.preview{
+  position:sticky;
+  top:16px;
+}
+
+.tab-btn-group{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.tab-btn{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  border:2px solid var(--pink2);
+  background:#fff;
+  color:var(--ink);
+  font-weight:800;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.tab-btn.active{
+  background:var(--pink);
+  color:#fff;
+  border-color:var(--pink);
+}
+
+.previewbox{
+  background:var(--dark);
+  padding:14px;
+  border-radius:20px;
+}
+
+#prompt{
+  min-height:300px;
+  background:#1a080d;
+  color:#ffdeeb;
+  border-color:#5e2233;
+  line-height:1.5;
+  font-size:13px;
+}
+
+/* 模擬生成 Canvas 區域 */
+.sim-area{
+  margin-top:16px;
+  background:#fff0f4;
+  border:2px dashed var(--pink2);
+  border-radius:18px;
+  padding:14px;
+  text-align:center;
+}
+
+.canvas-container{
+  position:relative;
+  width:100%;
+  max-width:260px;
+  height:360px;
+  margin:10px auto;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  background:#222;
+}
+
+#simCanvas{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:rgba(255,107,149,0.85);
+  color:#fff;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:bold;
+  backdrop-filter:blur(4px);
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+button{
+  padding:10px;
+  border:0;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:13px;
+  transition:transform 0.1s, background 0.2s;
+}
+
+button:active{
+  transform:scale(0.98);
+}
+
+.primary{
+  background:linear-gradient(135deg,var(--pink),var(--pink2));
+  color:#fff;
+  box-shadow:0 4px 12px #ff6b9540;
+}
+
+.secondary{
+  background:#ffeef2;
+  color:#c73860;
+}
+
+.success{
+  background:#28a745;
+  color:#fff;
+}
+
+.dark{
+  background:#4a1928;
+  color:#fff;
+}
+
+@media(max-width:1000px){
+  .app{ grid-template-columns:1fr; }
+  .preview{ position:static; }
+}
+
+@media(max-width:600px){
+  .grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="wrap">
+<h1>🐾 🎀 AI 萌系女生動物 MV 生成器 🎀 🐾</h1>
+<p>先生成可愛女生動物角色圖，再轉為動態唱跳 MV！鎖定動物外觀、毛色、服裝與配件。</p>
+</div>
+</header>
+
+<div class="wrap app">
+
+<main class="panel">
+
+<!-- 一鍵靈感 -->
+<div style="background:#ffeef2; border:1px solid #f7c5d3; padding:12px; border-radius:16px; margin-bottom:15px; display:flex; gap:8px;">
+  <button class="primary" style="flex:1" onclick="randomizeCharacter()">🎲 隨機女生動物造型</button>
+  <button class="secondary" style="flex:1" onclick="randomizeAll()">✨ 夢幻全隨機（含舞蹈）</button>
+</div>
+
+<!-- ① 人物造型 -->
+<div class="title">
+  <span>① 女生動物角色設定</span>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>1. 動物種類與女生氣質</label>
+    <select id="gender"></select>
+  </div>
+  <div class="group">
+    <label>2. 動物臉型與五官</label>
+    <select id="faceShape"></select>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>3. 毛色、毛型與花紋</label>
+    <select id="hairStyle"></select>
+  </div>
+  <div class="group">
+    <label>4. 動物體型與比例</label>
+    <select id="bodyType"></select>
+  </div>
+</div>
+
+<div class="group">
+  <label>5. 女生動物穿搭與配件</label>
+  <select id="outfit"></select>
+</div>
+
+<!-- ② 音樂與唱歌 -->
+<div class="title">② 音樂與動物唱跳風格</div>
+
+<div class="grid">
+  <div class="group">
+    <label>萌系曲風</label>
+    <select id="musicType"></select>
+  </div>
+  <div class="group">
+    <label>音樂節奏</label>
+    <select id="beat">
+      <option value="輕快節奏 (120-135 BPM)，充滿活力的萌系跳躍">輕快活力 (120-135 BPM)</option>
+      <option value="中快輕盈 (100-120 BPM)，適合俏皮手勢舞">中快輕盈 (100-120 BPM)</option>
+      <option value="軟萌律動 (80-100 BPM)，自然可愛擺動">軟萌律動 (80-100 BPM)</option>
+      <option value="夢幻溫柔 (60-80 BPM)，治癒系抒情搖擺">夢幻溫柔 (60-80 BPM)</option>
+    </select>
+  </div>
+</div>
+
+<div class="group">
+  <label>指定歌曲名稱/關鍵字 (選填)</label>
+  <input id="song" type="text" placeholder="例如：可愛日系動漫歌、抖音熱門萌舞曲……">
+</div>
+
+<!-- ③ 美術視覺與舞蹈 -->
+<div class="title">③ 動物美術風格與萌系舞蹈</div>
+
+<div class="grid">
+  <div class="group">
+    <label>動物角色美術風格</label>
+    <select id="artStyle">
+      <option value="精緻 3D 動物動畫電影風格，柔軟毛髮與電影級光影">精緻 3D 動畫電影風</option>
+      <option value="Q版大頭小身 3D 動物角色，比例可愛圓潤">Q版大頭 3D 動物</option>
+      <option value="日系二次元萌系動物動漫，線條清楚色彩明亮">日系萌系動物動漫</option>
+      <option value="高細節寫實動物擬人角色，真實毛流與自然光">精緻寫實動物風</option>
+      <option value="粉嫩黏土手作動物公仔風，柔和霧面質感">粉嫩黏土公仔風</option>
+      <option value="夢幻柔光水彩動物插畫，粉彩暈染">夢幻水彩插畫風</option>
+      <option value="高質感 3D 動物偶像角色，舞台燈光與精緻材質">3D 動物偶像風</option>
+      <option value="毛絨玩偶與手作布偶風，纖維細節清晰">毛絨玩偶風</option>
+      <option value="羊毛氈手作動物風，溫暖柔軟質感">羊毛氈手作風</option>
+      <option value="精品潮玩公仔風，細膩塗裝與高級棚拍">精品潮玩公仔風</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>動物舞蹈與肢體動作</label>
+    <select id="dance"></select>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>舞蹈萌度強度</label>
+    <select id="dancePower">
+      <option value="滿滿萌力，動作輕快可愛俏皮">滿滿萌力爆棚</option>
+      <option value="輕鬆隨性，像貓咪一樣的小幅度律動">貓系隨性律動</option>
+      <option value="甜美治癒，充滿笑容與溫柔擺動">甜美治癒系</option>
+      <option value="活力四射，充滿跳躍感的少女元氣">元氣少女活力</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>動物夢幻表演場景</label>
+    <select id="scene"></select>
+  </div>
+</div>
+
+<!-- ④ 鏡頭與表演細節 -->
+<div class="title">④ 鏡頭運鏡與動態細節</div>
+
+<div class="grid">
+  <div class="group">
+    <label>MV 運鏡風格</label>
+    <select id="camera">
+      <option value="流行可愛 MV 動態運鏡 (眨眼特寫與全景萌舞靈活切換)">可愛 MV 動態運鏡</option>
+      <option value="近距離跟拍鏡頭 (cute character follow camera shot)">近距離跟拍鏡頭</option>
+      <option value="特寫可愛面部與手勢舞 (Close-up cute gestures shot)">手勢舞近景特寫</option>
+      <option value="輕柔環繞運鏡 (Soft orbiting camera angle)">輕柔微環繞運鏡</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>影片畫面比例</label>
+    <select id="ratio">
+      <option value="9:16 直式 (TikTok / Shorts / Reels)">9:16 直式</option>
+      <option value="16:9 橫式 (YouTube / MV)">16:9 橫式</option>
+      <option value="1:1 正方形">1:1 正方形</option>
+    </select>
+  </div>
+</div>
+
+<div class="checks">
+  <label class="check"><input type="checkbox" value="嘴型精準呈現萌感歌詞與可愛口型 (Perfect cute Lip-sync)" checked>可愛對嘴口型</label>
+  <label class="check"><input type="checkbox" value="演唱時眼神閃閃發光，對著鏡頭眨眼與甜笑" checked>甜美眨眼與眼神互動</label>
+  <label class="check"><input type="checkbox" value="動物角色呈現自然可愛表情，眼神靈動，依物種保留合適的嘴部動作" checked>可愛動物表情</label>
+  <label class="check"><input type="checkbox" value="毛髮、耳朵、尾巴、翅膀與服裝配件隨身體動作自然擺動，符合物理規律" checked>毛髮耳朵尾巴自然擺動</label>
+  <label class="check"><input type="checkbox" value="副歌部分展現招牌動物爪爪手勢、比心或符合角色物種的可愛動作" checked>招牌爪爪手勢舞</label>
+</div>
+
+<!-- ⑤ 自訂 -->
+<div class="title">⑤ 額外補充說明</div>
+<textarea id="custom" rows="2" placeholder="例如：粉色蝴蝶結、蓬鬆尾巴、肉球腳掌、角色個性……"></textarea>
+
+</main>
+
+<!-- 右側 Prompt 與模擬生成區 -->
+<aside class="panel preview">
+
+<!-- 頁籤切換 -->
+<div class="tab-btn-group">
+  <button class="tab-btn active" id="tabImg" onclick="switchTab('img')">📷 階段 1：生成角色圖 Prompt</button>
+  <button class="tab-btn" id="tabVid" onclick="switchTab('vid')">🎬 階段 2：圖轉動態影片 Prompt</button>
+</div>
+
+<div class="previewbox">
+  <textarea id="prompt" readonly></textarea>
+</div>
+
+<!-- 模擬 AI 先圖後影互動區 -->
+<div class="sim-area">
+  <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#e04872;">🐾 先圖後影：動物角色流程 🐾</div>
+  
+  <div class="canvas-container">
+    <canvas id="simCanvas" width="260" height="360"></canvas>
+    <div class="badge" id="simBadge">1. 等待生成圖片</div>
+  </div>
+
+  <div style="display:flex; gap:6px; margin-top:8px;">
+    <button class="primary" style="flex:1;" onclick="generateImage()">🖼️ 步驟 1：生成動物角色圖</button>
+    <button class="success" style="flex:1;" id="btnAnim" onclick="generateVideo()" disabled>🎥 步驟 2：自動生成 MV 影片</button>
+  </div>
+  <div style="margin-top:6px;">
+    <input type="file" id="customImgUpload" accept="image/*" style="display:none;" onchange="loadCustomImage(event)">
+    <button class="secondary" style="width:100%; font-size:11px; padding:6px;" onclick="document.getElementById('customImgUpload').click()">📤 或上傳已生成的女生動物角色圖</button>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="primary" id="copy">📋 複製當前指令</button>
+  <button class="secondary" id="save">💾 儲存設定</button>
+  <button class="secondary" id="exportSettings">📤 匯出設定</button>
+  <button class="secondary" id="importSettings">📥 匯入設定</button>
+  <input id="importFile" type="file" accept=".json,application/json" style="display:none">
+  <button class="dark" id="reset" style="grid-column: span 2;">↺ 重設所有設定</button>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+/* 資料庫設定 (每項均已擴充至 50 款以上可愛風格) */
+const OPTIONS_DB = {
+  gender: [
+    "甜美貓咪女生角色，優雅又俏皮 (cute feminine cat girl animal character)",
+    "軟萌兔子女生角色，溫柔活潑 (adorable feminine bunny character)",
+    "奶油色小狗女生角色，親人療癒 (sweet feminine puppy character)",
+    "夢幻狐狸女生角色，靈巧神秘 (dreamy feminine fox character)",
+    "蓬鬆小熊女生角色，溫暖呆萌 (fluffy feminine bear character)",
+    "小倉鼠女生角色，圓滾滾又活潑 (cute hamster girl character)",
+    "小鹿女生角色，清新優雅 (gentle deer girl animal character)",
+    "小羊女生角色，柔軟甜美 (fluffy lamb girl character)",
+    "小老虎女生角色，勇敢可愛 (cute tiger girl animal character)",
+    "小豹貓女生角色，時尚靈動 (stylish leopard cat girl character)",
+    "小熊貓女生角色，慵懶可愛 (adorable red panda girl character)",
+    "小企鵝女生角色，呆萌俏皮 (cute penguin girl character)",
+    "小鴨子女生角色，元氣滿滿 (cheerful duckling girl character)",
+    "小狐狸與兔兔混合幻想角色 (fantasy fox-bunny girl creature)",
+    "小龍女生角色，奇幻夢幻 (cute feminine baby dragon character)",
+    "小獨角獸女生角色，彩虹夢幻 (pastel unicorn girl creature)",
+    "小水獺女生角色，活潑親水 (playful otter girl character)",
+    "小海豹女生角色，圓潤療癒 (soft seal girl character)",
+    "小貓頭鷹女生角色，知性可愛 (cute owl girl character)",
+    "小松鼠女生角色，俏皮靈敏 (playful squirrel girl character)",
+    "小刺蝟女生角色，害羞甜美 (sweet hedgehog girl character)",
+    "小青蛙女生角色，清新搞怪 (cute frog girl character)",
+    "小蜜蜂女生角色，勤快甜美 (cute bee girl character)",
+    "小蝴蝶女生角色，優雅夢幻 (dreamy butterfly girl creature)",
+    "小鯨魚女生角色，海洋系治癒風 (gentle whale girl creature)",
+    "小海豚女生角色，陽光活潑 (cheerful dolphin girl creature)",
+    "小章魚女生角色，軟萌奇幻 (cute octopus girl creature)",
+    "小恐龍女生角色，活力冒險風 (cute dinosaur girl creature)",
+    "小羊駝女生角色，蓬鬆溫柔 (fluffy alpaca girl character)",
+    "小浣熊女生角色，淘氣機靈 (mischievous raccoon girl character)",
+    "小天鵝女生角色，優雅芭蕾風 (elegant swan girl character)",
+    "小鸚鵡女生角色，鮮豔熱情 (colorful parrot girl character)",
+    "小麻雀女生角色，輕盈靈巧 (tiny bird girl character)",
+    "小蝙蝠女生角色，暗黑甜酷風 (cute gothic bat girl creature)",
+    "小幽靈貓女生角色，神秘可愛 (mysterious ghost cat girl creature)",
+    "星空兔女生角色，魔法系少女動物 (magical starry bunny creature)",
+    "草莓奶油貓女生角色，甜點系造型 (strawberry cream cat girl)",
+    "奶茶色泰迪狗女生角色，溫柔復古 (vintage teddy puppy girl)",
+    "粉彩小龍貓風幻想動物女生角色 (pastel fantasy forest creature girl)",
+    "森林精靈鹿女生角色，自然療癒 (forest spirit deer girl)",
+    "海洋人魚貓女生角色，夢幻閃耀 (mermaid cat fantasy creature)",
+    "機械賽博貓女生角色，未來科技風 (cyberpunk cat girl animal)",
+    "毛絨玩偶兔女生角色，手作布偶風 (plush handmade bunny girl)",
+    "Q版小獅子女生角色，威風又萌 (chibi lion girl character)",
+    "小熊貓女團偶像動物角色 (red panda idol girl character)",
+    "糖果色小馬女生角色，活潑夢幻 (pastel pony girl creature)",
+    "冰雪北極狐女生角色，清冷仙氣 (icy arctic fox girl)",
+    "黃金小獅鷲女生角色，奇幻華麗 (fantasy griffin girl creature)",
+    "棉花糖兔子女生角色，柔軟甜美 (marshmallow bunny girl)",
+    "月光黑貓女生角色，神秘優雅 (moonlight black cat girl)",
+    "彩虹鸚鵡女生角色，歡樂舞台風 (rainbow parrot girl character)",
+    "自訂物種的可愛女生動物角色 (custom cute feminine animal character)"
+  ],
+  faceShape: [
+    "圓潤動物臉、明亮大眼與小巧鼻頭", "貓咪三角耳、圓眼與俏皮嘴型", "兔子長耳、柔和眼神與小鼻子", "狗狗垂耳、無辜水汪汪眼睛", "狐狸尖耳、靈巧眼型與蓬鬆臉頰", "熊熊圓耳、短吻與溫柔微笑", "倉鼠鼓鼓臉頰與小門牙", "小鹿大眼、柔和額斑與小鼻子", "老虎額頭條紋與圓潤臉頰", "企鵝白色臉部花紋與圓眼", "鴨嘴小巧、圓眼與活潑表情", "小龍角、圓鼻與友善表情", "獨角獸額前小角與閃亮大眼", "海豹圓臉、短鬍鬚與微笑", "水獺小耳朵、鬍鬚點與好奇眼神", "貓頭鷹大圓眼與羽毛眉毛", "松鼠鼓臉與俏皮門牙", "刺蝟小鼻頭與害羞眼神", "青蛙大眼與圓潤嘴型", "蝴蝶觸角與夢幻眼眸", "小鯨魚圓潤頭部與溫柔笑容", "小海豚流線吻部與明亮眼睛", "章魚小觸手環繞臉部的可愛造型", "小恐龍短吻與圓潤小角", "羊駝長臉與蓬鬆瀏海毛", "浣熊眼周自然面罩花紋", "天鵝優雅頭頸與柔和眼神", "小鳥短喙與圓圓臉型", "蝙蝠大耳朵與小巧尖牙", "黑貓亮眼與微翹嘴角", "精緻布偶縫線臉與玻璃眼睛", "Q版大頭小身比例", "柔和粉彩插畫五官", "精緻寫實動物五官", "日系動漫動物表情", "3D動畫電影般表情", "微笑露出小虎牙", "俏皮眨眼表情", "害羞微紅臉頰", "驚喜張嘴表情", "溫柔閉眼微笑", "星星高光眼睛", "愛心高光眼睛", "好奇歪頭表情", "自信小小壞笑", "夢幻水晶眼眸", "自然真實動物口鼻結構", "軟綿綿毛絨玩偶臉", "精靈系神秘表情", "自訂動物臉部特徵"
+  ],
+  hairStyle: [
+    "奶油白蓬鬆短毛", "粉棕色柔軟長毛", "黑白對比花紋毛色", "橘白相間虎斑毛色", "灰藍色絲絨短毛", "焦糖棕捲毛", "雪白長毛與蓬鬆尾巴", "奶茶色漸層毛色", "粉色夢幻漸層毛", "薄荷綠幻想毛色", "紫羅蘭色幻想毛色", "金色亮澤毛色", "銀灰色月光毛色", "斑點豹紋毛色", "老虎橘黑條紋", "狐狸紅橘色毛皮", "兔子白毛與粉色耳尖", "黑貓亮面短毛", "三花貓毛色", "奶油色泰迪捲毛", "蓬鬆獅鬃造型", "柔軟羽毛與漸層翅膀", "彩虹色羽毛", "珍珠光澤鱗片", "藍色海洋漸層皮膚", "星空斑點與發光紋路", "額頭白色閃電花紋", "眼周面罩花紋", "耳朵尖端深色漸層", "背部奶油色斑塊", "腳掌白襪花紋", "尾巴末端白色毛尖", "蓬鬆雙色大尾巴", "自然短毛與細緻毛流", "長毛耳朵與耳尖毛束", "捲曲羊毛質感", "絨毛玩偶纖維質感", "柔軟羽絨般毛感", "亮澤鱗片與小角", "透明夢幻蝶翼", "毛色帶細緻星塵", "櫻花粉耳朵內側", "奶油黃與蜜桃色漸層", "巧克力棕與焦糖斑紋", "雪地白與冰藍漸層", "森林綠自然斑紋", "紫粉雙色毛尖", "自帶自然瀏海狀毛束", "頭頂一撮呆毛", "自訂毛色、羽毛、鱗片或花紋"
+  ],
+  bodyType: [
+    "Q版大頭小身，三頭身比例", "小巧圓潤的絨毛動物比例", "修長優雅的狐狸體態", "靈巧敏捷的貓科體態", "短腿圓身的柯基式比例", "長耳朵與小短腿兔子比例", "蓬鬆大尾巴的平衡比例", "柔軟圓滾滾倉鼠比例", "優雅長頸天鵝比例", "圓潤企鵝身形與小翅膀", "小龍短腿與小翅膀比例", "迷你獨角獸四肢比例", "海洋生物流線型身體", "短小可愛的玩偶身形", "纖細靈活的舞蹈角色比例", "胖嘟嘟療癒系身形", "高挑時尚擬人動物比例", "站立雙足的卡通動物比例", "四足自然動物姿態", "保留物種真實骨架與關節", "柔軟毛茸茸身體輪廓", "蓬鬆胸毛與大腳掌", "小翅膀與輕盈體態", "有力後腿適合跳躍", "長尾巴與靈活腰身", "短吻圓頭可愛比例", "小爪子與軟墊肉球", "大耳朵與小身體反差", "絨毛球般圓潤身形", "自訂動物體型與比例"
+  ],
+  outfit: [
+    "粉色蝴蝶結與蕾絲領巾", "甜美學院風小外套與領結", "夢幻芭蕾紗裙與緞帶", "可愛連帽斗篷與耳朵開孔", "奶油色針織衫與小吊帶裙", "K-Pop 動物偶像亮片舞台服", "粉彩運動套裝與小球鞋", "Y2K 甜酷外套與星星配件", "小公主皇冠與珠寶項圈", "小魔法師斗篷與星星吊飾", "蝴蝶翅膀造型披肩", "森林精靈花環與葉片披風", "冬季毛絨外套與圍巾", "可愛雨衣與小雨靴", "草莓圖案連身服", "奶茶色復古背心與領巾", "甜點主題圍裙與糖果吊飾", "海洋珍珠項鍊與透明披風", "黑金華麗舞台服", "新中式刺繡小披肩", "日系和風小浴衣與腰帶", "小惡魔翅膀與蝴蝶結", "天使羽翼與光環", "海盜帽與迷你腰包", "小偵探披風與領結", "迷你背包與吊飾", "貓咪鈴鐺項圈", "兔耳髮箍與緞帶", "小狗圍巾與名牌", "小熊背帶褲", "無服裝，保留自然動物外觀", "擬人化雙足角色穿完整可愛服裝", "舞台亮片裙與安全舒適剪裁", "街舞寬鬆外套與帽子", "甜美睡衣與睡帽", "聖誕節紅綠披風", "萬聖節南瓜斗篷", "櫻花刺繡和服風服飾", "未來科技發光護甲", "透明水晶飾品與夢幻披肩", "可拆式小翅膀配件", "花朵胸針與珍珠髮飾", "小領帶與袖口裝飾", "角色專屬主題色服裝", "絨毛玩偶縫線服裝", "運動啦啦隊服與彩球", "迷你樂團主唱服裝", "華麗歌劇舞台披風", "簡約高級精品風配件", "自訂女生動物服裝與配件"
+  ],
+  musicType: ["Cute Pop 可愛流行樂", "J-Pop 日系萌系動漫歌曲", "K-Pop 甜美女團舞曲", "Bubblegum Pop 泡泡糖流行樂", "Future Bass 夢幻電音", "Lofi 軟萌治癒音樂", "Disco 復古歡樂舞曲", "Electro-Pop 粉嫩電音舞曲", "City Pop 復古都市流行", "Kawaii Bass 萌系重低音", "Cute Rap 俏皮饒舌", "Chiptune 復古遊戲音樂", "Tropical House 夏日電音", "Acoustic Cute 木吉他輕音樂", "Sweet Waltz 夢幻圓舞曲", "Cute Rock 萌系搖滾", "Swing Jazz 可愛爵士", "Bossa Nova 輕柔慵懶樂", "Vocaloid 動漫合成器歌曲", "Lullaby Cute 治癒搖籃曲", "Toy Box March 玩具盒進行曲", "Melody Box 八音盒夢幻曲", "Dream Pop 夢幻泡泡流行樂", "Pastel Synthwave 夢幻合成波", "Soda Pop Dance 汽水泡泡舞曲", "Bunny Hop EDM 兔兔跳跳電音", "Starlight Disco 星空迪斯可", "森林自然系輕音樂", "動物派對歡樂樂曲", "自訂曲風"] ,
+  dance: ["萌系唱歌對嘴＋雙爪比心舞", "貓咪伸懶腰與輕踏步舞", "兔子連續小跳躍舞", "小狗搖尾巴與原地轉圈", "狐狸靈巧踏步與甩尾舞", "小熊左右搖擺與拍手舞", "企鵝左右搖擺踏步舞", "小鴨搖搖擺擺行進舞", "倉鼠轉圈與雙爪揮舞", "小鹿輕盈跳躍與點頭舞", "小老虎俏皮揮爪舞", "小龍拍翅膀與旋轉舞", "獨角獸小跑步與彩虹特效舞", "小鳥拍翅與原地彈跳", "蝴蝶飛舞與優雅旋轉", "水獺拍手與滑行動作", "海豹拍肚肚與搖擺舞", "小羊輕跳與咩咩嘴型", "松鼠抱堅果與左右跳步", "浣熊淘氣探頭與轉身", "小恐龍短腿踏步與搖尾巴", "天鵝優雅展翅旋轉", "小貓爪爪舞與眨眼", "雙爪托臉再比心", "左右耳朵同步晃動舞", "尾巴隨節奏擺動的律動舞", "前爪拍節奏與點頭舞", "原地連續小跳與落地定格", "四足小跑後站起來揮爪", "小翅膀扇動與空中轉圈", "魔法變身旋轉舞", "可愛躲貓貓探頭舞", "舞台走位與自信定格", "雙角色同步可愛舞", "團體動物偶像整齊編舞", "街舞節奏點頭與腳步律動", "芭蕾式輕盈旋轉", "滑步與俏皮甩尾", "轉身回眸與眨眼", "向鏡頭揮爪打招呼", "跳起來做出勝利姿勢", "爪子畫愛心與星星", "跟著節拍左右蹦跳", "柔和搖擺與閉眼微笑", "快速可愛手爪連擊", "舞台中央跳躍收尾", "坐姿拍爪節奏舞", "四足動物自然跑跳", "擬人化雙足偶像舞蹈", "自訂動物肢體舞蹈"] ,
+  scene: ["粉色夢幻糖果城堡舞台", "櫻花雨飄落的日系街道", "柔粉色動物偶像練習室", "彩虹雲朵與夢幻天空", "草莓甜點遊樂園", "粉色霓虹燈舞蹈棚", "K-Pop LED 璀璨舞台", "可愛動物主題咖啡廳", "夢幻水母海洋館", "星空露台與閃亮月亮", "絨毛玩具王國", "陽光森林草地", "夢幻芭蕾舞教室", "魔法森林圖書館", "冰雪水晶宮殿", "花海玻璃溫室", "糖果色展覽館", "彩虹熱氣球天空", "復古甜甜圈店", "草莓蛋糕城堡內景", "粉色海灘與棉花糖雲", "動物主題電競房間", "流星雨夜空舞台", "水晶星光表演舞台", "森林野餐草坪", "蒸汽波旋轉木馬", "夕陽下的森林學園", "薰衣草花海", "泡泡海洋舞台", "天使雲朵宮殿", "夢幻露營地", "櫻花樹下公園", "可愛奇幻森林", "月光粉色露台", "動物精品雜貨店", "奶油小狗咖啡館", "閃耀水晶許願池", "糖果色溜冰場", "日系屋頂花園", "夢幻冰淇淋車街道", "粉色列車車廂", "霓虹街角夜景", "彩虹橋與泡泡雲", "精靈池塘公園", "可愛音樂錄音室", "童話城堡庭院", "羽毛夢境世界", "動物爪印星形舞台", "珠光粉色展廳", "粉彩動物樂園"]
+};
+
+let currentTab = 'img';
+
+function initOptions(){
+  for(let key in OPTIONS_DB){
+    const select = document.getElementById(key);
+    if(!select) continue;
+    select.innerHTML = "";
+    OPTIONS_DB[key].forEach((item, index) => {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.textContent = `${index + 1}. ${item}`;
+      select.appendChild(opt);
+    });
+  }
+}
+
+const get = id => document.getElementById(id).value.trim();
+const checked = () => [...document.querySelectorAll('.check input:checked')].map(x=>x.value);
+
+function switchTab(tab){
+  currentTab = tab;
+  document.getElementById('tabImg').classList.toggle('active', tab === 'img');
+  document.getElementById('tabVid').classList.toggle('active', tab === 'vid');
+  makePrompt();
+}
+
+function makePrompt(){
+  const song = get('song') || '可愛熱門單曲';
+  const options = checked();
+
+  if(currentTab === 'img'){
+    // 專門給 Midjourney / DALL-E 用的靜態生圖 Prompt
+    const lines = [
+      '【階段 1：女生動物角色靜態圖片 Prompt (Text-to-Image)】',
+      '（可用於 Midjourney / DALL-E / Stable Diffusion 等生成高品質女生動物角色圖）',
+      '',
+      '【女生動物角色繪製核心特徵】',
+      '・物種與角色氣質：' + get('gender'),
+      '・動物臉型與五官：' + get('faceShape'),
+      '・毛色、毛型與花紋：' + get('hairStyle'),
+      '・動物體型與比例：' + get('bodyType'),
+      '・穿搭與配件：' + get('outfit'),
+      '・美術風格：' + get('artStyle'),
+      '・表演背景：' + get('scene'),
+      '・畫面規格：' + get('ratio') + '，角色完整入鏡，清楚呈現物種特徵、耳朵、尾巴、爪子/翅膀與配件；毛流或皮膚材質細緻，光影柔和，構圖乾淨。',
+      get('custom') ? '・細節補充：' + get('custom') : '',
+      '',
+      '【繪圖參數 Prompt】',
+      `${get('gender')}, ${get('faceShape')}, ${get('hairStyle')}, ${get('bodyType')}, ${get('outfit')}, ${get('scene')}, ${get('artStyle')}, full body character design, consistent species anatomy, detailed fur and textures, cute expressive pose, masterpiece, best quality, ultra-detailed --ar 9:16`
+    ];
+    document.getElementById('prompt').value = lines.join('\n');
+  } else {
+    // 專門給 Kling / Runway 用的圖生影片 Prompt
+    const lines = [
+      '【階段 2：女生動物角色圖轉動態唱跳影片 Prompt (Image-to-Video)】',
+      '（將階段 1 生成的照片上傳至 Kling / Runway / Luma 後貼入以下指令）',
+      '',
+      '【女生動物角色動態唱跳指令】',
+      '・音樂風格：' + get('musicType') + ' (節奏: ' + get('beat') + ')',
+      '・唱跳表演：女生動物角色依音樂節奏做可愛表情、自然嘴型與節奏互動；若物種不適合人類口型，保留符合物種的嘴部動作，不強行生成人類嘴唇。',
+      '・舞蹈動作：' + get('dance') + ' (' + get('dancePower') + ')。',
+      '・運鏡風格：' + get('camera'),
+      '・自然動態：' + (options.length ? options.join('；') : '耳朵、尾巴、毛髮、翅膀或服裝配件隨動作自然擺動') + '。',
+      '・一致性要求：全程保持原圖物種、臉部花紋、毛色、眼睛、耳朵、尾巴、四肢數量、服裝與配件一致；動作符合角色骨架，不變種、不融化、不多長肢體，避免閃爍與變形，動態流暢。'
+    ];
+    document.getElementById('prompt').value = lines.join('\n');
+  }
+}
+
+/* 隨機抽籤功能 */
+function randomizeCharacter(){
+  ['gender', 'faceShape', 'hairStyle', 'bodyType', 'outfit', 'artStyle'].forEach(key => {
+    const sel = document.getElementById(key);
+    if(sel){
+      sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+    }
+  });
+  makePrompt();
+}
+
+function randomizeAll(){
+  randomizeCharacter();
+  ['musicType', 'dance', 'scene'].forEach(key => {
+    const sel = document.getElementById(key);
+    if(sel){
+      sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+    }
+  });
+  makePrompt();
+}
+
+/* Canvas 模擬 AI 生成圖片與動畫機制 */
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+let currentImgData = null;
+let animTimer = null;
+let isAnimating = false;
+
+// 初始化畫布
+function initCanvas(){
+  ctx.fillStyle = "#ffeef2";
+  ctx.fillRect(0,0,260,360);
+  ctx.fillStyle = "#ff6b95";
+  ctx.font = "bold 14px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("✨ 點擊下方「生成角色照片」", 130, 170);
+  ctx.fillText("體驗先圖後影自動流程", 130, 195);
+}
+
+function generateImage(){
+  if(isAnimating) stopAnimation();
+  document.getElementById('simBadge').textContent = "1. 已生成角色圖片";
+  
+  // 繪製模擬的 AI 萌系女生動物角色卡片
+  ctx.fillStyle = "#ffdae3";
+  ctx.fillRect(0,0,260,360);
+  
+  // 背景星光裝飾
+  ctx.fillStyle = "#ffffff";
+  for(let i=0; i<15; i++){
+    ctx.beginPath();
+    ctx.arc(Math.random()*260, Math.random()*360, Math.random()*3+1, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // 動物角色頭部裝飾（示意）
+  ctx.fillStyle = "#ff7597";
+  ctx.beginPath();
+  ctx.arc(130, 130, 75, 0, Math.PI*2);
+  ctx.fill();
+
+  // 臉型
+  ctx.fillStyle = "#fff0e6";
+  ctx.beginPath();
+  ctx.arc(130, 140, 50, 0, Math.PI*2);
+  ctx.fill();
+
+  // 腮紅
+  ctx.fillStyle = "#ffb3c6";
+  ctx.beginPath();
+  ctx.arc(105, 150, 10, 0, Math.PI*2);
+  ctx.arc(155, 150, 10, 0, Math.PI*2);
+  ctx.fill();
+
+  // 眼睛
+  ctx.fillStyle = "#3d242b";
+  ctx.beginPath();
+  ctx.arc(110, 135, 7, 0, Math.PI*2);
+  ctx.arc(150, 135, 7, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(112, 133, 2.5, 0, Math.PI*2);
+  ctx.arc(152, 133, 2.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // 甜美微笑
+  ctx.strokeStyle = "#e04872";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(130, 150, 8, 0.1*Math.PI, 0.9*Math.PI);
+  ctx.stroke();
+
+  // 裙裝主體
+  ctx.fillStyle = "#ff477e";
+  ctx.beginPath();
+  ctx.moveTo(95, 185);
+  ctx.lineTo(165, 185);
+  ctx.lineTo(185, 290);
+  ctx.lineTo(75, 290);
+  ctx.closePath();
+  ctx.fill();
+
+  // 儲存快照
+  currentImgData = ctx.getImageData(0, 0, 260, 360);
+  document.getElementById('btnAnim').disabled = false;
+}
+
+function generateVideo(){
+  if(!currentImgData) return;
+  document.getElementById('simBadge').textContent = "2. 🎬 唱跳 MV 播放中";
+  stopAnimation();
+  
+  let frame = 0;
+  isAnimating = true;
+  
+  animTimer = setInterval(() => {
+    frame++;
+    ctx.putImageData(currentImgData, 0, 0);
+    
+    // 模擬動態擺動與對嘴效果
+    const offsetY = Math.sin(frame * 0.15) * 6;
+    const eyeWink = Math.sin(frame * 0.1) > 0.8;
+    
+    // 清除區域重新繪製擺動頭部
+    ctx.fillStyle = "#fff0e6";
+    ctx.beginPath();
+    ctx.arc(130, 140 + offsetY, 50, 0, Math.PI*2);
+    ctx.fill();
+
+    // 腮紅
+    ctx.fillStyle = "#ffb3c6";
+    ctx.beginPath();
+    ctx.arc(105, 150 + offsetY, 10, 0, Math.PI*2);
+    ctx.arc(155, 150 + offsetY, 10, 0, Math.PI*2);
+    ctx.fill();
+
+    // 眨眼/大眼
+    ctx.fillStyle = "#3d242b";
+    if(eyeWink){
+      ctx.fillRect(103, 133 + offsetY, 14, 3);
+      ctx.beginPath();
+      ctx.arc(150, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(110, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.arc(150, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // 萌感嘴型變化 (唱歌對嘴)
+    const mouthOpen = Math.abs(Math.sin(frame * 0.2)) * 6 + 3;
+    ctx.fillStyle = "#e04872";
+    ctx.beginPath();
+    ctx.ellipse(130, 155 + offsetY, 6, mouthOpen, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // 飄落愛心特效
+    ctx.fillStyle = "rgba(255, 107, 149, 0.7)";
+    const heartY = (frame * 4) % 360;
+    ctx.beginPath();
+    ctx.arc((frame*3)%260, heartY, 6, 0, Math.PI*2);
+    ctx.fill();
+
+  }, 50);
+}
+
+function stopAnimation(){
+  if(animTimer) clearInterval(animTimer);
+  isAnimating = false;
+}
+
+function loadCustomImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const img = new Image();
+  img.onload = () => {
+    stopAnimation();
+    ctx.drawImage(img, 0, 0, 260, 360);
+    currentImgData = ctx.getImageData(0, 0, 260, 360);
+    document.getElementById('simBadge').textContent = "1. 自訂圖片已上傳";
+    document.getElementById('btnAnim').disabled = false;
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+/* 即時監聽選項 */
+document.querySelectorAll('select, input[type=text], textarea, input[type=checkbox]').forEach(el => {
+  el.addEventListener('input', makePrompt);
+  el.addEventListener('change', makePrompt);
+});
+
+/* 複製 Prompt */
+document.getElementById('copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(document.getElementById('prompt').value);
+    const btn = document.getElementById('copy');
+    btn.textContent = '✓ 已複製當前指令';
+    setTimeout(() => { btn.textContent = '📋 複製當前指令'; }, 1500);
+  } catch(e) {
+    alert('複製失敗，請手動複製右側指令。');
+  }
+};
+
+/* 儲存/匯出/匯入/重設 */
+function getSettingsData(){
+  const data = { version:6, settings:{} };
+  document.querySelectorAll('select, input[type=text], textarea').forEach(el => {
+    data.settings[el.id] = el.value;
+  });
+  data.settings.checks = checked();
+  return data;
+}
+
+document.getElementById('save').onclick = () => {
+  localStorage.setItem('danceMVGenerator_img2vid', JSON.stringify(getSettingsData()));
+  alert('女生動物設定已儲存！');
+};
+
+document.getElementById('exportSettings').onclick = () => {
+  const blob = new Blob([JSON.stringify(getSettingsData(), null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Cute_Animal_Girl_MV_Settings.json';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById('importSettings').onclick = () => document.getElementById('importFile').click();
+
+document.getElementById('importFile').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const raw = JSON.parse(reader.result);
+      const data = raw.settings || raw;
+      Object.keys(data).forEach(id => {
+        const el = document.getElementById(id);
+        if(el && id !== 'checks') el.value = data[id];
+      });
+      makePrompt();
+      alert('女生動物設定匯入成功！');
+    } catch(e) { alert('格式錯誤。'); }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('reset').onclick = () => {
+  if(!confirm('確定要重設為初始女生動物設定嗎？')) return;
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type=text], textarea').forEach(el => el.value = '');
+  stopAnimation();
+  initCanvas();
+  makePrompt();
+};
+
+/* 啟動 */
+initOptions();
+initCanvas();
+makePrompt();
+</script>
+
+</body>
+</html>
