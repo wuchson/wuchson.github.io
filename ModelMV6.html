@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 萌系男生動物唱跳 MV 指令生成器 (圖生影版)</title>
+
+<style>
+:root{
+  --pink:#1e293b;
+  --pink2:#94a3b8;
+  --bg:#f1f5f9;
+  --line:#cbd5e1;
+  --ink:#172033;
+  --dark:#0f172a;
+  --accent:#334155;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;
+  background:linear-gradient(135deg,#f8fafc,#e2e8f0);
+  color:var(--ink);
+}
+
+header{
+  background:linear-gradient(120deg,#0f172a,#475569);
+  color:white;
+  padding:24px 20px;
+  text-align:center;
+}
+
+.wrap{
+  max-width:1300px;
+  margin:auto;
+}
+
+h1{
+  margin:0;
+  font-size:26px;
+}
+
+header p{
+  margin:8px 0 0;
+  opacity:.95;
+  font-size:14px;
+}
+
+.app{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+  padding:24px 20px 42px;
+}
+
+.panel{
+  background:#ffffff;
+  border:2px solid var(--line);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 10px 30px #0f172a12;
+}
+
+.title{
+  font-size:18px;
+  font-weight:800;
+  margin:12px 0 16px;
+  padding-bottom:8px;
+  border-bottom:2px dashed #cbd5e1;
+  color:#2563eb;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  font-weight:800;
+  margin-bottom:6px;
+  font-size:13px;
+  color:#334155;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+select,
+input[type=text],
+textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 12px;
+  background:#f8fafc;
+  font:inherit;
+  color:var(--ink);
+  font-size:13px;
+}
+
+textarea{
+  resize:vertical;
+}
+
+.checks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  background:#eef5ff;
+  border:1px solid var(--line);
+  border-radius:999px;
+  font-size:12px;
+}
+
+.check input{
+  accent-color:var(--pink);
+}
+
+.preview{
+  position:sticky;
+  top:16px;
+}
+
+.tab-btn-group{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.tab-btn{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  border:2px solid var(--pink2);
+  background:#fff;
+  color:var(--ink);
+  font-weight:800;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.tab-btn.active{
+  background:var(--pink);
+  color:#fff;
+  border-color:var(--pink);
+}
+
+.previewbox{
+  background:var(--dark);
+  padding:14px;
+  border-radius:20px;
+}
+
+#prompt{
+  min-height:300px;
+  background:#08111f;
+  color:#dbeafe;
+  border-color:#1e3a5f;
+  line-height:1.5;
+  font-size:13px;
+}
+
+/* 模擬生成 Canvas 區域 */
+.sim-area{
+  margin-top:16px;
+  background:#eff6ff;
+  border:2px dashed var(--pink2);
+  border-radius:18px;
+  padding:14px;
+  text-align:center;
+}
+
+.canvas-container{
+  position:relative;
+  width:100%;
+  max-width:260px;
+  height:360px;
+  margin:10px auto;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  background:#222;
+}
+
+#simCanvas{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:rgba(30,41,59,0.88);
+  color:#fff;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:bold;
+  backdrop-filter:blur(4px);
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+button{
+  padding:10px;
+  border:0;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:13px;
+  transition:transform 0.1s, background 0.2s;
+}
+
+button:active{
+  transform:scale(0.98);
+}
+
+.primary{
+  background:linear-gradient(135deg,var(--pink),var(--pink2));
+  color:#fff;
+  box-shadow:0 4px 12px #3b82f640;
+}
+
+.secondary{
+  background:#eef5ff;
+  color:#2563eb;
+}
+
+.success{
+  background:#28a745;
+  color:#fff;
+}
+
+.dark{
+  background:#172554;
+  color:#fff;
+}
+
+@media(max-width:1000px){
+  .app{ grid-template-columns:1fr; }
+  .preview{ position:static; }
+}
+
+@media(max-width:600px){
+  .grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="wrap">
+<h1>⚡ AI 男生動物潮流唱跳 MV 生成器（先圖後影版）</h1>
+<p>先生成高畫質擬人動物男生角色圖，再轉為動態唱跳 MV；保留物種特徵、動物耳朵、尾巴、毛色與服裝一致性。</p>
+</div>
+</header>
+
+<div class="wrap app">
+
+<main class="panel">
+
+<!-- 一鍵靈感 -->
+<div style="background:#eef5ff; border:1px solid #bfdbfe; padding:12px; border-radius:16px; margin-bottom:15px; display:flex; gap:8px;">
+  <button class="primary" style="flex:1" onclick="randomizeCharacter()">🎲 隨機動物男生造型</button>
+  <button class="secondary" style="flex:1" onclick="randomizeAll()">⚡ 動物潮流全隨機（含舞台與舞蹈）</button>
+</div>
+
+<!-- ① 人物造型 -->
+<div class="title">
+  <span>① 男生動物造型 (繪圖標準設定)</span>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>1. 動物角色類型</label>
+    <select id="gender"></select>
+  </div>
+  <div class="group">
+    <label>2. 動物臉型特徵</label>
+    <select id="faceShape"></select>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>3. 毛色／毛髮特徵</label>
+    <select id="hairStyle"></select>
+  </div>
+  <div class="group">
+    <label>4. 動物身型比例</label>
+    <select id="bodyType"></select>
+  </div>
+</div>
+
+<div class="group">
+  <label>5. 男生動物穿搭風格</label>
+  <select id="outfit"></select>
+</div>
+
+<!-- ② 音樂與唱歌 -->
+<div class="title">② 音樂與唱跳風格</div>
+
+<div class="grid">
+  <div class="group">
+    <label>萌系曲風 (52款)</label>
+    <select id="musicType"></select>
+  </div>
+  <div class="group">
+    <label>音樂節奏</label>
+    <select id="beat">
+      <option value="輕快節奏 (120-135 BPM)，充滿活力的萌系跳躍">輕快活力 (120-135 BPM)</option>
+      <option value="中快輕盈 (100-120 BPM)，適合俏皮手勢舞">中快輕盈 (100-120 BPM)</option>
+      <option value="軟萌律動 (80-100 BPM)，自然可愛擺動">軟萌律動 (80-100 BPM)</option>
+      <option value="夢幻溫柔 (60-80 BPM)，治癒系抒情搖擺">夢幻溫柔 (60-80 BPM)</option>
+    </select>
+  </div>
+</div>
+
+<div class="group">
+  <label>指定歌曲名稱/關鍵字 (選填)</label>
+  <input id="song" type="text" placeholder="例如：可愛日系動漫歌、抖音熱門萌舞曲……">
+</div>
+
+<!-- ③ 美術視覺與舞蹈 -->
+<div class="title">③ 美術視覺與潮流舞蹈</div>
+
+<div class="grid">
+  <div class="group">
+    <label>動物角色美術風格 (10款)</label>
+    <select id="artStyle">
+      <option value="高質感擬人動物偶像 MV 寫實風，細膩毛髮與電影級打光 (Photorealistic anthropomorphic animal idol MV)">韓系真人偶像 MV 風</option>
+      <option value="高質感 3D 擬人動物角色，細膩毛髮與材質 (Premium 3D anthropomorphic animal character)">高質感 3D 男性角色</option>
+      <option value="日系動物少年動畫與清爽賽璐璐上色 (Japanese animal-boy anime, clean cel shading)">日系少年漫畫風</option>
+      <option value="寫實男性時尚大片，低飽和色調與高級棚拍 (Photorealistic men's fashion editorial, muted tones)">男性時尚大片風</option>
+      <option value="街頭潮流視覺，硬朗構圖、顆粒底片與閃光燈 (Urban streetwear editorial, film grain, direct flash)">街頭潮流底片風</option>
+      <option value="電影感寫實 3D，冷色輪廓光與體積霧 (Cinematic realistic 3D, cool rim light, volumetric haze)">電影感 3D 風</option>
+      <option value="復古港風男星寫真，暖棕底片與復古閃光燈 (Retro Hong Kong male portrait, warm film grain)">復古港風男星寫真</option>
+      <option value="極簡高級時裝插畫，黑白灰與俐落線條 (Minimal luxury menswear illustration)">極簡高級時裝插畫</option>
+      <option value="潮流遊戲角色概念美術，金屬材質與霓虹光影 (Stylized game character concept art, metallic materials)">潮流遊戲角色概念風</option>
+      <option value="清新日系動畫電影風，通透自然光與細膩背景 (Japanese animated film, natural light)">日系動畫電影風</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>潮流舞蹈類型 (52款)</label>
+    <select id="dance"></select>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="group">
+    <label>舞蹈萌度強度</label>
+    <select id="dancePower">
+      <option value="力量感充足，動作俐落有型">活力帥氣爆棚</option>
+      <option value="放鬆自信，帶有街頭感的精準律動">街頭隨性律動</option>
+      <option value="清爽沉穩，表情自然、律動流暢">溫柔治癒系</option>
+      <option value="充滿舞台能量，步伐明快且落點穩定">元氣少年活力</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>舞台與夢幻場景 (52款)</label>
+    <select id="scene"></select>
+  </div>
+</div>
+
+<!-- ④ 鏡頭與表演細節 -->
+<div class="title">④ 鏡頭運鏡與動態細節</div>
+
+<div class="grid">
+  <div class="group">
+    <label>MV 運鏡風格</label>
+    <select id="camera">
+      <option value="流行潮流 MV 動態運鏡 (眨眼特寫與全景萌舞靈活切換)">潮流 MV 動態運鏡</option>
+      <option value="時尚紀實跟拍鏡頭 (Cinematic follow shot, natural confident male presence)">時尚紀實跟拍視角</option>
+      <option value="臉部表情與舞蹈手勢交替特寫 (Close-up expressions and precise dance gestures)">表情與手勢交替特寫</option>
+      <option value="電影感半環繞運鏡與低角度英雄鏡頭 (Cinematic orbit and subtle low-angle shot)">電影感環繞與低角度</option>
+    </select>
+  </div>
+  <div class="group">
+    <label>影片畫面比例</label>
+    <select id="ratio">
+      <option value="9:16 直式 (TikTok / Shorts / Reels)">9:16 直式</option>
+      <option value="16:9 橫式 (YouTube / MV)">16:9 橫式</option>
+      <option value="1:1 正方形">1:1 正方形</option>
+    </select>
+  </div>
+</div>
+
+<div class="checks">
+  <label class="check"><input type="checkbox" value="嘴型精準呈現歌詞與自然口型 (Accurate male lip-sync)" checked>自然對嘴口型</label>
+  <label class="check"><input type="checkbox" value="眼神自信有舞台魅力，與鏡頭自然互動，表情克制不僵硬" checked>自信眼神與鏡頭互動</label>
+  <label class="check"><input type="checkbox" value="表情自然有層次，可自信微笑或沉穩凝視，避免過度賣萌" checked>自然表情與男性魅力</label>
+  <label class="check"><input type="checkbox" value="頭髮與服裝隨身體擺動產生自然流動的真實物理效果" checked>自然髮絲與服裝物理</label>
+  <label class="check"><input type="checkbox" value="副歌呈現俐落手勢、卡點定格與街舞招牌動作，手部不遮住臉部" checked>俐落招牌手勢舞</label>
+</div>
+
+<!-- ⑤ 自訂 -->
+<div class="title">⑤ 額外補充說明</div>
+<textarea id="custom" rows="2" placeholder="例如：狼耳、蓬鬆尾巴、爪掌造型、銀色耳環、麥克風、刺繡外套、舞台煙霧……"></textarea>
+
+</main>
+
+<!-- 右側 Prompt 與模擬生成區 -->
+<aside class="panel preview">
+
+<!-- 頁籤切換 -->
+<div class="tab-btn-group">
+  <button class="tab-btn active" id="tabImg" onclick="switchTab('img')">📷 階段 1：生成照片 Prompt</button>
+  <button class="tab-btn" id="tabVid" onclick="switchTab('vid')">🎬 階段 2：圖轉影片 Prompt</button>
+</div>
+
+<div class="previewbox">
+  <textarea id="prompt" readonly></textarea>
+</div>
+
+<!-- 模擬 AI 先圖後影互動區 -->
+<div class="sim-area">
+  <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#2563eb;">⚡ 先圖後影：一鍵體驗流程</div>
+  
+  <div class="canvas-container">
+    <canvas id="simCanvas" width="260" height="360"></canvas>
+    <div class="badge" id="simBadge">1. 等待生成圖片</div>
+  </div>
+
+  <div style="display:flex; gap:6px; margin-top:8px;">
+    <button class="primary" style="flex:1;" onclick="generateImage()">🖼️ 步驟 1：生成角色照片</button>
+    <button class="success" style="flex:1;" id="btnAnim" onclick="generateVideo()" disabled>🎥 步驟 2：自動生成 MV 影片</button>
+  </div>
+  <div style="margin-top:6px;">
+    <input type="file" id="customImgUpload" accept="image/*" style="display:none;" onchange="loadCustomImage(event)">
+    <button class="secondary" style="width:100%; font-size:11px; padding:6px;" onclick="document.getElementById('customImgUpload').click()">📤 或上傳您自己生成的男生動物圖片</button>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="primary" id="copy">📋 複製當前指令</button>
+  <button class="secondary" id="save">💾 儲存設定</button>
+  <button class="secondary" id="exportSettings">📤 匯出設定</button>
+  <button class="secondary" id="importSettings">📥 匯入設定</button>
+  <input id="importFile" type="file" accept=".json,application/json" style="display:none">
+  <button class="dark" id="reset" style="grid-column: span 2;">↺ 重設所有設定</button>
+</div>
+
+</aside>
+
+</div>
+
+<script>
+/* 資料庫設定 (每項均已擴充至 50 款以上可愛風格) */
+const OPTIONS_DB = {
+  gender: [
+    '帥氣狼族男主角，直立擬人動物 (Handsome anthropomorphic wolf male lead)',
+    '可愛柴犬男孩，陽光活力 (Cute Shiba Inu boy)',
+    '優雅狐狸紳士，聰明自信 (Elegant fox gentleman)',
+    '酷帥黑貓男孩，神秘潮流 (Cool black cat boy)',
+    '溫柔金毛犬系男生 (Gentle golden retriever male)',
+    '威風獅子王子，舞台魅力 (Lion prince performer)',
+    '熊族暖男，憨厚可愛 (Friendly bear guy)',
+    '兔族潮流男孩，靈巧俏皮 (Trendy rabbit boy)',
+    '老虎街舞男生，充滿力量 (Tiger street dancer)',
+    '企鵝偶像男孩，紳士可愛 (Penguin idol boy)',
+    '龍族幻想系男主角 (Fantasy dragon male lead)',
+    '小浣熊嘻哈男孩 (Raccoon hip-hop boy)',
+    '水獺樂團主唱 (Otter band vocalist)',
+    '鹿族森林系王子 (Deer forest prince)',
+    '狼犬運動系男生 (Athletic wolfdog male)',
+    'Q版萌系動物男孩 (Cute chibi animal boy)'
+  ],
+  faceShape: [
+    '圓潤動物臉型，大而明亮的眼睛 (Round animal face, bright eyes)',
+    '狐狸尖吻與俐落眉眼 (Fox muzzle and sharp eyes)',
+    '柴犬微笑嘴型與圓臉 (Shiba smile and round face)',
+    '貓科眼型，眼神自信 (Feline eyes, confident gaze)',
+    '狼族輪廓與英挺眉眼 (Wolf features and strong brows)',
+    '熊族短吻與溫柔笑容 (Bear muzzle and gentle smile)',
+    '兔子長耳與無辜大眼 (Long rabbit ears and innocent eyes)',
+    '老虎額紋與堅定神情 (Tiger stripes and determined expression)',
+    '獅子蓬鬆鬃毛與王者神情 (Lion mane and regal expression)',
+    '浣熊眼罩花紋與俏皮神情 (Raccoon mask markings and playful face)',
+    '鹿角與溫柔眼神 (Antlers and gentle eyes)',
+    '龍族角與奇幻眼眸 (Dragon horns and fantasy eyes)'
+  ],
+  hairStyle: [
+    '自然蓬鬆的頭部毛髮，黑棕色 (Fluffy black-brown fur)',
+    '銀灰色狼鬃層次毛 (Layered silver-gray wolf fur)',
+    '奶茶棕狐狸毛，耳尖深色 (Milk-tea fox fur with dark ear tips)',
+    '黑貓亮澤短毛與尖耳 (Glossy black cat fur and pointed ears)',
+    '金黃色柔軟犬毛 (Soft golden dog fur)',
+    '奶油白兔毛與長耳 (Cream rabbit fur and long ears)',
+    '棕色熊毛與圓耳 (Brown bear fur and round ears)',
+    '橘黑虎紋毛色 (Orange and black tiger stripes)',
+    '金棕色獅鬃，蓬鬆有層次 (Golden-brown layered lion mane)',
+    '灰白浣熊毛與環紋尾巴 (Gray-white raccoon fur and ringed tail)',
+    '鹿棕色短毛與小鹿角 (Deer-brown fur and small antlers)',
+    '藍黑色龍鱗與短鬃 (Blue-black scales and short mane)'
+  ],
+  bodyType: [
+    '直立擬人動物比例，修長敏捷 (Anthropomorphic, slender and agile)',
+    'Q版三頭身大頭短身比例 (Chibi three-head-tall proportions)',
+    '運動型精壯動物身形 (Athletic animal build)',
+    '高挑舞台偶像比例 (Tall performer proportions)',
+    '圓潤可愛、柔軟蓬鬆 (Round, cute and fluffy)',
+    '靈巧貓科身形，動作輕盈 (Agile feline build)',
+    '強壯狼族身形，肩背有力 (Strong wolf build)',
+    '優雅狐狸身形，線條俐落 (Elegant fox silhouette)',
+    '短腿萌系動物比例 (Short-legged cute animal)',
+    '四肢與尾巴符合物種設定，結構自然 (Species-accurate limbs and tail)'
+  ],
+  outfit: [
+    '黑色潮流帽T＋工裝褲，保留動物耳朵尾巴 (Black street hoodie and cargos)',
+    '韓系男團舞台服，銀色飾邊 (K-pop stage outfit with silver trim)',
+    '白襯衫＋黑色西裝背心，紳士風 (White shirt and black vest)',
+    '棒球外套＋球鞋，運動潮流 (Varsity jacket and sneakers)',
+    '街舞寬鬆運動套裝 (Oversized street-dance tracksuit)',
+    '黑金華麗舞台服，精緻刺繡 (Black-and-gold embroidered stagewear)',
+    '日系學院風針織背心與襯衫 (Japanese academy vest and shirt)',
+    '牛仔外套＋白T＋休閒長褲 (Denim jacket and casual trousers)',
+    '新中式立領上衣，典雅東方風 (Modern Chinese stand-collar outfit)',
+    '機能風外套＋多口袋工裝褲 (Techwear jacket and cargo pants)',
+    '海邊度假襯衫＋短褲 (Beach resort shirt and shorts)',
+    '可愛圖案衛衣＋束口褲 (Cute graphic sweatshirt and joggers)',
+    '精品西裝外套＋俐落長褲 (Luxury blazer and tailored trousers)',
+    '樂團主唱皮外套＋舞台配件 (Band vocalist jacket and stage accessories)'
+  ],
+  musicType: [
+    "K-Pop 男團主打歌 (強勁鼓點、俐落合成器、舞台張力)",
+    "J-Pop 青春搖滾 (明亮吉他、熱血副歌)",
+    "City Pop 都會復古流行 (貝斯律動、復古合成器)",
+    "Hip-Hop 嘻哈節拍 (厚實低音、節奏切分)",
+    "R&B 都會情歌 (絲滑和弦、慵懶律動)",
+    "Pop Rock 流行搖滾 (鼓組推進、吉他旋律)",
+    "EDM Festival 電子舞曲 (大鼓、Build-up、Drop)",
+    "Future Bass 未來電音 (空間感合成器、層次低音)",
+    "House Dance 俐落舞曲 (四拍底鼓、流暢律動)",
+    "Funk Groove 復古放克 (彈跳貝斯、銅管節奏)",
+    "Disco Revival 復古迪斯可 (閃耀弦樂、舞池節拍)",
+    "Trap Pop 潮流陷阱流行 (808 低音、快速 Hi-hat)",
+    "Melodic Rap 旋律饒舌 (節奏人聲、流暢副歌)",
+    "Lo-fi Chill 都會慵懶氛圍 (柔和鼓點、黑膠質感)",
+    "Indie Pop 獨立流行 (清透吉他、自然人聲)",
+    "Acoustic Pop 木吉他流行 (溫暖弦音、真摯旋律)",
+    "Ballad 抒情流行 (鋼琴、弦樂、情緒堆疊)",
+    "Synthwave 復古合成波 (霓虹夜色、復古電子鼓)",
+    "Drum & Bass 高速電子節奏 (急促鼓點、低音線)",
+    "Techno 電子舞曲 (機械節奏、冷冽音色)",
+    "Afrobeats 非洲流行節奏 (輕快打擊樂、彈性律動)",
+    "Latin Pop 拉丁流行 (熱情節奏、吉他與打擊樂)",
+    "Reggaeton 拉丁都市舞曲 (強烈律動、低音節拍)",
+    "Jazz Pop 都會爵士流行 (電鋼琴、滑順貝斯)",
+    "Soul Pop 靈魂流行 (厚實人聲、復古鼓組)",
+    "Britpop 英倫搖滾 (吉他牆、青春感)",
+    "Pop Punk 青春龐克搖滾 (高速鼓點、熱血旋律)",
+    "Alternative Rock 另类搖滾 (層次吉他、個性編曲)",
+    "K-Indie 韓系獨立音樂 (清新編曲、自然情緒)",
+    "K-R&B 韓系節奏藍調 (低調鼓點、絲滑人聲)",
+    "Boy Group Anthem 男團群舞主題曲 (整齊節拍、強烈副歌)",
+    "Vocal Synth 電子人聲流行 (精準節拍、未來感)",
+    "Piano Pop 鋼琴流行 (清楚旋律、情感鋪陳)",
+    "Orchestral Pop 管弦流行 (電影感弦樂、宏大副歌)",
+    "Jazz Funk 爵士放克 (銅管切分、彈跳貝斯)",
+    "Nu Disco 新復古舞曲 (現代節拍、復古音色)",
+    "Garage Pop 車庫流行搖滾 (粗粒吉他、直接鼓點)",
+    "Electro Rock 電子搖滾 (合成器與失真吉他)",
+    "Jersey Club 節奏舞曲 (切分鼓點、快速律動)",
+    "UK Garage 英式車庫節奏 (跳躍低音、碎拍)",
+    "Breakbeat 碎拍電子樂 (斷奏鼓組、街頭感)",
+    "Dancehall 雷鬼舞曲 (鬆弛律動、鮮明節奏)",
+    "Summer Pop 夏日清爽流行 (明亮吉他、輕快鼓點)",
+    "Night Drive 夜行都會流行 (深色合成器、霓虹氛圍)",
+    "Luxury Lounge 精品都會音樂 (低調、精緻、成熟)",
+    "Acoustic Rock 木吉他搖滾 (自然演奏、青春感)",
+    "Stadium Rock 體育場搖滾 (大鼓、合唱副歌)",
+    "Anime Opening 熱血動畫 OP (高速節奏、昂揚旋律)",
+    "Gaming Electro 電競電子樂 (脈衝低音、未來音色)",
+    "Chillstep 氛圍電子樂 (寬廣合成器、柔和節拍)",
+    "Orchestra Trailer 電影預告配樂 (鼓擊、銅管、史詩張力)",
+    "Vocal Harmony 男聲和聲流行 (層疊和聲、乾淨編曲)"
+  ],
+  dance: [
+    "K-Pop 男團同步群舞感獨舞 (俐落手臂線條、精準卡點)",
+    "Hip-Hop 街舞基礎律動 (重心切換、肩胸律動)",
+    "Locking 鎖舞 (定格、手腕翻轉、節奏停頓)",
+    "Popping 機械震動舞 (肌肉控制、乾淨震點)",
+    "House Dance 步伐舞 (快速腳步、流暢重心移動)",
+    "Breaking 霹靂舞元素 (安全俐落的地板轉換、力量控制)",
+    "Jazz Funk 舞台編舞 (俐落線條、肩部與手臂延伸)",
+    "男團副歌招牌動作 (簡潔記憶點、整齊卡拍)",
+    "手指舞與鏡頭互動 (手勢俐落、眼神準確)",
+    "帥氣走位加定點 Pose (前進、轉身、定格)",
+    "肩部律動與胸口 Isolation (小幅度精準控制)",
+    "滑步與交叉步組合 (腳步清楚、節奏穩定)",
+    "快速手臂 Wave (連續流動、自然銜接)",
+    "帽沿輕觸與側身轉頭 (潮流偶像小動作)",
+    "外套甩動與轉身卡點 (服裝自然跟隨動作)",
+    "街頭 Freestyle 即興舞 (放鬆自信、不過度誇張)",
+    "嘻哈 Bounce 律動 (膝部彈性、上身放鬆)",
+    "雙手交叉再俐落展開 (強拍定格、線條乾淨)",
+    "腳跟腳尖節奏步 (細膩腳步、穩定節拍)",
+    "滑板風鬆弛律動 (自然重心、隨性步伐)",
+    "樂團主唱舞台表演 (持麥、點拍、與鏡頭互動)",
+    "吉他手節奏表演 (撥弦動作、身體自然搖擺)",
+    "麥克風手持唱跳 (對嘴自然、手勢不遮臉)",
+    "舞台走台與回眸 (穩定步伐、眼神自信)",
+    "低重心街舞律動 (控制重心、動作不誇張)",
+    "左右肩節拍切換 (清楚節奏、自然擺臂)",
+    "手掌翻轉與指向鏡頭 (俐落手勢、精準卡點)",
+    "雙手比出簡潔愛心手勢 (偶像互動、避免過度賣萌)",
+    "半圈轉身接定格 (流暢轉向、結尾 Pose)",
+    "側身滑步與回頭 (腳步穩定、鏡頭感俐落)",
+    "前後交錯步加手臂打點 (節奏清楚、連貫不僵硬)",
+    "膝部彈跳與肩部律動 (充滿活力、落地穩定)",
+    "街頭團體編舞感單人版本 (層次清楚、卡點準確)",
+    "強拍手臂擊點 (有力但不僵硬)",
+    "舞蹈副歌招牌 Pose (簡潔有記憶點)",
+    "輕鬆自然的 Vibe 舞 (放鬆表情、流暢律動)",
+    "慢拍 R&B Groove (肩胸律動、眼神沉穩)",
+    "復古 Disco 步伐 (輕快腳步、肩部擺動)",
+    "Funk 舞蹈與手腕節奏 (俏皮但不幼態)",
+    "電音舞台大幅度副歌編舞 (充滿能量、動作清晰)",
+    "雙手向外展開接轉身 (舞台張力、衣料自然飄動)",
+    "單手插口袋的節奏走位 (隨性時尚、避免僵硬)",
+    "由遠景走近鏡頭並停步 (自信台步、自然眼神)",
+    "坐姿節奏律動再起身 (動作平順、姿態自然)",
+    "手臂交叉接側身滑步 (俐落轉換、肩線乾淨)",
+    "帽 T 街舞手勢與腳步組合 (街頭感、節拍準確)",
+    "雙人男團編舞感單人演繹 (模仿隊形節奏、不生成多餘人物)",
+    "慢動作轉身與外套擺動 (電影感、保持臉部穩定)",
+    "副歌連續三個定點 Pose (每個動作短促清楚)",
+    "結尾看鏡頭微笑並俐落定格 (自然自信、不誇張)"
+  ],
+  scene: [
+    "黑銀色極簡 MV 棚，線性燈條與煙霧 (Black and silver minimalist studio)",
+    "深藍霓虹城市屋頂，遠景天際線 (Navy neon rooftop skyline)",
+    "工業風地下舞蹈排練室，水泥牆與鏡面 (Industrial dance practice studio)",
+    "韓系男團演唱會舞台，藍白 LED 與雷射光 (K-pop concert stage, blue-white LEDs)",
+    "黑色鏡面舞台，銀色光束與薄霧 (Black reflective stage with silver beams)",
+    "都市夜街與濕地反光，電影感街拍 (Cinematic wet city street at night)",
+    "高級飯店大廳，大理石與暖金燈光 (Luxury hotel lobby, marble and warm gold)",
+    "極簡灰色攝影棚，硬光與深邃陰影 (Minimal gray photo studio)",
+    "深色錄音室，混音台與低調氛圍燈 (Dark recording studio)",
+    "復古唱片行，木質層架與暖色底片感 (Retro record store, warm film look)",
+    "黑白棋盤格舞台，俐落幾何構圖 (Black-white geometric stage)",
+    "藍紫色電競空間，科技光線與金屬材質 (Blue-purple gaming studio)",
+    "城市停車場頂樓，日落逆光與街頭感 (Urban parking rooftop at sunset)",
+    "現代美術館，混凝土牆與雕塑 (Modern art gallery, concrete and sculpture)",
+    "精品男裝攝影棚，深棕皮革與金屬細節 (Luxury menswear editorial set)",
+    "日系街道與自動販賣機，清爽電影色調 (Japanese street, cinematic color grading)",
+    "復古港風街景，霓虹招牌與底片顆粒 (Retro Hong Kong neon street)",
+    "籃球場夜間燈光，球場線條與看台 (Basketball court at night)",
+    "城市天橋與高架道路，藍調時刻 (Urban overpass at blue hour)",
+    "極簡白色棚拍空間，柔和自然光 (Minimal white studio, natural soft light)",
+    "森林步道與晨霧，沉穩自然氛圍 (Forest path with morning mist)",
+    "海邊防波堤，夕陽、海風與寬闊天空 (Seaside breakwater at sunset)",
+    "海岸公路與復古跑車，電影感構圖 (Coastal road and classic sports car)",
+    "現代玻璃建築中庭，冷調反射光 (Modern glass atrium, cool reflections)",
+    "水泥牆塗鴉街角，街頭文化氛圍 (Graffiti street corner)",
+    "滑板公園，斜陽與長陰影 (Skate park in low sunlight)",
+    "天台直升機停機坪風格場景，城市遠景 (Rooftop helipad-inspired city view)",
+    "深夜便利商店門口，日系都會氛圍 (Japanese convenience store at night)",
+    "深綠色酒吧風格棚景，黃銅與低調燈光 (Moody emerald and brass set)",
+    "暖棕咖啡廳，木質桌面與窗邊光線 (Warm brown cafe by the window)",
+    "男裝精品店，俐落陳列與高級材質 (Menswear boutique)",
+    "現代圖書館，書牆與窗邊光影 (Modern library with dramatic window light)",
+    "校園走廊與午後斜陽，青春電影感 (Campus corridor in afternoon light)",
+    "樂團 Live House，舞台燈與音箱 (Live house with stage lights and amplifiers)",
+    "排練室鏡牆與木地板，專業舞者氛圍 (Dance rehearsal room)",
+    "深紅幕布與聚光燈，戲劇化舞台 (Deep red curtain and spotlight stage)",
+    "金黑色典禮舞台，金屬裝置與煙霧 (Black-and-gold award stage)",
+    "銀白未來感空間，金屬拱門與光帶 (Silver futuristic set)",
+    "藍色雷射光束與粒子特效舞台 (Blue laser and particle stage)",
+    "紫色星際艙，科幻面板與深空背景 (Sci-fi starship interior)",
+    "復古遊戲廳，霓虹燈與街機 (Retro arcade with neon lights)",
+    "城市地鐵月台，冷色燈光與速度感 (Metro platform, cool cinematic lighting)",
+    "老式電梯與金屬牆面，時尚大片構圖 (Vintage elevator fashion editorial)",
+    "極簡公寓客廳，落地窗與自然光 (Minimal apartment with floor-to-ceiling windows)",
+    "黑色背景配一道輪廓光，人物主視覺 (Black backdrop with rim light)",
+    "沙色荒漠與強烈夕陽，史詩電影氛圍 (Sand desert at golden hour)",
+    "雪地松林與冷冽晨光 (Snowy pine forest in cool morning light)",
+    "雨後巷弄與招牌倒影，寫實電影風 (Rainy alley with reflected signs)",
+    "露天音樂祭舞台，觀眾燈海與煙火光點 (Outdoor music festival stage)",
+    "復古美式加油站，公路電影風 (Retro American gas station)",
+    "黑膠唱片與音響器材的暗色陳列空間 (Vinyl records and audio equipment)",
+    "落日海岸草地，逆光與自然微風 (Coastal grass at sunset)",
+    "俐落建築樓梯間，光影幾何與深色材質 (Architectural staircase with geometric shadows)"
+  ]
+};
+
+let currentTab = 'img';
+
+function initOptions(){
+  for(let key in OPTIONS_DB){
+    const select = document.getElementById(key);
+    if(!select) continue;
+    select.innerHTML = "";
+    OPTIONS_DB[key].forEach((item, index) => {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.textContent = `${index + 1}. ${item}`;
+      select.appendChild(opt);
+    });
+  }
+}
+
+const get = id => document.getElementById(id).value.trim();
+const checked = () => [...document.querySelectorAll('.check input:checked')].map(x=>x.value);
+
+function switchTab(tab){
+  currentTab = tab;
+  document.getElementById('tabImg').classList.toggle('active', tab === 'img');
+  document.getElementById('tabVid').classList.toggle('active', tab === 'vid');
+  makePrompt();
+}
+
+function makePrompt(){
+  const song = get('song') || '青春熱門單曲';
+  const options = checked();
+
+  if(currentTab === 'img'){
+    // 專門給 Midjourney / DALL-E 用的靜態生圖 Prompt
+    const lines = [
+      '【階段 1：AI 男生動物角色靜態照片 Prompt (Text-to-Image)】',
+      '（可用於 Midjourney / DALL-E / Stable Diffusion 等生成高品質擬人動物男生角色圖）',
+      '',
+      '【角色繪製核心特徵】',
+      '・動物角色類型：' + get('gender'),
+      '・物種臉部特徵：' + get('faceShape'),
+      '・毛色與毛髮：' + get('hairStyle'),
+      '・動物身型比例：' + get('bodyType'),
+      '・服裝造型：' + get('outfit'),
+      '・美術風格：' + get('artStyle'),
+      '・場景背景：' + get('scene'),
+      '・畫面規格：' + get('ratio') + ' 正面全身或半身角色圖；角色為男性擬人動物，保留清楚物種特徵、耳朵、尾巴、毛色與爪掌／手部設定，服裝質感清晰，電影級光影與高解析細節。',
+      get('custom') ? '・細節補充：' + get('custom') : '',
+      '',
+      '【繪圖參數 Prompt】',
+      `${get('gender')}, ${get('hairStyle')}, ${get('outfit')}, ${get('scene')}, ${get('artStyle')}, masterpiece, best quality, ultra-detailed, handsome anthropomorphic male animal idol, species-accurate ears, muzzle, fur, tail and paws, consistent animal anatomy, stylish menswear, cinematic lighting, clean composition, no human skin, no extra limbs, no extra tails --ar 9:16`
+    ];
+    document.getElementById('prompt').value = lines.join('\n');
+  } else {
+    // 專門給 Kling / Runway 用的圖生影片 Prompt
+    const lines = [
+      '【階段 2：圖轉唱跳影片 Prompt (Image-to-Video)】',
+      '（將階段 1 生成的照片上傳至 Kling / Runway / Luma 後貼入以下指令）',
+      '',
+      '【動態舞蹈與對嘴表演指令】',
+      '・音樂風格：' + get('musicType') + ' (節奏: ' + get('beat') + ')',
+      '・唱跳表演：擬人動物男生依音樂節奏自然唱歌、對嘴與舞蹈，保留物種特徵與自信舞台魅力；嘴部動作符合動物口鼻結構，避免臉部變成人類。',
+      '・舞蹈動作：' + get('dance') + ' (' + get('dancePower') + ')。',
+      '・運鏡風格：' + get('camera'),
+      '・物理流動：' + (options.length ? options.join('；') : '毛髮、耳朵、尾巴與衣料隨動作自然擺動，保持合理重力與慣性') + '。',
+      '・品質維護：保持動物物種、口鼻、耳朵、毛色、尾巴、身形與服裝和原圖一致；動作連貫、四肢與爪掌結構自然，避免物種變化、尾巴／耳朵消失、肢體增生、服裝變形、額外人物與背景閃爍。'
+    ];
+    document.getElementById('prompt').value = lines.join('\n');
+  }
+}
+
+/* 隨機抽籤功能 */
+function randomizeCharacter(){
+  ['gender', 'faceShape', 'hairStyle', 'bodyType', 'outfit', 'artStyle'].forEach(key => {
+    const sel = document.getElementById(key);
+    if(sel){
+      sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+    }
+  });
+  makePrompt();
+}
+
+function randomizeAll(){
+  randomizeCharacter();
+  ['musicType', 'dance', 'scene'].forEach(key => {
+    const sel = document.getElementById(key);
+    if(sel){
+      sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+    }
+  });
+  makePrompt();
+}
+
+/* Canvas 模擬 AI 生成圖片與動畫機制 */
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+let currentImgData = null;
+let animTimer = null;
+let isAnimating = false;
+
+// 初始化畫布
+function initCanvas(){
+  ctx.fillStyle = "#eef5ff";
+  ctx.fillRect(0,0,260,360);
+  ctx.fillStyle = "#334155";
+  ctx.font = "bold 14px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("⚡ 點擊下方「生成角色照片」", 130, 170);
+  ctx.fillText("體驗先圖後影 MV 流程", 130, 195);
+}
+
+function generateImage(){
+  if(isAnimating) stopAnimation();
+  document.getElementById('simBadge').textContent = "1. 已生成角色圖片";
+  
+  // 繪製模擬的 AI 萌系美少年卡片
+  ctx.fillStyle = "#ffdae3";
+  ctx.fillRect(0,0,260,360);
+  
+  // 背景星光裝飾
+  ctx.fillStyle = "#ffffff";
+  for(let i=0; i<15; i++){
+    ctx.beginPath();
+    ctx.arc(Math.random()*260, Math.random()*360, Math.random()*3+1, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // 美少年頭髮
+  ctx.fillStyle = "#1e293b";
+  ctx.beginPath();
+  ctx.arc(130, 130, 75, 0, Math.PI*2);
+  ctx.fill();
+
+  // 臉型
+  ctx.fillStyle = "#fff0e6";
+  ctx.beginPath();
+  ctx.arc(130, 140, 50, 0, Math.PI*2);
+  ctx.fill();
+
+  // 腮紅
+  ctx.fillStyle = "#cbd5e1";
+  ctx.beginPath();
+  ctx.arc(105, 150, 10, 0, Math.PI*2);
+  ctx.arc(155, 150, 10, 0, Math.PI*2);
+  ctx.fill();
+
+  // 眼睛
+  ctx.fillStyle = "#3d242b";
+  ctx.beginPath();
+  ctx.arc(110, 135, 7, 0, Math.PI*2);
+  ctx.arc(150, 135, 7, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(112, 133, 2.5, 0, Math.PI*2);
+  ctx.arc(152, 133, 2.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // 甜美微笑
+  ctx.strokeStyle = "#334155";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(130, 150, 8, 0.1*Math.PI, 0.9*Math.PI);
+  ctx.stroke();
+
+  // 男生上衣主體
+  ctx.fillStyle = "#475569";
+  ctx.beginPath();
+  ctx.moveTo(95, 185);
+  ctx.lineTo(165, 185);
+  ctx.lineTo(185, 290);
+  ctx.lineTo(75, 290);
+  ctx.closePath();
+  ctx.fill();
+
+  // 儲存快照
+  currentImgData = ctx.getImageData(0, 0, 260, 360);
+  document.getElementById('btnAnim').disabled = false;
+}
+
+function generateVideo(){
+  if(!currentImgData) return;
+  document.getElementById('simBadge').textContent = "2. 🎬 唱跳 MV 播放中";
+  stopAnimation();
+  
+  let frame = 0;
+  isAnimating = true;
+  
+  animTimer = setInterval(() => {
+    frame++;
+    ctx.putImageData(currentImgData, 0, 0);
+    
+    // 模擬動態擺動與對嘴效果
+    const offsetY = Math.sin(frame * 0.15) * 6;
+    const eyeWink = Math.sin(frame * 0.1) > 0.8;
+    
+    // 清除區域重新繪製擺動頭部
+    ctx.fillStyle = "#fff0e6";
+    ctx.beginPath();
+    ctx.arc(130, 140 + offsetY, 50, 0, Math.PI*2);
+    ctx.fill();
+
+    // 腮紅
+    ctx.fillStyle = "#cbd5e1";
+    ctx.beginPath();
+    ctx.arc(105, 150 + offsetY, 10, 0, Math.PI*2);
+    ctx.arc(155, 150 + offsetY, 10, 0, Math.PI*2);
+    ctx.fill();
+
+    // 眨眼/大眼
+    ctx.fillStyle = "#3d242b";
+    if(eyeWink){
+      ctx.fillRect(103, 133 + offsetY, 14, 3);
+      ctx.beginPath();
+      ctx.arc(150, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(110, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.arc(150, 135 + offsetY, 7, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // 萌感嘴型變化 (唱歌對嘴)
+    const mouthOpen = Math.abs(Math.sin(frame * 0.2)) * 6 + 3;
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath();
+    ctx.ellipse(130, 155 + offsetY, 6, mouthOpen, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // 飄落愛心特效
+    ctx.fillStyle = "rgba(96, 165, 250, 0.7)";
+    const heartY = (frame * 4) % 360;
+    ctx.beginPath();
+    ctx.arc((frame*3)%260, heartY, 6, 0, Math.PI*2);
+    ctx.fill();
+
+  }, 50);
+}
+
+function stopAnimation(){
+  if(animTimer) clearInterval(animTimer);
+  isAnimating = false;
+}
+
+function loadCustomImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const img = new Image();
+  img.onload = () => {
+    stopAnimation();
+    ctx.drawImage(img, 0, 0, 260, 360);
+    currentImgData = ctx.getImageData(0, 0, 260, 360);
+    document.getElementById('simBadge').textContent = "1. 自訂圖片已上傳";
+    document.getElementById('btnAnim').disabled = false;
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+/* 即時監聽選項 */
+document.querySelectorAll('select, input[type=text], textarea, input[type=checkbox]').forEach(el => {
+  el.addEventListener('input', makePrompt);
+  el.addEventListener('change', makePrompt);
+});
+
+/* 複製 Prompt */
+document.getElementById('copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(document.getElementById('prompt').value);
+    const btn = document.getElementById('copy');
+    btn.textContent = '✓ 已複製當前指令';
+    setTimeout(() => { btn.textContent = '📋 複製當前指令'; }, 1500);
+  } catch(e) {
+    alert('複製失敗，請手動複製右側指令。');
+  }
+};
+
+/* 儲存/匯出/匯入/重設 */
+function getSettingsData(){
+  const data = { version:5, settings:{} };
+  document.querySelectorAll('select, input[type=text], textarea').forEach(el => {
+    data.settings[el.id] = el.value;
+  });
+  data.settings.checks = checked();
+  return data;
+}
+
+document.getElementById('save').onclick = () => {
+  localStorage.setItem('danceMVGenerator_img2vid', JSON.stringify(getSettingsData()));
+  alert('男生動物造型設定已儲存！');
+};
+
+document.getElementById('exportSettings').onclick = () => {
+  const blob = new Blob([JSON.stringify(getSettingsData(), null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Cute_Animal_Boy_MV_ImageToVideo_Settings.json';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById('importSettings').onclick = () => document.getElementById('importFile').click();
+
+document.getElementById('importFile').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const raw = JSON.parse(reader.result);
+      const data = raw.settings || raw;
+      Object.keys(data).forEach(id => {
+        const el = document.getElementById(id);
+        if(el && id !== 'checks') el.value = data[id];
+      });
+      makePrompt();
+      alert('男生動物造型設定匯入成功！');
+    } catch(e) { alert('格式錯誤。'); }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('reset').onclick = () => {
+  if(!confirm('確定要重設為初始男生動物設定嗎？')) return;
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('input[type=text], textarea').forEach(el => el.value = '');
+  stopAnimation();
+  initCanvas();
+  makePrompt();
+};
+
+/* 啟動 */
+initOptions();
+initCanvas();
+makePrompt();
+</script>
+
+</body>
+</html>
