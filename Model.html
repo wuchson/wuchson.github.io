@@ -126,7 +126,7 @@
       transition: all 0.2s ease;
       appearance: none;
       -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238c6d63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%3C8c6d63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       background-size: 16px;
@@ -269,7 +269,7 @@
 <div class="container">
   <header>
     <span class="badge">PROMPT GENERATOR</span>
-    <h1>AI 貼身衣物拍攝指令生成器 <br><span style="font-size: 1.1rem; font-weight: 400; color: var(--text-sub);">(粉嫩少女風無木紋升級版)</span></h1>
+    <h1>AI 貼身衣物拍攝指令生成器 <br><span style="font-size: 1.1rem; font-weight: 400; color: var(--text-sub);">(海量擴充升級版)</span></h1>
   </header>
 
   <div class="grid">
@@ -744,6 +744,7 @@
         <option value="野性豹紋/斑馬紋時尚風格，充滿性感張力">野性動物紋時尚風格</option>
         <option value="童話夢幻愛麗絲風格，帶有藍白色系與蕾絲">童話夢幻蕾絲風格</option>
         <option value="未來感金屬光澤風格，亮面貼合剪裁">未來感金屬光澤風格</option>
+        
       </select>
     </div>
 
@@ -791,6 +792,7 @@
         <option value="外搭高級深藍色絨面晨袍">深藍色貴族絨面晨袍（奢華沉穩）</option>
         <option value="身上裹著一張純白柔軟被單（遮住局部）">裹著純白柔軟被單（性感）</option>
         <option value="外搭印花夏威夷短袖襯衫（敞開）">夏威夷印花襯衫（熱帶度假）</option>
+        
       </select>
     </div>
 
@@ -831,6 +833,7 @@
         <option value="佩戴木質與貝殼組合自然項鍊">貝殼木質自然項鍊（渡假風）</option>
         <option value="佩戴簡約金屬胸針點綴罩衫">簡約金屬胸針（精緻細節）</option>
         <option value="無任何首飾裝飾，呈現最純粹肌膚">無首飾（純淨自然肌膚）</option>
+        
       </select>
     </div>
 
@@ -869,12 +872,14 @@
         <option value="腳穿紅色尖頭細高跟鞋（點睛色彩）">紅色尖頭高跟鞋（紅唇點睛）</option>
         <option value="搭配白色魚網短襪與高跟鞋">白色魚網短襪 + 高跟鞋（時尚混搭）</option>
         <option value="赤腳踩在地板上（海邊氛圍）">赤腳踩沙灘（海邊自然）</option>
+        
       </select>
     </div>
 
-    <!-- 5. 下午茶、食物與生活道具 -->
+    <!-- 5. 下午茶、食物與生活道具（分類優化版） -->
     <div class="section-title">5. 下午茶、食物與生活道具</div>
 
+    <!-- ① 手拿飲品／食物互動 -->
     <div class="form-group">
       <label>① 手拿飲品／食物互動</label>
       <select id="foodItem">
@@ -909,9 +914,11 @@
         <option value="手持小碗爆米花，搭配柔和居家背景">爆米花（休閒電影感）</option>
         <option value="雙手自然托著小點心盤，視線看向桌面，呈現生活抓拍感">托著點心盤（自然生活感）</option>
         <option value="雙手自然放在桌邊，不拿食物，讓內衣商品成為畫面主體">不拿食物（專注商品）</option>
+        
       </select>
     </div>
 
+    <!-- ② 桌面下午茶／餐點陳列 -->
     <div class="form-group">
       <label>② 桌面下午茶／餐點陳列</label>
       <select id="teaTableSetting">
@@ -927,8 +934,8 @@
         <option value="桌面擺放水果優格、莓果、蜂蜜與燕麥，陳列清爽">水果優格早餐盤（健康清新）</option>
         <option value="桌面擺放新鮮草莓、藍莓、葡萄、無花果與白瓷水果盤">新鮮水果拼盤（自然生活感）</option>
         <option value="桌面擺放冰拿鐵、氣泡水、檸檬片與透明玻璃器皿">冰飲玻璃器皿（清爽夏日）</option>
-        <option value="桌面擺放熱拿鐵、陶瓷杯、金屬托盤與小餅乾">拿鐵＋金屬托盤（溫暖居家）</option>
-        <option value="桌面擺放熱可可、棉花糖、小餅乾與柔軟毛絨小物">熱可可＋棉花糖（冬日溫馨）</option>
+        <option value="桌面擺放熱拿鐵、陶瓷杯、木質托盤與小餅乾">拿鐵＋木托盤（溫暖居家）</option>
+        <option value="桌面擺放熱可可、棉花糖、小餅乾與柔軟針織小物">熱可可＋棉花糖（冬日溫馨）</option>
         <option value="桌面擺放小鬆餅、蜂蜜、莓果與白色陶瓷餐盤">鬆餅＋蜂蜜＋莓果（甜美早餐）</option>
         <option value="桌面擺放法式可麗露、瑪德蓮、咖啡與小花瓶">法式烘焙點心（精緻生活）</option>
         <option value="桌面擺放巧克力禮盒、絲帶、小卡片與花束">巧克力禮盒＋花束（精緻禮物感）</option>
@@ -936,7 +943,7 @@
         <option value="桌面擺放冰淇淋聖代杯、櫻桃與復古玻璃吸管">冰淇淋聖代（復古甜點店）</option>
         <option value="桌面擺放青花瓷茶壺、茶杯與中式小糕點">青花瓷茶具＋糕點（中式雅致）</option>
         <option value="桌面擺放極簡白瓷餐盤、透明玻璃杯與米白餐巾">極簡白瓷餐桌（乾淨電商感）</option>
-        <option value="桌面鋪設米白亞麻桌巾，搭配金屬托盤與少量甜點">米白亞麻＋金屬托盤（自然質感）</option>
+        <option value="桌面鋪設米白亞麻桌巾，搭配木質托盤與少量甜點">米白亞麻＋木質托盤（自然質感）</option>
         <option value="桌面鋪設淡粉色桌巾，搭配白瓷餐具與小花束">淡粉桌面＋白瓷（柔美風格）</option>
         <option value="桌面擺放透明玻璃花瓶、白色花朵、茶杯與小甜點">玻璃花瓶＋白花（清新高級）</option>
         <option value="桌面擺放小型乾燥花束、復古書本、茶杯與餅乾">乾燥花＋書本＋茶（文藝復古）</option>
@@ -945,9 +952,11 @@
         <option value="窗邊小桌擺放早餐托盤、咖啡、吐司、水果與花瓶">窗邊早餐托盤（晨間生活感）</option>
         <option value="床邊小桌擺放咖啡、書本、眼鏡、小花瓶與簡約點心">床邊生活小桌（自然居家）</option>
         <option value="桌面只保留一杯咖啡與一小盤點心，背景大面積留白">極簡單品桌面（商品主體優先）</option>
+        
       </select>
     </div>
 
+    <!-- ③ 花卉／植物道具 -->
     <div class="form-group">
       <label>③ 花卉／植物道具</label>
       <select id="floralProp">
@@ -969,9 +978,11 @@
         <option value="桌面擺放小型白花與透明玻璃瓶，背景柔焦">白花玻璃瓶（極簡清透）</option>
         <option value="桌面擺放淡粉與白色混合花束，色調低飽和">粉白混合花束（柔霧質感）</option>
         <option value="桌面擺放季節感小花束，色彩自然，不過度繁複">季節花束（自然生活感）</option>
+        
       </select>
     </div>
 
+    <!-- ④ 布偶／玩偶／可愛小物 -->
     <div class="form-group">
       <label>④ 布偶／玩偶／可愛小物</label>
       <select id="plushProp">
@@ -989,12 +1000,14 @@
         <option value="桌面放置一個小型陶瓷小熊擺件，與茶具保持適當距離">陶瓷熊擺件（溫暖質感）</option>
         <option value="椅子上自然放置一個柔軟抱枕，色調與場景協調">柔軟抱枕（居家氛圍）</option>
         <option value="床上放置兩個不同尺寸的奶油色抱枕，保持自然隨意">奶油抱枕（柔和生活感）</option>
-        <option value="沙發角落放置一條柔軟毛絨毯與小型布偶">毛絨毯＋布偶（溫暖居家）</option>
+        <option value="沙發角落放置一條柔軟針織毯與小型布偶">針織毯＋布偶（溫暖居家）</option>
         <option value="畫面加入小型玩偶作為背景點綴，景深自然，不搶商品">背景小玩偶（柔焦點綴）</option>
         <option value="桌面放置可愛小巧音樂盒，造型簡潔精緻">迷你音樂盒（復古可愛）</option>
+        
       </select>
     </div>
 
+    <!-- ⑤ 書籍／文具／生活小物 -->
     <div class="form-group">
       <label>⑤ 書籍／文具／生活小物</label>
       <select id="lifestyleProp">
@@ -1008,18 +1021,20 @@
         <option value="桌面擺放簡約香水瓶與小花瓶，保持留白">香水瓶＋小花（精品感）</option>
         <option value="桌面擺放小型珠寶盒與珍珠耳飾，細節精緻">珠寶盒（輕奢質感）</option>
         <option value="桌面擺放絲質髮帶與小髮夾，色調柔和">絲質髮帶＋髮飾（柔美生活感）</option>
-        <option value="桌面擺放米白亞麻餐巾、金屬托盤與陶瓷餐具">亞麻餐巾＋金屬托盤（自然質感）</option>
+        <option value="桌面擺放米白亞麻餐巾、木質托盤與陶瓷餐具">亞麻餐巾＋木托盤（自然質感）</option>
         <option value="桌面擺放精緻茶匙、銀色甜點叉與小瓷盤">銀色茶匙＋甜點叉（下午茶細節）</option>
         <option value="桌面擺放透明玻璃花瓶與小型花束，背景自然柔焦">玻璃花瓶＋小花（清透高級）</option>
-        <option value="窗邊擺放一張小白椅與摺疊毛毯，營造自然居家氛圍">小白椅＋毛毯（自然居家）</option>
-        <option value="沙發旁擺放金屬小圓几、咖啡杯與一本書，畫面乾淨有層次">金屬小圓几＋書（生活感）</option>
+        <option value="窗邊擺放一張小木椅與摺疊毛毯，營造自然居家氛圍">木椅＋毛毯（自然居家）</option>
+        <option value="沙發旁擺放小圓几、咖啡杯與一本書，畫面乾淨有層次">小圓几＋書＋咖啡（生活感）</option>
         <option value="桌面擺放一只復古小鬧鐘與書本，營造晨間氛圍">復古小鬧鐘（晨間生活）</option>
         <option value="桌面擺放小型手提包或編織包，作為背景造型點綴">編織小包（度假生活感）</option>
         <option value="桌面擺放小型絲巾自然垂落，色調與服裝協調">絲巾（法式優雅）</option>
         <option value="桌面擺放簡約白色陶瓷花器、茶杯與小點心">白瓷器皿（極簡高級）</option>
+        
       </select>
     </div>
 
+    <!-- ⑥ 季節／節慶氛圍小物 -->
     <div class="form-group">
       <label>⑥ 季節／節慶氛圍小物</label>
       <select id="seasonalProp">
@@ -1027,14 +1042,16 @@
         <option value="畫面加入少量春季淡色花朵與柔和綠葉，保持背景乾淨">春日花卉（清新季節感）</option>
         <option value="畫面加入少量夏季檸檬、玻璃杯與清爽綠葉">夏日檸檬（清爽明亮）</option>
         <option value="畫面加入秋季乾燥花、栗子與暖色陶器">秋日乾燥花（溫暖質感）</option>
-        <option value="畫面加入冬季毛絨毯、松果與溫暖馬克杯">冬日毛絨小物（溫馨居家）</option>
+        <option value="畫面加入冬季針織毯、松果與溫暖馬克杯">冬日針織小物（溫馨居家）</option>
         <option value="畫面加入少量生日緞帶、小蛋糕與小花束，保持簡潔">生日小物（甜美慶祝）</option>
         <option value="畫面加入淡色緞帶、禮盒與小花束，構圖精緻">精緻禮盒＋緞帶（送禮氛圍）</option>
         <option value="畫面加入少量聖誕松枝、松果與米白裝飾，色調低飽和">冬季松枝裝飾（節日質感）</option>
         <option value="畫面加入簡約野餐籃、格紋餐巾與水果，背景自然">野餐籃＋格紋餐巾（戶外生活感）</option>
+        
       </select>
     </div>
 
+    <!-- ⑦ 道具數量與畫面控制 -->
     <div class="form-group">
       <label>⑦ 道具整體控制</label>
       <select id="propBalance">
@@ -1043,13 +1060,14 @@
         <option value="道具控制在4至6件，前中後景有層次，但保持商品與人物為主要視覺焦點">中等豐富道具（生活感）</option>
         <option value="只安排1至2件主道具，其餘背景大面積留白，強調高級電商型錄感">極簡1～2件主道具</option>
         <option value="花卉或布偶放在背景側邊並使用淺景深，前景道具輕微虛化，不搶商品焦點">前景／背景景深分層</option>
-        <option value="道具色調與服裝、背景協調，採低飽和米白、奶油、金屬與淡色系，避免雜亂">低飽和統一色系</option>
+        <option value="道具色調與服裝、背景協調，採低飽和米白、奶油、木質與淡色系，避免雜亂">低飽和統一色系</option>
         <option value="所有道具自然擺放，不刻意排列整齊，保留真實生活攝影的輕微隨性感">自然隨手擺放</option>
         <option value="道具僅作氛圍襯托，不能遮住內衣版型、蕾絲、肩帶、車縫與主要商品細節">商品優先不遮擋</option>
+        
       </select>
     </div>
 
-    <!-- 6. 場景與光影 (已全數改為粉嫩少女風格且無木紋) -->
+    <!-- 6. 場景與光影 -->
     <div class="section-title">6. 拍攝場景風格與光影</div>
 
     <div class="form-group">
@@ -1234,6 +1252,7 @@
       </select>
     </div>
 
+
     <div class="form-group">
       <label>時間與光線氛圍</label>
       <select id="timeOfDay">
@@ -1318,12 +1337,14 @@
     <div class="form-group">
       <label>模特兒姿勢</label>
       <select id="pose">
+
+        <!-- 女模｜自然站姿 -->
         <option value="成年女性時尚模特兒自然站立面向鏡頭，雙腳前後錯開半步，肩膀放鬆，一手自然垂放，另一手輕搭腰側，視線自然看向鏡頭，高級商業攝影">自然正面站姿</option>
         <option value="成年女性時尚模特兒身體微微側向鏡頭約30度，一腳自然向前，肩膀與髖部呈自然角度，一手輕放腰側，另一手自然垂落，表情柔和自然">微側身站姿</option>
         <option value="成年女性時尚模特兒身體側向鏡頭，上半身自然轉向鏡頭，頭部輕輕回望，肩頸放鬆，姿態優雅自然">側身回眸</option>
         <option value="成年女性時尚模特兒自然站在牆邊，肩膀輕靠牆面，一腳微微彎曲，雙手自然放置，姿態放鬆自然，時尚型錄攝影">靠牆自然站姿</option>
         <option value="成年女性時尚模特兒自然站在落地窗旁，身體微側，一手輕搭窗框，另一手自然垂放，視線望向窗外，柔和自然光">落地窗站姿</option>
-        <option value="成年女性時尚模特兒自然向前跨步，身體保持平衡，雙臂隨步伐自然擺動，捕捉自然走動瞬間，服裝產生輕微動態">自然跨步</option>
+        <option value="成年女性時尚模特兒自然向前跨一步，身體保持平衡，雙臂隨步伐自然擺動，捕捉自然走動瞬間，服裝產生輕微動態">自然跨步</option>
         <option value="成年女性時尚模特兒自然站立，一手輕輕整理耳側髮絲，另一手自然垂放，頭部微微側傾，呈現自然生活感">整理頭髮站姿</option>
         <option value="成年女性時尚模特兒自然站立，雙手在身前輕輕交疊，雙腳自然錯開，身體微側，肩膀放鬆，簡潔優雅">雙手交疊</option>
         <option value="成年女性時尚模特兒站在簡約桌邊，身體微微靠近桌面，一手輕搭桌面，另一手自然垂放，雙腳自然錯開">輕靠桌邊</option>
@@ -1333,6 +1354,8 @@
         <option value="成年女性時尚模特兒自然站立，單側肩膀輕輕向後轉，雙手自然垂放，頭部微微側傾，呈現自然立體感">肩膀微轉</option>
         <option value="成年女性時尚模特兒向前自然走動後輕輕回頭，髮絲產生自然動態，捕捉時尚攝影抓拍瞬間">走動回眸</option>
         <option value="成年女性時尚模特兒自然站立，雙手輕放腰側，身體微微側向鏡頭，一腳自然向前，呈現俐落時尚姿態">腰側站姿</option>
+
+        <!-- 女模｜坐姿 -->
         <option value="成年女性時尚模特兒自然坐在沙發中央，背部輕靠靠背，雙腳自然落地，雙手輕放腿上，肩膀放鬆，視線看向鏡頭">沙發自然坐姿</option>
         <option value="成年女性時尚模特兒自然坐在沙發中央，背部輕靠靠背，雙腳自然落地，雙手輕放腿上，肩膀放鬆，視線低頭">沙發自然坐姿(低頭)</option>
         <option value="成年女性時尚模特兒坐在沙發邊緣，身體微微側向鏡頭，雙腿自然併放並略微錯開，一手輕搭沙發扶手，另一手放在腿側">沙發側坐</option>
@@ -1349,6 +1372,8 @@
         <option value="成年女性時尚模特兒坐在簡約椅子上，雙腿自然交錯，一手輕搭椅背，另一手放在腿側，時尚型錄姿態">交錯腿坐姿</option>
         <option value="成年女性時尚模特兒坐在地毯上，雙腿自然向一側彎曲，身體微微側傾，一手支撐地面，姿態自然柔和">地毯側靠坐姿</option>
         <option value="成年女性時尚模特兒坐在沙發上，背部自然靠著靠背，一手輕撥頭髮，另一手放在腿側，視線看向鏡頭">慵懶沙發坐姿</option>
+
+        <!-- 女模｜床上／居家 -->
         <option value="成年女性時尚模特兒自然側躺在整潔白色床單上，上半身微微支撐，雙腿自然彎曲，一手輕放枕頭旁，另一手自然放在身側">自然側躺</option>
         <option value="成年女性時尚模特兒半躺在床上，背部自然靠著枕頭，上半身微微抬起，雙腿自然伸展，一手輕放床面，另一手整理髮絲">半躺床上</option>
         <option value="成年女性時尚模特兒自然仰躺在白色床單上，頭部微微轉向鏡頭，雙手自然放在身體兩側，髮絲自然散落，柔和窗光">仰躺床上</option>
@@ -1359,6 +1384,8 @@
         <option value="成年女性時尚模特兒坐在床頭靠枕旁，雙腿自然彎曲，一手輕撥頭髮，另一手自然放在床面">靠枕休閒</option>
         <option value="成年女性時尚模特兒坐在床邊，低頭自然整理髮絲，雙肩放鬆，柔和窗光營造高級居家氛圍">低頭整理頭髮</option>
         <option value="成年女性時尚模特兒自然躺在床上側身看向窗外，雙手自然放置，姿態舒適放鬆，乾淨明亮的商業生活攝影">側躺望窗</option>
+
+        <!-- 女模｜背面／側面 -->
         <option value="成年女性時尚模特兒背對鏡頭自然站立，雙腳前後錯開，肩膀放鬆，雙手自然垂放，完整呈現服裝背面設計">背面自然站姿</option>
         <option value="成年女性時尚模特兒背對鏡頭自然站立，上半身微微轉動，頭部輕輕回望鏡頭，自然呈現服裝背部與肩帶設計">背面回眸</option>
         <option value="成年女性時尚模特兒身體與鏡頭呈45度角，一側肩膀靠近鏡頭，雙手自然放置，完整展示服裝側面與背面剪裁">45度側背</option>
@@ -1369,6 +1396,8 @@
         <option value="成年女性時尚模特兒背對鏡頭站立，一手輕撫髮絲，另一手自然垂放，呈現自然優雅的背影">背影撫髮</option>
         <option value="成年女性時尚模特兒站在鏡子前，以側後方角度呈現本人與鏡面反射，自然展示服裝側面與背面">鏡面側背</option>
         <option value="成年女性時尚模特兒背對鏡頭站立後自然轉身，捕捉轉身瞬間，髮絲與服裝產生輕微自然動態">轉身瞬間</option>
+
+        <!-- 女模｜商品細節 -->
         <option value="成年女性時尚模特兒一手輕輕觸碰肩帶位置，另一手自然垂放，視線看向肩帶，清楚呈現肩帶材質與車縫細節">輕觸肩帶</option>
         <option value="成年女性時尚模特兒一手輕輕觸碰衣物面料，另一手自然放置，表情專注自然，近距離呈現布料紋理">輕撫面料</option>
         <option value="成年女性時尚模特兒雙手自然整理衣物下襬，使服裝保持平整，動作自然不刻意，完整呈現服裝版型">整理衣襬</option>
@@ -1379,10 +1408,12 @@
         <option value="成年女性時尚模特兒身體微側，一手輕觸側邊面料，另一手自然放在腰側，突出服裝側面剪裁">展示側面細節</option>
         <option value="成年女性時尚模特兒自然站立，手臂輕抬並整理頭髮，完整呈現肩帶、側面與腰部結構，姿勢自然流暢">完整側面展示</option>
         <option value="成年女性時尚模特兒採半身構圖，一手輕觸服裝細節，另一手自然垂放，焦點集中於材質、蕾絲與精緻車縫">半身商品特寫</option>
+
+        <!-- 男模｜自然商品姿勢 -->
         <option value="成年男性時尚模特兒自然站立，雙腳前後錯開，肩膀放鬆，雙手自然垂放，身體微微側向鏡頭，專業商業型錄攝影">男模自然站姿</option>
         <option value="成年男性時尚模特兒身體微側45度，一腳自然向前，雙手自然放置，完整展示服裝正面與側面剪裁">男模45度站姿</option>
         <option value="成年男性時尚模特兒自然斜靠牆面，一側肩膀輕靠牆壁，單腳微微彎曲，雙手自然放置，休閒時尚氛圍">男模靠牆</option>
-        <option value="成年男性時尚模特兒坐在金屬凳上，身體微微前傾，雙肘自然靠近膝蓋，雙手放鬆，視線看向鏡頭">男模凳子坐姿</option>
+        <option value="成年男性時尚模特兒坐在木凳上，身體微微前傾，雙肘自然靠近膝蓋，雙手放鬆，視線看向鏡頭">男模木凳坐姿</option>
         <option value="成年男性時尚模特兒自然坐在沙發上，背部輕靠靠背，雙腿自然放置，一手搭在沙發扶手，舒適居家氛圍">男模沙發坐姿</option>
         <option value="成年男性時尚模特兒坐在簡約椅子上，雙腳穩定踩地，雙手自然放在腿上，身體微微側向鏡頭">男模簡約坐姿</option>
         <option value="成年男性時尚模特兒站在窗邊，身體微側，一手輕搭窗框，另一手自然垂放，柔和自然光">男模窗邊站姿</option>
@@ -1399,6 +1430,7 @@
         <option value="成年男性時尚模特兒自然靠坐在沙發上，一手搭扶手，另一手放在腿側，雙腿自然放置，舒適居家氛圍">男模沙發休閒</option>
         <option value="成年男性時尚模特兒身體微微轉身並回頭看向鏡頭，雙手自然放置，捕捉自然轉身瞬間">男模轉身回眸</option>
         <option value="成年男性時尚模特兒半身構圖，一手輕觸服裝腰頭或面料，另一手自然垂放，焦點集中於商品材質與設計細節">男模商品特寫</option>
+
         <option value="">無顯示（不指定姿勢）</option>
       </select>
     </div>
@@ -1420,17 +1452,18 @@
         <option value="成年女性時尚模特兒站在海邊迎著微風，一手輕壓草帽，另一手自然垂放，眼神望向遠方，呈現自由度假氛圍">迎風壓草帽</option>
         <option value="成年女性時尚模特兒雙手自然撥動被海風吹起的長髮，身體微側，雙腳自然錯開，呈現陽光自然的海島旅拍感">雙手撥髮迎海風</option>
         <option value="成年女性時尚模特兒手持透明冷飲杯站在沙灘上，一腳自然向前跨步，另一手輕搭腰側，陽光明亮自然">手持冷飲跨步</option>
-        <option value="成年女性時尚模特兒坐在白色沙灘小桌旁，身體微微側向鏡頭，一手拿飲料，另一手自然放在桌面">沙灘小桌旁坐姿</option>
-        <option value="成年女性時尚模特兒靠坐在金屬沙灘椅上，背部放鬆，雙腿自然伸展，一手輕撫椅側，另一手整理髮絲">金屬沙灘椅休閒坐</option>
-        <option value="成年女性時尚模特兒坐在海邊金屬欄杆旁，雙腿自然垂下，一手扶欄杆，另一手輕撥髮絲，望向海面">金屬欄杆坐姿</option>
+        <option value="成年女性時尚模特兒坐在木質沙灘小桌旁，身體微微側向鏡頭，一手拿飲料，另一手自然放在桌面">沙灘小桌旁坐姿</option>
+        <option value="成年女性時尚模特兒靠坐在藤編沙灘椅上，背部放鬆，雙腿自然伸展，一手輕撫椅側，另一手整理髮絲">藤編沙灘椅休閒坐</option>
+        <option value="成年女性時尚模特兒坐在海邊木棧道欄杆旁，雙腿自然垂下，一手扶欄杆，另一手輕撥髮絲，望向海面">木棧道欄杆坐姿</option>
         <option value="成年女性時尚模特兒站在觀景台欄杆旁，雙手自然搭在欄杆上，身體微側，視線望向遠方風景">觀景台眺望</option>
-        <option value="成年女性時尚模特兒沿著風景區步道自然行走，肩背小型度假包，雙臂自然擺動，回頭看向鏡頭">風景步道走動回眸</option>
+        <option value="成年女性時尚模特兒沿著風景區木棧道自然行走，肩背小型度假包，雙臂自然擺動，回頭看向鏡頭">風景步道走動回眸</option>
         <option value="成年女性時尚模特兒靠在棕櫚樹旁自然站立，一腳微微彎曲，一手輕搭樹幹，另一手自然放在腰側">棕櫚樹旁靠站</option>
         <option value="成年女性時尚模特兒坐在野餐墊上，雙腿自然彎曲，一手拿透明飲料，另一手放在身側，呈現輕鬆戶外生活感">野餐墊休閒坐</option>
         <option value="成年女性時尚模特兒手持復古相機站在風景區觀景點，身體微側，假裝拍攝遠方景色，再自然回頭看向鏡頭">手持相機旅拍</option>
         <option value="成年男性時尚模特兒站在海邊，雙腳前後錯開，一手拿草帽，另一手自然放在腰側，陽光自然明亮">男模海邊度假站姿</option>
         <option value="成年男性時尚模特兒坐在白色沙灘躺椅上，雙腿自然伸展，一手拿冰飲，另一手搭在椅側，呈現輕鬆度假感">男模躺椅休閒坐</option>
         <option value="成年男性時尚模特兒沿海邊自然走動，雙臂隨步伐擺動，偶爾回頭看向鏡頭，呈現自然旅拍抓拍感">男模海邊走動回眸</option>
+        
       </select>
     </div>
 
@@ -1441,39 +1474,40 @@
         <option value="">無顯示（不指定海灘／風景區道具）</option>
         <option value="場景加入一把大型米白色海灘遮陽傘，傘面自然張開，位置位於人物側後方，不遮擋人物與商品">米白色沙灘遮陽傘</option>
         <option value="場景加入一張乾淨俐落的白色沙灘躺椅，材質細緻，放置於人物側邊，呈現高級度假村氛圍">白色沙灘躺椅</option>
-        <option value="場景加入一張金屬沙灘躺椅，搭配米白色坐墊，具有自然高級度假感">金屬沙灘躺椅</option>
-        <option value="場景加入一張簡約白色躺椅，色調自然，與沙灘及海景協調">白色躺椅</option>
+        <option value="場景加入一張藤編沙灘躺椅，搭配米白色坐墊，具有自然高級度假感">藤編沙灘躺椅</option>
+        <option value="場景加入一張簡約木質沙灘躺椅，色調自然，與沙灘及海景協調">木質沙灘躺椅</option>
         <option value="場景加入一頂天然草編寬邊帽，自然放在躺椅或小桌上，作為度假風格點綴">草編寬邊草帽</option>
         <option value="場景加入一副精緻太陽眼鏡，自然放在躺椅或沙灘小桌上，不遮擋商品">時尚太陽眼鏡</option>
         <option value="場景加入一杯透明玻璃冷飲，杯中有冰塊、檸檬片與少量水珠，呈現清爽夏日感">透明冰飲＋檸檬</option>
         <option value="場景加入一顆自然造型椰子飲料，搭配簡約吸管，放在沙灘小桌或躺椅旁">椰子飲料</option>
         <option value="場景加入一條乾淨米白色沙灘毛巾，自然垂落在躺椅或鋪在沙灘上">米白沙灘毛巾</option>
         <option value="場景加入一張米白色沙灘野餐墊，布料有自然皺褶，保持整潔高級">米白野餐墊</option>
-        <option value="場景加入一個天然編織野餐籃，放在野餐墊側邊，尺寸適中不搶人物主體">編織野餐籃</option>
+        <option value="場景加入一個天然藤編野餐籃，放在野餐墊側邊，尺寸適中不搶人物主體">藤編野餐籃</option>
         <option value="場景加入一個米白色編織托特包，放在躺椅或野餐墊旁，具有度假生活感">編織度假托特包</option>
         <option value="場景加入一塊簡約白色沙灘小桌，桌面只放少量冰飲與太陽眼鏡，保持高級留白">白色沙灘小桌</option>
-        <option value="場景加入一張金屬小桌，搭配少量飲料與草帽，呈現自然度假村氛圍">金屬沙灘小桌</option>
+        <option value="場景加入一張天然木質小桌，搭配少量飲料與草帽，呈現自然度假村氛圍">木質沙灘小桌</option>
         <option value="場景加入一塊簡約白色衝浪板，斜靠在人物後方，比例合理，不遮擋服裝">白色衝浪板</option>
-        <option value="場景加入一個米白色衝浪板，作為背景造型元素，具有高級海島旅拍感">米白衝浪板</option>
+        <option value="場景加入一塊米白與木色系衝浪板，作為背景造型元素，具有高級海島旅拍感">米白木質衝浪板</option>
         <option value="場景加入一個白色救生圈，放在躺椅旁或沙灘上，保持自然生活感">白色救生圈</option>
         <option value="場景加入一輛復古海灘單車，停放在人物側後方，車身乾淨簡約，不搶人物焦點">復古海灘單車</option>
-        <option value="場景加入一把金屬休閒椅，搭配米白坐墊，形成高級海島度假場景">金屬休閒椅</option>
-        <option value="場景加入一把簡約露營椅，色調米白或卡其，放在風景區草地或步道旁">米白露營椅</option>
+        <option value="場景加入一把天然藤編休閒椅，搭配米白坐墊，形成高級海島度假場景">藤編休閒椅</option>
+        <option value="場景加入一把簡約露營椅，色調米白或卡其，放在風景區草地或木棧道旁">米白露營椅</option>
         <option value="場景加入一個小型透明防水包，放在沙灘躺椅旁，呈現實用旅遊生活感">透明防水小包</option>
-        <option value="場景加入一個小型旅行背包，材質簡約，放在觀景台旁">旅行小背包</option>
-        <option value="場景加入一台復古底片相機，放在桌上或由模特兒自然手持，營造旅拍氛圍">復古底片相機</option>
+        <option value="場景加入一個小型旅行背包，材質簡約，放在木棧道或觀景台旁">旅行小背包</option>
+        <option value="場景加入一台復古底片相機，放在木桌或由模特兒自然手持，營造旅拍氛圍">復古底片相機</option>
         <option value="場景加入一副小型望遠鏡，放在風景區觀景平台欄杆附近，營造旅行探索感">觀景望遠鏡</option>
-        <option value="場景加入金屬觀景平台欄杆，作為人物前後景層次元素">觀景欄杆</option>
+        <option value="場景加入木質觀景平台欄杆與自然木棧道，作為人物前後景層次元素">木棧道＋觀景欄杆</option>
         <option value="場景加入少量熱帶棕櫚葉與綠色植物，放置於背景兩側，營造自然海島度假感">熱帶棕櫚植物</option>
         <option value="場景加入幾顆自然圓潤的海邊礁石，分布在人物遠近景，保持畫面乾淨">天然海邊礁石</option>
         <option value="場景加入少量白色貝殼散落在沙灘前景，數量控制少量，增加海邊細節">白色貝殼</option>
         <option value="場景加入一條乾淨白色棉麻披巾，隨海風吹拂產生輕微自然動態">白色棉麻披巾</option>
         <option value="場景加入一張簡約旅遊地圖與太陽眼鏡，放在小桌上，營造風景區旅行生活感">旅遊地圖＋太陽眼鏡</option>
         <option value="場景加入一只透明水壺與簡約帆布袋，放在野餐墊或觀景平台旁，呈現戶外生活感">透明水壺＋帆布袋</option>
+        
       </select>
     </div>
 
-    <!-- 拍攝視角與構圖 -->
+    <!-- 拍攝視角與構圖（分類優化版） -->
     <div class="section-title">7. 拍攝視角與構圖</div>
 
     <div class="form-group"><label>① 景別與拍攝範圍</label><select id="shotSize">
@@ -1481,4 +1515,381 @@
       <option value="三分之二全身構圖，兼顧身材比例與商品展示">3/4全身照</option>
       <option value="膝蓋以上中全身構圖，呈現內衣套裝與腿部比例">膝蓋以上構圖</option>
       <option value="腰部以上半身構圖，聚焦上半身內衣設計">腰部以上半身</option>
-      <option value="胸部至腰部中景特寫，清晰展示罩杯與下圍細節">胸腰
+      <option value="胸部至腰部中景特寫，清晰展示罩杯與下圍細節">胸腰中景特寫</option>
+      <option value="胸部至膝蓋構圖，兼顧胸罩與內褲完整展示">胸部至膝蓋構圖</option>
+      <option value="切頭無臉商品構圖，集中於內衣商品與身材線條">無臉商品展示</option>
+      <option value="超近距離微距局部構圖，展示布料、蕾絲與車縫細節">超微距商品細節</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>② 攝影機拍攝視角</label><select id="cameraAngle">
+      <option value="攝影機位於人物眼睛高度的平視視角，畫面自然真實且具有親近感">平視視角</option>
+      <option value="正面平視拍攝，人物正對鏡頭，畫面穩定清晰">正面平視</option>
+      <option value="斜側平視拍攝，增加立體層次">斜側平視</option>
+      <option value="攝影機位於人物上方的微俯拍視角，呈現自然線條">微俯拍</option>
+      <option value="高角度俯拍視角，從上方向下拍攝，營造時尚大片感">高角度俯拍</option>
+      <option value="攝影機從正上方九十度垂直向下拍攝">90度垂直俯拍</option>
+      <option value="攝影機略低於人物視線的微仰拍角度，增加人物氣場">微仰拍</option>
+      <option value="低角度仰拍視角，展現高挑身材與時尚氣場">低角度仰拍</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>③ 人物展示方向與角度</label><select id="modelDirection">
+      <option value="模特兒正面面向鏡頭，完整展示內衣正面設計與杯型">正面展示</option>
+      <option value="模特兒身體向右微轉三十度，展示側邊剪裁">右側30度</option>
+      <option value="模特兒身體向左微轉三十度，展示側邊剪裁">左側30度</option>
+      <option value="模特兒面向右方側身四十五度，展示側收與身材曲線">右側45度（側收）</option>
+      <option value="模特兒面向左方側身四十五度，展示側收與身材曲線">左側45度（側收）</option>
+      <option value="模特兒完全向右側身九十度，展示側邊包覆與線條">右側90度</option>
+      <option value="模特兒完全向左側身九十度，展示側邊包覆與線條">左側90度</option>
+      <option value="模特兒背對鏡頭，展示背扣、肩帶與美背設計">正背面展示</option>
+      <option value="模特兒背向鏡頭並自然回頭看向攝影機">背面回眸</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>④ 商品重點展示</label><select id="productFocus">
+      <option value="畫面重點聚焦胸罩罩杯立體結構與胸型包覆效果">罩杯與杯型</option>
+      <option value="畫面重點展示上胸線條與自然包覆效果">上胸與包覆</option>
+      <option value="畫面重點展示側收、副乳包覆與側邊剪裁">側收與副乳包覆</option>
+      <option value="畫面重點展示鋼圈、下圍與支撐結構">鋼圈與下圍支撐</option>
+      <option value="畫面重點展示肩帶材質與調節設計">肩帶細節</option>
+      <option value="畫面重點展示蕾絲刺繡、花紋與布料質感">蕾絲花紋</option>
+      <option value="畫面重點展示內褲腰頭與腰部貼合效果">內褲腰頭</option>
+      <option value="畫面重點展示褲腳無痕剪裁與服貼效果">褲腳無痕</option>
+      <option value="超近距離展示布料纖維紋理與細緻材質">布料微距紋理</option>
+      <option value="手部自然觸摸商品布料，呈現柔軟親膚質感">手部觸摸布料</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>⑤ 專業構圖方式</label><select id="composition">
+      <option value="主體置中構圖，人物位於畫面中央，清晰突出商品">主體置中</option>
+      <option value="採用三分法構圖，視覺焦點位於黃金交叉位置">三分法構圖</option>
+      <option value="採用中央對稱構圖，畫面平衡且具有典雅感">中央對稱</option>
+      <option value="採用對角線構圖，利用身體線條形成時尚張力">對角線構圖</option>
+      <option value="大面積留白構圖，保留文字與品牌排版空間">留白雜誌構圖</option>
+      <option value="電商商品主圖滿版構圖，人物與商品清晰突出">電商主圖滿版</option>
+      <option value="利用門框、窗框或場景元素形成框架式構圖">框架式構圖</option>
+      <option value="利用前景元素形成遮擋與景深層次">前景遮擋構圖</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>⑥ 鏡頭焦段與攝影效果</label><select id="lensEffect">
+      <option value="使用標準鏡頭拍攝，自然呈現人物比例與商品細節">標準鏡頭</option>
+      <option value="使用35mm鏡頭拍攝，具有時尚街拍與環境人像氛圍">35mm時尚街拍</option>
+      <option value="使用50mm標準人像鏡頭拍攝，人物比例自然">50mm自然人像</option>
+      <option value="使用85mm專業商業人像鏡頭拍攝，背景自然虛化">85mm商業人像</option>
+      <option value="使用廣角鏡頭拍攝，增加空間感與畫面張力">廣角鏡頭</option>
+      <option value="使用長焦鏡頭拍攝，壓縮背景並突出人物">長焦鏡頭</option>
+      <option value="使用微距鏡頭拍攝，展示布料與工藝">微距鏡頭 Macro</option>
+      <option value="使用淺景深效果，背景柔和虛化">超淺景深</option>
+      <option value="背景產生自然散景光斑，營造高級攝影氛圍">背景散景 Bokeh</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group"><label>⑦ 創意與特殊拍攝視角</label><select id="creativeAngle">
+      <option value="利用鏡面反射拍攝人物與商品，形成時尚雙重視覺">鏡面反射</option>
+      <option value="從人物肩膀後方拍攝，形成自然過肩視角">過肩視角</option>
+      <option value="採用第一人稱視角拍攝，營造沉浸式視覺體驗">第一人稱 POV</option>
+      <option value="利用薄紗窗簾作為前景，形成朦朧柔焦質感">紗簾前景</option>
+      <option value="以連續動作呈現不同姿勢，形成時尚多畫面">連續動作構圖</option>
+      <option value="兩位模特兒並列展示不同商品或不同角度">雙人商品對比</option>
+      <option value="捕捉自然走動或轉身瞬間，呈現真實動態感">自然動態抓拍</option>
+      <option value="加入適度動態模糊，營造時尚大片瞬間感">動態模糊 Motion Blur</option>
+      <option value="">無指定</option></select></div>
+
+    <div class="form-group">
+      <label>畫面質感與風格</label>
+      <select id="styleQuality">
+        <option value="時尚商業內衣大片質感，極致皮膚肌理細節，8k超高畫質，高雅色調">商業內衣大片（高級肌理/高雅色調）</option>
+        <option value="韓系柔光寫真質感，色彩柔和乾淨，清新透亮光影">韓系柔光寫真（清新透亮）</option>
+        <option value="日系底片膠片質感，帶有復古顆粒感與溫暖色調">日系復古膠片感（可愛懷舊）</option>
+        <option value="高對比度冷色調時尚大片，極具視覺衝擊力與硬朗質感">冷酷時尚大片質感（帥氣高冷）</option>
+        <option value="柯達膠卷（Kodak Portra 400）色彩，帶有溫暖懷舊膚色">柯達膠卷Portra 400色彩（溫暖膚色）</option>
+        <option value="富士膠卷（Fujifilm Pro 400H）色彩，帶有清透日系青綠色調">富士膠卷Pro 400H色彩（清透青綠）</option>
+        <option value="拍立得（Polaroid）復古質感，色彩微黃帶有獨特顆粒">拍立得復古質感（獨特顆粒感）</option>
+        <option value="電影級黑白攝影質感（Black & White），極致光影對比與結構">黑白電影攝影質感（光影藝術）</option>
+        <option value="Vogue 雜誌封面質感，極致奢華時尚與高階色調">Vogue 雜誌封面質感（高級時尚）</option>
+        <option value="柔焦夢幻質感（Dreamy Orton Effect），帶有仙氣光暈">柔焦夢幻質感（仙氣光暈）</option>
+        <option value="90年代港風復古膠片，濃郁色彩與獨特氛圍">90年代港風復古膠片（濃郁色彩）</option>
+        <option value="極致真實8K HDR攝影，毛孔與面料纖維清晰可見">8K HDR極致超真實細節</option>
+        <option value="膠片電影感（Cinematic 35mm），2.35:1畫面與溫柔色調">35mm電影膠片感（影院級）</option>
+        <option value="低飽和度極簡莫蘭迪色調（Morandi Color Palette）">低飽和莫蘭迪色調（極簡質感）</option>
+        <option value="油畫般細緻古典質感（Oil Painting Aesthetic）">油畫古典藝術質感</option>
+        <option value="閃光燈直打高調時尚感（High Fashion Flash Aesthetic）">閃光燈高調時尚感（派對街拍）</option>
+        <option value="清透水光質感，帶有微潤光澤感">清透水光潤澤質感</option>
+        <option value="暖洋洋陽光過濾質感，帶有金黃光斑">金黃陽光過濾質感</option>
+        <option value="極致啞光高級質感，無反光沉穩色調">極致啞光高級沉穩質感</option>
+        <option value="賽博朋克炫光質感，帶有霓虹反射光">賽博朋克霓虹反射質感</option>
+        <option value="冷淡風灰色調高階寫真質感">冷淡風灰色調高階寫真</option>
+        <option value="法式慵懶微粒質感，隨性自然">法式慵懶微粒質感</option>
+        <option value="高級奢華金屬光澤色彩風格">奢華金屬光澤色彩風格</option>
+        <option value="美式復古彩色雜誌質感（1970s Vintage）">美式70年代復古雜誌質感</option>
+        <option value="微醺暖紅醺感藝術寫真">微醺暖紅藝術寫真</option>
+        <option value="清冷藍調夢幻畫風">清冷藍調夢幻畫風</option>
+        <option value="純淨無瑕白高調寫真">純淨無瑕白高調寫真</option>
+        <option value="重顆粒粗糙復古黑白大片">重顆粒粗糙復古黑白大片</option>
+        <option value="3D超真實渲染CG質感（Unreal Engine 5）">UE5 3D超真實RENDER質感</option>
+        <option value="極致清透玻璃質感色調">極致清透玻璃質感色調</option>
+        <option value="">無顯示（不指定畫風）</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 隱藏的檔案上傳 Input -->
+  <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImport(event)">
+
+  <!-- 結果輸出 -->
+  <div class="output-section">
+    <div class="output-header">
+      <label for="output">生成的中文 AI 指令 (Prompt)</label>
+    </div>
+    <textarea id="output" readonly></textarea>
+    <div class="btn-group">
+      <button onclick="generatePrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        生成中文指令
+      </button>
+      <button class="btn-copy" onclick="copyPrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        複製指令
+      </button>
+      <button class="btn-secondary" onclick="exportSettings()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        匯出設定
+      </button>
+      <button class="btn-secondary" onclick="triggerImport()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        匯入設定
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 需要被儲存與還原的欄位 ID 清單
+  const fieldIds = [
+    'aspectRatio', 'modelGender', 'modelNationality', 'skinTone', 'bodyType', 
+    'hairStyle', 'hairColor', 'imgRef', 'outfitStyle', 'topOutfit', 'bottomOutfit', 
+    'outerwear', 'jewelry', 'footwear', 'foodItem', 'outdoorPose', 'outdoorProp', 'teaTableSetting', 'floralProp', 'plushProp', 'lifestyleProp', 'seasonalProp', 'propBalance', 
+    'environment', 'timeOfDay', 'expression', 'pose', 'shotSize', 'cameraAngle', 'modelDirection', 'productFocus', 'composition', 'lensEffect', 'creativeAngle', 'styleQuality'
+  ];
+
+  function generatePrompt() {
+    const ratio = document.getElementById('aspectRatio').value;
+    const genderVal = document.getElementById('modelGender').value;
+    const modelNationality = document.getElementById('modelNationality').value;
+    const skinTone = document.getElementById('skinTone').value;
+    const bodyVal = document.getElementById('bodyType').value;
+    const hairStyle = document.getElementById('hairStyle').value;
+    
+    const imgRef = document.getElementById('imgRef').value;
+    const outfitStyle = document.getElementById('outfitStyle').value;
+    let top = document.getElementById('topOutfit').value.trim();
+    let bottom = document.getElementById('bottomOutfit').value.trim();
+    const outerwear = document.getElementById('outerwear').value;
+
+    const jewelry = document.getElementById('jewelry').value;
+    const footwear = document.getElementById('footwear').value;
+    const outdoorPose = document.getElementById('outdoorPose').value;
+    const outdoorProp = document.getElementById('outdoorProp').value;
+
+    const foodItem = document.getElementById('foodItem').value;
+    const teaTableSetting = document.getElementById('teaTableSetting').value;
+    const floralProp = document.getElementById('floralProp').value;
+    const plushProp = document.getElementById('plushProp').value;
+    const lifestyleProp = document.getElementById('lifestyleProp').value;
+    const seasonalProp = document.getElementById('seasonalProp').value;
+    const propBalance = document.getElementById('propBalance').value;
+    
+    const env = document.getElementById('environment').value;
+    const time = document.getElementById('timeOfDay').value;
+    const expr = document.getElementById('expression').value;
+    const pose = document.getElementById('pose').value;
+    const shotSize = document.getElementById('shotSize').value;
+    const cameraAngle = document.getElementById('cameraAngle').value;
+    const modelDirection = document.getElementById('modelDirection').value;
+    const productFocus = document.getElementById('productFocus').value;
+    const composition = document.getElementById('composition').value;
+    const lensEffect = document.getElementById('lensEffect').value;
+    const creativeAngle = document.getElementById('creativeAngle').value;
+    const style = document.getElementById('styleQuality').value;
+
+    if (top === '無顯示' || top === '無') top = '';
+    if (bottom === '無顯示' || bottom === '無') bottom = '';
+
+    let parts = [];
+
+    if (ratio) parts.push(`照片畫幅構圖：${ratio}`);
+
+    let modelParts = [];
+    if (genderVal !== 'none') {
+      modelParts.push(`一位${genderVal}`);
+    }
+    if (modelNationality) modelParts.push(`具有${modelNationality}`);
+    if (skinTone) modelParts.push(`擁有${skinTone}`);
+    if (bodyVal) modelParts.push(`體型特徵為${bodyVal}`);
+    if (hairStyle) modelParts.push(`髮型為${hairStyle}`);
+     if (hairColor) modelParts.push(`髮色為${hairColor}`);
+
+    if (modelParts.length > 0) {
+      parts.push(`模特兒設定：${modelParts.join('，')}`);
+    }
+
+    let outfitParts = [];
+    if (imgRef) outfitParts.push(imgRef);
+    if (outfitStyle) outfitParts.push(`整體風格為${outfitStyle}`);
+    
+    let items = [];
+    if (top) items.push(`上身/胸罩為${top}`);
+    if (bottom) items.push(`下身/內褲為${bottom}`);
+    if (outerwear) items.push(`搭配外罩罩衫為${outerwear}`);
+    
+    if (items.length > 0) {
+      outfitParts.push(items.join('，'));
+    }
+
+    if (outfitParts.length > 0) {
+      parts.push(`內衣穿搭：${outfitParts.join('，')}`);
+    }
+
+    let accParts = [];
+    if (jewelry) accParts.push(jewelry);
+    if (footwear) accParts.push(footwear);
+
+    if (accParts.length > 0) {
+      parts.push(`配件與鞋襪：${accParts.join('，')}`);
+    }
+
+    let foodParts = [];
+    if (foodItem) foodParts.push(foodItem);
+    if (teaTableSetting) foodParts.push(teaTableSetting);
+    if (floralProp) foodParts.push(floralProp);
+    if (plushProp) foodParts.push(plushProp);
+    if (lifestyleProp) foodParts.push(lifestyleProp);
+    if (seasonalProp) foodParts.push(seasonalProp);
+    if (propBalance) foodParts.push(propBalance);
+
+    if (foodParts.length > 0) {
+      const propNaturalizer = '道具自然融入場景，大小比例合理，前後景層次自然，不遮擋人物與商品，避免道具過多造成畫面雜亂，維持高級商業攝影質感';
+      foodParts.push(propNaturalizer);
+      parts.push(`下午茶、食物與生活道具：${foodParts.join('，')}`);
+    }
+
+    let sceneParts = [];
+    if (env) sceneParts.push(env);
+    if (time) sceneParts.push(`光線氣氛為${time}`);
+    if (env || time) {
+      const sceneNaturalizer = '自然商業攝影、光線柔和均勻、背景乾淨、主體清晰、空間透視自然、色彩協調、細節清楚、人物與環境比例正確、具有高級電商型錄質感';
+      sceneParts.push(sceneNaturalizer);
+    }
+    if (sceneParts.length > 0) {
+      parts.push(`拍攝場景與光影：${sceneParts.join('，')}`);
+    }
+
+    let actionParts = [];
+    if (expr) actionParts.push(`神態表情為${expr}`);
+    if (pose) {
+      const poseNaturalizer = '姿勢自然舒展，人體比例正確，身體重心自然，肩膀放鬆，關節角度符合人體結構，手指與手部結構自然正確，動作連貫，不刻意擺拍，不過度扭轉身體，表情自然，具有真實時尚攝影抓拍感';
+      actionParts.push(`姿勢為${pose}，${poseNaturalizer}`);
+    }
+    if (actionParts.length > 0) {
+      parts.push(`姿勢神態：${actionParts.join('，')}`);
+    }
+
+    let outdoorParts = [];
+    if (outdoorPose) outdoorParts.push(`海灘／風景區專用姿勢：${outdoorPose}`);
+    if (outdoorProp) outdoorParts.push(`海灘／風景區道具：${outdoorProp}`);
+    if (outdoorParts.length > 0) {
+      outdoorParts.push('戶外道具自然融入場景，比例真實合理，不遮擋人物與內衣商品，前中後景層次自然，維持高級旅拍與商業攝影質感');
+      parts.push(`海灘／風景區旅拍元素：${outdoorParts.join('，')}`);
+    }
+
+    let angleParts = [];
+    if (shotSize) angleParts.push(`景別：${shotSize}`);
+    if (cameraAngle) angleParts.push(`攝影視角：${cameraAngle}`);
+    if (modelDirection) angleParts.push(`人物方向：${modelDirection}`);
+    if (productFocus) angleParts.push(`商品重點：${productFocus}`);
+    if (composition) angleParts.push(`構圖方式：${composition}`);
+    if (lensEffect) angleParts.push(`鏡頭效果：${lensEffect}`);
+    if (creativeAngle) angleParts.push(`特殊視角：${creativeAngle}`);
+    if (angleParts.length > 0) parts.push(`拍攝視角與構圖：${angleParts.join('，')}`);
+    if (style) parts.push(`畫面質感風格：${style}`);
+
+    let prompt = parts.length > 0 
+      ? `商業內衣商品拍攝需求：\n${parts.join('。\n')}。` 
+      : '請至少選擇或填寫一個條件以生成指令。';
+
+    document.getElementById('output').value = prompt;
+  }
+
+  function copyPrompt() {
+    const output = document.getElementById('output');
+    if (!output.value) {
+      alert('請先點擊「生成中文指令」！');
+      return;
+    }
+    output.select();
+    document.execCommand('copy');
+    alert('指令已成功複製到剪貼簿！');
+  }
+
+  // 匯出 JSON 設定
+  function exportSettings() {
+    const config = {};
+    fieldIds.forEach(id => {
+      const elem = document.getElementById(id);
+      if (elem) {
+        config[id] = elem.value;
+      }
+    });
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+    const downloadAnchor = document.createElement('a');
+    
+    // 設定檔名帶上日期時間，方便區分
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 10) + '_' + now.toTimeString().slice(0, 5).replace(':', '');
+    
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `prompt_config_${timestamp}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  }
+
+  // 觸發匯入隱藏的 input
+  function triggerImport() {
+    document.getElementById('importFileInput').click();
+  }
+
+  // 處理檔案匯入
+  function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const config = JSON.parse(e.target.result);
+        
+        // 將資料還原至表單
+        fieldIds.forEach(id => {
+          if (config.hasOwnProperty(id)) {
+            const elem = document.getElementById(id);
+            if (elem) {
+              elem.value = config[id];
+            }
+          }
+        });
+
+        // 匯入完成後自動重新生成 Prompt
+        generatePrompt();
+        alert('設定檔已成功匯入！');
+      } catch (err) {
+        alert('檔案格式錯誤，無法解析 JSON 檔案！');
+      }
+    };
+    reader.readAsText(file);
+    // 清空，確保連續選擇相同檔案時能再次觸發
+    event.target.value = '';
+  }
+
+  window.onload = generatePrompt;
+</script>
+
+</body>
+</html>
