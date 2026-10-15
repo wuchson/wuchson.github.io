@@ -315,7 +315,7 @@ button:active{
 </div>
 
 <div class="group">
-  <label>5. 甜美穿搭風格 (52款)</label>
+  <label>5. 甜美穿搭風格 (含一年節慶主題)</label>
   <select id="outfit"></select>
 </div>
 
@@ -377,7 +377,7 @@ button:active{
     </select>
   </div>
   <div class="group">
-    <label>可愛夢幻場景 (52款)</label>
+    <label>可愛夢幻場景 (含一年節慶場景)</label>
     <select id="scene"></select>
   </div>
 </div>
@@ -415,7 +415,7 @@ button:active{
 
 <!-- ⑤ 自訂 -->
 <div class="title">⑤ 額外補充說明</div>
-<textarea id="custom" rows="2" placeholder="例如：嘴角有可愛小虎牙、貓耳發飾……"></textarea>
+<textarea id="custom" rows="2" placeholder="例如：嘴角有可愛小虎牙、貓耳發飾……支援自訂節慶裝扮細節"></textarea>
 
 </main>
 
@@ -465,7 +465,7 @@ button:active{
 </div>
 
 <script>
-/* 資料庫設定 (每項均已擴充至 50 款以上可愛風格) */
+/* 資料庫設定 (包含原本完整資料，並擴充一年各大節慶裝扮與背景) */
 const OPTIONS_DB = {
   gender: [
     "甜美日系元氣少女 (Sweet Japanese energetic girl)",
@@ -684,7 +684,21 @@ const OPTIONS_DB = {
     "嬌小勻稱萌感舞台比例 (Petite balanced cute stage proportion)"
   ],
   outfit: [
-    "甜美草莓粉色蕾絲百褶裙舞者套裝 (Sweet strawberry pink lace pleated skirt outfit)",
+    "【🎄 聖誕節】可愛聖誕紅絨毛連帽短裙與毛茸茸靴套 (Cute Christmas red velvet hooded dress & furry boots)",
+    "【🎁 聖誕節】夢幻聖誕禮物盒粉色緞帶立體蝴蝶結洋裝 (Dreamy Christmas gift box pink ribbon dress)",
+    "【❄️ 跨年/冬日】粉紅極光毛呢小香風外套與白色百褶裙 (Winter New Year pink tweed jacket & white pleated skirt)",
+    "【🏮 農曆新年】喜氣粉嫩改良式短旗袍洋裝配金色刺繡 (Lunar New Year cute pastel pink qipao with gold embroidery)",
+    "【🧧 農曆新年】軟萌招財貓主題紅色喜慶連身裙 (Chinese New Year lucky cat themed red cute dress)",
+    "【🍫 情人節】浪漫愛心圖騰粉紅甜美削肩連身裙 (Valentine's Day romantic heart-patterned pink slip dress)",
+    "【🌹 情人節】精緻紅玫瑰蕾絲花邊甜心公主裙 (Valentine's Day red rose lace sweet princess dress)",
+    "【🤍 白色情人節】純白蕾絲透膚仙氣蛋糕裙洋裝 (White Day pure white lace tiered ethereal dress)",
+    "【🥚 復活節】粉嫩彩蛋馬卡龍色系兔耳連帽洋裝 (Easter pastel macaron bunny-ear hoodie dress)",
+    "【🐉 端午節】粉色國潮改良端午祈福漢服短裙 (Dragon Boat Festival modern pink cute Hanfu dress)",
+    "【🌌 七夕情人節】夢幻星空銀河藍紫漸層紗裙禮服 (Tanabata Qixi starry galaxy gradient tulle dress)",
+    "【🥮 中秋節】粉嫩玉兔嫦娥風輕透漢服萌裙 (Mid-Autumn Festival cute bunny-themed pastel Hanfu dress)",
+    "【🎃 萬聖節】可愛粉紅小魔女斗篷與南瓜圖騰短裙 (Halloween cute pink little witch cape & pumpkin skirt)",
+    "【🥧 感恩節】溫柔奶茶色秋季針織毛衣與格紋裙 (Thanksgiving warm milk tea knit sweater & plaid skirt)",
+  "甜美草莓粉色蕾絲百褶裙舞者套裝 (Sweet strawberry pink lace pleated skirt outfit)",
     "女團學院風 (白色襯衫、蝴蝶結領結、格紋百褶裙) (Preppy girlgroup pleated skirt & ribbon shirt)",
     "可愛貓耳連帽衫與短褲 (Cute cat-ear hoodie with denim shorts)",
     "夢幻芭蕾風 (粉色蕾絲蓬蓬裙、絲帶與蕾絲襪) (Balletcore tulle skirt & satin lace socks)",
@@ -846,7 +860,21 @@ const OPTIONS_DB = {
     "可愛跳躍雙手比 V 舞 (Cute bounce with double peace sign)"
   ],
   scene: [
-    "粉色夢幻糖果城堡世界 (Pastel pink dream candy castle world)",
+    "【🎄 聖誕節】飄雪聖誕樹、閃爍彩燈與溫馨壁爐小屋 (Christmas snow, glowing tree & cozy fireplace cabin)",
+    "【🎁 聖誕節】夢幻巨型聖誕禮物盒與粉色糖果雪景街道 (Dreamy giant Christmas gift boxes & candy snow street)",
+    "【🎆 跨年夜】絢麗繽紛跨年煙火秀與倒數計時粉紅夜空 (New Year's Eve brilliant fireworks & pink countdown night sky)",
+    "【🏮 農曆新年】喜慶春節紅燈籠街景與粉色桃花樹 (Lunar New Year festive red lanterns & pink peach blossom trees)",
+    "【🏮 元宵節】浪漫元宵燈會與可愛粉紅兔子花燈街 (Lantern Festival romantic cute pink rabbit lanterns street)",
+    "【🍫 情人節】浪漫粉紅玫瑰花海與愛心氣球拱門 (Valentine's Day romantic pink rose garden & heart balloon arch)",
+    "【💘 情人節】夢幻心形巧克力噴泉與浪漫燭光甜點屋 (Valentine's Day chocolate fountain & romantic candlelit dessert room)",
+    "【🤍 白色情人節】純白浪漫雪景與精緻白色玫瑰花園 (White Day pure white snowscape & white rose garden)",
+    "【🥚 復活節】粉彩春日草地、繽紛復活彩蛋與可愛小兔子 (Easter pastel spring lawn, colorful eggs & cute bunnies)",
+    "【🐉 端午節】粉紅龍舟慶典水岸與粽葉飄香古風小鎮 (Dragon Boat Festival pastel pink dragon boat river town)",
+    "【🌌 七夕情人節】浪漫銀河星空橋與七夕鵲橋粉紫夜空 (Tanabata Qixi romantic galaxy milky way bridge night sky)",
+    "【🥮 中秋節】夢幻巨型滿月、可愛玉兔與粉色中秋庭院 (Mid-Autumn Festival dreamy giant full moon & cute jade rabbits)",
+    "【🎃 萬聖節】可愛萬聖節南瓜燈派對與粉色魔法森林 (Halloween cute pastel pumpkin lantern party & magical forest)",
+    "【🥧 感恩節】溫馨豐收南瓜與金黃楓葉秋日莊園 (Thanksgiving cozy harvest pumpkin & golden autumn maple estate)",
+  "粉色夢幻糖果城堡世界 (Pastel pink dream candy castle world)",
     "粉嫩櫻花雨飄落的日系街道 (Japanese street with falling cherry blossom petals)",
     "夢幻粉紫色甜點奶油房間 (Pastel pink & purple dessert cream room)",
     "可愛雲朵與彩虹城堡天空 (Dreamy clouds & rainbow pastel sky)",
@@ -1178,7 +1206,7 @@ document.getElementById('copy').onclick = async () => {
 
 /* 儲存/匯出/匯入/重設 */
 function getSettingsData(){
-  const data = { version:5, settings:{} };
+  const data = { version:6, settings:{} };
   document.querySelectorAll('select, input[type=text], textarea').forEach(el => {
     data.settings[el.id] = el.value;
   });
@@ -1187,7 +1215,7 @@ function getSettingsData(){
 }
 
 document.getElementById('save').onclick = () => {
-  localStorage.setItem('danceMVGenerator_img2vid', JSON.stringify(getSettingsData()));
+  localStorage.setItem('danceMVGenerator_img2vid_v6', JSON.stringify(getSettingsData()));
   alert('可愛設定已儲存！');
 };
 
