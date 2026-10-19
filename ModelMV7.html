@@ -1,0 +1,642 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中國古裝武俠影視生成器</title>
+<style>
+:root{--a:#a52c30;--b:#d7b574;--bg:#f5efe4;--ink:#32251c;--panel:#fffdf8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft JhengHei",sans-serif}
+header{padding:24px 16px;text-align:center;color:#fff;background:linear-gradient(120deg,#301b19,#87332d,#bd874b)}
+header h1{margin:0;font-size:25px}
+header p{margin:8px 0 0;font-size:13px}
+.wrap{max-width:1400px;margin:auto}
+.app{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px}
+.panel{background:var(--panel);border:1px solid #dfcba8;border-radius:18px;padding:20px;box-shadow:0 6px 22px #43261612;min-width:0}
+.title{font-weight:900;border-bottom:2px solid #dfcba8;padding-bottom:9px;margin:18px 0 14px;color:#87332d}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.group{margin-bottom:13px}
+label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
+select,input[type=text],textarea{width:100%;padding:10px;border:1px solid #d9c7ac;border-radius:10px;background:#fffaf1;color:#32251c;font:inherit;font-size:13px}
+textarea{resize:vertical;line-height:1.6}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.check{display:flex;align-items:center;gap:5px;background:#f6ecdd;border-radius:20px;padding:8px 10px;font-size:12px}
+.check input{accent-color:var(--a)}
+button{border:0;border-radius:10px;padding:10px;cursor:pointer;font-weight:800;font-size:13px}
+button:active{transform:scale(.98)}
+.primary{background:var(--a);color:#fff}
+.secondary{background:#eee1ce;color:#51372a}
+.dark{background:#30201b;color:#fff}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.preview{position:sticky;top:12px;align-self:start}
+.tabs{display:flex;gap:7px;margin-bottom:12px}
+.tab{flex:1;background:#eee1ce;color:#51372a}
+.tab.active{background:var(--a);color:#fff}
+#prompt{min-height:400px;background:#261c18;color:#f7e7c8;border-color:#574138}
+.previewbox{background:#261c18;padding:10px;border-radius:13px}
+.art{margin-top:14px;background:#f5ead8;border:1px dashed #bd9b69;border-radius:14px;padding:12px;text-align:center}
+canvas{width:100%;max-width:300px;height:350px;object-fit:contain;background:#29211d;border-radius:10px;display:block;margin:10px auto}
+.small{font-size:11px;line-height:1.6;color:#75614c}
+@media(max-width:900px){.app{grid-template-columns:1fr}.preview{position:static}}
+@media(max-width:550px){.grid{grid-template-columns:1fr}.app{padding:10px}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+<h1>⚔️ 中國古裝武俠影視生成器</h1>
+<p>女俠人物定妝・江湖場景・武打劇情・電影分鏡・先圖後影</p>
+</header>
+<div class="wrap app">
+<main class="panel">
+<div class="actions" style="margin-top:0">
+<button class="primary" onclick="randomCharacter()">🎲 隨機女俠造型</button>
+<button class="secondary" onclick="randomAll()">🎴 隨機武俠劇情</button>
+</div>
+
+<div class="title">① 人物與角色設定</div>
+<div class="grid">
+<div class="group"><label>角色身分</label><select id="role"></select></div>
+<div class="group"><label>人物氣質</label><select id="temper"></select></div>
+<div class="group"><label>五官與面容</label><select id="face"></select></div>
+<div class="group"><label>髮型與髮色</label><select id="hair"></select></div>
+<div class="group"><label>身形與姿態</label><select id="body"></select></div>
+<div class="group"><label>角色年齡</label><select id="age">
+<option>成年女性，約 20 至 25 歲</option>
+<option>成年女性，約 26 至 35 歲</option>
+<option>成熟女性，約 36 至 45 歲</option>
+<option>年長女性，氣度沉穩</option>
+</select></div>
+</div>
+
+<div class="title">② 古裝服飾與兵器</div>
+<div class="grid">
+<div class="group"><label>服裝款式</label><select id="outfit"></select></div>
+<div class="group"><label>服裝主色</label><select id="color">
+<option>月白與銀灰</option><option>朱紅與玄黑</option>
+<option>墨黑與暗金</option><option>青綠與竹色</option>
+<option>冰藍與雪白</option><option>紫色與銀色</option>
+<option>米白與淺金</option><option>深藍與古銅</option>
+<option>深紅與金色</option><option>素雅灰與靛青</option>
+</select></div>
+<div class="group"><label>兵器</label><select id="weapon"></select></div>
+<div class="group"><label>配件與裝飾</label><select id="accessory"></select></div>
+</div>
+
+<div class="title">③ 畫風與人物定妝</div>
+<div class="grid">
+<div class="group"><label>美術風格</label><select id="style">
+<option value="電影級真人寫實古裝武俠，真實皮膚、布料、自然光影">真人寫實武俠劇</option>
+<option value="精緻中國古風動漫，細膩線稿，電影級構圖">古風動漫</option>
+<option value="高品質3D中國奇幻角色，精細材質與電影光影">3D奇幻電影</option>
+<option value="真人寫實與東方水墨美學融合，詩意電影色調">寫實水墨混合風</option>
+</select></div>
+<div class="group"><label>人物構圖</label><select id="framing">
+<option>全身定妝照，完整呈現服裝與兵器</option>
+<option>半身人物肖像，突出五官與髮飾</option>
+<option>低角度英雄式全身構圖</option>
+<option>側身持劍，衣袂迎風的電影劇照</option>
+<option>正面角色設定圖，清楚呈現整體造型</option>
+</select></div>
+</div>
+
+<div class="title">④ 江湖場景與環境</div>
+<div class="grid">
+<div class="group"><label>場景</label><select id="scene"></select></div>
+<div class="group"><label>時間與天氣</label><select id="weather">
+<option>月夜薄霧，冷色月光</option><option>黎明晨霧，柔和金色逆光</option>
+<option>大雪紛飛，寒風與雪塵</option><option>暴雨夜晚，地面濕潤反光</option>
+<option>夕陽西下，暖色光束穿過山林</option>
+<option>竹林晴日，斑駁陽光與浮塵</option>
+<option>古城燈火，深夜煙霧繚繞</option>
+<option>陰天山巔，雲海翻湧</option>
+</select></div>
+<div class="group"><label>鏡頭與構圖</label><select id="camera">
+<option>電影級廣角全景，交代人物與環境</option>
+<option>低角度仰拍，突出女俠氣勢</option>
+<option>中景跟拍，人物在場景中移動</option>
+<option>臉部特寫與兵器細節切換</option>
+<option>環繞人物運鏡，衣袂與髮絲隨風飄動</option>
+<option>長鏡頭跟隨輕功移動</option>
+<option>高空俯拍古城與屋頂追逐</option>
+</select></div>
+<div class="group"><label>畫面比例</label><select id="ratio">
+<option value="9:16">9:16 直式短影片</option>
+<option value="16:9">16:9 電影橫式</option>
+<option value="1:1">1:1 正方形</option>
+<option value="2.39:1">2.39:1 寬銀幕電影</option>
+</select></div>
+</div>
+
+<div class="title">⑤ 劇情與武打動作</div>
+<div class="grid">
+<div class="group"><label>劇情類型</label><select id="plot"></select></div>
+<div class="group"><label>主要動作</label><select id="action"></select></div>
+<div class="group"><label>對手或互動</label><select id="opponent"></select></div>
+<div class="group"><label>情緒表演</label><select id="emotion"></select></div>
+<div class="group"><label>武打節奏</label><select id="pace">
+<option>寫實俐落，重心穩定，招式清晰</option>
+<option>快速連招，急停轉身，攻防交錯</option>
+<option>慢動作拔劍，衣袖與髮絲飄揚</option>
+<option>輕功騰空，空中轉體與落地收勢</option>
+<option>沉穩對峙，眼神交鋒後瞬間出招</option>
+<option>仙俠奇幻，劍氣與粒子特效</option>
+</select></div>
+<div class="group"><label>分鏡長度</label><select id="duration">
+<option>5 秒，一個完整動作</option><option>8 秒，兩段動作銜接</option>
+<option>10 秒，含起手、交鋒與收勢</option>
+<option>15 秒，完整短場景</option>
+<option>30 秒，多鏡頭劇情片段</option>
+</select></div>
+</div>
+
+<div class="title">⑥ 動態細節與一致性</div>
+<div class="checks">
+<label class="check"><input type="checkbox" value="臉部五官穩定，保持角色身份一致" checked>固定臉部</label>
+<label class="check"><input type="checkbox" value="服裝、顏色、髮飾與兵器全程一致" checked>固定服裝與兵器</label>
+<label class="check"><input type="checkbox" value="衣袂、髮絲、披風依風向自然飄動" checked>布料物理</label>
+<label class="check"><input type="checkbox" value="動作符合人體重心、關節與武術慣性" checked>動作合理</label>
+<label class="check"><input type="checkbox" value="兵器形狀清晰，手部握持正確" checked>兵器穩定</label>
+<label class="check"><input type="checkbox" value="電影級景深、體積霧、自然光影與細節" checked>電影光影</label>
+<label class="check"><input type="checkbox" value="鏡頭平穩，避免不必要的畫面抖動" checked>穩定運鏡</label>
+<label class="check"><input type="checkbox" value="不新增人物，不突然切換場景" checked>場景穩定</label>
+</div>
+
+<div class="title">⑦ 劇情補充</div>
+<div class="group"><label>角色姓名（選填）</label><input id="name" type="text" placeholder="例如：沈月璃、顧清寒"></div>
+<div class="group"><label>自訂劇情、門派、招式或台詞</label><textarea id="custom" rows="3" placeholder="例如：青霜劍派掌門之女，為尋失傳劍譜獨闖寒山古寺……"></textarea></div>
+</main>
+
+<aside class="panel preview">
+<div class="tabs">
+<button class="tab active" id="tabImg" onclick="switchTab('img')">🖼️ 人物／場景生圖</button>
+<button class="tab" id="tabStory" onclick="switchTab('story')">🎬 劇情分鏡</button>
+<button class="tab" id="tabVid" onclick="switchTab('vid')">⚔️ 圖生影片</button>
+</div>
+<div class="previewbox"><textarea id="prompt" readonly></textarea></div>
+<div class="actions">
+<button class="primary" onclick="copyPrompt()">📋 複製指令</button>
+<button class="secondary" onclick="saveSettings()">💾 儲存設定</button>
+<button class="secondary" onclick="exportSettings()">📤 匯出 JSON</button>
+<button class="secondary" onclick="document.getElementById('importFile').click()">📥 匯入 JSON</button>
+<input id="importFile" type="file" accept=".json,application/json" hidden>
+<button class="dark" onclick="resetAll()" style="grid-column:span 2">↺ 重設設定</button>
+</div>
+<div class="art">
+<strong>🖼️ 參考圖片預覽</strong>
+<canvas id="canvas" width="300" height="350"></canvas>
+<input type="file" id="imageFile" accept="image/*" hidden>
+<button class="secondary" onclick="document.getElementById('imageFile').click()">上傳人物或場景參考圖</button>
+<p class="small">此區僅供本機預覽，不會呼叫 AI 生圖或影片服務。請複製右側提示詞，貼入你使用的生成平台。圖生影片請將生成好的圖片上傳至該平台。</p>
+</div>
+</aside>
+</div>
+
+<script>
+const DB={
+role:[
+"清冷白衣女劍客，名門正派高手",
+"身手矯健的江湖女俠，行走四方",
+"神祕蒙面女刺客，擅長潛行與暗器",
+"氣度威嚴的女掌門，武功深不可測",
+"出身世家的郡主，文武雙全",
+"冷艷魔教高手，行事果決",
+"精通醫術與劍法的女神醫",
+"隱居山林的絕世高手",
+"守護古寺祕密的女武僧",
+"精通雙刀的邊城女鏢師",
+"古靈精怪的唐門女弟子",
+"身懷祕密的流亡公主",
+"仙氣飄逸的修仙女劍尊",
+"黑衣紅紗的江湖情報高手",
+"女捕快，追查連環奇案",
+"古琴與劍術兼修的俠女",
+"擅長鞭法的西域女高手",
+"守衛皇城的女禁軍統領"
+],
+temper:[
+"清冷孤傲，眼神銳利而克制",
+"溫婉沉靜，外柔內剛",
+"英氣逼人，果敢自信",
+"神祕冷艷，不露聲色",
+"灑脫不羈，帶著江湖豪氣",
+"威嚴沉穩，具有領袖氣場",
+"靈動機敏，眉眼帶笑",
+"悲憫堅定，帶有歷經風霜的氣質",
+"凌厲肅殺，充滿壓迫感",
+"仙氣出塵，平靜而超然",
+"驕傲倔強，不輕易服輸",
+"成熟睿智，深藏不露"
+],
+face:[
+"東方古典鵝蛋臉，眉目清晰，五官自然",
+"清秀眉眼，細長眼型，輪廓優雅",
+"英氣劍眉，眼神堅定，鼻樑俐落",
+"冷艷鳳眼，細膩眼妝與自然膚質",
+"溫柔杏眼，神情沉靜，面部比例自然",
+"成熟端莊的古典美人面容",
+"帶有風霜感的寫實江湖人物面容",
+"精緻動漫五官，細膩上色與眼神刻畫",
+"立體電影角色面容，真實皮膚紋理",
+"疏朗眉目，清冷耐看的古典氣質"
+],
+hair:[
+"烏黑長髮高束馬尾，紅色髮帶",
+"半挽古典髮髻，玉簪固定，長髮垂落",
+"高髻配銀色髮冠，威嚴俐落",
+"長直黑髮披肩，額前碎髮隨風飄動",
+"雙環髮髻配細長流蘇簪",
+"高馬尾與俐落編髮，適合武打動作",
+"低髻配木簪，素雅不張揚",
+"白銀色長髮與精緻仙門髮冠",
+"黑髮編辮盤髻，金屬髮飾低調點綴",
+"半束長髮，絲帶與髮尾自然飄動",
+"戴黑色斗笠或薄面紗，保留髮型細節",
+"成熟盤髮，金玉髮簪與垂墜珠飾"
+],
+body:[
+"身形修長，站姿挺拔，動作輕盈",
+"精實敏捷，肩背穩定，適合近身劍術",
+"優雅端莊，姿態舒展而沉穩",
+"矯健有力，適合高難度輕功與翻身",
+"纖細靈活，動作幅度清晰",
+"成熟穩健，重心低而扎實"
+],
+outfit:[
+"月白色交領漢服，寬袖外袍與銀灰腰封",
+"深色俠客服，窄袖束腕、皮革護腕與腰帶",
+"朱紅黑邊勁裝，層疊布料與金屬扣件",
+"青綠色竹紋長袍，輕薄披帛與玉佩",
+"墨黑刺客服，暗紋面料、輕甲護肩與蒙面巾",
+"冰藍色仙門長衣，多層飄逸衣袖與銀線刺繡",
+"深紫色魔教服飾，精緻金屬飾件與長披風",
+"女掌門禮服，端莊長袍、寬腰封與玉冠",
+"古典紅色婚服，金線刺繡與長袖裙裾",
+"邊城鏢師短打勁裝，布靴、護腕與實用腰帶",
+"素雅米白長衫，低調織紋與長披帛",
+"玄青色飛魚紋風格古裝，立領與俐落束腰",
+"西域風長袍，深色布料、腰帶與金屬飾品",
+"雪地斗篷搭配白色厚布衣與皮革護腕",
+"精緻古典宮裝，層疊長裙、雲肩與玉飾",
+"古風動漫仙俠長裙，漸層布料與流光紋飾",
+"3D 奇幻輕甲，布料、金屬護肩與披風結合"
+],
+weapon:[
+"單手長劍，青鋼劍身，古樸劍鞘",
+"細身長劍，銀色劍格，精緻玉柄",
+"雙刀，黑色刀鞘與紅色刀穗",
+"長槍，紅色槍纓與金屬槍頭",
+"軟鞭，深色編繩與金屬鞭梢",
+"飛刀暗器，藏於袖中與腰間",
+"古琴，黑木琴身與細緻弦線",
+"摺扇，烏木扇骨與水墨扇面",
+"長劍與玉佩組合，劍穗隨動作擺動",
+"弓箭，木製長弓與箭囊",
+"雙短劍，輕巧兵器與皮革握柄",
+"長柄月牙兵器，金屬刃面與古典裝飾",
+"無兵器，雙掌運氣，寫實拳掌招式",
+"拂塵，木柄與柔軟絲束",
+"仙俠飛劍，青白劍光與克制的粒子效果",
+"佩劍收於鞘中，手按劍柄準備拔劍"
+],
+accessory:[
+"白玉髮簪、青玉佩與銀色劍穗",
+"紅色髮帶、黑皮護腕與布腰封",
+"銀色髮冠、金屬肩飾與深色披風",
+"竹葉刺繡、木簪與青綠玉墜",
+"黑色面紗、暗器囊與無聲軟靴",
+"珍珠流蘇、玉步搖與長披帛",
+"古銅護腕、舊皮革腰帶與布靴",
+"冰晶髮飾、銀色腰鏈與透明薄紗",
+"金色鳳簪、玉鐲與繡花腰帶",
+"簡約髮簪、舊劍穗與磨損布料",
+"紅繩結、銅鈴與江湖信物",
+"古典耳墜、玉佩與繡紋香囊"
+],
+scene:[
+"晨霧竹林，青竹交錯，石徑蜿蜒",
+"古城屋頂，灰瓦飛簷與遠處燈火",
+"山巔懸崖，翻湧雲海與孤松",
+"古代客棧大堂，木桌、燈籠與樓梯",
+"雪山石階，白雪覆蓋古老山門",
+"荒廢古寺，斑駁石牆與殘破佛殿",
+"月下湖畔，薄霧水面與垂柳",
+"皇宮庭院，朱紅宮牆、石階與宮燈",
+"江南古鎮河道，木橋、烏篷船與雨幕",
+"密林祕境，藤蔓、巨石與薄霧",
+"山門廣場，石雕階梯與飄動旗幟",
+"地下密室，石壁、燭火與古老機關",
+"荒漠古道，風沙、岩石與殘破驛站",
+"竹屋庭院，石桌、茶具與落葉",
+"懸崖棧道，峭壁、木橋與強風",
+"古代地牢，鐵門、石牆與火把",
+"紅楓山谷，落葉飄散與石橋",
+"古典庭園，假山、荷塘與曲廊",
+"戰後城門，煙塵、破旗與殘垣",
+"仙山雲海，懸浮石階與遠方宮闕",
+"雪夜長街，紅燈籠與青石板",
+"月光下的演武場，石柱、旗幟與兵器架"
+],
+plot:[
+"女俠追查失傳劍譜，夜闖古寺尋找線索",
+"女刺客潛入敵方宅院，奪取祕密卷軸",
+"兩派高手在山門前對峙，決定門派存亡",
+"女劍客護送受傷同伴穿越暴雨山道",
+"女掌門獨守山門，迎戰來犯的敵對門派",
+"古城屋頂展開追逐，女俠追捕蒙面黑衣人",
+"雪山尋藥途中遭遇伏擊，女俠拔劍反擊",
+"女俠在客棧發現暗號，揭開一場江湖陰謀",
+"魔教高手與名門劍客在月下決戰",
+"女捕快追查古城奇案，發現失落的兵器",
+"女俠護送密信，突破重重攔截",
+"仙門弟子在雲海山巔練劍，感悟劍意",
+"女俠救下被困山崖的同伴，施展輕功",
+"門派大比最後一戰，雙方以劍術決勝負",
+"古寺石門開啟，女俠發現被封印的祕密",
+"雨夜重逢，昔日同門在屋簷下拔劍相向"
+],
+action:[
+"緩緩拔劍，劍尖斜指地面，再抬眼凝視對手",
+"踏步前衝，橫劍格擋，旋身回斬後穩定收勢",
+"輕功躍上屋簷，踩瓦疾行，再落地半蹲",
+"長袖揮動，轉腕出劍，劍光掠過鏡頭前景",
+"後撤閃避，低身滑步，反手格開來襲兵器",
+"雙劍連續交錯攻防，步伐俐落且重心穩定",
+"躍過石欄，空中轉身，衣袂飛揚後輕巧落地",
+"側身避開暗器，拔劍擊落飛來物，再回身戒備",
+"慢動作抬手按劍，眼神變冷，瞬間向前出招",
+"單手持劍旋身，劍尖劃出清晰弧線，定格收勢",
+"運氣凝神，周身落葉被氣流帶起，緩緩睜眼",
+"與對手短兵相接，三次格擋後拉開距離",
+"從門後現身，收起暗器，抬頭直視敵人",
+"迎風站在懸崖邊，轉身收劍，披風隨風揚起",
+"疾步穿過竹林，跳躍避開障礙，回身拔劍",
+"持劍刺出後迅速回收，腳步站穩並保持防禦姿勢",
+"揮袖施展奇幻劍氣，特效沿劍刃短暫流動",
+"跪地扶起受傷同伴，再起身面向追兵"
+],
+opponent:[
+"獨自演武，無其他人物",
+"與一名黑衣蒙面女刺客交手",
+"面對兩名持劍的敵方高手",
+"與一名白衣劍客隔著石橋對峙",
+"護送受傷同伴，敵人從遠處逼近",
+"與門派長老進行點到為止的比武",
+"追逐一名手持密信的蒙面人",
+"面對遠處的敵方首領，尚未正式交手",
+"與一名使用長槍的武者攻防",
+"無可見對手，獨自練劍與調息"
+],
+emotion:[
+"眼神冷靜而警覺，呼吸克制",
+"憤怒壓抑，眼神銳利，眉頭微蹙",
+"悲傷隱忍，目光短暫低垂",
+"堅定無畏，直視前方",
+"驚覺危險，迅速轉頭觀察",
+"沉著自信，出招後平靜收劍",
+"疲憊但不屈，衣衫略有風塵",
+"殺意凌厲，表情冷峻不誇張",
+"溫柔關切，低頭查看同伴傷勢",
+"超然寧靜，閉眼凝神後緩緩睜眼"
+]
+};
+
+let currentTab="img";
+const $=id=>document.getElementById(id);
+const val=id=>$(id).value;
+const selectedChecks=()=>[...document.querySelectorAll('.check input:checked')].map(x=>x.value);
+
+function init(){
+ Object.entries(DB).forEach(([id,items])=>{
+  $(id).innerHTML=items.map((x,i)=>`<option value="${esc(x)}">${i+1}. ${esc(x)}</option>`).join("");
+ });
+ document.querySelectorAll("select,input[type=text],textarea").forEach(el=>{
+  el.addEventListener("input",makePrompt);
+  el.addEventListener("change",makePrompt);
+ });
+ document.querySelectorAll(".check input").forEach(el=>el.addEventListener("change",makePrompt));
+ $("importFile").addEventListener("change",importSettings);
+ $("imageFile").addEventListener("change",previewImage);
+ drawPlaceholder();
+ makePrompt();
+}
+function esc(s){return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
+function randomIds(ids){
+ ids.forEach(id=>{const e=$(id);if(e && e.options.length)e.selectedIndex=Math.floor(Math.random()*e.options.length);});
+}
+function randomCharacter(){
+ randomIds(["role","temper","face","hair","body","outfit","color","weapon","accessory","style"]);
+ makePrompt();
+}
+function randomAll(){
+ randomCharacter();
+ randomIds(["scene","weather","camera","plot","action","opponent","emotion","pace","duration","framing"]);
+ makePrompt();
+}
+function identity(){
+ return [
+  "角色："+(val("name")||"未命名女俠"),
+  "身分："+val("role"),
+  "人物氣質："+val("temper"),
+  "五官："+val("face"),
+  "年齡："+val("age"),
+  "髮型："+val("hair"),
+  "身形："+val("body"),
+  "服裝："+val("outfit"),
+  "配色："+val("color"),
+  "配件："+val("accessory"),
+  "兵器："+val("weapon")
+ ].join("\n");
+}
+function commonQuality(){
+ return [
+  "風格："+val("style"),
+  "場景："+val("scene"),
+  "天氣與光線："+val("weather"),
+  "構圖："+val("framing"),
+  "畫面比例："+val("ratio"),
+  "一致性要求："+selectedChecks().join("；"),
+  "補充設定："+(val("custom")||"無"),
+  "品質要求：精細材質，清晰五官，合理人體比例，手指與兵器結構正確，服裝紋理清楚，電影級構圖，層次分明的光影。"
+ ].join("\n");
+}
+function makePrompt(){
+ if(!$("prompt"))return;
+ const ident=identity();
+ const quality=commonQuality();
+ let text="";
+ if(currentTab==="img"){
+  text=`【中國古裝武俠角色／場景生圖提示詞】
+
+【人物定妝設定】
+${ident}
+
+【場景與美術】
+${quality}
+
+【英文生成提示詞】
+Chinese wuxia female heroine, ${val("role")}, ${val("temper")}, ${val("face")}, ${val("hair")}, ${val("outfit")}, ${val("weapon")}, ${val("scene")}, ${val("weather")}, ${val("style")}, cinematic composition, detailed historical Chinese costume, realistic fabric texture, elegant martial arts pose, coherent lighting, highly detailed, clear facial features, consistent character design, aspect ratio ${val("ratio")}.
+
+【負面提示詞】
+low quality, blurry, deformed hands, extra fingers, extra limbs, duplicated body, distorted face, inconsistent costume, broken weapon, floating objects, modern clothing, modern buildings, text, watermark, logo, oversaturated effects.
+
+建議：首次先生成角色定妝照，確認臉部、服裝與兵器，再以該圖作為後續場景與影片的參考圖。`;
+ }else if(currentTab==="story"){
+  text=`【武俠短劇劇情與分鏡生成指令】
+
+【角色設定】
+${ident}
+
+【故事主軸】
+${val("plot")}
+
+【場景】
+${val("scene")}；${val("weather")}
+
+【主要動作】
+${val("action")}
+
+【對手與互動】
+${val("opponent")}
+
+【情緒表演】
+${val("emotion")}
+
+【鏡頭風格】
+${val("camera")}
+
+【分鏡規劃】
+鏡頭一：遠景交代場景、天氣、人物所在位置。
+鏡頭二：中景呈現人物走位、手部動作與兵器細節。
+鏡頭三：人物眼神特寫，表現情緒與出招意圖。
+鏡頭四：${val("action")}，動作清晰連貫，重心與兵器軌跡合理。
+鏡頭五：人物完成動作後穩定收勢，鏡頭停留在有戲劇張力的畫面。
+
+【視覺統一】
+${quality}
+
+【補充劇情】
+${val("custom")||"請根據武俠世界觀補足合理的動機與場景細節。"}
+
+請保持人物身份、服裝、髮型、武器、天氣與場景方向一致，避免跳躍式敘事；每個分鏡均交代景別、人物動作、鏡頭運動、光線與情緒。`;
+ }else{
+  text=`【圖生影片 Image-to-Video｜武俠電影動態提示詞】
+
+【參考圖使用規則】
+以輸入圖片作為角色外觀與初始構圖的唯一視覺基準。保留同一張臉、髮型、年齡感、服裝剪裁、主色、飾品、兵器外觀與場景設定。不要重新設計人物。
+
+【場景與劇情】
+${val("plot")}
+地點：${val("scene")}
+天氣：${val("weather")}
+對手：${val("opponent")}
+
+【動作時間軸】
+0–2 秒：人物自然呼吸，衣袂與髮絲受風輕動，眼神鎖定目標。
+2–4 秒：${val("action")}
+4–6 秒：動作完成後保持合理重心，兵器與手部位置正確，人物轉向或收勢。
+影片長度選擇：${val("duration")}。請依所選長度合理延展節奏，不要強行塞入過多動作。
+
+【動作與表演】
+武打節奏：${val("pace")}
+情緒：${val("emotion")}
+鏡頭：${val("camera")}
+畫面比例：${val("ratio")}
+
+【動態細節】
+${selectedChecks().join("；")}
+衣物、披風、髮絲、落葉、雨雪依場景風向自然運動。兵器軌跡清楚，不穿透身體或環境。人物動作有預備、發力、慣性與收勢，避免瞬間位移與不合理關節扭曲。
+
+【影視品質限制】
+保持單一連貫場景，鏡頭運動平穩，動作流暢。除非劇情明確要求，不新增人物、不改變服裝、不更換兵器、不改變角色面容、不突然切景、不生成字幕或水印。
+
+【補充要求】
+${val("custom")||"以古裝武俠電影的表演方式呈現，重視眼神、氣勢、動作細節與環境氛圍。"}
+
+注意：影片生成模型可能無法完全鎖定角色；建議使用角色參考圖、固定種子或平台提供的角色一致性功能。`;
+ }
+ $("prompt").value=text;
+}
+function switchTab(tab){
+ currentTab=tab;
+ ["img","story","vid"].forEach(t=>$("tab"+(t==="img"?"Img":t==="story"?"Story":"Vid")).classList.toggle("active",t===tab));
+ makePrompt();
+}
+async function copyPrompt(){
+ const text=$("prompt").value;
+ try{await navigator.clipboard.writeText(text);alert("提示詞已複製。");}
+ catch(e){$("prompt").focus();$("prompt").select();alert("請使用複製快捷鍵複製提示詞。");}
+}
+function getSettings(){
+ const data={};
+ document.querySelectorAll("select,input[type=text],textarea").forEach(el=>data[el.id]=el.value);
+ data.checks=selectedChecks();
+ return data;
+}
+function applySettings(data){
+ Object.entries(data).forEach(([id,value])=>{
+  if(id==="checks")return;
+  const el=$(id);
+  if(el)el.value=value;
+ });
+ document.querySelectorAll(".check input").forEach(el=>el.checked=(data.checks||[]).includes(el.value));
+ makePrompt();
+}
+function saveSettings(){
+ try{localStorage.setItem("wuxiaMVSettings",JSON.stringify(getSettings()));alert("設定已儲存於此瀏覽器。");}
+ catch(e){alert("無法儲存設定，請使用匯出 JSON。");}
+}
+function exportSettings(){
+ const blob=new Blob([JSON.stringify(getSettings(),null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="WuxiaMV-settings.json";a.click();URL.revokeObjectURL(a.href);
+}
+function importSettings(e){
+ const file=e.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{applySettings(JSON.parse(reader.result));alert("設定匯入成功。");}
+  catch(err){alert("檔案格式錯誤，無法匯入。");}
+  e.target.value="";
+ };
+ reader.readAsText(file);
+}
+function resetAll(){
+ if(!confirm("確定要重設所有武俠設定嗎？"))return;
+ document.querySelectorAll("select").forEach(el=>el.selectedIndex=0);
+ document.querySelectorAll("input[type=text],textarea").forEach(el=>el.value="");
+ document.querySelectorAll(".check input").forEach(el=>el.checked=true);
+ currentTab="img";
+ switchTab("img");
+}
+const canvas=$("canvas"),ctx=canvas.getContext("2d");
+function drawPlaceholder(){
+ ctx.fillStyle="#29211d";ctx.fillRect(0,0,300,350);
+ ctx.fillStyle="#dfc28d";ctx.textAlign="center";
+ ctx.font="bold 18px sans-serif";ctx.fillText("江湖人物參考圖",150,150);
+ ctx.font="13px sans-serif";ctx.fillText("請上傳定妝照或場景圖",150,180);
+ ctx.fillText("此處僅為本機預覽",150,205);
+}
+function previewImage(e){
+ const file=e.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const img=new Image();
+  img.onload=()=>{
+   ctx.clearRect(0,0,300,350);
+   const scale=Math.min(300/img.width,350/img.height);
+   const w=img.width*scale,h=img.height*scale;
+   ctx.drawImage(img,(300-w)/2,(350-h)/2,w,h);
+  };
+  img.src=reader.result;
+ };
+ reader.readAsDataURL(file);
+}
+init();
+try{
+ const saved=localStorage.getItem("wuxiaMVSettings");
+ if(saved)applySettings(JSON.parse(saved));
+}catch(e){}
+</script>
+</body>
+</html>
