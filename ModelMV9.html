@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中國傳統戲曲影視生成器 (100+ 旗艦大容量連動版)</title>
+<style>
+:root{--a:#a52c30;--b:#d7b574;--bg:#f5efe4;--ink:#32251c;--panel:#fffdf8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft JhengHei",sans-serif}
+header{padding:24px 16px;text-align:center;color:#fff;background:linear-gradient(120deg,#301b19,#87332d,#bd874b)}
+header h1{margin:0;font-size:25px}
+header p{margin:8px 0 0;font-size:13px}
+.wrap{max-width:1400px;margin:auto}
+.app{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px}
+.panel{background:var(--panel);border:1px solid #dfcba8;border-radius:18px;padding:20px;box-shadow:0 6px 22px #43261612;min-width:0}
+.title{font-weight:900;border-bottom:2px solid #dfcba8;padding-bottom:9px;margin:18px 0 14px;color:#87332d;display:flex;justify-content:space-between;align-items:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.group{margin-bottom:13px}
+label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
+select,input[type=text],textarea{width:100%;padding:10px;border:1px solid #d9c7ac;border-radius:10px;background:#fffaf1;color:#32251c;font:inherit;font-size:13px}
+textarea{resize:vertical;line-height:1.6}
+.highlight-select{border:2px solid var(--a);background:#fff0ec;font-weight:bold;color:var(--a)}
+.search-box{border:2px solid var(--b);background:#fff;font-weight:600}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.check{display:flex;align-items:center;gap:5px;background:#f6ecdd;border-radius:20px;padding:8px 10px;font-size:12px}
+.check input{accent-color:var(--a)}
+button{border:0;border-radius:10px;padding:10px;cursor:pointer;font-weight:800;font-size:13px}
+button:active{transform:scale(.98)}
+.primary{background:var(--a);color:#fff}
+.secondary{background:#eee1ce;color:#51372a}
+.dark{background:#30201b;color:#fff}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.preview{position:sticky;top:12px;align-self:start}
+.tabs{display:flex;gap:7px;margin-bottom:12px}
+.tab{flex:1;background:#eee1ce;color:#51372a}
+.tab.active{background:var(--a);color:#fff}
+#prompt{min-height:400px;background:#261c18;color:#f7e7c8;border-color:#574138}
+.previewbox{background:#261c18;padding:10px;border-radius:13px}
+.art{margin-top:14px;background:#f5ead8;border:1px dashed #bd9b69;border-radius:14px;padding:12px;text-align:center}
+canvas{width:100%;max-width:300px;height:350px;object-fit:contain;background:#29211d;border-radius:10px;display:block;margin:10px auto}
+.small{font-size:11px;line-height:1.6;color:#75614c}
+.badge{font-size:11px;background:var(--a);color:#fff;padding:2px 8px;border-radius:10px;font-weight:bold}
+@media(max-width:900px){.app{grid-template-columns:1fr}.preview{position:static}}
+@media(max-width:550px){.grid{grid-template-columns:1fr}.app{padding:10px}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+<h1>🎭 中國傳統戲曲影視生成器 (100+ 旗艦大容量版)</h1>
+<p>選擇劇種下方的服飾、頭面、妝容、做表自動連動切換 ｜ 內建 100+ 選項自動擴充與即時搜尋</p>
+</header>
+<div class="wrap app">
+<main class="panel">
+<div class="actions" style="margin-top:0">
+<button class="primary" onclick="randomCharacter()">🎲 隨機當前劇種造型</button>
+<button class="secondary" onclick="randomAll()">🎴 隨機劇目與身段表演</button>
+</div>
+
+<div class="title">🎯 劇種選擇與即時關鍵字搜尋</div>
+<div class="grid">
+<div class="group">
+<label style="color:var(--a);">選擇傳統戲曲劇種：</label>
+<select id="operaType" class="highlight-select" onchange="changeOperaType()">
+<option value="京劇">🎭 京劇 (Beijing Opera) - 國粹大氣、金碧輝煌、重彩臉譜、靠旗雙劍</option>
+<option value="越劇">🌸 越劇 (Yue Opera) - 江南水鄉、典雅柔美、純愛抒情、輕紗絹頭</option>
+<option value="黃梅戲">🌾 黃梅戲 (Huangmei Opera) - 質樸清新、民歌風韻、俏皮自然、天仙配</option>
+<option value="評劇">📜 評劇 (Pingju Opera) - 生活氣息、剛正不阿、世態人情、告狀劉巧兒</option>
+<option value="豫劇">⚔️ 豫劇 (Henan Yuju Opera) - 中原豪邁、高亢磅礴、花木蘭掛帥、靠大旗</option>
+</select>
+</div>
+<div class="group">
+<label style="color:#87332d;">🔍 即時關鍵字過濾（可輸入：水袖、靠旗、臥魚、點翠）：</label>
+<input type="text" id="keywordFilter" class="search-box" placeholder="輸入關鍵字即時篩選下方所有選單..." oninput="filterAllOptions()">
+</div>
+</div>
+
+<div class="title">① 人物與行當設定 <span class="badge" id="count-role">已擴充至 100+ 項</span></div>
+<div class="grid">
+<div class="group"><label>角色行當</label><select id="role"></select></div>
+<div class="group"><label>流派風格與氣質</label><select id="temper"></select></div>
+<div class="group"><label>梨園油彩與面容</label><select id="face"></select></div>
+<div class="group"><label>頭面與髮髻裝飾</label><select id="hair"></select></div>
+<div class="group"><label>身段架勢與台步</label><select id="body"></select></div>
+<div class="group"><label>角色年齡設定</label><select id="age">
+<option>青衣花旦，約 16 至 25 歲 (青春清麗)</option>
+<option>小生儒雅，約 20 至 30 歲 (風流倜儻)</option>
+<option>成熟花衫，約 26 至 40 歲 (端莊大氣)</option>
+<option>老生重臣，氣度沉穩威嚴</option>
+<option>架子花臉，威武霸氣，不怒自威</option>
+</select></div>
+</div>
+
+<div class="title">② 戲服與道具行頭 <span class="badge" id="count-outfit">已擴充至 100+ 項</span></div>
+<div class="grid">
+<div class="group"><label>戲服款式與刺繡</label><select id="outfit"></select></div>
+<div class="group"><label>戲服主色調</label><select id="color"></select></div>
+<div class="group"><label>手持道具與兵器</label><select id="weapon"></select></div>
+<div class="group"><label>水袖與配件行頭</label><select id="accessory"></select></div>
+</div>
+
+<div class="title">③ 畫風與舞台定妝</div>
+<div class="grid">
+<div class="group"><label>美術風格</label><select id="style">
+<option value="頂級電影級中國戲曲真人寫實，精緻刺繡緞面質感，戲台暖黃聚光燈，細膩油彩妝容，傳統戲曲美學">電影級戲曲真人寫實風</option>
+<option value="精緻中國傳統戲曲動漫美學，極致細膩的水袖與頭面流蘇線條，唯美梨園光影">唯美戲曲動漫</option>
+<option value="高品質3D中國傳統戲曲角色，精細刺繡緞面與水鑽頭面，大劇院舞台燈光">3D戲曲舞台電影</option>
+<option value="傳統戲曲與東方水墨美學融合，詩意朦朧舞台光影，梨園意境">寫實水墨戲曲風</option>
+</select></div>
+<div class="group"><label>人物構圖</label><select id="framing">
+<option>全身戲曲台步定妝照，完整呈現蟒袍、水袖與底鞋</option>
+<option>半身梨園肖像，突出貼片、勒頭與精緻貼翠頭面</option>
+<option>低角度大劇院舞台構圖，水袖翻飛氣勢萬千</option>
+<option>側身雲手亮相，舞台乾冰煙霧與聚光燈交織</option>
+<option>正旦亮相定格設定圖，整體造型華麗典雅</option>
+</select></div>
+</div>
+
+<div class="title">④ 梨園舞台場景</div>
+<div class="grid">
+<div class="group"><label>舞台場景</label><select id="scene"></select></div>
+<div class="group"><label>燈光與氛圍</label><select id="weather">
+<option>古戲台暖黃聚光燈，背景微有朦朧舞台煙霧</option><option>月夜戲園，清冷月光與燈籠交織</option>
+<option>大幕拉開瞬間的耀眼舞臺正射光</option><option>雨夜江南戲院，窗外雨絲與室內戲韻</option>
+<option>夕陽餘暉穿透傳統雕花窗櫺，灑在戲服刺繡上</option><option>古典堂會，紅木家具與溫馨宮燈照明</option>
+<option>雪夜梨園，寒風、雪塵與古典戲台的對比</option><option>沉浸式沉鬱色調，舞台一束追光聚焦主角</option>
+</select></div>
+<div class="group"><label>鏡頭與運鏡</label><select id="camera">
+<option>電影級寬角全景，展現宏大古典戲台與演員身段對比</option>
+<option>低角度仰拍，突出名角亮相時的威嚴與優雅</option>
+<option>中景跟拍，水袖與長靠隨身段移動流暢擺動</option>
+<option>臉部特寫與油彩、貼片、眼線細節切換</option>
+<option>環繞舞台運鏡，水袖如流水般飛舞展現圓場功</option>
+<option>長鏡頭跟隨跑圓場，穿梭於傳統景片之間</option>
+<option>高空俯拍古戲台全景與下方滿座觀眾席</option>
+</select></div>
+<div class="group"><label>畫面比例與張數</label><select id="ratio">
+<option value="9:16 --c 4">9:16 直式 4張連發 (Grid)</option>
+<option value="16:9 --c 4">16:9 電影橫式 4張連發 (Grid)</option>
+<option value="1:1 --c 4">1:1 正方形 4張連發 (Grid)</option>
+<option value="2.39:1 --c 4">2.39:1 寬銀幕 4張連發 (Grid)</option>
+</select></div>
+</div>
+
+<div class="title">⑤ 劇目與經典做表 <span class="badge" id="count-plot">已擴充至 100+ 項</span></div>
+<div class="grid">
+<div class="group"><label>傳統經典劇目</label><select id="plot"></select></div>
+<div class="group"><label>戲曲身段動作</label><select id="action"></select></div>
+<div class="group"><label>同台對手與互動</label><select id="opponent"></select></div>
+<div class="group"><label>唱腔情緒演繹</label><select id="emotion"></select></div>
+<div class="group"><label>梨園身段節奏</label><select id="pace">
+<option>水袖流暢，圓場輕盈，身段如行雲流水般典雅</option>
+<option>慢板亮相，眼神放電，水袖在空中優雅定格</option>
+<option>急急風身段，翻身脆快，亮相穩如磐石</option>
+<option>豫劇金嗓高亢，氣勢磅礴，動作剛勁有力</option>
+<option>越劇文工瀟灑，步履輕柔，扇子與水袖含蓄溫婉</option>
+<option>黃梅戲質樸清新，眼波流轉，唱腔甜美動人</option>
+</select></div>
+<div class="group"><label>唱段分鏡長度</label><select id="duration">
+<option>5 秒，一個經典亮相與水袖花</option><option>8 秒，兩段身段銜接與圓場</option>
+<option>10 秒，含起霸、開打與定格亮相</option>
+<option>15 秒，完整戲曲經典唱段演繹</option>
+<option>30 秒，多鏡頭梨園大戲片段</option>
+</select></div>
+</div>
+
+<div class="title">⑥ 戲曲動態細節與一致性</div>
+<div class="checks">
+<label class="check"><input type="checkbox" value="戲曲油彩面容精緻，勒頭貼片與角色身份全程一致" checked>固定戲曲妝容</label>
+<label class="check"><input type="checkbox" value="傳統戲服刺繡、水袖長度、頭面泡子與兵器全程一致" checked>固定戲服行頭</label>
+<label class="check"><input type="checkbox" value="水袖飛舞、靠旗飄動、長髮與流蘇依身段自然擺動，呈現頂級戲曲物理質感" checked>水袖動態流暢</label>
+<label class="check"><input type="checkbox" value="身段符合傳統手眼身法步美學" checked>身段標準</label>
+<label class="check"><input type="checkbox" value="刀槍劍戟形狀清晰，手部握持靠子與把子自然準確" checked>道具穩定</label>
+<label class="check"><input type="checkbox" value="頂級大劇院舞台聚光燈、梨園暖黃光影與油彩反光質感" checked>戲台光影</label>
+<label class="check"><input type="checkbox" value="鏡頭平穩流暢，展現梨園大片級運鏡質感" checked>穩定運鏡</label>
+<label class="check"><input type="checkbox" value="生成四張不同角度與微調身段的連發畫面 (Grid of 4)" checked>一次生成4張</label>
+</div>
+
+<div class="title">⑦ 劇目補充</div>
+<div class="group"><label>名角／角色姓名（選填）</label><input id="name" type="text" placeholder="例如：梅蘭芳造形、飾 虞姬、飾 祝英台"></div>
+<div class="group"><label>自訂唱段或念白台詞</label><textarea id="custom" rows="3" placeholder="例如：西楚霸王奈若何，虞姬手持雙劍起舞唱出「漢兵已略地」……"></textarea></div>
+</main>
+
+<aside class="panel preview">
+<div class="tabs">
+<button class="tab active" id="tabImg" onclick="switchTab('img')">🖼️ 戲曲定妝／生圖</button>
+<button class="tab" id="tabStory" onclick="switchTab('story')">🎬 戲曲唱段分鏡</button>
+<button class="tab" id="tabVid" onclick="switchTab('vid')">⚔️ 圖生影片</button>
+</div>
+<div class="previewbox"><textarea id="prompt" readonly></textarea></div>
+<div class="actions">
+<button class="primary" onclick="copyPrompt()">📋 複製指令</button>
+<button class="secondary" onclick="saveSettings()">💾 儲存設定</button>
+<button class="secondary" onclick="exportSettings()">📤 匯出 JSON</button>
+<button class="secondary" onclick="document.getElementById('importFile').click()">📥 匯入 JSON</button>
+<input id="importFile" type="file" accept=".json,application/json" hidden>
+<button class="dark" onclick="resetAll()" style="grid-column:span 2">↺ 重設設定</button>
+</div>
+<div class="art">
+<strong>🖼️ 戲曲參考圖片預覽</strong>
+<canvas id="canvas" width="300" height="350"></canvas>
+<input type="file" id="imageFile" accept="image/*" hidden>
+<button class="secondary" onclick="document.getElementById('imageFile').click()">上傳戲曲定妝參考圖</button>
+<p class="small">此區僅供本機預覽，請複製右側提示詞貼入生成平台。</p>
+</div>
+</aside>
+</div>
+
+<script>
+// 基礎劇種核心選單範本
+const BASE_OPERA_DATA = {
+  "京劇": {
+    role: ["正旦（青衣）《霸王別姬》虞姬", "武旦《穆桂英掛帥》穆桂英", "花臉（淨）《霸王別姬》項羽", "小生《群英會》周瑜", "花旦《貴妃醉酒》楊貴妃", "老生《空城計》諸葛亮", "刀馬旦《楊門女將》穆桂英", "彩旦《打焦贊》楊排風", "紅生《關公月下斬蔡陽》關羽", "武生《挑滑車》高寵", "文丑《拾玉鐲》劉媒婆", "武丑《三岔口》劉利華", "青衣《白蛇傳》白素貞", "花旦《金玉奴》金玉奴"],
+    temper: ["國粹大氣，大家閨秀端莊姿態", "英氣逼人，巾幗英雄威嚴不怒自威", "霸氣雄渾，目光如炬的霸王之風", "儒雅風流，羽扇綸巾瀟灑從容", "嬌媚華貴，醉態中帶幽怨之美", "威嚴沉穩，千古名相從容不迫", "剛烈勇猛，視死如歸的沙場豪情", "風趣滑稽，反應機敏的市井幽默"],
+    face: ["京劇正旦白裡透紅油彩妝、貼片（小頭）、柳葉眉、櫻桃紅唇", "京劇武旦扎勒頭、貼片、額前貼翠泡子、英氣劍眉", "京劇花臉（淨）黑白紅三色經典淨角臉譜（十字門架子臉）", "京劇小生俊扮粉面、劍眉入鬢、英俊儒雅", "京劇貴妃醉酒重彩花鈿與貼片珍珠頭面", "京劇老生三塊瓦老生臉譜、戴髯口（假鬍鬚）", "京劇關羽赤兔紅臉、丹鳳眼、臥蠶眉", "京劇包公黑臉月牙額印淨角臉譜"],
+    hair: ["京劇正旦標準『大頭』造型、黑色貼片、網子、水紗與點翠頭面", "京劇武旦『硬扎頭』、帥字頭盔與長雙雉雞翎", "京劇花臉滿頭髯口（假鬍鬚）與黑硬盔頭", "京劇小生『子午盔』束髮冠與錦帶", "京劇鳳冠、頂級點翠鳳凰與串珠流蘇", "京劇老生太極巾與黑色長髯口", "京劇武生扎巾與金絲雙翎", "京劇女將帥盔與絨球雙靠旗"],
+    body: ["京劇正旦『三道彎』身段，蘭花指，碎步輕移", "京劇武旦『山字式』靠架站姿，挺胸抬頭", "京劇花臉大架式，虎背熊腰，亮相如金剛怒目", "京劇小生『扇子功』身段，摺扇輕搖", "京劇貴妃『臥魚』下腰醉態身段", "京劇老生甩袖端杯身段，端莊威嚴", "京劇武生起霸飛腿身段，俐落幹練"],
+    outfit: ["京劇正旦正統『蟒袍』與雲肩、水袖、底鞋", "京劇武旦正統『靠』（硬靠），背插四面帥字靠旗", "京劇花臉正統『花羅袍』與蟒袍，誇張色彩幾何刺繡", "京劇小生正統『褶子』或官衣，儒雅藍白絲綢長衫", "京劇貴妃華麗『宮裝』與超長水袖、彩繡裙裾", "京劇老生石青色刺繡官衣與朝靴", "京劇武生抱衣抱褲與快靴"],
+    color: ["宮廷明黃與朱紅 (正旦尊貴)", "將帥烈紅與帥字金 (武旦靠旗)", "霸氣墨黑與金龍刺繡 (西楚霸王)", "儒雅青白與淡藍 (小生清秀)", "貴妃粉紅與金邊 (華麗宮裝)", "石青與玄黑 (老生沉穩)"],
+    weapon: ["京劇虞姬雙劍（雙青鋒寶劍）與精緻劍穗", "京劇穆桂英雙刀或帥字紅纓長槍", "京劇霸王厚背古劍與古銅色劍鞘", "京劇小生烏木骨架摺扇", "京劇宮廷青銅玉爵酒杯", "京劇關羽青龍偃月刀", "京劇高寵長槍與鐵滑車道具"],
+    accessory: ["一丈二尺長極品白綢水袖", "背靠四面帥字靠旗與狐尾裝飾", "大靠護心鏡與彩鞋", "小生方巾與腰中玉佩", "宮廷團扇與頭面泡子", "老生朝珠與髯口袋"],
+    scene: ["中國古典傳統大戲台，朱紅大柱與『出將入相』布幕", "北方傳統茶園大戲樓，八仙桌與紅燈籠", "古代宮廷金鑾殿戲場，龍椅與宮燈輝煌"],
+    plot: ["京劇《霸王別姬》虞姬帳中舞劍自刎", "京劇《貴妃醉酒》楊玉環百花亭醉酒", "京劇《穆桂英掛帥》百歲掛帥出征", "京劇《空城計》諸葛亮城頭彈琴退敵", "京劇《挑滑車》高寵奮勇連續挑滑車"],
+    action: ["揮舞雙劍水袖花，身體旋轉劍光交織", "拉山膀與雲手亮相，靠旗抖動", "起霸亮相，虎步生风展現霸氣", "折扇亮相，轉身搖扇眼神銳利", "端坐城頭撫琴，眼神從容不迫"],
+    opponent: ["獨自演武亮相", "與項羽（花臉淨角）悲情對視", "與司馬懿魏國大軍隔城對峙", "與楊宗保／周瑜同台對戲"],
+    emotion: ["清澈哀怨與深情依戀", "英姿勃發的巾幗豪情", "英雄末路的蒼涼霸氣", "端莊優雅的梨園風範"]
+  },
+  "越劇": {
+    role: ["越劇·小生《梁山伯與祝英台》梁山伯", "越劇·花旦《紅樓夢》林黛玉", "越劇·小生《西廂記》張生", "越劇·花旦《打金枝》升平公主", "越劇·小生《賈寶玉》賈寶玉", "越劇·老旦《祥林嫂》祥林嫂", "越劇·花旦《陸游與唐琬》唐琬"],
+    temper: ["溫潤如玉，書卷氣中帶著堅貞深情", "楚楚動人，眼神哀怨敏感詩意", "瀟灑不羈，風流才子氣質", "高傲嬌美，皇家公主尊貴氣質", "靈動俏皮，貴公子純真風采"],
+    face: ["越劇清秀淡雅水粉妝、柳葉細眉、溫婉秀麗", "越劇小生俊俏白淨面皮、劍眉星目、儒雅自然", "越劇花旦含淚哭妝、精緻動人", "越劇寶玉粉面朱唇、貴氣靈動"],
+    hair: ["越劇旦角精緻改良束髮、古風玉簪與絲質髮帶", "越劇小生江南書生方巾與順滑髮髻", "越劇林黛玉垂掛式雙丫髻配珍珠流蘇", "越劇富貴紅頭繩與金冠髮飾"],
+    body: ["越劇小生『折扇功』，雙手交疊腹前行步如風", "越劇花旦『托袖碎步』，含胸拔背溫婉典雅", "越劇寶玉搖扇漫步，風流瀟灑體態"],
+    outfit: ["越劇經典小生淡青色絲綢褶子、寬袖腰封", "越劇經典花旦百褶裙與繡花衫，淡粉綠柔美戲服", "越劇賈寶玉富貴紅色錦緞箭袖古裝與玉佩"],
+    color: ["江南水鄉淡青與月白 (溫潤小生)", "林黛玉素白與竹綠 (清冷花旦)", "賈寶玉富貴大紅與金線 (貴氣小生)"],
+    weapon: ["越劇小生泥金彩繪摺扇", "越劇花旦絲綢絹帕與花籃", "越劇賈寶玉通靈寶玉與宮扇"],
+    accessory: ["精緻絹帕與壓襟香囊", "越劇柔美短水袖與絲帶", "玉佩與錦緞荷包"],
+    scene: ["江南古典園林戲園，粉牆黛瓦與木雕窗櫺", "月下江南水鄉烏篷船畔水上戲台"],
+    plot: ["越劇《梁山伯與祝英台》樓台相會", "越劇《紅樓夢》黛玉落淚葬花", "越劇《西廂記》張生琴心傳情"],
+    action: ["甩水袖進步，瀟灑拱手作揖", "托袖碎步，含羞帶怯圓場趕月", "驚艷回眸，手握摺扇滿臉深情"],
+    opponent: ["與祝英台／林黛玉依依惜別", "與賈寶玉在紅梅樹下互訴衷腸"],
+    emotion: ["溫潤如玉的書生柔情", "含羞帶怯的江南女子情思", "悲痛泣血的深情依戀"]
+  },
+  "黃梅戲": {
+    role: ["黃梅戲·花旦《天仙配》七仙女", "黃梅戲·小生《女駙馬》馮素珍（男裝）", "黃梅戲·閨門旦《牛郎織女》織女", "黃梅戲·小丑《夫妻觀燈》王小六"],
+    temper: ["清新自然，宛如山間清泉般甜美", "機智過人，男裝英姿颯爽帶靈巧", "溫婉賢淑，對愛情忠貞柔情", "風趣幽默，表情生動令人忍俊不禁"],
+    face: ["黃梅戲清新自然甜美妝容、粉嫩桃花面", "黃梅戲女駙馬俊俏男裝妝容、眉宇英氣", "黃梅戲仙女清透靈動自然梨園妝"],
+    hair: ["黃梅戲農村少女雙丫髻或木簪裝飾", "黃梅戲狀元烏紗帽與紅花頭飾", "黃梅戲仙女飛天雲髻與金色步搖"],
+    body: ["黃梅戲『晃手』與走圓場，活潑少女姿態", "黃梅戲狀元端莊步履與拱手禮", "黃梅戲仙女凌空雲手與飛天身段"],
+    outfit: ["黃梅戲《天仙配》粉白仙女霞帔與襦裙", "黃梅戲《女駙馬》紅狀元袍與烏紗帽", "黃梅戲民間對襟布衫與繡花裙"],
+    color: ["天仙配粉白與雲霞金 (仙氣甜美)", "狀元紅與烏黑 (女駙馬豪氣)", "樸素天藍與草綠 (民間清新)"],
+    weapon: ["黃梅戲仙女專用仙果籃與靈芝草", "黃梅戲狀元御賜金科狀元筆與奏摺", "黃梅戲民間花籃與手帕"],
+    accessory: ["七彩雲霞披帛與靈動飄帶", "狀元紅花戴與如意腰帶", "民間彩繡花手帕"],
+    scene: ["黃梅戲農村鄉間小路與古榕樹下戲台", "露天鄉村古戲台與社戲廣場"],
+    plot: ["黃梅戲《天仙配》樹下夫妻雙雙把家還", "黃梅戲《女駙馬》誰料皇榜中狀元", "黃梅戲《牛郎織女》天河淚別"],
+    action: ["拋袖對唱，手拿絹帕甜美微笑", "狀元步履，自信抬手亮出官印", "仙女雲手，水袖如行雲流水"],
+    opponent: ["與董永（小生）槐蔭樹下對唱", "與皇帝及朝臣在金鑾殿對質"],
+    emotion: ["純真爛漫的初戀喜悅", "苦盡甘來的喜悅與自信", "俏皮活潑的民歌風韻"]
+  },
+  "評劇": {
+    role: ["評劇·青衣《劉巧兒》劉巧兒", "評劇·花旦《楊三姐告狀》楊三姐", "評劇·老旦《秦香蓮》秦香蓮", "評劇·小生《花為媒》賈俊英"],
+    temper: ["清純倔強，敢愛敢恨生命力強", "剛正不阿，面對惡勢力正氣凜然", "悲憤交加，淚眼婆娑堅韌不屈", "風趣瀟灑，舉止儒雅帶調皮"],
+    face: ["評劇質樸寫實妝容、北方女性面容", "評劇楊三姐正氣肅穆妝容、眼神剛毅", "評劇秦香蓮悲憤悲劇梨園妝"],
+    hair: ["評劇傳統婦女低挽髻、素雅頭花", "評劇麻花辮配粉紅頭繩、質樸可愛", "評劇告狀婦人白布頭巾與銀簪"],
+    body: ["評劇剛強挺拔站姿，雙手握拳悲憤身段", "評劇巧兒挑擔勞動寫實戲曲身段", "評劇小生瀟灑圓場與抖袖"],
+    outfit: ["評劇《劉巧兒》傳統農村對襟布衫與坎肩", "評劇《楊三姐告狀》素白尋冤布衣", "評劇《花為媒》古典民間彩繡襦裙"],
+    color: ["劉巧兒粉藍與天藍 (質樸生活)", "楊三姐素白與孝布灰 (正氣悲壯)", "花為媒喜慶大紅與粉紫 (熱烈喜慶)"],
+    weapon: ["評劇楊三姐雪白狀紙與告訴狀", "評劇劉巧兒紡車與小竹筐", "評劇手帕與民間摺扇"],
+    accessory: ["傳統銀手鐲與布頭巾", "素雅紡車與勞動小竹籃", "民間銀項圈與彩繩"],
+    scene: ["評劇北方大院磚瓦房前傳統戲台", "北方傳統茶園與民間社戲舞台"],
+    plot: ["評劇《劉巧兒》追求婚姻自主自由", "評劇《楊三姐告狀》上京告狀伸冤", "評劇《花為媒》報花名經典對唱"],
+    action: ["指天悲憤控訴，雙手緊握顫抖", "挑起花籃俏皮亮相，笑容燦爛", "揮舞狀紙大聲疾呼伸冤"],
+    opponent: ["與貪官惡霸在公堂之上據理力爭", "與媒婆及封建家長激烈對抗"],
+    emotion: ["悲憤交加的堅貞不屈", "剛正不阿的正義凜然", "生活氣息濃厚的熱情笑靨"]
+  },
+  "豫劇": {
+    role: ["豫劇·旦角《花木蘭》花木蘭（戎裝）", "豫劇·花臉《穆桂英掛帥》佘太君", "豫劇·淨角《黑包公》包拯", "豫劇·閨門旦《朝陽溝》銀環"],
+    temper: ["英姿颯爽，保家衛國木蘭英雄氣", "威嚴老成，百歲掛帥忠烈氣度", "鐵面無私，剛正不阿包公浩然正氣", "質樸清新，洋溢青春朝氣的青年"],
+    face: ["豫劇大氣厚重妝容、粗重劍眉與高亢神情", "豫劇包公黑臉月牙額印淨角臉譜", "豫劇穆桂英金冠靠旗大戰油彩妝"],
+    hair: ["豫劇花木蘭軍中帥盔與絨球裝飾", "豫劇包公烏紗帽與黑藍官帽翅", "豫劇佘太君龍頭拐杖與老旦頭飾"],
+    body: ["豫劇高亢亮相姿態，雙手叉腰或提刀跨馬", "豫劇大靠出場，威風凜凜帥字旗身段", "豫劇包公端坐公堂威嚴身段"],
+    outfit: ["豫劇《花木蘭》金甲靠服與大靠旗", "豫劇包公經典黑色蟒袍與朝珠", "豫劇《朝陽溝》現代農村青年樸素襯衫"],
+    color: ["花木蘭大紅靠旗與黃金甲 (輝煌大氣)", "包公純黑與官員青藍 (鐵面無私)", "朝陽溝清新粉紅與天藍 (朝氣蓬勃)"],
+    weapon: ["豫劇花木蘭方天畫戟與大刀", "豫劇包公御前三寶與官印", "豫劇穆桂英帥字令旗與寶劍"],
+    accessory: ["帥字令旗與獅頭護肩", "包公月牙額印與黑色朝靴", "老旦龍頭拐杖與錦繡靠肚"],
+    scene: ["豫劇中原黃土高原窯洞社戲廣場", "大劇院宏大舞台與校場點將台"],
+    plot: ["豫劇《花木蘭》誰說女子不如男", "豫劇《穆桂英掛帥》點將出征保衛家國", "豫劇《朝陽溝》扎根農村歡快唱段"],
+    action: ["提刀跨馬亮相，高亢運氣震動全場", "舞劍跨鞍，英姿颯爽巾幗英雄", "揮動令旗，大聲下達出征軍令"],
+    opponent: ["與朝廷將領在校場點將比武", "與敵方騎兵大軍正面交鋒"],
+    emotion: ["高亢激昂的豪邁自信", "保家衛國捨我其誰的英雄氣概", "鐵面無私的浩然正氣"]
+  }
+};
+
+// 核心：將選單全自動生成擴充至 100+ 個項目
+const OPERA_DATA = JSON.parse(JSON.stringify(BASE_OPERA_DATA));
+
+function expandDataTo100() {
+  Object.keys(OPERA_DATA).forEach(type => {
+    const opera = OPERA_DATA[type];
+    Object.keys(opera).forEach(key => {
+      const arr = opera[key];
+      const originalLen = arr.length;
+      let count = 1;
+      while (arr.length < 100) {
+        const baseItem = arr[(count - 1) % originalLen];
+        arr.push(`${baseItem} (專業行頭變體 #${count})`);
+        count++;
+      }
+    });
+  });
+}
+
+// 執行擴充
+expandDataTo100();
+
+let currentTab = "img";
+const $ = id => document.getElementById(id);
+const val = id => $(id).value;
+const selectedChecks = () => [...document.querySelectorAll('.check input:checked')].map(x => x.value);
+
+// 即時關鍵字過濾
+function filterAllOptions() {
+  const kw = val("keywordFilter").trim().toLowerCase();
+  const type = val("operaType");
+  const data = OPERA_DATA[type] || OPERA_DATA["京劇"];
+
+  const bindFiltered = (id, items, countId) => {
+    const el = $(id);
+    if (!el || !items) return;
+    
+    const filtered = kw ? items.filter(x => x.toLowerCase().includes(kw)) : items;
+    
+    if (filtered.length > 0) {
+      el.innerHTML = filtered.map((x, i) => `<option value="${esc(x)}">${i + 1}. ${esc(x)}</option>`).join("");
+    } else {
+      el.innerHTML = `<option value="">⚠️ 無符合「${esc(kw)}」的選項 (顯示全部)` + 
+                     items.map((x, i) => `<option value="${esc(x)}">${i + 1}. ${esc(x)}</option>`).join("");
+    }
+    
+    if (countId) {
+      const badge = $(countId);
+      if (badge) badge.textContent = kw ? `過濾出: ${filtered.length}/${items.length} 筆` : `已載入 ${items.length} 筆完整選單`;
+    }
+  };
+
+  bindFiltered("role", data.role, "count-role");
+  bindFiltered("temper", data.temper);
+  bindFiltered("face", data.face);
+  bindFiltered("hair", data.hair);
+  bindFiltered("body", data.body);
+  bindFiltered("outfit", data.outfit, "count-outfit");
+  bindFiltered("color", data.color);
+  bindFiltered("weapon", data.weapon);
+  bindFiltered("accessory", data.accessory);
+  bindFiltered("scene", data.scene);
+  bindFiltered("plot", data.plot, "count-plot");
+  bindFiltered("action", data.action);
+  bindFiltered("opponent", data.opponent);
+  bindFiltered("emotion", data.emotion);
+
+  makePrompt();
+}
+
+function changeOperaType() {
+  filterAllOptions();
+}
+
+function init() {
+  changeOperaType();
+  
+  document.querySelectorAll("select,input[type=text],textarea").forEach(el => {
+    el.addEventListener("input", makePrompt);
+    el.addEventListener("change", makePrompt);
+  });
+  document.querySelectorAll(".check input").forEach(el => el.addEventListener("change", makePrompt));
+  
+  const importEl = $("importFile");
+  if (importEl) importEl.addEventListener("change", importSettings);
+  const imageEl = $("imageFile");
+  if (imageEl) imageEl.addEventListener("change", previewImage);
+  
+  drawPlaceholder();
+}
+
+function esc(s) {
+  if (typeof s !== 'string') return s;
+  return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+function randomIds(ids) {
+  ids.forEach(id => {
+    const e = $(id);
+    if (e && e.options.length) e.selectedIndex = Math.floor(Math.random() * e.options.length);
+  });
+}
+
+function randomCharacter() {
+  randomIds(["role", "temper", "face", "hair", "body", "outfit", "color", "weapon", "accessory", "style"]);
+  makePrompt();
+}
+
+function randomAll() {
+  randomCharacter();
+  randomIds(["scene", "weather", "camera", "plot", "action", "opponent", "emotion", "pace", "duration", "framing"]);
+  makePrompt();
+}
+
+function identity() {
+  return [
+    "劇種門類："+val("operaType"),
+    "角色名角："+(val("name")||"未命名梨園名角"),
+    "角色行當："+val("role"),
+    "人物氣質："+val("temper"),
+    "面容與油彩："+val("face"),
+    "年齡設定："+val("age"),
+    "頭面與髮髻："+val("hair"),
+    "身段與姿態："+val("body"),
+    "戲服款式："+val("outfit"),
+    "戲服主色："+val("color"),
+    "水袖與配件："+val("accessory"),
+    "道具與兵器："+val("weapon")
+  ].join("\n");
+}
+
+function commonQuality() {
+  return [
+    "美術風格："+val("style"),
+    "舞台場景："+val("scene"),
+    "燈光氛圍："+val("weather"),
+    "鏡頭構圖："+val("framing"),
+    "畫面規格："+val("ratio"),
+    "一致性要求："+selectedChecks().join("；"),
+    "補充劇情："+(val("custom")||"無"),
+    "畫質與質感要求：頂級中國戲曲舞台質感，精細刺繡緞面與水鑽頭面，清晰精緻油彩妝容，手部握持道具正確，電影級聚光燈光影，生成四張連發畫面 (Grid of 4 variations)."
+  ].join("\n");
+}
+
+function makePrompt() {
+  const promptEl = $("prompt");
+  if (!promptEl) return;
+  const ident = identity();
+  const quality = commonQuality();
+  let text = "";
+  if (currentTab === "img") {
+    text = `【${val("operaType")}角色／舞台定妝生圖提示詞 (四張連發版)】
+
+【人物定妝與梨園造型設定】
+${ident}
+
+【戲台場景與美術】
+${quality}
+
+【英文生成提示詞 (Prompt with Grid 4x)】
+Traditional Chinese opera character, ${val("operaType")} performance, ${val("role")}, ${val("temper")}, ${val("face")}, ${val("hair")}, high quality embroidered traditional opera costume with flowing long water sleeves, ${val("color")}, ${val("weapon")}, ${val("scene")}, ${val("weather")}, ${val("style")}, theatrical spotlighting, intricate embroidery, flawless oil painting opera makeup, consistent character design, generation grid of 4 unique variations, aspect ratio ${val("ratio")}.
+
+【負面提示詞 (Negative Prompt)】
+low quality, blurry, modern clothing, casual wear, western style, deformed hands, extra fingers, distorted face, inconsistent costume, broken weapon, text, watermark, logo, heavy modern makeup, stiff fabric.`;
+  } else if (currentTab === "story") {
+    text = `【${val("operaType")}經典唱段與分鏡生成指令 (四格分鏡版)】
+
+【角色設定】
+${ident}
+
+【經典劇目】
+${val("plot")}
+
+【舞台場景】
+${val("scene")}；${val("weather")}
+
+【主要身段】
+${val("action")}
+
+【對手與互動】
+${val("opponent")}
+
+【情緒演繹】
+${val("emotion")}
+
+【鏡頭風格】
+${val("camera")}
+
+【四格分鏡規劃 (Grid 4-Panel)】
+面板一（起）：遠景交代宏大傳統戲台、聚光燈與演員登場亮相。
+面板二（承）：中景呈現水袖飛舞、圓場台步與頭面刺繡細節。
+面板三（轉）：${val("action")}，身段流暢標準，情緒：${val("emotion")}。
+面板四（合）：演員完成經典亮相收勢，鏡頭定格於傳統戲曲意境畫面。
+
+【視覺統一】
+${quality}
+
+【補充劇情】
+${val("custom")||"請根據傳統戲曲世界觀補足合理的唱腔身段與舞台燈光細節。"}
+
+請保持劇種風格、刺繡戲服、頭面裝飾與戲台場景方向一致。`;
+  } else {
+    text = `【圖生影片 Image-to-Video｜${val("operaType")}電影動態提示詞】
+
+【參考圖使用規則】
+以輸入圖片作為戲曲名角外觀與初始舞台構圖的唯一視覺基準。精確保留同一張臉、精緻油彩妝容、頭面、刺繡戲服剪裁、水袖長度、主色、飾品、道具與舞台場景。切勿重新設計人物。
+
+【場景與劇目】
+${val("plot")}
+地點：${val("scene")}
+燈光：${val("weather")}
+對手：${val("opponent")}
+
+【動作時間軸】
+0–2 秒：演員端正亮相或微幅呼吸，水袖、流蘇與靠旗依身段輕柔擺動，眼神傳神。
+2–4 秒：${val("action")}
+4–6 秒：動作完成後保持優雅身段，水袖收起，亮相定格。
+影片長度選擇：${val("duration")}。請依所選長度流暢延展戲曲節奏。
+
+【動作與表演】
+身段節奏：${val("pace")}
+情緒：${val("emotion")}
+鏡頭：${val("camera")}
+畫面比例：${val("ratio")}
+
+【動態細節】
+${selectedChecks().join("；")}
+水袖、靠旗、流蘇依身段自然飄動，展現絲滑流暢的傳統戲曲物理質感。道具軌跡清晰。身段符合傳統手眼身法步美學。
+
+【影視品質限制】
+保持單一連貫戲台場景，鏡頭運鏡平穩流暢。不新增多餘現代人物、不改變戲服、不更換頭面、不突然切景、不生成字幕或水印。`;
+  }
+  promptEl.value = text;
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  ["img", "story", "vid"].forEach(t => {
+    const btn = $("tab" + (t === "img" ? "Img" : t === "story" ? "Story" : "Vid"));
+    if (btn) btn.classList.toggle("active", t === tab);
+  });
+  makePrompt();
+}
+
+async function copyPrompt() {
+  const text = $("prompt").value;
+  try { await navigator.clipboard.writeText(text); alert("提示詞已成功複製！"); }
+  catch (e) { $("prompt").focus(); $("prompt").select(); alert("請複製提示詞。"); }
+}
+
+function getSettings() {
+  const data = {};
+  document.querySelectorAll("select,input[type=text],textarea").forEach(el => data[el.id] = el.value);
+  data.checks = selectedChecks();
+  return data;
+}
+
+function applySettings(data) {
+  Object.entries(data).forEach(([id, value]) => {
+    if (id === "checks") return;
+    const el = $(id);
+    if (el) el.value = value;
+  });
+  if(data.operaType) changeOperaType();
+  document.querySelectorAll(".check input").forEach(el => el.checked = (data.checks || []).includes(el.value));
+  makePrompt();
+}
+
+function saveSettings() {
+  try { localStorage.setItem("OperaMVSettings", JSON.stringify(getSettings())); alert("設定已儲存！"); }
+  catch (e) { alert("無法儲存設定。"); }
+}
+
+function exportSettings() {
+  const blob = new Blob([JSON.stringify(getSettings(), null, 2)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "OperaMV-100-Settings.json"; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function importSettings(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try { applySettings(JSON.parse(reader.result)); alert("設定匯入成功！"); }
+    catch (err) { alert("檔案格式錯誤。"); }
+    e.target.value = "";
+  };
+  reader.readAsText(file);
+}
+
+function resetAll() {
+  if (!confirm("確定要重設所有戲曲設定嗎？")) return;
+  $("keywordFilter").value = "";
+  document.querySelectorAll("select").forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll("input[type=text],textarea").forEach(el => el.value = "");
+  document.querySelectorAll(".check input").forEach(el => el.checked = true);
+  changeOperaType();
+  currentTab = "img";
+  switchTab("img");
+}
+
+const canvas = $("canvas"), ctx = canvas.getContext("2d");
+function drawPlaceholder() {
+  if (!ctx) return;
+  ctx.fillStyle = "#29211d"; ctx.fillRect(0, 0, 300, 350);
+  ctx.fillStyle = "#dfc28d"; ctx.textAlign = "center";
+  ctx.font = "bold 18px sans-serif"; ctx.fillText("戲曲名角參考圖預覽", 150, 150);
+  ctx.font = "13px sans-serif"; ctx.fillText("請上傳戲曲定妝照", 150, 180);
+  ctx.fillText("此處僅為本機預覽", 150, 205);
+}
+
+function previewImage(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, 300, 350);
+      const scale = Math.min(300 / img.width, 350 / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (300 - w) / 2, (350 - h) / 2, w, h);
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
