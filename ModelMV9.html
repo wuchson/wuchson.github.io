@@ -102,6 +102,10 @@ canvas{width:100%;max-width:300px;height:350px;object-fit:contain;background:#29
 <div class="title">③ 畫風與舞台定妝</div>
 <div class="grid">
 <div class="group"><label>美術風格</label><select id="style">
+<option value="粉嫩黏土手作風中國傳統戲曲角色，溫暖的手工捏製質感，柔和粉彩配色，精緻微型手作布料與細緻質感">🧸 粉嫩黏土手作風</option>
+<option value="Q版大頭 3D 角色風格中國傳統戲曲，大頭小身體，精緻可愛的大眼比例與立體 3D 渲染，童趣萌系梨園">👶 Q版大頭 3D 角色</option>
+<option value="超萌Q版大眼風格中國傳統戲曲角色，粉嫩色調，精緻可愛刺繡貼片頭面，溫馨童話梨園氛圍">✨ Q版萌系可愛戲曲風格</option>
+<option value="粉嫩手作紙雕與立體刺繡風中國傳統戲曲，溫暖手感面料，柔和粉彩配色，精緻手工質感">✂️ 粉嫩手作刺繡紙雕風</option>
 <option value="頂級電影級中國戲曲真人寫實，精緻刺繡緞面質感，戲台暖黃聚光燈，細膩油彩妝容，傳統戲曲美學">電影級戲曲真人寫實風</option>
 <option value="精緻中國傳統戲曲動漫美學，極致細膩的水袖與頭面流蘇線條，唯美梨園光影">唯美戲曲動漫</option>
 <option value="高品質3D中國傳統戲曲角色，精細刺繡緞面與水鑽頭面，大劇院舞台燈光">3D戲曲舞台電影</option>
@@ -207,7 +211,6 @@ canvas{width:100%;max-width:300px;height:350px;object-fit:contain;background:#29
 </div>
 
 <script>
-// 基礎劇種核心選單範本
 const BASE_OPERA_DATA = {
   "京劇": {
     role: ["正旦（青衣）《霸王別姬》虞姬", "武旦《穆桂英掛帥》穆桂英", "花臉（淨）《霸王別姬》項羽", "小生《群英會》周瑜", "花旦《貴妃醉酒》楊貴妃", "老生《空城計》諸葛亮", "刀馬旦《楊門女將》穆桂英", "彩旦《打焦贊》楊排風", "紅生《關公月下斬蔡陽》關羽", "武生《挑滑車》高寵", "文丑《拾玉鐲》劉媒婆", "武丑《三岔口》劉利華", "青衣《白蛇傳》白素貞", "花旦《金玉奴》金玉奴"],
@@ -291,7 +294,6 @@ const BASE_OPERA_DATA = {
   }
 };
 
-// 核心：將選單全自動生成擴充至 100+ 個項目
 const OPERA_DATA = JSON.parse(JSON.stringify(BASE_OPERA_DATA));
 
 function expandDataTo100() {
@@ -310,7 +312,6 @@ function expandDataTo100() {
   });
 }
 
-// 執行擴充
 expandDataTo100();
 
 let currentTab = "img";
@@ -318,7 +319,6 @@ const $ = id => document.getElementById(id);
 const val = id => $(id).value;
 const selectedChecks = () => [...document.querySelectorAll('.check input:checked')].map(x => x.value);
 
-// 即時關鍵字過濾
 function filterAllOptions() {
   const kw = val("keywordFilter").trim().toLowerCase();
   const type = val("operaType");
@@ -327,16 +327,13 @@ function filterAllOptions() {
   const bindFiltered = (id, items, countId) => {
     const el = $(id);
     if (!el || !items) return;
-    
     const filtered = kw ? items.filter(x => x.toLowerCase().includes(kw)) : items;
-    
     if (filtered.length > 0) {
       el.innerHTML = filtered.map((x, i) => `<option value="${esc(x)}">${i + 1}. ${esc(x)}</option>`).join("");
     } else {
-      el.innerHTML = `<option value="">⚠️ 無符合「${esc(kw)}」的選項 (顯示全部)` + 
+      el.innerHTML = `<option value="">⚠️ 無符合「${esc(kw)}」的選項 (顯示全部)</option>` + 
                      items.map((x, i) => `<option value="${esc(x)}">${i + 1}. ${esc(x)}</option>`).join("");
     }
-    
     if (countId) {
       const badge = $(countId);
       if (badge) badge.textContent = kw ? `過濾出: ${filtered.length}/${items.length} 筆` : `已載入 ${items.length} 筆完整選單`;
@@ -367,18 +364,15 @@ function changeOperaType() {
 
 function init() {
   changeOperaType();
-  
   document.querySelectorAll("select,input[type=text],textarea").forEach(el => {
     el.addEventListener("input", makePrompt);
     el.addEventListener("change", makePrompt);
   });
   document.querySelectorAll(".check input").forEach(el => el.addEventListener("change", makePrompt));
-  
   const importEl = $("importFile");
   if (importEl) importEl.addEventListener("change", importSettings);
   const imageEl = $("imageFile");
   if (imageEl) imageEl.addEventListener("change", previewImage);
-  
   drawPlaceholder();
 }
 
@@ -431,7 +425,7 @@ function commonQuality() {
     "畫面規格："+val("ratio"),
     "一致性要求："+selectedChecks().join("；"),
     "補充劇情："+(val("custom")||"無"),
-    "畫質與質感要求：頂級中國戲曲舞台質感，精細刺繡緞面與水鑽頭面，清晰精緻油彩妝容，手部握持道具正確，電影級聚光燈光影，生成四張連發畫面 (Grid of 4 variations)."
+    "畫質與質感要求：精緻藝術風格，細膩材質，頂級視覺呈現，生成四張連發畫面 (Grid of 4 variations)."
   ].join("\n");
 }
 
@@ -451,10 +445,10 @@ ${ident}
 ${quality}
 
 【英文生成提示詞 (Prompt with Grid 4x)】
-Traditional Chinese opera character, ${val("operaType")} performance, ${val("role")}, ${val("temper")}, ${val("face")}, ${val("hair")}, high quality embroidered traditional opera costume with flowing long water sleeves, ${val("color")}, ${val("weapon")}, ${val("scene")}, ${val("weather")}, ${val("style")}, theatrical spotlighting, intricate embroidery, flawless oil painting opera makeup, consistent character design, generation grid of 4 unique variations, aspect ratio ${val("ratio")}.
+Traditional Chinese opera character, ${val("operaType")} performance, ${val("role")}, ${val("temper")}, ${val("face")}, ${val("hair")}, ${val("style")}, traditional costume with flowing water sleeves, ${val("color")}, ${val("weapon")}, ${val("scene")}, ${val("weather")}, high quality artistic lighting, consistent character design, generation grid of 4 unique variations, aspect ratio ${val("ratio")}.
 
 【負面提示詞 (Negative Prompt)】
-low quality, blurry, modern clothing, casual wear, western style, deformed hands, extra fingers, distorted face, inconsistent costume, broken weapon, text, watermark, logo, heavy modern makeup, stiff fabric.`;
+low quality, blurry, modern clothing, casual wear, deformed hands, extra fingers, distorted face, inconsistent costume, text, watermark, logo.`;
   } else if (currentTab === "story") {
     text = `【${val("operaType")}經典唱段與分鏡生成指令 (四格分鏡版)】
 
@@ -480,23 +474,23 @@ ${val("emotion")}
 ${val("camera")}
 
 【四格分鏡規劃 (Grid 4-Panel)】
-面板一（起）：遠景交代宏大傳統戲台、聚光燈與演員登場亮相。
-面板二（承）：中景呈現水袖飛舞、圓場台步與頭面刺繡細節。
+面板一（起）：遠景交代傳統戲台與主角登場亮相。
+面板二（承）：中景呈現水袖飛舞、身段與服飾細節。
 面板三（轉）：${val("action")}，身段流暢標準，情緒：${val("emotion")}。
-面板四（合）：演員完成經典亮相收勢，鏡頭定格於傳統戲曲意境畫面。
+面板四（合）：演員完成經典亮相收勢，鏡頭定格於精彩意境畫面。
 
 【視覺統一】
 ${quality}
 
 【補充劇情】
-${val("custom")||"請根據傳統戲曲世界觀補足合理的唱腔身段與舞台燈光細節。"}
+${val("custom")||"請根據選定風格補足合理的唱腔身段與舞台細節。"}
 
-請保持劇種風格、刺繡戲服、頭面裝飾與戲台場景方向一致。`;
+請保持劇種風格、服飾、頭面裝飾與戲台場景方向一致。`;
   } else {
     text = `【圖生影片 Image-to-Video｜${val("operaType")}電影動態提示詞】
 
 【參考圖使用規則】
-以輸入圖片作為戲曲名角外觀與初始舞台構圖的唯一視覺基準。精確保留同一張臉、精緻油彩妝容、頭面、刺繡戲服剪裁、水袖長度、主色、飾品、道具與舞台場景。切勿重新設計人物。
+以輸入圖片作為角色外觀與初始舞台構圖的唯一視覺基準。精確保留風格、臉部特徵、服飾剪裁、水袖長度、主色、飾品、道具與場景。
 
 【場景與劇目】
 ${val("plot")}
@@ -505,10 +499,10 @@ ${val("plot")}
 對手：${val("opponent")}
 
 【動作時間軸】
-0–2 秒：演員端正亮相或微幅呼吸，水袖、流蘇與靠旗依身段輕柔擺動，眼神傳神。
+0–2 秒：角色端正亮相，服飾與配件依身段輕柔擺動。
 2–4 秒：${val("action")}
-4–6 秒：動作完成後保持優雅身段，水袖收起，亮相定格。
-影片長度選擇：${val("duration")}。請依所選長度流暢延展戲曲節奏。
+4–6 秒：動作完成後保持優雅定格。
+影片長度選擇：${val("duration")}。
 
 【動作與表演】
 身段節奏：${val("pace")}
@@ -518,10 +512,10 @@ ${val("plot")}
 
 【動態細節】
 ${selectedChecks().join("；")}
-水袖、靠旗、流蘇依身段自然飄動，展現絲滑流暢的傳統戲曲物理質感。道具軌跡清晰。身段符合傳統手眼身法步美學。
+水袖與服飾依身段自然飄動，展現流暢物理質感。道具軌跡清晰。
 
 【影視品質限制】
-保持單一連貫戲台場景，鏡頭運鏡平穩流暢。不新增多餘現代人物、不改變戲服、不更換頭面、不突然切景、不生成字幕或水印。`;
+保持單一連貫場景，鏡頭運鏡平穩流暢。不改變整體美術風格。`;
   }
   promptEl.value = text;
 }
