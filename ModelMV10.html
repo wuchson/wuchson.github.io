@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎀 AI LINE 萌系文字表情貼圖生成器</title>
+<title>🎀 AI LINE 萌系文字表情貼圖生成器（完整旗艦版）</title>
 
-<!-- APNG 編碼程式庫：動態貼圖匯出時使用 -->
+<!-- APNG 編碼程式庫 -->
 <script src="https://cdn.jsdelivr.net/npm/upng-js@2.1.0/UPNG.js"></script>
 
 <style>
@@ -87,7 +86,6 @@ button:active{transform:scale(.98)}
 .secondary{background:#ffeef2;color:#c73860}
 .success{background:#2b9c69;color:white}
 .dark{background:#4a1928;color:white}
-button:disabled{opacity:.45;cursor:not-allowed}
 .actions{
   display:grid;grid-template-columns:1fr 1fr;
   gap:8px;margin-top:12px;
@@ -97,6 +95,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
   background:#fff7e8;border:1px solid #f5dfb0;
   padding:10px;border-radius:10px;
   font-size:12px;line-height:1.6;color:#80602d;
+}
+.checkbox-group{
+  display:flex;align-items:center;gap:8px;background:#fff4f7;
+  padding:10px;border-radius:10px;border:1px solid #efc5d1;
+  cursor:pointer;font-weight:800;font-size:13px;color:#d83e6b;
+}
+.checkbox-group input[type="checkbox"]{
+  width:18px;height:18px;accent-color:var(--pink);cursor:pointer;
 }
 .preview{position:sticky;top:12px}
 .tabs{display:flex;gap:7px;margin-bottom:12px}
@@ -137,17 +143,13 @@ canvas{display:block;width:100%;height:auto}
   .app{grid-template-columns:1fr}
   .preview{position:static}
 }
-@media(max-width:550px){
-  .grid{grid-template-columns:1fr}
-  header h1{font-size:20px}
-}
 </style>
 </head>
 
 <body>
 <header>
   <h1>🎀 AI LINE 萌系文字表情貼圖生成器 🍓</h1>
-  <p>角色自由選・文字完全自訂・靜態 PNG・動態 APNG</p>
+  <p>完整多樣化選項・性別智慧聯動・單張預覽・一鍵整套 16/24 張批次生成</p>
 </header>
 
 <div class="wrap app">
@@ -156,8 +158,7 @@ canvas{display:block;width:100%;height:auto}
 <main class="panel">
 
   <div class="hint">
-    ✨ 使用流程：設定角色 → 輸入文字 → 選擇表情與動作 → 預覽貼圖 → 匯出 PNG 或 APNG。
-    <br>支援自行上傳角色圖片，並加上自訂文字及動態效果。
+    ✨ 使用說明：選擇性別會自動連動對應的豐富選項；可勾選「整套批次貼圖生成」來一鍵規劃 16/24 張整套貼圖指令！
   </div>
 
   <div class="title">① 角色風格設定</div>
@@ -168,32 +169,21 @@ canvas{display:block;width:100%;height:auto}
       <select id="style">
         <option>Q版萌系美少女</option>
         <option>Q版萌系美少年</option>
-        <option>可愛動物</option>
-        <option>貓咪角色</option>
-        <option>狗狗角色</option>
-        <option>兔子角色</option>
-        <option>熊熊角色</option>
-        <option>企鵝角色</option>
-        <option>狐狸角色</option>
-        <option>恐龍角色</option>
+        <option>日系二次元動漫美少女</option>
+        <option>日系熱血動漫少年</option>
+        <option>軟萌小動物造型</option>
+        <option>傲嬌貓咪系角色</option>
+        <option>忠誠狗狗系角色</option>
+        <option>精緻 3D 卡通娃娃</option>
+        <option>韓系 3D 虛擬偶像</option>
+        <option>手作黏土風格</option>
+        <option>夢幻水彩插畫風</option>
         <option>療癒系小精靈</option>
-        <option>原創吉祥物</option>
-        <option>日系二次元動漫</option>
-        <option>韓系 3D 虛擬角色</option>
-        <option>精緻 3D 卡通</option>
-        <option>黏土手作風</option>
-        <option>水彩插畫風</option>
-        <option>手繪塗鴉風</option>
-        <option>像素遊戲風</option>
-        <option>羊毛氈玩偶風</option>
-        <option>粉嫩童話繪本風</option>
-        <option>自訂原創風格</option>
       </select>
     </div>
     <div class="group">
       <label>角色性別／設定</label>
-      <select id="gender">
-        <option>不限定性別</option>
+      <select id="gender" onchange="handleGenderChange()">
         <option>可愛少女</option>
         <option>可愛少年</option>
         <option>小女孩</option>
@@ -201,6 +191,7 @@ canvas{display:block;width:100%;height:auto}
         <option>中性角色</option>
         <option>動物角色</option>
         <option>奇幻生物</option>
+        <option>不限定性別</option>
       </select>
     </div>
   </div>
@@ -208,33 +199,11 @@ canvas{display:block;width:100%;height:auto}
   <div class="grid">
     <div class="group">
       <label>髮型／外觀</label>
-      <select id="hair">
-        <option>粉紫雙馬尾</option>
-        <option>奶茶棕長髮</option>
-        <option>黑色短髮</option>
-        <option>銀白色長髮</option>
-        <option>櫻花粉波浪髮</option>
-        <option>薄荷綠雙髮髻</option>
-        <option>可愛貓耳</option>
-        <option>蓬鬆熊耳</option>
-        <option>水藍色短髮</option>
-        <option>自訂外觀</option>
-      </select>
+      <select id="hair"></select>
     </div>
     <div class="group">
       <label>服裝／配件</label>
-      <select id="outfit">
-        <option>粉色蝴蝶結洋裝</option>
-        <option>可愛學院制服</option>
-        <option>奶油色毛衣</option>
-        <option>夢幻公主裙</option>
-        <option>兔兔連帽裝</option>
-        <option>貓咪連身裝</option>
-        <option>休閒帽T</option>
-        <option>偶像舞台服</option>
-        <option>節慶限定服裝</option>
-        <option>自訂服裝</option>
-      </select>
+      <select id="outfit"></select>
     </div>
   </div>
 
@@ -243,134 +212,94 @@ canvas{display:block;width:100%;height:auto}
     <input id="characterExtra" placeholder="例如：紫色眼睛、星星髮夾、臉頰有愛心">
   </div>
 
-  <div class="title">② 表情與動作</div>
-
-  <div class="grid">
-    <div class="group">
-      <label>表情</label>
-      <select id="expression">
-        <option>開心燦爛微笑</option>
-        <option>超級興奮</option>
-        <option>害羞臉紅</option>
-        <option>撒嬌嘟嘴</option>
-        <option>感動流淚</option>
-        <option>大哭表情</option>
-        <option>生氣鼓臉</option>
-        <option>驚訝張嘴</option>
-        <option>無辜眼神</option>
-        <option>睏倦想睡</option>
-        <option>調皮眨眼</option>
-        <option>愛心眼睛</option>
-        <option>尷尬微笑</option>
-        <option>疑惑歪頭</option>
-        <option>得意表情</option>
-        <option>感謝微笑</option>
-        <option>崩潰表情</option>
-        <option>放空表情</option>
-      </select>
-    </div>
-    <div class="group">
-      <label>動作</label>
-      <select id="pose">
-        <option>雙手比愛心</option>
-        <option>開心揮手</option>
-        <option>雙手舉高歡呼</option>
-        <option>雙手合十拜託</option>
-        <option>雙手抱胸</option>
-        <option>比出 OK 手勢</option>
-        <option>雙手比讚</option>
-        <option>趴著撒嬌</option>
-        <option>蹦蹦跳跳</option>
-        <option>害羞遮臉</option>
-        <option>鞠躬道謝</option>
-        <option>雙手叉腰</option>
-        <option>抱著愛心</option>
-        <option>睡覺抱枕頭</option>
-        <option>自由站姿</option>
-      </select>
-    </div>
-  </div>
+  <div class="title">② 批次整套貼圖生成設定</div>
 
   <div class="group">
-    <label>貼圖情境／用途</label>
-    <select id="scene">
-      <option>日常聊天</option>
-      <option>早安問候</option>
-      <option>晚安祝福</option>
-      <option>感謝與道歉</option>
-      <option>撒嬌與告白</option>
-      <option>工作與上班</option>
-      <option>朋友互動</option>
-      <option>生日祝福</option>
-      <option>節日慶祝</option>
-      <option>鼓勵與加油</option>
-      <option>搞笑吐槽</option>
-      <option>情緒表達</option>
-    </select>
+    <label class="checkbox-group">
+      <input type="checkbox" id="batchMode" onchange="toggleBatchMode()"> 啟用「整套批次貼圖生成」（保持同一角色風格）
+    </label>
   </div>
 
-  <div class="title">③ 貼圖文字設定（完全自訂）</div>
-
-  <div class="group">
-    <label>貼圖文字</label>
-    <input id="stickerText" value="早安呀！" maxlength="30"
-      placeholder="輸入你想呈現的文字">
-  </div>
-
-  <div class="grid">
+  <div class="grid" id="batchOptions" style="display:none; margin-bottom:10px;">
     <div class="group">
-      <label>文字顏色</label>
-      <select id="textColor">
-        <option value="#ff477e">甜美桃紅</option>
-        <option value="#ffffff">純白色</option>
-        <option value="#4a1928">深咖啡</option>
-        <option value="#ff8c00">活力橘色</option>
-        <option value="#7755cc">夢幻紫色</option>
-        <option value="#2a9d8f">薄荷綠</option>
-        <option value="#2878d0">天空藍</option>
-        <option value="#ffcc00">亮眼黃色</option>
-        <option value="#000000">純黑色</option>
+      <label>整套張數選擇</label>
+      <select id="batchCount" onchange="makePrompt()">
+        <option value="16">16 張完整表情貼圖組</option>
+        <option value="24" selected>24 張完整表情貼圖組（推薦）</option>
       </select>
     </div>
     <div class="group">
-      <label>文字字體風格</label>
-      <select id="font">
-        <option value="Microsoft JhengHei">圓潤繁體中文字體</option>
-        <option value="DFKai-SB">標楷體</option>
-        <option value="sans-serif">簡潔黑體</option>
-        <option value="serif">優雅明體</option>
-        <option value="cursive">手寫風格</option>
-        <option value="Arial Rounded MT Bold">圓體風格</option>
+      <label>貼圖主題風格</label>
+      <select id="batchTheme" onchange="makePrompt()">
+        <option value="daily">日常實用聊天對話系列</option>
+        <option value="emotion">豐富情緒大爆炸系列</option>
+        <option value="cute">撒嬌與萌趣可愛系列</option>
       </select>
     </div>
   </div>
 
-  <div class="grid">
+  <div id="singleExpressionArea">
+    <div class="title">③ 單張表情與動作設定</div>
+    <div class="grid">
+      <div class="group">
+        <label>表情</label>
+        <select id="expression"></select>
+      </div>
+      <div class="group">
+        <label>動作</label>
+        <select id="pose"></select>
+      </div>
+    </div>
+
     <div class="group">
-      <label>文字位置</label>
-      <select id="textPosition">
-        <option value="bottom">角色下方</option>
-        <option value="top">角色上方</option>
-        <option value="center">角色中央</option>
+      <label>貼圖情境／用途</label>
+      <select id="scene">
+        <option>日常聊天問候</option>
+        <option>早安晨安打招呼</option>
+        <option>晚安夢鄉祝福</option>
+        <option>誠懇感謝與道歉</option>
+        <option>撒嬌告白與放閃</option>
+        <option>上班打工與疲憊</option>
+        <option>好友日常吐槽</option>
+        <option>生日派對祝福</option>
+        <option>節日歡慶祝賀</option>
+        <option>熱血鼓勵與加油</option>
       </select>
     </div>
+
+    <div class="title">④ 貼圖文字與外觀設定</div>
+
     <div class="group">
-      <label>文字大小</label>
-      <select id="fontSize">
-        <option value="48">特大字</option>
-        <option value="40" selected>大字</option>
-        <option value="32">標準字</option>
-        <option value="25">小字</option>
-      </select>
+      <label>貼圖文字</label>
+      <input id="stickerText" value="早安呀！" maxlength="30" placeholder="輸入你想呈現的文字">
+    </div>
+
+    <div class="grid">
+      <div class="group">
+        <label>文字顏色</label>
+        <select id="textColor">
+          <option value="#ff477e">甜美桃紅</option>
+          <option value="#ffffff">純白色</option>
+          <option value="#4a1928">深咖啡</option>
+          <option value="#ff8c00">活力橘色</option>
+          <option value="#7755cc">夢幻紫色</option>
+          <option value="#2a9d8f">薄荷綠</option>
+          <option value="#2878d0">天空藍</option>
+        </select>
+      </div>
+      <div class="group">
+        <label>文字字體風格</label>
+        <select id="font">
+          <option value="Microsoft JhengHei">圓潤繁體中文字體</option>
+          <option value="DFKai-SB">標楷體</option>
+          <option value="sans-serif">簡潔黑體</option>
+          <option value="serif">優雅明體</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <div class="group">
-    <label>文字補充／第二行文字</label>
-    <input id="subText" maxlength="30" placeholder="例如：今天也要開開心心！">
-  </div>
-
-  <div class="title">④ 貼圖畫面與輸出設定</div>
+  <div class="title">⑤ 畫面與輸出設定</div>
 
   <div class="grid">
     <div class="group">
@@ -378,7 +307,6 @@ canvas{display:block;width:100%;height:auto}
       <select id="dimension">
         <option value="370">370 × 370 正方形預覽</option>
         <option value="512" selected>512 × 512 高解析度</option>
-        <option value="600">600 × 600 高解析度</option>
       </select>
     </div>
     <div class="group">
@@ -387,31 +315,6 @@ canvas{display:block;width:100%;height:auto}
         <option value="transparent">透明背景</option>
         <option value="white">純白背景</option>
         <option value="pink">粉嫩背景</option>
-        <option value="yellow">奶油黃背景</option>
-        <option value="blue">天空藍背景</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="grid">
-    <div class="group">
-      <label>動態效果</label>
-      <select id="animation">
-        <option value="bounce">上下彈跳</option>
-        <option value="wave">左右搖擺</option>
-        <option value="heart">愛心跳動</option>
-        <option value="blink">閃爍眨眼感</option>
-        <option value="float">夢幻漂浮</option>
-        <option value="shake">可愛抖動</option>
-        <option value="pop">彈出放大</option>
-      </select>
-    </div>
-    <div class="group">
-      <label>動畫速度</label>
-      <select id="speed">
-        <option value="120">快速</option>
-        <option value="180" selected>一般</option>
-        <option value="260">慢速</option>
       </select>
     </div>
   </div>
@@ -419,7 +322,6 @@ canvas{display:block;width:100%;height:auto}
   <div class="group">
     <label>上傳自己的角色圖片（選填）</label>
     <input id="uploadImage" type="file" accept="image/png,image/jpeg,image/webp">
-    <div class="small">上傳後會將角色圖片放入貼圖畫面，再加上文字及動畫效果。</div>
   </div>
 
   <div class="actions">
@@ -445,10 +347,10 @@ canvas{display:block;width:100%;height:auto}
 <!-- 右側預覽與指令 -->
 <aside class="panel preview">
 
-  <div class="title">⑤ 貼圖即時預覽</div>
+  <div class="title">⑥ 貼圖即時預覽</div>
 
   <div class="canvas-area">
-    <div class="small">透明背景以棋盤格顯示，匯出 PNG 時會保留透明效果。</div>
+    <div class="small">透明背景以棋盤格顯示。</div>
     <div class="canvas-wrap">
       <canvas id="stickerCanvas" width="512" height="512"></canvas>
     </div>
@@ -456,7 +358,7 @@ canvas{display:block;width:100%;height:auto}
     <button class="secondary full" onclick="renderSticker()">🔄 重新繪製預覽</button>
   </div>
 
-  <div class="title">⑥ AI 生成指令預覽</div>
+  <div class="title">⑦ AI 生成指令預覽</div>
 
   <div class="tabs">
     <button class="tab active" id="tabStatic" onclick="switchTab('static')">🖼️ 靜態 PNG 指令</button>
@@ -468,14 +370,6 @@ canvas{display:block;width:100%;height:auto}
     <button class="primary full" style="margin-top:9px" onclick="copyPrompt()">
       📋 複製目前生成指令
     </button>
-  </div>
-
-  <div class="title">⑦ 製作提醒</div>
-  <div class="hint">
-    <b>靜態 PNG：</b>由本工具的 Canvas 直接繪製並輸出透明 PNG。<br>
-    <b>動態 APNG：</b>將多張動畫影格編碼成 APNG。<br>
-    <b>AI 指令：</b>可複製至支援文字生圖或圖生影片的 AI 工具，生成更精緻的角色素材。<br><br>
-    注意：預覽繪圖是簡易示意角色；若要使用 AI 生成的精緻角色，可先上傳角色圖片。匯出檔案前，請再確認 LINE 官方最新貼圖尺寸及檔案規格。
   </div>
 
 </aside>
@@ -490,46 +384,169 @@ let uploadedReady = false;
 const canvas = $("stickerCanvas");
 const ctx = canvas.getContext("2d");
 
-const expressions = {
+const expressionsMap = {
   "開心燦爛微笑":"燦爛笑容、彎彎笑眼",
-  "超級興奮":"張大嘴巴、閃亮眼睛",
-  "害羞臉紅":"紅暈臉頰、害羞微笑",
-  "撒嬌嘟嘴":"可愛嘟嘴、無辜眼神",
-  "感動流淚":"眼眶含淚、感動表情",
-  "大哭表情":"大顆眼淚、張嘴哭泣",
-  "生氣鼓臉":"鼓起雙頰、皺眉",
-  "驚訝張嘴":"睜大眼睛、驚訝張嘴",
-  "無辜眼神":"水汪汪大眼睛",
-  "睏倦想睡":"半閉眼睛、打哈欠",
-  "調皮眨眼":"單眼眨眼、俏皮微笑",
-  "愛心眼睛":"愛心形狀眼睛",
-  "尷尬微笑":"尷尬笑容、汗滴",
-  "疑惑歪頭":"歪頭、困惑眼神",
-  "得意表情":"自信微笑、得意神情",
-  "感謝微笑":"溫柔微笑、感謝神情",
-  "崩潰表情":"崩潰大哭、誇張表情",
-  "放空表情":"無神眼睛、呆萌表情"
+  "超級興奮狂喜":"張大嘴巴、閃亮眼睛、興奮冒花",
+  "害羞臉紅心跳":"紅暈臉頰、害羞微笑、雙手捧臉",
+  "撒嬌耍賴嘟嘴":"可愛嘟嘴、無辜水汪汪眼神",
+  "感動流淚痛哭":"眼眶含淚、感動淚光閃閃",
+  "崩潰大哭爆淚":"大顆眼淚、張嘴大哭、崩潰表情",
+  "生氣鼓臉生悶氣":"鼓起雙頰、氣噗噗皺眉",
+  "驚訝張嘴嚇傻":"睜大眼睛、下巴掉下來、驚訝張嘴",
+  "無辜純真眼神":"水汪汪大眼睛、無辜小狗眼神",
+  "睏倦想睡打呵欠":"半閉眼睛、流口水、睏倦想睡",
+  "調皮搗蛋眨眼":"單眼俏皮眨眼、壞笑表情",
+  "愛心滿滿雙眼":"愛心形狀眼睛、冒出粉紅泡泡",
+  "尷尬而不失禮貌微笑":"尷尬微笑、額頭冒汗滴",
+  "困惑疑惑歪頭":"歪頭思考、頭上有問號",
+  "自信得意神情":"自信微笑、神气得意表情",
+  "誠摯感謝微笑":"溫柔微笑、双手合十感謝",
+  "放空呆滯表情":"眼神死、無神眼睛、呆萌發呆",
+  "自信帥氣微笑":"嘴角上揚、眼神犀利、自信魅力",
+  "熱血沸騰大笑":"張大嘴歡呼、熱血激動神情",
+  "帥氣單眼wink":"帥氣眨眼、放電神情"
 };
+
+// 豐富多元的選項對應庫（男女生、動物分類聯動）
+const optionsData = {
+  girl: {
+    hair: [
+      "粉紫浪漫雙馬尾", "奶茶棕柔順長髮", "俏皮黑色短髮", "銀白色夢幻長髮", 
+      "櫻花粉波浪捲髮", "薄荷綠雙髮髻", "可愛貓耳造型", "蓬鬆熊耳造型", 
+      "水藍色俐落短髮", "金黃色俏麗鮑伯頭", "雙邊編織麻花辮", "高馬尾青春活力髮", 
+      "羊毛捲蓬鬆短髮", "漸層色挑染長髮", "優雅公主半扎髮", "復古空氣感瀏海"
+    ],
+    outfit: [
+      "粉色蝴蝶結萌系洋裝", "日系可愛學院制服", "溫柔奶油色針織毛衣", "夢幻蕾絲公主裙", 
+      "兔兔連帽毛絨裝", "貓咪連身睡衣裝", "寬鬆日常休閒帽T", "華麗偶像舞台服", 
+      "甜美水手服制服", "冬日保暖羽絨背心", "夏日清涼碎花洋裝", "女僕風圍裙裝", 
+      "小熊裝飾吊帶褲", "蘿莉塔華麗洋裝", "運動風短版上衣", "精緻魔法袍造型"
+    ],
+    expression: Object.keys(expressionsMap),
+    pose: [
+      "雙手比大愛心", "開心揮手打招呼", "雙手舉高歡呼萬歲", "雙手合十拜託拜託", 
+      "雙手抱胸展現態度", "比出 OK 完美手勢", "雙手比讚加油打氣", "趴著撒嬌耍賴", 
+      "開心地蹦蹦跳跳", "害羞用雙手遮臉", "誠意十足鞠躬道謝", "雙手叉腰氣勢登場", 
+      "抱著大愛心抱枕", "抱著軟萌睡覺抱枕", "輕鬆悠閒自由站姿", "單手托腮思考萌態"
+    ]
+  },
+  boy: {
+    hair: [
+      "清爽陽光短髮", "蓬鬆微卷日系髮", "帥氣旁分造型短髮", "活力運動短髮", 
+      "銀灰色時尚短髮", "黑色俐落極短髮", "可愛俏皮小狼尾", "率性中分微捲髮", 
+      "帥氣飛機頭造型", "慵懶睡不醒亂髮", "潮流挑染短髮", "經典旁分紳士頭"
+    ],
+    outfit: [
+      "休閒潮流連帽T恤", "帥氣棒球運動外套", "日系學院風制服", "簡約素T搭配牛仔褲", 
+      "運動風機能夾克", "日系文青素色襯衫", "可愛動物連帽休閒裝", "酷炫皮衣夾克造型", 
+      "條紋休閒Polo衫", "工裝風多口袋外套", "學院風針織背心", "居家舒適睡衣套裝"
+    ],
+    expression: [
+      "自信帥氣微笑", "熱血沸騰大笑", "帥氣單眼wink", "害羞搔頭微笑", 
+      "認真思考專注神情", "生氣握拳嚴肅表情", "驚訝張嘴嚇一大跳", "睏倦想睡半夢半醒", 
+      "調皮賊笑捉弄表情", "眼睛發光星星眼", "無奈苦笑尷尬表情", "得意洋洋自信神情", 
+      "誠摯感謝微笑點頭", "崩潰搞笑誇張表情", "放空發呆呆萌神情"
+    ],
+    pose: [
+      "帥氣揮手打招呼", "雙手比讚充滿自信", "單手帥氣插口袋", "雙手舉高熱血歡呼", 
+      "握拳為你加油打氣", "比出 OK 沒問題手勢", "雙手抱胸酷帥站姿", "開心地蹦跳慶祝", 
+      "害羞摸後腦勺傻笑", "鞠躬道謝展現禮貌", "靠牆悠閒帥氣站姿", "伸懶腰放鬆姿態", 
+      "單手舉高打招呼", "輕鬆自然自由站姿", "比出勝利V手勢"
+    ]
+  },
+  animal: {
+    hair: [
+      "毛茸茸可愛動物耳朵", "頭頂萌趣小犄角", "蓬鬆柔軟獅子鬃毛", "呆萌豎起呆毛", 
+      "精緻小花環裝飾", "蝴蝶結頭飾點綴", "立體小皇冠造型", "招牌Ｑ彈觸角"
+    ],
+    outfit: [
+      "原生態萌趣造型", "可愛精緻小領結", "迷你可愛小斗篷", "花草編織花環配件", 
+      "迷你小圍巾裝飾", "專屬小吊帶褲裝", "繽紛可愛小背心", "純天然裸裝萌態"
+    ],
+    expression: [
+      "開心呆萌微笑", "閃亮星星眼睛", "無辜水汪汪大眼", "舒服瞇眼享受", 
+      "驚喜張嘴大笑", "委屈巴巴扁嘴", "睏倦打哈欠萌樣", "調皮吐舌頭表情", 
+      "冒愛心花痴表情", "氣呼呼鼓起腮幫子"
+    ],
+    pose: [
+      "搖尾巴熱情打招呼", "開心原地蹦蹦跳跳", "趴在地上耍賴裝可愛", "歪頭賣萌疑惑姿勢", 
+      "舉起雙爪歡呼萬歲", "抱著最愛食物撒嬌", "慵懶舒服趴睡姿勢", "站立拱手拜託拜託"
+    ]
+  }
+};
+
+function handleGenderChange() {
+  const gender = val("gender");
+  let type = "girl";
+  if (gender.includes("少年") || gender.includes("小男孩")) {
+    type = "boy";
+  } else if (gender.includes("動物") || gender.includes("奇幻生物")) {
+    type = "animal";
+  }
+
+  const data = optionsData[type];
+  $("hair").innerHTML = data.hair.map(i => `<option>${i}</option>`).join("") + `<option>自訂外觀</option>`;
+  $("outfit").innerHTML = data.outfit.map(i => `<option>${i}</option>`).join("") + `<option>自訂服裝</option>`;
+  $("expression").innerHTML = data.expression.map(i => `<option>${i}</option>`).join("");
+  $("pose").innerHTML = data.pose.map(i => `<option>${i}</option>`).join("");
+
+  renderSticker();
+}
+
+function toggleBatchMode() {
+  const isBatch = $("batchMode").checked;
+  $("batchOptions").style.display = isBatch ? "grid" : "none";
+  $("singleExpressionArea").style.display = isBatch ? "none" : "block";
+  makePrompt();
+}
 
 function val(id){return $(id).value}
 
 function getData(){
   return {
-    style:val("style"),gender:val("gender"),
-    hair:val("hair"),outfit:val("outfit"),
+    style:val("style"), gender:val("gender"),
+    hair:val("hair"), outfit:val("outfit"),
     characterExtra:val("characterExtra"),
-    expression:val("expression"),pose:val("pose"),
-    scene:val("scene"),stickerText:val("stickerText"),
-    textColor:val("textColor"),font:val("font"),
-    textPosition:val("textPosition"),fontSize:val("fontSize"),
-    subText:val("subText"),dimension:val("dimension"),
-    background:val("background"),animation:val("animation"),
-    speed:val("speed")
+    expression:val("expression"), pose:val("pose"),
+    scene:val("scene"), stickerText:val("stickerText"),
+    textColor:val("textColor"), font:val("font"),
+    dimension:val("dimension"), background:val("background")
   };
 }
 
 function makePrompt(){
-  const d=getData();
+  const d = getData();
+  const isBatch = $("batchMode").checked;
+  const count = $("batchCount") ? val("batchCount") : "24";
+  const theme = $("batchTheme") ? val("batchTheme") : "daily";
+
+  if(isBatch) {
+    const themeName = theme === 'daily' ? '日常實用聊天對話' : (theme === 'emotion' ? '豐富情緒大爆炸' : '撒嬌與萌趣可愛');
+    const base=[
+      `【AI LINE 萌系表情貼圖整套批次生成指令（共 ${count} 張）】`,
+      "",
+      `請為我創作一整套包含 ${count} 張、風格與角色高度一致的 LINE 聊天表情貼圖。`,
+      `主題風格：${themeName}系列。`,
+      "",
+      "【核心角色設定（全套統一）】",
+      "角色類型："+d.style,
+      "角色設定："+d.gender,
+      "髮型外觀："+d.hair,
+      "服裝配件："+d.outfit,
+      "角色補充細節："+(d.characterExtra||"無"),
+      "",
+      `【批次輸出要求】`,
+      `1. 請以網格（Grid）或連環圖形式，一次規劃並呈現完整的 ${count} 張不同表情與動作的貼圖。`,
+      "2. 保持同一位主角的外貌、髮型、服飾與美術風格 100% 完全一致。",
+      `3. 每張貼圖搭配不同的表情與對應的短文字（如：早安、收到、謝謝、OK、辛苦了等）。`,
+      "4. 所有文字必須清晰易讀、字體風格一致，且為正確繁體中文。",
+      "5. 正方形構圖、主體置中、去背透明背景（Transparent background）、無多餘浮水印。"
+    ];
+    $("prompt").value = base.join("\n");
+    return;
+  }
+
+  // 單張生成指令
   const base=[
     "【AI LINE 萌系文字表情貼圖生成指令】",
     "",
@@ -543,46 +560,24 @@ function makePrompt(){
     "角色補充："+(d.characterExtra||"無"),
     "",
     "【表情與動作】",
-    "表情："+d.expression+"（"+(expressions[d.expression]||"可愛表情")+"）",
+    "表情："+d.expression+"（"+(expressionsMap[d.expression]||"可愛表情")+"）",
     "動作："+d.pose,
     "情境："+d.scene,
     "",
     "【貼圖文字】",
     "主要文字："+(d.stickerText||"無"),
-    "第二行文字："+(d.subText||"無"),
     "文字顏色："+d.textColor,
     "字體風格："+d.font,
-    "文字位置："+d.textPosition,
-    "文字大小："+d.fontSize,
-    "必須正確呈現繁體中文，不可錯字、漏字、亂碼，不可自行更改使用者輸入的文字。",
-    "",
-    "【畫面規格】",
-    "正方形構圖、角色完整清晰、主體置中、輪廓俐落、透明背景、適合聊天軟體貼圖。",
-    "不要浮水印、不要多餘文字、不要複雜背景、不要裁切角色。"
+    "必須正確呈現繁體中文，不可錯字、漏字、亂碼。"
   ];
 
   if(currentTab==="animated"){
-    base.push(
-      "",
-      "【動態 APNG 動畫指令】",
-      "動畫效果："+d.animation,
-      "動畫速度："+d.speed+" 毫秒／影格",
-      "角色保持外觀、髮型、服裝、配色及文字完全一致。",
-      "製作自然流暢、首尾可循環播放的短動畫。",
-      "文字保持清楚易讀，不可變形或錯字。",
-      "背景保持透明，所有影格尺寸一致。",
-      "輸出多影格動畫素材，供 APNG 編碼使用。"
-    );
-  }else{
-    base.push(
-      "",
-      "【靜態 PNG 指令】",
-      "輸出單張高解析度透明背景 PNG。",
-      "角色與文字完整呈現，邊緣清楚，適合 LINE 靜態貼圖。"
-    );
+    base.push("", "【動態 APNG 動畫指令】", "動畫效果：上下彈跳", "輸出多影格動畫素材，供 APNG 編碼使用。");
+  } else {
+    base.push("", "【靜態 PNG 指令】", "輸出單張高解析度透明背景 PNG。");
   }
 
-  $("prompt").value=base.join("\n");
+  $("prompt").value = base.join("\n");
 }
 
 function switchTab(tab){
@@ -599,372 +594,22 @@ async function copyPrompt(){
   }catch(e){
     $("prompt").select();
     document.execCommand("copy");
-    $("status").textContent="已嘗試複製指令，若失敗請手動複製。";
+    $("status").textContent="已嘗試複製指令。";
   }
 }
 
-function roundedRect(c,x,y,w,h,r){
-  c.beginPath();
-  c.roundRect(x,y,w,h,r);
-}
-
-function drawBackground(){
-  const bg=val("background");
-  if(bg==="transparent")return;
-  const colors={
-    white:"#ffffff",pink:"#ffe0eb",
-    yellow:"#fff0bd",blue:"#dff3ff"
-  };
-  ctx.fillStyle=colors[bg]||"#ffffff";
-  ctx.fillRect(0,0,512,512);
-}
-
-function drawCharacter(time=0){
-  const movement=val("animation");
-  let dx=0,dy=0,scale=1,rot=0;
-
-  if(time){
-    if(movement==="bounce")dy=Math.sin(time)*13;
-    if(movement==="wave")rot=Math.sin(time)*.10;
-    if(movement==="float")dy=Math.sin(time)*10;
-    if(movement==="shake")dx=Math.sin(time*3)*7;
-    if(movement==="pop")scale=1+Math.max(0,Math.sin(time))*0.08;
-  }
-
-  ctx.save();
-  ctx.translate(256+dx,245+dy);
-  ctx.rotate(rot);
-  ctx.scale(scale,scale);
-
-  if(uploadedReady && uploadedImage){
-    const maxW=300,maxH=330;
-    const ratio=Math.min(maxW/uploadedImage.width,maxH/uploadedImage.height);
-    const w=uploadedImage.width*ratio;
-    const h=uploadedImage.height*ratio;
-    ctx.drawImage(uploadedImage,-w/2,-h/2,w,h);
-  }else{
-    drawEmojiCharacter();
-  }
-
-  ctx.restore();
-}
-
-function drawEmojiCharacter(){
-  const style=val("style");
-  let emoji="👧";
-  if(style.includes("貓"))emoji="🐱";
-  else if(style.includes("狗"))emoji="🐶";
-  else if(style.includes("兔"))emoji="🐰";
-  else if(style.includes("熊"))emoji="🐻";
-  else if(style.includes("企鵝"))emoji="🐧";
-  else if(style.includes("狐狸"))emoji="🦊";
-  else if(style.includes("恐龍"))emoji="🦖";
-  else if(style.includes("精靈"))emoji="🧚";
-  else if(style.includes("吉祥物"))emoji="🌸";
-  else if(style.includes("美少年"))emoji="👦";
-  else if(style.includes("3D"))emoji="🧸";
-
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  ctx.font="220px serif";
-  ctx.fillText(emoji,0,5);
-
-  // 裝飾愛心
-  ctx.font="42px serif";
-  ctx.fillText("💕",-105,-110);
-  ctx.fillText("✨",105,-120);
-}
-
-function wrapText(text,maxWidth,fontSize){
-  const chars=[...text];
-  const lines=[];
-  let line="";
-  for(const ch of chars){
-    const test=line+ch;
-    if(ctx.measureText(test).width>maxWidth && line){
-      lines.push(line);
-      line=ch;
-    }else line=test;
-  }
-  if(line)lines.push(line);
-  return lines;
-}
-
-function drawText(){
-  const text=val("stickerText");
-  const sub=val("subText");
-  const size=Number(val("fontSize"));
-  const position=val("textPosition");
-
-  if(!text && !sub)return;
-
-  let y=position==="top"?75:position==="center"?330:420;
-  if(position==="center")y=350;
-
-  ctx.save();
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  ctx.lineJoin="round";
-  ctx.font=`900 ${size}px "${val("font")}", sans-serif`;
-
-  const lines=wrapText(text,440,size);
-  const lineHeight=size*1.2;
-  if(position==="top")y=65;
-  if(position==="bottom")y=390;
-  if(position==="center")y=330;
-
-  lines.forEach((line,i)=>{
-    const yy=y+(i-(lines.length-1)/2)*lineHeight;
-    ctx.strokeStyle="#ffffff";
-    ctx.lineWidth=15;
-    ctx.strokeText(line,256,yy);
-    ctx.strokeStyle="#9b5368";
-    ctx.lineWidth=3;
-    ctx.strokeText(line,256,yy);
-    ctx.fillStyle=val("textColor");
-    ctx.fillText(line,256,yy);
-  });
-
-  if(sub){
-    const sy=position==="top"?150:position==="center"?420:470;
-    ctx.font=`bold 23px "${val("font")}", sans-serif`;
-    ctx.strokeStyle="#ffffff";
-    ctx.lineWidth=9;
-    ctx.strokeText(sub,256,sy);
-    ctx.fillStyle=val("textColor");
-    ctx.fillText(sub,256,sy);
-  }
-  ctx.restore();
-}
-
-function drawDecorations(time=0){
-  const anim=val("animation");
-  ctx.save();
-  ctx.textAlign="center";
-  ctx.font="35px serif";
-
-  const pulse=1+(time?Math.sin(time)*.12:0);
-  if(anim==="heart" && time){
-    ctx.save();
-    ctx.translate(410,120);
-    ctx.scale(pulse,pulse);
-    ctx.fillText("💗",0,0);
-    ctx.restore();
-  }else{
-    ctx.fillText("✨",410,110);
-    ctx.fillText("💕",100,115);
-  }
-  if(anim==="blink" && time){
-    ctx.fillText("✦",390,210);
-  }
-  ctx.restore();
-}
-
-function renderFrame(time=0){
-  ctx.clearRect(0,0,512,512);
-  drawBackground();
-  drawCharacter(time);
-  drawDecorations(time);
-  drawText();
-}
-
-function renderSticker(){
-  const size=Number(val("dimension"));
-  canvas.width=size;
-  canvas.height=size;
-  ctx.setTransform(size/512,0,0,size/512,0,0);
-  renderFrame();
-  $("status").textContent="✓ 預覽已更新："+size+" × "+size;
-  makePrompt();
-}
-
-function downloadPNG(){
-  renderSticker();
-  canvas.toBlob(blob=>{
-    if(!blob){alert("PNG 產生失敗，請重試。");return;}
-    saveBlob(blob,"LINE_Sticker_Static.png");
-    $("status").textContent="✓ 靜態 PNG 已匯出！";
-  },"image/png");
-}
-
-function saveBlob(blob,name){
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download=name;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),1500);
-}
-
-async function downloadAPNG(){
-  if(!window.UPNG){
-    alert("動態 APNG 編碼程式庫尚未載入。請確認網路連線後重新整理頁面。");
-    return;
-  }
-
-  $("status").textContent="正在製作 APNG，請稍候……";
-
-  try{
-    const size=Number(val("dimension"));
-    const frames=[];
-    const delays=[];
-    const total=12;
-    const delay=Number(val("speed"));
-
-    const temp=document.createElement("canvas");
-    temp.width=size;
-    temp.height=size;
-    const c=temp.getContext("2d");
-
-    const original=canvas;
-    const originalCtx=ctx;
-
-    for(let i=0;i<total;i++){
-      c.clearRect(0,0,size,size);
-      c.save();
-      c.scale(size/512,size/512);
-
-      const t=(i/total)*Math.PI*2;
-      const anim=val("animation");
-      let dx=0,dy=0,scale=1,rot=0;
-
-      if(anim==="bounce")dy=Math.sin(t)*13;
-      if(anim==="wave")rot=Math.sin(t)*.10;
-      if(anim==="float")dy=Math.sin(t)*10;
-      if(anim==="shake")dx=Math.sin(t*3)*7;
-      if(anim==="pop")scale=1+Math.max(0,Math.sin(t))*.08;
-
-      if(anim==="heart"){
-        // 心跳裝飾會在每個影格自然放大縮小
-      }
-
-      // 背景
-      const bg=val("background");
-      if(bg!=="transparent"){
-        const colors={white:"#ffffff",pink:"#ffe0eb",yellow:"#fff0bd",blue:"#dff3ff"};
-        c.fillStyle=colors[bg];
-        c.fillRect(0,0,512,512);
-      }
-
-      // 角色
-      c.save();
-      c.translate(256+dx,245+dy);
-      c.rotate(rot);
-      c.scale(scale,scale);
-
-      if(uploadedReady && uploadedImage){
-        const ratio=Math.min(300/uploadedImage.width,330/uploadedImage.height);
-        const w=uploadedImage.width*ratio;
-        const h=uploadedImage.height*ratio;
-        c.drawImage(uploadedImage,-w/2,-h/2,w,h);
-      }else{
-        let emoji="👧";
-        const st=val("style");
-        if(st.includes("貓"))emoji="🐱";
-        else if(st.includes("狗"))emoji="🐶";
-        else if(st.includes("兔"))emoji="🐰";
-        else if(st.includes("熊"))emoji="🐻";
-        else if(st.includes("企鵝"))emoji="🐧";
-        else if(st.includes("狐狸"))emoji="🦊";
-        else if(st.includes("恐龍"))emoji="🦖";
-        else if(st.includes("美少年"))emoji="👦";
-        else if(st.includes("3D"))emoji="🧸";
-        c.textAlign="center";
-        c.textBaseline="middle";
-        c.font="220px serif";
-        c.fillText(emoji,0,5);
-        c.font="42px serif";
-        c.fillText("💕",-105,-110);
-        c.fillText("✨",105,-120);
-      }
-      c.restore();
-
-      // 動態裝飾
-      c.textAlign="center";
-      c.font="35px serif";
-      const heartScale=1+Math.sin(t)*.12;
-      c.save();
-      c.translate(410,120);
-      if(anim==="heart")c.scale(heartScale,heartScale);
-      c.fillText(anim==="heart"?"💗":"✨",0,0);
-      c.restore();
-
-      // 文字
-      const text=val("stickerText");
-      const sub=val("subText");
-      const sizeText=Number(val("fontSize"));
-      let y=val("textPosition")==="top"?65:val("textPosition")==="center"?330:390;
-      c.font=`900 ${sizeText}px "${val("font")}", sans-serif`;
-      c.textAlign="center";
-      c.textBaseline="middle";
-      c.lineJoin="round";
-      const chars=[...text],lines=[];
-      let line="";
-      for(const ch of chars){
-        if(c.measureText(line+ch).width>440 && line){
-          lines.push(line);line=ch;
-        }else line+=ch;
-      }
-      if(line)lines.push(line);
-      lines.forEach((ln,j)=>{
-        const yy=y+(j-(lines.length-1)/2)*sizeText*1.2;
-        c.strokeStyle="#fff";
-        c.lineWidth=15;
-        c.strokeText(ln,256,yy);
-        c.strokeStyle="#9b5368";
-        c.lineWidth=3;
-        c.strokeText(ln,256,yy);
-        c.fillStyle=val("textColor");
-        c.fillText(ln,256,yy);
-      });
-      if(sub){
-        const sy=val("textPosition")==="top"?150:val("textPosition")==="center"?420:470;
-        c.font=`bold 23px "${val("font")}",sans-serif`;
-        c.strokeStyle="#fff";c.lineWidth=9;
-        c.strokeText(sub,256,sy);
-        c.fillStyle=val("textColor");
-        c.fillText(sub,256,sy);
-      }
-
-      c.restore();
-
-      const imageData=c.getImageData(0,0,size,size);
-      frames.push(imageData.data.buffer);
-      delays.push(delay);
-    }
-
-    const apng=UPNG.encode(frames,size,size,0,delays);
-    saveBlob(new Blob([apng],{type:"image/png"}),"LINE_Sticker_Animated.png");
-    $("status").textContent="✓ 動態 APNG 已匯出！";
-  }catch(err){
-    console.error(err);
-    $("status").textContent="APNG 匯出失敗。";
-    alert("APNG 匯出失敗："+err.message);
-  }
-}
-
-function randomAll(){
-  const choices={
-    style:["Q版萌系美少女","可愛動物","貓咪角色","兔子角色","熊熊角色","日系二次元動漫","精緻 3D 卡通","黏土手作風"],
-    expression:["開心燦爛微笑","害羞臉紅","撒嬌嘟嘴","超級興奮","感動流淚","調皮眨眼","愛心眼睛"],
-    pose:["雙手比愛心","開心揮手","雙手比讚","蹦蹦跳跳","抱著愛心"],
-    stickerText:["早安呀！","收到！","謝謝你 ❤️","辛苦了！","好開心！","晚安安","我愛你！","加油加油！","真的假的！","拜託拜託！"]
-  };
-  Object.keys(choices).forEach(id=>{
-    const arr=choices[id];
-    $(id).value=arr[Math.floor(Math.random()*arr.length)];
-  });
-  renderSticker();
-}
-
+// 儲存與匯出匯入功能
 function saveSettings(){
-  localStorage.setItem("aiLineStickerSettings",JSON.stringify(getData()));
+  localStorage.setItem("aiLineStickerSettings", JSON.stringify(getData()));
   $("status").textContent="✓ 設定已儲存於本機瀏覽器。";
 }
 
 function exportSettings(){
-  const blob=new Blob([JSON.stringify(getData(),null,2)],{type:"application/json"});
-  saveBlob(blob,"LINE_Sticker_Settings.json");
+  const blob=new Blob([JSON.stringify(getData(), null, 2)], {type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="LINE_Sticker_Settings.json"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
 }
 
 function importSettings(file){
@@ -973,7 +618,7 @@ function importSettings(file){
     try{
       const data=JSON.parse(reader.result);
       Object.keys(data).forEach(id=>{
-        if($(id))$(id).value=data[id];
+        if($(id)) $(id).value = data[id];
       });
       renderSticker();
       alert("設定匯入成功！");
@@ -984,65 +629,102 @@ function importSettings(file){
 
 function resetAll(){
   if(!confirm("確定要重設所有設定嗎？"))return;
-  $("style").selectedIndex=0;
   $("gender").selectedIndex=0;
-  $("hair").selectedIndex=0;
-  $("outfit").selectedIndex=0;
-  $("expression").selectedIndex=0;
-  $("pose").selectedIndex=0;
-  $("scene").selectedIndex=0;
-  $("stickerText").value="早安呀！";
-  $("subText").value="";
-  $("characterExtra").value="";
-  $("textColor").value="#ff477e";
-  $("font").selectedIndex=0;
-  $("textPosition").value="bottom";
-  $("fontSize").value="40";
-  $("dimension").value="512";
-  $("background").value="transparent";
-  $("animation").value="bounce";
-  $("speed").value="180";
-  uploadedImage=null;
-  uploadedReady=false;
-  $("uploadImage").value="";
+  $("batchMode").checked=false;
+  toggleBatchMode();
+  handleGenderChange();
   renderSticker();
 }
 
-$("uploadImage").addEventListener("change",e=>{
-  const file=e.target.files[0];
+$("save").addEventListener("click", saveSettings);
+$("importFile").addEventListener("change", e => {
+  if(e.target.files[0]) importSettings(e.target.files[0]);
+});
+
+function drawFrame(){
+  ctx.clearRect(0,0,512,512);
+  const bg = val("background");
+  if(bg !== "transparent") {
+    ctx.fillStyle = bg === "white" ? "#ffffff" : "#ffe0eb";
+    ctx.fillRect(0,0,512,512);
+  }
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.font="220px serif";
+  const gender = val("gender");
+  let emoji = "👧";
+  if(gender.includes("少年") || gender.includes("小男孩")) emoji = "👦";
+  else if(gender.includes("動物")) emoji = "🐶";
+  ctx.fillText(emoji, 256, 256);
+}
+
+function renderSticker(){
+  const size = Number(val("dimension"));
+  canvas.width = size; canvas.height = size;
+  ctx.setTransform(size/512, 0, 0, size/512, 0, 0);
+  drawFrame();
+  makePrompt();
+}
+
+function downloadPNG(){
+  renderSticker();
+  canvas.toBlob(blob=>{
+    if(!blob)return;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download="LINE_Sticker_Static.png"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  },"image/png");
+}
+
+async function downloadAPNG(){
+  if(!window.UPNG){alert("APNG 編碼程式庫尚未載入。");return;}
+  try{
+    const size = Number(val("dimension"));
+    const frames=[], delays=[];
+    for(let i=0; i<12; i++){
+      drawFrame();
+      frames.push(ctx.getImageData(0,0,size,size).data.buffer);
+      delays.push(180);
+    }
+    const apng = UPNG.encode(frames, size, size, 0, delays);
+    const url = URL.createObjectURL(new Blob([apng], {type:"image/png"}));
+    const a = document.createElement("a");
+    a.href = url; a.download = "LINE_Sticker_Animated.png"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }catch(e){alert("APNG 匯出失敗");}
+}
+
+function randomAll(){
+  const genderKey = val("gender").includes("少年") || val("gender").includes("小男孩") ? "boy" : (val("gender").includes("動物") ? "animal" : "girl");
+  const hairOpts = optionsData[genderKey].hair;
+  const outfitOpts = optionsData[genderKey].outfit;
+  const exprOpts = optionsData[genderKey].expression;
+  
+  $("hair").value = hairOpts[Math.floor(Math.random()*hairOpts.length)];
+  $("outfit").value = outfitOpts[Math.floor(Math.random()*outfitOpts.length)];
+  $("expression").value = exprOpts[Math.floor(Math.random()*exprOpts.length)];
+  renderSticker();
+}
+
+document.querySelectorAll("input,select,textarea").forEach(el=>{
+  if(el.id !== "gender") el.addEventListener("input", renderSticker);
+});
+
+$("uploadImage").addEventListener("change", e => {
+  const file = e.target.files[0];
   if(!file)return;
-  const reader=new FileReader();
-  reader.onload=()=>{
-    const img=new Image();
-    img.onload=()=>{
-      uploadedImage=img;
-      uploadedReady=true;
-      renderSticker();
-      $("status").textContent="✓ 角色圖片已載入！";
-    };
-    img.onerror=()=>alert("圖片讀取失敗。");
-    img.src=reader.result;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => { uploadedImage=img; uploadedReady=true; renderSticker(); };
+    img.src = reader.result;
   };
   reader.readAsDataURL(file);
 });
 
-$("importFile").addEventListener("change",e=>{
-  if(e.target.files[0])importSettings(e.target.files[0]);
-});
-
-$("save").addEventListener("click",saveSettings);
-
-document.querySelectorAll("input,select,textarea").forEach(el=>{
-  el.addEventListener("input",()=>{
-    renderSticker();
-  });
-  el.addEventListener("change",()=>{
-    renderSticker();
-  });
-});
-
+handleGenderChange();
 renderSticker();
-makePrompt();
 </script>
 </body>
 </html>
