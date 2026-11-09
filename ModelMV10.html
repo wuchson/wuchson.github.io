@@ -149,7 +149,7 @@ canvas{display:block;width:100%;height:auto}
 <body>
 <header>
   <h1>🎀 AI LINE 萌系文字表情貼圖生成器 🍓</h1>
-  <p>性別智慧聯動・單張預覽・一鍵整套 16/24 張批次生成</p>
+  <p>性別智慧聯動・豐富文字色彩・百種常用字句・單張預覽・一鍵批次生成</p>
 </header>
 
 <div class="wrap app">
@@ -158,7 +158,7 @@ canvas{display:block;width:100%;height:auto}
 <main class="panel">
 
   <div class="hint">
-    ✨ 使用說明：選擇性別會自動連動對應的豐富選項；可勾選「整套批次貼圖生成」來一鍵規劃 16/24 張整套貼圖指令！
+    ✨ 使用說明：已擴充多達 24 種豐富文字顏色選項，讓你的貼圖文字在任何背景下都清晰搶眼！
   </div>
 
   <div class="title">① 角色風格設定</div>
@@ -264,27 +264,92 @@ canvas{display:block;width:100%;height:auto}
         <option>生日派對祝福</option>
         <option>節日歡慶祝賀</option>
         <option>熱血鼓勵與加油</option>
+        <option>上班打卡與職場趕死線</option>
+        <option>開會報告與工作回覆中</option>
+        <option>摸魚偷懶與薪水小偷</option>
+        <option>下班放鬆與回家路上</option>
+        <option>約吃飯、喝一杯與聚會邀約</option>
+        <option>尋找集合地點與路上催促</option>
+        <option>遠距離想念與甜蜜互動</option>
+        <option>求包養、討抱抱與撒嬌耍賴</option>
+        <option>網路迷因、看戲吃瓜與無言傻眼</option>
+        <option>敷衍回應與貼圖連發</option>
       </select>
     </div>
 
     <div class="title">④ 貼圖文字與外觀設定</div>
 
+    <!-- 常用文字分類選單 -->
     <div class="group">
-      <label>貼圖文字</label>
-      <input id="stickerText" value="早安呀！" maxlength="30" placeholder="輸入你想呈現的文字">
+      <label>快速選擇常用貼圖文字（100種分類）</label>
+      <select id="presetTextSelect" onchange="selectPresetText(this)">
+        <option value="">-- 請選擇內建常用文字快速帶入 --</option>
+        <optgroup label="一、 常用打招呼與問候">
+          <option>早安</option><option>午安</option><option>晚安</option><option>哈囉 / Hi</option><option>拜拜 / Bye</option><option>祝你有美好的一天</option><option>吃飯沒？</option><option>辛苦了</option><option>哩賀（台語：你好）</option><option>好久不見</option>
+        </optgroup>
+        <optgroup label="二、 回應與確認">
+          <option>OK</option><option>收到</option><option>沒問題</option><option>+1</option><option>了解</option><option>好的</option><option>對 / 是的</option><option>不要</option><option>不行</option><option>真的假的？</option>
+        </optgroup>
+        <optgroup label="三、 讚賞與肯定">
+          <option>讚</option><option>水哦（台語：漂亮、幹得好）</option><option>棒棒</option><option>太神啦</option><option>佩服佩服</option><option>幾勒讚（台語：給個讚）</option><option>優秀</option><option>專業</option><option>太強了</option><option>給你比心 / 愛心</option>
+        </optgroup>
+        <optgroup label="四、 感謝與道歉">
+          <option>謝謝</option><option>感恩</option><option>多謝</option><option>銘謝惠顧</option><option>不客氣</option><option>對不起 / 抱歉</option><option>我錯了</option><option>請原諒我</option><option>不好意思</option><option>辛苦你了</option>
+        </optgroup>
+        <optgroup label="五、 工作與日常生活">
+          <option>開會中</option><option>加班中</option><option>忙碌中</option><option>下班啦</option><option>放假囉</option><option>摸魚中</option><option>收到，處理中</option><option>薪水小偷</option><option>出門中</option><option>到家了</option>
+        </optgroup>
+        <optgroup label="六、 聚會與邀約">
+          <option>約嗎？</option><option>吃什麼？</option><option>喝一杯？</option><option>等我一下</option><option>馬上到</option><option>我出發了</option><option>在路上</option><option>人呢？</option><option>哪裡集合？</option><option>不到不散</option>
+        </optgroup>
+        <optgroup label="七、 情緒與心情">
+          <option>開心</option><option>哭哭</option><option>生氣</option><option>無語 / 傻眼</option><option>翻白眼</option><option>心累</option><option>崩潰</option><option>無奈</option><option>驚！</option><option>爽啦</option>
+        </optgroup>
+        <optgroup label="八、 敷衍與懶人回應">
+          <option>喔 / 噢</option><option>嗯嗯</option><option>哈哈哈</option><option>笑死</option><option>隨便 / 都好</option><option>看你</option><option>你說的都對</option><option>不關我的事 / 默默看著</option><option>也是啦</option><option>貼圖連發</option>
+        </optgroup>
+        <optgroup label="九、 經典網路流行與迷因用語">
+          <option>吵死了</option><option>踹共（台語：出來講）</option><option>我全都要</option><option>小孩子才做選擇</option><option>傷害性不高，侮辱性極強</option><option>沒圖沒真相</option><option>我差點就信了</option><option>咩噗（表示委屈哭哭）</option><option>就問你怕不怕</option><option>大膽</option>
+        </optgroup>
+        <optgroup label="十、 討好、撒嬌與互動">
+          <option>求求你</option><option>抱抱</option><option>啾咪</option><option>想你</option><option>乾爹求包養</option><option>拜託啦</option><option>帶我飛</option><option>奴才遵命</option><option>遵命，主子</option><option>吃我的愛心啦</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="group">
+      <label>貼圖文字（可自由輸入或修改）</label>
+      <input id="stickerText" value="早安" maxlength="30" placeholder="輸入你想呈現的文字">
     </div>
 
     <div class="grid">
       <div class="group">
-        <label>文字顏色</label>
+        <label>文字顏色（已擴充 24 種）</label>
         <select id="textColor">
           <option value="#ff477e">甜美桃紅</option>
-          <option value="#ffffff">純白色</option>
-          <option value="#4a1928">深咖啡</option>
+          <option value="#ff2a6d">放閃熱戀紅</option>
+          <option value="#ff6b95">萌系粉紅</option>
           <option value="#ff8c00">活力橘色</option>
-          <option value="#7755cc">夢幻紫色</option>
+          <option value="#ffd700">亮眼金黃</option>
+          <option value="#38b000">清新草綠</option>
           <option value="#2a9d8f">薄荷綠</option>
+          <option value="#00b4d8">海洋蔚藍</option>
           <option value="#2878d0">天空藍</option>
+          <option value="#7755cc">夢幻紫色</option>
+          <option value="#9b5de5">電音紫粉</option>
+          <option value="#f72585">潮流桃紫</option>
+          <option value="#ffffff">純白色</option>
+          <option value="#f8f9fa">米白色</option>
+          <option value="#ced4da">銀灰色</option>
+          <option value="#6c757d">沉穩灰</option>
+          <option value="#343a40">炭黑色</option>
+          <option value="#4a1928">深咖啡色</option>
+          <option value="#d4a373">焦糖奶茶色</option>
+          <option value="#bc6c25">復古琥珀棕</option>
+          <option value="#e63946">鮮紅警示</option>
+          <option value="#fb8500">夕陽橘黃</option>
+          <option value="#4cc9f0">霓虹淺藍</option>
+          <option value="#7209b7">神祕深紫</option>
         </select>
       </div>
       <div class="group">
@@ -407,7 +472,6 @@ const expressionsMap = {
   "帥氣單眼wink":"帥氣眨眼、放電神情"
 };
 
-// 豐富多元的選項對應庫（男女生、動物分類聯動）
 const optionsData = {
   girl: {
     hair: [
@@ -427,7 +491,10 @@ const optionsData = {
       "雙手比大愛心", "開心揮手打招呼", "雙手舉高歡呼萬歲", "雙手合十拜託拜託", 
       "雙手抱胸展現態度", "比出 OK 完美手勢", "雙手比讚加油打氣", "趴著撒嬌耍賴", 
       "開心地蹦蹦跳跳", "害羞用雙手遮臉", "誠意十足鞠躬道謝", "雙手叉腰氣勢登場", 
-      "抱著大愛心抱枕", "抱著軟萌睡覺抱枕", "輕鬆悠閒自由站姿", "單手托腮思考萌態"
+      "抱著大愛心抱枕", "抱著軟萌睡覺抱枕", "輕鬆悠閒自由站姿", "單手托腮思考萌態",
+      "抱著電腦瘋狂敲鍵盤趕死線", "拿著熱咖啡悠閒站立", "雙手抱頭崩潰苦惱", 
+      "蹲在角落畫圈圈耍孤僻", "翻白眼無奈攤手", "氣噗噗握拳生悶氣", 
+      "躲在箱子裡探頭偷看", "雙手拿手機快速回訊息", "舉起雙手投降求饒"
     ]
   },
   boy: {
@@ -451,7 +518,9 @@ const optionsData = {
       "帥氣揮手打招呼", "雙手比讚充滿自信", "單手帥氣插口袋", "雙手舉高熱血歡呼", 
       "握拳為你加油打氣", "比出 OK 沒問題手勢", "雙手抱胸酷帥站姿", "開心地蹦跳慶祝", 
       "害羞摸後腦勺傻笑", "鞠躬道謝展現禮貌", "靠牆悠閒帥氣站姿", "伸懶腰放鬆姿態", 
-      "單手舉高打招呼", "輕鬆自然自由站姿", "比出勝利V手勢"
+      "單手舉高打招呼", "輕鬆自然自由站姿", "比出勝利V手勢",
+      "辦公桌前嚴肅敲鍵盤加班", "單手拿咖啡帥氣靠牆", "雙手抱頭無奈崩潰", 
+      "單手插口袋翻白眼", "氣噗噗握緊雙拳", "拿手機狂奔趕路中", "雙手攤開無奈苦笑"
     ]
   },
   animal: {
@@ -470,94 +539,18 @@ const optionsData = {
     ],
     pose: [
       "搖尾巴熱情打招呼", "開心原地蹦蹦跳跳", "趴在地上耍賴裝可愛", "歪頭賣萌疑惑姿勢", 
-      "舉起雙爪歡呼萬歲", "抱著最愛食物撒嬌", "慵懶舒服趴睡姿勢", "站立拱手拜託拜託"
+      "舉起雙爪歡呼萬歲", "抱著最愛食物撒嬌", "慵懶舒服趴睡姿勢", "站立拱手拜託拜託",
+      "翻肚肚求摸摸耍賴", "躲在紙箱裡探頭萌笑", "氣噗噗鼓臉生悶氣", "委屈縮成一團畫圈圈"
     ]
   }
 };
 
-
-// ===== 擴充選項庫：新增 200+ 種可混搭靈感 =====
-const extraExpressions = {
-  "收到訊息秒回":"眼睛一亮、快速點頭、手上出現訊息泡泡",
-  "期待到坐立難安":"雙眼發亮、身體前傾、周圍有閃光",
-  "委屈想哭又忍住":"嘴角下垂、眼眶泛淚、努力忍住",
-  "冷笑看透一切":"單邊嘴角上揚、半瞇眼、淡定神情",
-  "震驚到靈魂出竅":"瞳孔放大、嘴巴張開、頭頂冒煙",
-  "幸福融化表情":"眼睛彎成月牙、臉頰紅潤、滿足微笑",
-  "認真專注模式":"眉頭微皺、目光集中、神情投入",
-  "懷疑人生表情":"眼神空洞、嘴角抽動、頭頂問號",
-  "超級無奈攤手":"眉毛下垂、嘴角苦笑、無奈眼神",
-  "得逞奸笑表情":"瞇眼壞笑、眉毛挑起、狡黠神情",
-  "熱到融化表情":"滿頭汗水、舌頭微吐、疲憊瞇眼",
-  "冷到發抖表情":"縮起肩膀、牙齒打顫、臉頰泛紅",
-  "吃到美食陶醉":"雙眼幸福瞇起、嘴角滿足、閃亮特效",
-  "靈感突然降臨":"眼睛發光、眉毛上揚、頭頂燈泡",
-  "社交電量耗盡":"眼神放空、肩膀垂下、電量歸零",
-  "滿滿正能量笑容":"燦爛微笑、眼神堅定、周圍光芒",
-  "優雅保持微笑":"嘴角淡淡上揚、姿態從容、眼神溫柔",
-  "忍笑忍到發抖":"雙頰鼓起、嘴唇緊閉、眼角笑淚",
-  "驚喜捂嘴表情":"雙手掩嘴、眼睛圓睜、臉頰泛紅",
-  "靜靜觀察表情":"微微側頭、眼神專注、神秘微笑"
-};
-Object.assign(expressionsMap, extraExpressions);
-optionsData.girl.expression = Object.keys(expressionsMap);
-optionsData.boy.expression.push(
-  "收到訊息秒回","期待到坐立難安","委屈想哭又忍住","冷笑看透一切","震驚到靈魂出竅",
-  "幸福融化表情","認真專注模式","懷疑人生表情","超級無奈攤手","得逞奸笑表情",
-  "熱到融化表情","冷到發抖表情","吃到美食陶醉","靈感突然降臨","社交電量耗盡",
-  "滿滿正能量笑容","優雅保持微笑","忍笑忍到發抖","驚喜捂嘴表情","靜靜觀察表情"
-);
-optionsData.animal.expression.push(
-  "期待到坐立難安","委屈想哭又忍住","震驚到靈魂出竅","幸福融化表情","懷疑人生表情",
-  "吃到美食陶醉","熱到融化表情","冷到發抖表情","驚喜捂嘴表情","忍笑忍到發抖",
-  "靈感突然降臨","社交電量耗盡","滿滿正能量笑容","靜靜觀察表情","得逞奸笑表情"
-);
-
-const extraOptions = {
-  girl: {
-    hair: ["霧灰紫慵懶大波浪","蜜桃橘高層次短髮","冰藍色漸層長直髮","奶油金法式編髮","黑茶色公主切","栗子棕鎖骨髮","雙丸子俏皮髮髻","側邊魚骨辮","蓬鬆法式羊毛捲","星空藍長馬尾","銀紫色精靈短髮","粉金色內彎鮑伯","紅棕色復古捲髮","薄瀏海高盤髮","彩虹挑染雙辮子"],
-    outfit: ["未來感銀白機能套裝","奶油白法式針織裙","街頭潮流寬版外套","星際旅行員制服","夢幻星月刺繡洋裝","復古格紋百褶裙裝","甜酷黑粉舞台服","森林系亞麻洋裝","透明感雨衣造型","冬日毛絨圍巾大衣","極簡運動休閒套裝","科幻發光線條服裝","優雅絲質睡衣套裝","海洋水手風連身裝","可愛恐龍連帽裝"],
-    pose: ["雙手捧著熱茶取暖","抱著手機開心回訊息","雙手托著星星道具","坐在雲朵上揮手","轉身回眸比愛心","拿著小花送給對方","雙手遮陽遠眺","抱膝坐著撒嬌","拿著禮物盒驚喜登場","單手扶額表示無奈","雙手舉牌展示文字","拿著魔法棒施展魔法","踮腳尖輕快旋轉","抱著枕頭打瞌睡","比出安靜手勢"]
-  },
-  boy: {
-    hair: ["霧藍層次碎短髮","奶茶灰蓬鬆中分","黑金挑染狼尾髮","銀白微捲瀏海","栗棕色自然側分","清爽寸頭造型","深藍漸層短髮","慵懶法式捲髮","俐落漸層油頭","紫灰色刺蝟短髮","紅棕色蓬鬆短髮","微長髮束低馬尾"],
-    outfit: ["未來科技機能外套","簡約街頭棒球服","復古牛仔連身工作服","星際探險家制服","黑白極簡高領套裝","戶外登山機能穿搭","日系寬鬆針織衫","潮流拼接運動套裝","正式紳士西裝","海軍風水手服","冬季厚磅連帽大衣","電競選手戰隊服"],
-    pose: ["雙手插腰自信登場","拿著咖啡悠閒站立","雙手比出大拇指","抱著電腦努力工作","單手扶眼鏡耍帥","坐在地上休息放空","拿著小旗子歡呼","雙手攤開表示疑問","揮舞應援手燈","抱著大禮物盒","拿著手機自拍","雙手交叉比出拒絕"]
-  },
-  animal: {
-    hair: ["彩虹色蓬鬆絨毛","星星形狀額頭斑紋","漸層彩色小翅膀","水晶小角與耳飾","蓬鬆雲朵造型毛","閃亮星塵尾巴","花瓣形狀耳朵","小小宇宙觸角","彩色羽毛冠","月牙形額頭裝飾"],
-    outfit: ["迷你太空探險服","可愛水果造型帽衣","小小郵差背包","夢幻星星斗篷","暖呼呼針織毛衣","迷你廚師圍裙","森林探險小背心","彩色雨衣與雨靴","節慶派對領結","小小飛行員服裝"],
-    pose: ["抱著胡蘿蔔開心跳躍","翻肚肚求摸摸","躲在小箱子裡探頭","追著蝴蝶奔跑","抱著魚骨頭炫耀","縮成一團取暖","用小爪子比愛心","坐在星球上揮手","尾巴捲成愛心形狀","躲在花朵後面偷看"]
+function selectPresetText(selectObj) {
+  if (selectObj.value) {
+    $("stickerText").value = selectObj.value;
+    renderSticker();
   }
-};
-Object.keys(extraOptions).forEach(type => {
-  Object.keys(extraOptions[type]).forEach(key => optionsData[type][key].push(...extraOptions[type][key]));
-});
-
-const extraStyles = [
-  "高精緻日系漫畫風","韓系柔霧 3D 公仔風","美式復古漫畫風","歐洲童話繪本風","軟陶手作公仔風",
-  "透明水晶質感 3D 風","賽博龐克霓虹風","未來科技全息投影風","太空科幻動畫風","外星奇幻生物風",
-  "像素復古遊戲風","美式街頭塗鴉風","極簡扁平向量插畫風","粉彩蠟筆手繪風","日系療癒水彩風",
-  "立體毛絨玩偶風","精緻盲盒收藏公仔風","黏土定格動畫風","夢幻星雲漸層風","潮流潮玩設計風"
-];
-extraStyles.forEach(s => $("style").add(new Option(s, s)));
-
-const extraScenes = [
-  "上班打卡與職場日常","下班放鬆與回家路上","朋友聚會與約吃飯","遠距離想念與關心",
-  "戀人甜蜜互動","家人問候與日常關懷","讀書考試與努力加油","開會討論與工作回覆",
-  "購物逛街與開箱分享","美食分享與下午茶","運動健身與健康生活","旅行出遊與打卡",
-  "雨天晴天與天氣心情","週末耍廢與追劇","熬夜趕工與精神不濟","收到包裹與期待開箱",
-  "節慶活動與派對邀約","新年祝福與好運連連","療癒陪伴與暖心鼓勵","拒絕邀約與委婉回覆",
-  "已讀回覆與訊息互動","等待對方與想念心情","完成任務與成就慶祝","突發狀況與搞笑反應",
-  "宇宙冒險與科幻情境"
-];
-extraScenes.forEach(s => $("scene").add(new Option(s, s)));
-
-const extraColors = [
-  ["#ff6f91","珊瑚粉"],["#f4a261","奶杏橘"],["#8e7dbe","薰衣草紫"],
-  ["#5aa9a3","湖水綠"],["#34495e","霧感深藍"],["#d4a373","焦糖奶茶"]
-];
-extraColors.forEach(([value,label]) => $("textColor").add(new Option(label, value)));
+}
 
 function handleGenderChange() {
   const gender = val("gender");
@@ -630,7 +623,6 @@ function makePrompt(){
     return;
   }
 
-  // 單張生成指令
   const base=[
     "【AI LINE 萌系文字表情貼圖生成指令】",
     "",
@@ -650,7 +642,7 @@ function makePrompt(){
     "",
     "【貼圖文字】",
     "主要文字："+(d.stickerText||"無"),
-    "文字顏色："+d.textColor,
+    "文字顏色代碼："+d.textColor,
     "字體風格："+d.font,
     "必須正確呈現繁體中文，不可錯字、漏字、亂碼。"
   ];
@@ -682,7 +674,6 @@ async function copyPrompt(){
   }
 }
 
-// 儲存與匯出匯入功能
 function saveSettings(){
   localStorage.setItem("aiLineStickerSettings", JSON.stringify(getData()));
   $("status").textContent="✓ 設定已儲存於本機瀏覽器。";
