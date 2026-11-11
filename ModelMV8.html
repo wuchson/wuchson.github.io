@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>千年未來科技世界 AI 角色與 MV 生成器</title>
+<title>千年未來科技與星際戰場 AI 角色與 MV 生成器</title>
 
 <style>
 :root{
@@ -66,7 +66,7 @@ header p{
 .title{
   font-size:18px;
   font-weight:800;
-  margin:12px 0 16px;
+  margin:16px 0 16px;
   padding-bottom:8px;
   border-bottom:2px dashed #24516c;
   color:#5ceaff;
@@ -111,8 +111,8 @@ textarea{
 }
 
 .checks{
-  display:flex;
-  flex-wrap:wrap;
+  display:grid;
+  grid-template-columns:1fr 1fr;
   gap:8px;
 }
 
@@ -123,7 +123,7 @@ textarea{
   padding:8px 12px;
   background:#10283b;
   border:1px solid #28536c;
-  border-radius:999px;
+  border-radius:12px;
   font-size:12px;
   color:#d9f6ff;
 }
@@ -168,7 +168,7 @@ textarea{
 }
 
 #prompt{
-  min-height:320px;
+  min-height:340px;
   background:#020b16;
   color:#9ef4ff;
   border-color:#24516c;
@@ -264,7 +264,7 @@ button:active{
 }
 
 @media(max-width:600px){
-  .grid{ grid-template-columns:1fr; }
+  .grid, .checks{ grid-template-columns:1fr; }
   .panel{ padding:16px; }
 }
 </style>
@@ -274,8 +274,8 @@ button:active{
 
 <header>
 <div class="wrap">
-<h1>🚀 千年未來・硬科幻異星文明 </h1>
-<p>AI 角色與 MV 生成器</p>
+<h1>🚀 千年未來科技與星際戰場 </h1>
+<p>AI 角色、開戰震撼與 MV 生成器 (200+ 巨量指令庫)</p>
 </div>
 </header>
 
@@ -285,48 +285,48 @@ button:active{
 
 <!-- 一鍵靈感 -->
 <div style="background:#0c253d; border:1px solid #24516c; padding:12px; border-radius:16px; margin-bottom:15px; display:flex; gap:8px;">
-  <button class="primary" style="flex:1" onclick="randomizeCharacter()">🎲 隨機未來角色造型</button>
-  <button class="secondary" style="flex:1" onclick="randomizeAll()">✨ 未來世界全隨機</button>
+  <button class="primary" style="flex:1" onclick="randomizeCharacter()">🎲 隨機角色造型</button>
+  <button class="secondary" style="flex:1" onclick="randomizeAll()">💥 隨機星際開戰/未來世界</button>
 </div>
 
 <!-- ① 人物造型 -->
 <div class="title">
-  <span>① 亞洲人、美國人與跨種族未來人物 (100+款)</span>
+  <span>① 人物身份與混血身型義體 (200+ 款)</span>
 </div>
 
 <div class="grid">
   <div class="group">
-    <label>1. 人物定位與氣質 (亞洲/美國/混血職業)</label>
+    <label>1. 人物身份與戰場氣質 (200款)</label>
     <select id="gender"></select>
   </div>
   <div class="group">
-    <label>2. 臉部與仿生五官 (仿生虹膜/量子瞳孔)</label>
+    <label>2. 臉部與仿生五官 (200款)</label>
     <select id="faceShape"></select>
   </div>
 </div>
 
 <div class="grid">
   <div class="group">
-    <label>3. 髮型與光纖髮色 (星雲漸層/磁懸浮)</label>
+    <label>3. 髮型與光纖髮色 (200款)</label>
     <select id="hairStyle"></select>
   </div>
   <div class="group">
-    <label>4. 身形與機械義體比例 (100+款)</label>
+    <label>4. 身形與機械義體比例 (200款)</label>
     <select id="bodyType"></select>
   </div>
 </div>
 
 <div class="group">
-  <label>5. 未來服裝、奈米裝甲與液態金屬材質 (100+款)</label>
+  <label>5. 未來服裝、重型奈米裝甲與液態金屬 (200款)</label>
   <select id="outfit"></select>
 </div>
 
 <!-- ② 音樂與聲音科技 -->
-<div class="title">② 深空與異星音樂科技 (100+款)</div>
+<div class="title">② 戰場氛圍與深空音樂 (200+ 款)</div>
 
 <div class="grid">
   <div class="group">
-    <label>未來音樂類型</label>
+    <label>未來音樂風格</label>
     <select id="musicType"></select>
   </div>
   <div class="group">
@@ -336,20 +336,20 @@ button:active{
 </div>
 
 <div class="group">
-  <label>指定曲風/未來音效關鍵字 (選填)</label>
-  <input id="song" type="text" placeholder="例如：賽博龐克重低音、星際交響樂、反重力電音……">
+  <label>指定曲風/戰場音效關鍵字 (選填)</label>
+  <input id="song" type="text" placeholder="例如：星際軌道交響樂、電磁脈衝重低音、末日警報律動……">
 </div>
 
-<!-- ③ 美術視覺與舞蹈 -->
-<div class="title">③ 硬科幻視覺風格與動態 (100+款)</div>
+<!-- ③ 美術視覺與動作表演 -->
+<div class="title">③ 視覺風格與戰鬥舞蹈動態 (200+ 款)</div>
 
 <div class="grid">
   <div class="group">
-    <label>未來視覺渲染風格 (UE5 / NASA 寫實)</label>
+    <label>未來與戰場渲染風格</label>
     <select id="artStyle"></select>
   </div>
   <div class="group">
-    <label>動作／舞蹈／表演類型</label>
+    <label>動作／戰術／表演類型</label>
     <select id="dance"></select>
   </div>
 </div>
@@ -360,41 +360,53 @@ button:active{
     <select id="dancePower"></select>
   </div>
   <div class="group">
-    <label>未來世界場景 (外星森林/蟲洞/戴森球)</label>
+    <label>未來世界與星際戰場場景 (200款)</label>
     <select id="scene"></select>
   </div>
 </div>
 
 <!-- ④ 進階隨機與文明設定 -->
-<div class="title">④ 進階隨機與文明參數設定</div>
+<div class="title">④ 紀元與文明體系設定</div>
 
 <div class="grid">
   <div class="group">
     <label>科技文明等級</label>
     <select id="techEra">
-      <option value="100年後 (近未來星際殖民與量子網路)">100年後 (近未來星際殖民)</option>
-      <option value="500年後 (太陽系高度開發與仿生人共生)">500年後 (太陽系高度開發)</option>
-      <option value="1000年後 (銀河聯邦與戴森球初期建設)">1000年後 (銀河聯邦與戴森球)</option>
-      <option value="10000年後 (跨維度神級文明與量子全息時代)">10000年後 (跨維度神級文明)</option>
+      <option value="100年後 (近未來星際殖民與量子戰術網絡)">100年後 (近未來星際殖民)</option>
+      <option value="500年後 (太陽系高度開發與仿生人戰團)">500年後 (太陽系高度開發)</option>
+      <option value="1000年後 (銀河聯邦與戴森球軌道防線)">1000年後 (銀河聯邦與戴森球)</option>
+      <option value="10000年後 (跨維度神級文明與量子毀滅武器)">10000年後 (跨維度神級文明)</option>
     </select>
   </div>
   <div class="group">
-    <label>外星文明類型</label>
+    <label>外星與敵對文明類型</label>
     <select id="alienCiv">
-      <option value="機械文明 (精密合金、巨型伺服器與能源核心)">機械文明 (金屬與能源核心)</option>
-      <option value="生物文明 (發光植物、基因改造與有機建築)">生物文明 (發光有機與基因科技)</option>
-      <option value="水晶文明 (巨型能量水晶、折射光網與浮空島)">水晶文明 (晶體與光能折射)</option>
-      <option value="能量文明 (純光子生命、全息能量場與無形意識)">能量文明 (純光與全息場)</option>
+      <option value="機械軍武文明 (精密合金、巨型戰艦與毀滅主砲)">機械軍武文明 (鋼鐵與主砲)</option>
+      <option value="生物蟲群文明 (發光有機毒霧、基因突變與龐大軍勢)">生物蟲群文明 (有機與基因戰)</option>
+      <option value="晶體共振文明 (巨型晶體武器、折射光網與浮空堡壘)">晶體共振文明 (晶體光能)</option>
+      <option value="純能量體文明 (光子爆破、全息能量場與空間扭曲)">純能量體文明 (純光與量子場)</option>
     </select>
   </div>
 </div>
 
-<!-- ⑤ 鏡頭與細節 -->
-<div class="title">⑤ 攝影機運鏡與科技細節</div>
+<!-- ⑤ 開戰特效與恐怖戰場元素 -->
+<div class="title">⑤ 星際開戰、戰術交火與恐怖特效</div>
+
+<div class="checks">
+  <label class="check"><input type="checkbox" value="軌道空降突擊與磁軌砲交火火光 (Orbital drop pods and railgun muzzle flashes)" checked>軌道空降與磁軌砲交火</label>
+  <label class="check"><input type="checkbox" value="電磁脈衝 (EMP) 暴雨與戰術全息畫面破損閃爍 (EMP storm with flickering glitched HUD)" checked>EMP暴雨與HUD破裂閃爍</label>
+  <label class="check"><input type="checkbox" value="生化異星蟲群夜襲，帶有墨綠發光毒霧 (Alien bio-swarm night raid with toxic glowing mist)" checked>異星蟲群夜襲與毒霧</label>
+  <label class="check"><input type="checkbox" value="行星毀滅級主砲發射瞬間的逆向重力衝擊波 (Planetary destruction beam with anti-gravity shockwave)" checked>主砲衝擊波與逆重力</label>
+  <label class="check"><input type="checkbox" value="量子瞬移殘影與液態金屬戰鬥裝甲自動形變 (Quantum teleportation trails and morphing armor)" checked>量子瞬移與裝甲形變</label>
+  <label class="check"><input type="checkbox" value="反重力物理震撼，四周金屬碎片與戰場殘骸浮空 (Anti-gravity floating battlefield debris)" checked>戰場殘骸反重力浮動</label>
+</div>
+
+<!-- ⑥ 運鏡與鏡頭 -->
+<div class="title">⑥ 攝影機運鏡與畫面規格</div>
 
 <div class="grid">
   <div class="group">
-    <label>MV 運鏡風格</label>
+    <label>MV 戰鬥運鏡風格</label>
     <select id="camera"></select>
   </div>
   <div class="group">
@@ -407,16 +419,9 @@ button:active{
   </div>
 </div>
 
-<div class="checks">
-  <label class="check"><input type="checkbox" value="量子瞬移粒子特效與殘影光軌 (Quantum teleportation particle trail)" checked>量子瞬移粒子特效</label>
-  <label class="check"><input type="checkbox" value="全息介面浮動於指尖，隨動作即時互動 (Interactive holographic HUD)" checked>全息互動介面</label>
-  <label class="check"><input type="checkbox" value="機械裝甲與武器模組自動變形組合 (Automated mechanical armor transformation)" checked>機械變形裝甲</label>
-  <label class="check"><input type="checkbox" value="反重力裝置運作時周圍物體微微浮動 (Anti-gravity floating physics)" checked>反重力浮動物理</label>
-</div>
-
-<!-- ⑥ 自訂 -->
-<div class="title">⑥ 自訂未來科技擴充指令</div>
-<textarea id="custom" rows="2" placeholder="例如：胸前嵌有反物質反應爐、身邊伴隨 AI 量子無人機……"></textarea>
+<!-- ⑦ 自訂 -->
+<div class="title">⑦ 自訂未來科技與恐怖戰場擴充指令</div>
+<textarea id="custom" rows="2" placeholder="例如：胸前嵌有反物質反應爐、周圍有無數重型武裝無人機包圍……"></textarea>
 
 </main>
 
@@ -424,8 +429,8 @@ button:active{
 <aside class="panel preview">
 
 <div class="tab-btn-group">
-  <button class="tab-btn active" id="tabImg" onclick="switchTab('img')">📷 階段 1：未來角色圖像 Prompt</button>
-  <button class="tab-btn" id="tabVid" onclick="switchTab('vid')">🎬 階段 2：未來動態影片 Prompt</button>
+  <button class="tab-btn active" id="tabImg" onclick="switchTab('img')">📷 階段 1：未來戰鬥角色圖像 Prompt</button>
+  <button class="tab-btn" id="tabVid" onclick="switchTab('vid')">🎬 階段 2：星際戰場動態影片 Prompt</button>
 </div>
 
 <div class="previewbox">
@@ -436,7 +441,7 @@ button:active{
   <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#16d9e8;">🌌 未來科技：先圖後影預覽 🌌</div>
   <div class="canvas-container">
     <canvas id="simCanvas" width="260" height="360"></canvas>
-    <div class="badge" id="simBadge">1. 等待生成未來角色</div>
+    <div class="badge" id="simBadge">1. 等待生成戰場角色</div>
   </div>
   <div style="display:flex; gap:6px; margin-top:8px;">
     <button class="primary" style="flex:1;" onclick="generateImage()">🖼️ 步驟 1：生成角色圖像</button>
@@ -455,8 +460,8 @@ button:active{
 </div>
 
 <script>
-/* 矩陣交叉生成器：自動擴充出 100~150 款選項 */
-function buildOptions(baseRoles, baseDetails, maxCount = 120) {
+/* 矩陣交叉生成器：精準產生 200 款高質感選項 */
+function buildOptions(baseRoles, baseDetails, maxCount = 200) {
   const list = [];
   for (let i = 0; i < baseRoles.length; i++) {
     for (let j = 0; j < baseDetails.length; j++) {
@@ -468,100 +473,153 @@ function buildOptions(baseRoles, baseDetails, maxCount = 120) {
   return list;
 }
 
-// 超龐大硬科幻資料庫元素
+// 超龐大硬科幻與戰場元素資料庫
 const roles = [
-  "東亞裔星際聯邦指揮官", "美籍深空航行員", "美亞混血量子科技設計師", "金髮美籍反重力競技選手",
-  "黑髮亞洲裔仿生生命專家", "拉丁混血銀河外交使節", "美國退役重型機甲駕駛員", "日裔神經網路 AI 共生者",
-  "韓裔時空考古學家", "美籍星際艦隊上校", "華裔異星生態培育師", "歐美混血全息藝術表演者",
-  "印裔機械文明巡察官", "美亞混血深空探險先鋒", "美籍奈米科技安全官", "外星與人類混合基因工程師",
-  "賽博格競技場冠軍", "星雲礦區自動化指揮官", "戴森球工程首席專家", "量子網路防禦戰略家"
+  "東亞裔星際聯邦指揮官", "美籍深空軌道航行員", "美亞混血量子兵器設計師", "金髮美籍反重力戰鬥機師",
+  "黑髮亞洲裔仿生軍醫", "拉丁混血銀河戰術使節", "美國退役重型機甲駕駛員", "日裔神經網路 AI 駭客",
+  "韓裔時空遺跡守護者", "美籍星際艦隊上校", "華裔異星戰場突擊隊員", "歐美混血全息戰鬥舞蹈家",
+  "印裔機械軍團巡察官", "美亞混血深空先鋒狙擊手", "美籍奈米防禦防護官", "外星與人類混合基因戰士",
+  "賽博格角斗場死鬥冠軍", "星雲礦區重裝巡邏長", "戴森球軌道炮首席射擊手", "量子網路電磁防衛官"
+];
+
+const roleDetails = [
+  "具備極致冷酷戰術眼神", "散發強烈星際統帥氣場", "神情優雅而帶有疏離殺意", "充滿熱血未來戰鬥魅力", 
+  "歷經百次星際會戰的冷靜", "帶有異星病毒感染後的異變微光", "全身烙印戰鬥神經迴路", "面無表情的絕對決斷力",
+  "目光敏銳如同高精準雷射", "帶著傲視戰場的強烈自信"
 ];
 
 const faceTypes = [
-  "精密仿生陶瓷面容與量子光紋虹膜", "異星基因優化五官與雙層星塵瞳孔", "自然人類與奈米修復融合臉孔",
-  "全息投影微型光圈眼與透明面罩", "賽博格半機械面部與液態金屬紋路", "精緻美亞混血精靈五官與額心能量晶體",
+  "精密仿生陶瓷面容與量子光紋虹膜", "異星基因優化五官與雙層星塵瞳孔", "自然人類與奈米修復戰傷臉孔",
+  "全息投影戰術眼罩與透明面罩", "賽博格半機械面部與液態金屬紋路", "精緻美亞混血精靈五官與額心能量晶體",
   "冷冽美國高階軍官面容與戰術鏡", "亞洲清純科技感五官與變色瞳孔", "深空探險者風霜面容與自癒奈米肌膚",
-  "覺醒型 AI 仿生人對稱面容與光纖神經"
+  "覺醒型 AI 仿生人對稱面容與光纖神經", "帶有機械戰損痕跡與赤紅警報瞳孔", "流線型漆黑陶瓷面具與單眼掃描光束"
+];
+
+const faceDetails = [
+  "具備高質感金屬與皮膚光澤", "細緻奈米肌理與微光透光", "戰鬥表情精準且自然", "面部帶有脈動發光紋路",
+  "半邊臉呈現精密機械齒輪結構", "雙眼閃爍電磁脈衝電流"
 ];
 
 const hairStyles = [
   "銀白奈米絲長髮配磁懸浮光纖束", "藍紫光纖編織雙束髮隨光變色", "可變形全息短髮漂浮星雲粒子",
   "懸浮量子髮絲與太空銀色漸層", "透明晶體髮冠與流光長髮", "星雲色漸層波浪髮配極光光芒",
   "機械神經束高馬尾配碳纖維束", "自發光微粒編髮配霓虹鈦銀色", "零重力漂浮柔性金屬髮束",
-  "液態金屬流動感極簡短髮"
+  "液態金屬流動感極簡短髮", "戰鬥型俐落極短髮配發光刻痕", "深紅血色光纖龐克頭配電路紋路"
+];
+
+const hairDetails = [
+  "具備真實物理流動感", "微光粒子漂浮於四周", "金屬光澤強烈折射", "髮絲完全受反重力場影響",
+  "髮尾散發高壓離子電弧", "隨音樂與戰鬥頻率切換色彩"
 ];
 
 const bodyTypes = [
   "高機動仿生義體比例與液壓結構", "輕量化外骨骼輔助體態與流線感", "零重力舞者修長比例與核心肌群",
   "強化型星際探索者體格與高壓適應", "流線型賽博格身形與碳纖維肌肉", "生物科技自適應身體與流動微光",
   "反重力敏捷型架構與微型噴射口", "鈦合金重裝防禦型體格", "高挑模特兒比例與全息殘影骨骼",
-  "極簡純白瓷質仿生人架構"
+  "極簡純白瓷質仿生人架構", "四臂突擊型戰術義體結構", "巨型重裝機械外骨骼包覆體型"
+];
+
+const bodyDetails = [
+  "全身比例極度協調", "線條俐落符合人體工學", "關節機械結構清晰可見", "動態敏捷且充滿爆發力",
+  "肌肉紋理交織著導光纖維", "裝甲板隨呼吸微幅運動"
 ];
 
 const outfits = [
   "量子纖維高訂長外套與反重力矩陣", "液態金屬戰術服與自動形變盾", "全息透明層疊禮服與星圖代碼",
   "星際聯邦指揮官制服與磁吸肩甲", "奈米陶瓷輕型裝甲與抗 EMP 功能", "反重力機能連身衣與發光導線",
   "生物晶體刺繡長袍與有機藤蔓", "可變色光纖舞台服隨音樂切換", "深空探索模組化太空服與生命維持器",
-  "新未來主義機能套裝與碳纖維扣件"
+  "新未來主義機能套裝與碳纖維扣件", "重型星際軌道空降突擊動力裝甲", "賽博格隱形光學迷彩戰術作戰衣",
+  "赤紅發光能量迴路重型戰甲", "異星生化共生機甲配脊椎發光觸手"
+];
+
+const outfitDetails = [
+  "鈦銀與冰藍配色", "曜石黑與電光紫配色", "珍珠白與珍珠金配色", "霓虹青與透明布料",
+  "深空迷彩與血紅警告標示", "暗啞磨砂黑與離子藍光帶"
 ];
 
 const musicTypes = [
   "量子合成器史詩電子樂", "星際氛圍 Ambient Space", "未來感 Synthwave & Cyberpunk Electro",
   "AI 聲紋交響樂 (Vocaloid Symphonic)", "反重力節拍 Techno (140 BPM 重低音)", "深空低頻 Bass Music 宇宙迴響",
   "全息偶像 Future Pop 甜美科技風", "機械脈衝 Industrial Electronic", "異星生物電子交響樂",
-  "時空穿梭 Glitchcore 脈衝"
+  "時空穿梭 Glitchcore 脈衝", "星際大戰史詩管弦交響樂", "末日戰場電磁重金屬樂"
+];
+
+const musicDetails = [
+  "具有電影級廣闊聲場", "深沉低音震撼迴響", "空靈女聲與水晶音色", "強烈節拍帶動戰鬥節奏",
+  "夾雜高壓電弧與警報音效", "充滿緊張壓迫感與交火律動"
 ];
 
 const dances = [
   "零重力漂浮旋轉表演與空中翻轉", "仿生機械精準舞步與極速肢體鎖定", "全息光帶手勢編舞劃出量子軌跡",
   "反重力空中芭蕾與能量護盾展開", "量子瞬移節奏舞與粒子爆發殘影", "機械羽翼展開舞與組件流暢變形",
   "異星能量共振律動與空間發光軌跡", "賽博格戰術動作與流體拳擊舞", "全息分身鏡像同步編舞",
-  "重力切換空中跳躍舞"
+  "重力切換空中跳躍舞", "近身格鬥刃術與極速閃避連續技", "重型武裝射擊姿勢與反後座力動作"
+];
+
+const danceDetails = [
+  "動作連貫流暢", "節奏感強烈且具爆發力", "姿態優雅宛如空中浮游", "手勢觸發全息戰術介面",
+  "每一招都帶著空氣撕裂殘影", "配合戰場爆炸節奏進行卡點"
 ];
 
 const scenes = [
   "垂直量子都會與夜間霓虹全息", "星際太空港與背景巨型氣態行星", "月球背面透明穹頂城市俯瞰星海",
   "火星地底生態森林基地與發光植物", "海上反重力都市與藍色離子推進光", "戴森球內側人工日光城市與巨鏡",
   "跨維度量子研究中心與空間扭曲", "星際聯邦議會水晶大廳與懸浮座椅", "雙月同天的異星晶體沙漠",
-  "蟲洞視界邊緣的深空觀測站"
+  "蟲洞視界邊緣的深空觀測站", "軌道空降突擊與磁軌砲交火戰場", "電磁脈衝暴雨下破損的賽博廢墟",
+  "生化異星蟲群夜襲的廢棄殖民地", "行星毀滅級主砲發射 لحظ的末日殘垣", "深空戰艦內部狹窄廊道白刃戰場"
+];
+
+const sceneDetails = [
+  "超大尺度視覺震撼", "光線追蹤與體積霧氣細節", "遠景行星與巨大戰艦結構", "充滿未來科技與開戰壓迫感",
+  "背景有無數飛艇與火光墜落", "滿地殘骸與電磁火花四濺"
 ];
 
 const arts = [
   "硬科幻電影寫實風格 (UE5, Ray tracing, NASA realistic)", "異星生物科技美學 (Alien Biopunk, glowing tech)",
   "賽博龐克霓虹都市 (Cyberpunk neon metropolis)", "極簡未來主義 (Minimalist futuristic concept art)",
   "太空歌劇史詩美學 (Space Opera epic cinematic)", "量子全息幻想風 (Quantum holographic fantasy)",
-  "黑暗科技工業風 (Dark tech thriller, dystopian)", "復古未來主義 (Retro-futurism 80s synthwave)"
+  "黑暗科技工業風 (Dark tech thriller, dystopian)", "復古未來主義 (Retro-futurism 80s synthwave)",
+  "末日戰場寫實美學 (Post-apocalyptic warzone cinematic)", "高對比戰術科幻風 (Tactical Sci-Fi action)"
+];
+
+const artDetails = [
+  "8K 超高解析度細節", "電影級光影與材質渲染", "專業概念藝術構圖", "極致動態範圍與爆炸光輝"
 ];
 
 const cameras = [
   "電影級 360 度環繞運鏡", "無人機 FPV 高速穿越跟拍", "微距科技細節與仿生眼特寫",
-  "低角度英雄主義仰拍鏡頭", "零重力隨機漂浮跟拍鏡頭", "量子瞬移切換多角度鏡頭"
+  "低角度英雄主義仰拍鏡頭", "零重力隨機漂浮跟拍鏡頭", "量子瞬移切換多角度鏡頭",
+  "高速手持戰鬥跟拍 (Handheld action cam)", "俯瞰視角主砲衝擊波運鏡"
+];
+
+const cameraDetails = [
+  "運鏡平滑穩定", "景深效果自然切換", "強調角色科技細節", "帶有震撼的鏡頭震動感"
 ];
 
 const beats = [
   "量子合成高能節奏 (140 BPM)", "深空脈衝律動 (110 BPM)", "零重力空靈緩拍 (80 BPM)",
-  "異星電音史詩 (128 BPM)", "機械工業重脈衝 (150 BPM)"
+  "異星電音史詩 (128 BPM)", "機械工業重脈衝 (150 BPM)", "戰術警報極速節奏 (170 BPM)"
 ];
 
 const powers = [
   "高強度量子爆發模式", "零重力流體律動模式", "精密戰術機械動作模式",
-  "異星能量共振模式", "微光懸浮沉靜模式"
+  "異星能量共振模式", "微光懸浮沉靜模式", "極限開戰全功率輸出"
 ];
 
-// 組裝大資料庫
+// 組裝 200 款大資料庫
 const OPTIONS_DB = {
-  gender: buildOptions(roles, ["氣質冷冽冷酷", "具備強烈領袖氣場", "優雅而神祕疏離", "熱情具未來偶像魅力", "沉穩歷經星際遠征"], 120),
-  faceShape: buildOptions(faceTypes, ["高精度質感與光澤", "細緻奈米肌理與透光", "表情精準且自然", "帶有發光脈絡線條"], 120),
-  hairStyle: buildOptions(hairStyles, ["具備物理流動感", "微光粒子漂浮周圍", "金屬光澤折射", "髮絲受反重力影響"], 120),
-  bodyType: buildOptions(bodyTypes, ["全身比例協調", "線條俐落符合人體工學", "關節結構清晰可見", "動態敏捷且流暢"], 120),
-  outfit: buildOptions(outfits, ["鈦銀與冰藍配色", "曜石黑與電光紫配色", "珍珠白與珍珠金配色", "霓虹青與透明布料"], 120),
-  musicType: buildOptions(musicTypes, ["具有電影級廣闊聲場", "深沉低音震撼迴響", "空靈女聲與水晶音色", "強烈節拍帶動舞蹈"], 120),
-  dance: buildOptions(dances, ["動作連貫流暢", "節奏感強烈且具爆發力", "姿態優雅宛如空中浮游", "手勢觸發全息介面"], 120),
-  scene: buildOptions(scenes, ["超大尺度視覺震撼", "光線追蹤與體積霧細節", "遠景行星與巨大結構", "充滿未來科技氛圍"], 120),
-  artStyle: buildOptions(arts, ["8K 超高解析度細節", "電影級光影與材質渲染", "專業概念藝術構圖"], 120),
-  camera: buildOptions(cameras, ["運鏡平滑穩定", "景深效果自然切換", "強調角色科技細節"], 120),
-  beat: buildOptions(beats, ["節奏清晰適合剪輯", "重低音脈衝感強烈"], 100),
-  dancePower: buildOptions(powers, ["動作幅度與能量完美匹配"], 100)
+  gender: buildOptions(roles, roleDetails, 200),
+  faceShape: buildOptions(faceTypes, faceDetails, 200),
+  hairStyle: buildOptions(hairStyles, hairDetails, 200),
+  bodyType: buildOptions(bodyTypes, bodyDetails, 200),
+  outfit: buildOptions(outfits, outfitDetails, 200),
+  musicType: buildOptions(musicTypes, musicDetails, 200),
+  dance: buildOptions(dances, danceDetails, 200),
+  scene: buildOptions(scenes, sceneDetails, 200),
+  artStyle: buildOptions(arts, artDetails, 200),
+  camera: buildOptions(cameras, cameraDetails, 200),
+  beat: buildOptions(beats, ["節奏清晰適合剪輯", "重低音脈衝感強烈", "交火爆破卡點感強"], 200),
+  dancePower: buildOptions(powers, ["動作幅度與能量完美匹配", "視覺衝擊力極強"], 200)
 };
 
 // 填入所有下拉選單
@@ -596,44 +654,44 @@ function switchTab(tab){
 }
 
 function makePrompt(){
-  const song = get('song') || '星際量子電音';
+  const song = get('song') || '星際量子戰術電音';
   const options = checked();
   const techEra = get('techEra');
   const alienCiv = get('alienCiv');
 
   if(currentTab === 'img'){
     const lines = [
-      '【階段 1：硬科幻未來科技角色圖像 Prompt (Text-to-Image)】',
+      '【階段 1：硬科幻未來戰鬥角色圖像 Prompt (Text-to-Image)】',
       '（適用於 Midjourney / DALL-E / Stable Diffusion XL）',
       '',
       '【世界觀與角色設定】',
       `・文明紀元：${techEra}`,
-      `・外星文明：${alienCiv}`,
-      '・人物氣質：' + get('gender'),
+      `・外星與敵對文明：${alienCiv}`,
+      '・人物身份與氣質：' + get('gender'),
       '・臉部五官：' + get('faceShape'),
       '・髮型髮色：' + get('hairStyle'),
       '・身形義體：' + get('bodyType'),
-      '・未來服裝：' + get('outfit'),
+      '・未來服裝裝甲：' + get('outfit'),
       '・視覺風格：' + get('artStyle'),
-      '・未來場景：' + get('scene'),
+      '・未來戰場場景：' + get('scene'),
       '・畫面規格：' + get('ratio') + ' 頂級硬科幻概念圖，UE5 渲染，8k 解析度。',
       get('custom') ? '・自訂擴充：' + get('custom') : '',
       '',
       '【AI 繪圖指令】',
-      `${get('gender')}, ${get('faceShape')}, ${get('hairStyle')}, ${get('outfit')}, ${get('scene')}, ${get('artStyle')}, ${techEra}, ${alienCiv}, masterpiece, best quality, ultra-detailed sci-fi concept art, cinematic lighting, ray tracing, 8k --ar 9:16`
+      `${get('gender')}, ${get('faceShape')}, ${get('hairStyle')}, ${get('outfit')}, ${get('scene')}, ${get('artStyle')}, ${techEra}, ${alienCiv}, masterpiece, best quality, ultra-detailed sci-fi cinematic concept art, battlefield action, epic lighting, ray tracing, 8k --ar 9:16`
     ];
     document.getElementById('prompt').value = lines.join('\n');
   } else {
     const lines = [
-      '【階段 2：未來角色圖轉影片 Prompt (Image-to-Video)】',
+      '【階段 2：未來戰鬥角色圖轉影片 Prompt (Image-to-Video)】',
       '（適用於 Kling / Runway Gen-3 / Luma）',
       '',
-      '【動態與音樂表演指令】',
+      '【動態、戰場與音樂表演指令】',
       '・音樂風格：' + get('musicType') + ' (' + get('beat') + ')',
-      '・舞蹈動作：' + get('dance') + ' (' + get('dancePower') + ')。',
-      '・運鏡風格：' + get('camera'),
-      '・物理與特效：' + (options.length ? options.join('；') : '量子瞬移與機械變形') + '。',
-      '・品質維持：維持人物臉孔與人種特徵一致；物理動態自然、無閃爍變形。'
+      '・戰術與舞蹈動作：' + get('dance') + ' (' + get('dancePower') + ')。',
+      '・戰鬥運鏡風格：' + get('camera'),
+      '・星際開戰特效與物理：' + (options.length ? options.join('；') : '軌道交火與量子瞬移') + '。',
+      '・品質維持：維持人物臉孔與裝甲細節一致；開戰動態流暢、無閃爍變形。'
     ];
     document.getElementById('prompt').value = lines.join('\n');
   }
@@ -669,22 +727,28 @@ function initCanvas(){
   ctx.font = "bold 13px sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("🌌 點擊「生成角色圖像」", 130, 170);
-  ctx.fillText("啟動硬科幻全息預覽", 130, 195);
+  ctx.fillText("啟動星際戰場全息預覽", 130, 195);
 }
 
 function generateImage(){
   if(animTimer) clearInterval(animTimer);
-  document.getElementById('simBadge').textContent = "1. 角色圖像已生成";
+  document.getElementById('simBadge').textContent = "1. 戰場角色已生成";
   
   ctx.fillStyle = "#071727";
   ctx.fillRect(0,0,260,360);
   
   ctx.fillStyle = "#16d9e8";
-  for(let i=0; i<25; i++){
+  for(let i=0; i<35; i++){
     ctx.beginPath();
     ctx.arc(Math.random()*260, Math.random()*360, Math.random()*2, 0, Math.PI*2);
     ctx.fill();
   }
+
+  // 戰場背景火光
+  ctx.fillStyle = "rgba(255, 68, 68, 0.2)";
+  ctx.beginPath();
+  ctx.arc(40, 60, 50, 0, Math.PI*2);
+  ctx.fill();
 
   ctx.fillStyle = "#8c7bff";
   ctx.beginPath();
@@ -716,7 +780,7 @@ function generateImage(){
 
 function generateVideo(){
   if(!currentImgData) return;
-  document.getElementById('simBadge').textContent = "2. 🎬 量子動態播放中";
+  document.getElementById('simBadge').textContent = "2. 💥 星際動態播放中";
   if(animTimer) clearInterval(animTimer);
   
   let frame = 0;
@@ -724,17 +788,18 @@ function generateVideo(){
     frame++;
     ctx.putImageData(currentImgData, 0, 0);
     
+    // 電磁光圈與開戰火花
     ctx.strokeStyle = "rgba(22, 217, 232, 0.6)";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(130, 135, 50 + Math.sin(frame*0.2)*6, 0, Math.PI*2);
     ctx.stroke();
 
-    ctx.fillStyle = "#8c7bff";
-    for(let i=0; i<4; i++){
-      let px = (frame * 6 + i * 60) % 260;
-      let py = (360 - (frame * 4 + i * 40) % 360);
-      ctx.fillRect(px, py, 3, 3);
+    ctx.fillStyle = "#ff4444";
+    for(let i=0; i<6; i++){
+      let px = (frame * 8 + i * 45) % 260;
+      let py = (360 - (frame * 5 + i * 30) % 360);
+      ctx.fillRect(px, py, 2, 6);
     }
   }, 50);
 }
