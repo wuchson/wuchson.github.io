@@ -116,7 +116,7 @@ button:active{transform:scale(.98)}
 }
 .previewbox textarea{
   background:#1a080d;color:#ffdeeb;
-  border-color:#71384c;min-height:220px;
+  border-color:#71384c;min-height:240px;
 }
 .canvas-area{
   margin-top:14px;padding:13px;text-align:center;
@@ -149,7 +149,7 @@ canvas{display:block;width:100%;height:auto}
 <body>
 <header>
   <h1>🎀 AI LINE 萌系文字表情貼圖生成器 🍓</h1>
-  <p>性別智慧聯動・豐富文字色彩・百種常用字句・單張預覽・一鍵批次生成</p>
+  <p>性別智慧聯動・豐富文字色彩・百種常用字句・多款背景配色・一鍵批次生成</p>
 </header>
 
 <div class="wrap app">
@@ -158,7 +158,7 @@ canvas{display:block;width:100%;height:auto}
 <main class="panel">
 
   <div class="hint">
-    ✨ 使用說明：已擴充多達 24 種豐富文字顏色選項，讓你的貼圖文字在任何背景下都清晰搶眼！
+    ✨ 使用說明：已擴充多達 24 種文字顏色與 10 種背景配色，切換背景時右側預覽與 AI 指令將即時同步更新！
   </div>
 
   <div class="title">① 角色風格設定</div>
@@ -375,11 +375,18 @@ canvas{display:block;width:100%;height:auto}
       </select>
     </div>
     <div class="group">
-      <label>背景</label>
-      <select id="background">
-        <option value="transparent">透明背景</option>
-        <option value="white">純白背景</option>
-        <option value="pink">粉嫩背景</option>
+      <label>背景顏色（已擴充 10 種）</label>
+      <select id="background" onchange="renderSticker()">
+        <option value="transparent">透明去背背景（LINE貼圖推薦）</option>
+        <option value="white">純白乾淨背景</option>
+        <option value="pink">粉嫩櫻花背景</option>
+        <option value="blue">清新天空藍背景</option>
+        <option value="yellow">溫暖奶油黃背景</option>
+        <option value="mint">療癒薄荷綠背景</option>
+        <option value="purple">夢幻薰衣草紫背景</option>
+        <option value="orange">活力蜜桃橘背景</option>
+        <option value="dark">質感星空深藍背景</option>
+        <option value="gradient">粉藍夢幻漸層背景</option>
       </select>
     </div>
   </div>
@@ -449,6 +456,50 @@ let uploadedReady = false;
 const canvas = $("stickerCanvas");
 const ctx = canvas.getContext("2d");
 
+// 背景設定對應表（預覽色碼 + AI 提示詞描述）
+const backgroundMap = {
+  transparent: {
+    color: null,
+    prompt: "去背透明背景（Transparent background），無雜物、方便直接製作 LINE 貼圖"
+  },
+  white: {
+    color: "#ffffff",
+    prompt: "純白乾淨素色背景（Pure solid white background #FFFFFF）"
+  },
+  pink: {
+    color: "#ffe0eb",
+    prompt: "粉嫩櫻花淺粉色背景（Soft pastel sakura pink background #FFE0EB）"
+  },
+  blue: {
+    color: "#e0f4ff",
+    prompt: "清新天空淺藍色背景（Soft pastel sky blue background #E0F4FF）"
+  },
+  yellow: {
+    color: "#fff8d6",
+    prompt: "溫暖奶油淺黃色背景（Warm pastel cream yellow background #FFF8D6）"
+  },
+  mint: {
+    color: "#dff8eb",
+    prompt: "療癒薄荷淺綠色背景（Fresh pastel mint green background #DFF8EB）"
+  },
+  purple: {
+    color: "#f0e6ff",
+    prompt: "夢幻薰衣草淺紫色背景（Dreamy pastel lavender purple background #F0E6FF）"
+  },
+  orange: {
+    color: "#ffebd6",
+    prompt: "活力蜜桃淺橘色背景（Warm pastel peach orange background #FFEBD6）"
+  },
+  dark: {
+    color: "#1e2749",
+    prompt: "質感星空深藍色背景（Deep starry navy blue background #1E2749），搭配白色外發光描邊讓角色與文字更突出"
+  },
+  gradient: {
+    color: "gradient",
+    prompt: "粉藍夢幻柔和漸層背景（Soft pastel pink to baby blue gradient background）"
+  }
+};
+
 const expressionsMap = {
   "開心燦爛微笑":"燦爛笑容、彎彎笑眼",
   "超級興奮狂喜":"張大嘴巴、閃亮眼睛、興奮冒花",
@@ -464,8 +515,8 @@ const expressionsMap = {
   "愛心滿滿雙眼":"愛心形狀眼睛、冒出粉紅泡泡",
   "尷尬而不失禮貌微笑":"尷尬微笑、額頭冒汗滴",
   "困惑疑惑歪頭":"歪頭思考、頭上有問號",
-  "自信得意神情":"自信微笑、神气得意表情",
-  "誠摯感謝微笑":"溫柔微笑、双手合十感謝",
+  "自信得意神情":"自信微笑、神氣得意表情",
+  "誠摯感謝微笑":"溫柔微笑、雙手合十感謝",
   "放空呆滯表情":"眼神死、無神眼睛、呆萌發呆",
   "自信帥氣微笑":"嘴角上揚、眼神犀利、自信魅力",
   "熱血沸騰大笑":"張大嘴歡呼、熱血激動神情",
@@ -596,6 +647,7 @@ function makePrompt(){
   const isBatch = $("batchMode").checked;
   const count = $("batchCount") ? val("batchCount") : "24";
   const theme = $("batchTheme") ? val("batchTheme") : "daily";
+  const bgInfo = backgroundMap[d.background] || backgroundMap.transparent;
 
   if(isBatch) {
     const themeName = theme === 'daily' ? '日常實用聊天對話' : (theme === 'emotion' ? '豐富情緒大爆炸' : '撒嬌與萌趣可愛');
@@ -612,12 +664,13 @@ function makePrompt(){
       "服裝配件："+d.outfit,
       "角色補充細節："+(d.characterExtra||"無"),
       "",
-      `【批次輸出要求】`,
+      `【批次輸出與畫面要求】`,
       `1. 請以網格（Grid）或連環圖形式，一次規劃並呈現完整的 ${count} 張不同表情與動作的貼圖。`,
       "2. 保持同一位主角的外貌、髮型、服飾與美術風格 100% 完全一致。",
       `3. 每張貼圖搭配不同的表情與對應的短文字（如：早安、收到、謝謝、OK、辛苦了等）。`,
       "4. 所有文字必須清晰易讀、字體風格一致，且為正確繁體中文。",
-      "5. 正方形構圖、主體置中、去背透明背景（Transparent background）、無多餘浮水印。"
+      "5. 畫面尺寸比例："+d.dimension+"×"+d.dimension+" 正方形構圖、主體置中、外圍加上乾淨白色貼紙描邊。",
+      "6. 背景設定："+bgInfo.prompt+"，無多餘浮水印。"
     ];
     $("prompt").value = base.join("\n");
     return;
@@ -644,13 +697,18 @@ function makePrompt(){
     "主要文字："+(d.stickerText||"無"),
     "文字顏色代碼："+d.textColor,
     "字體風格："+d.font,
-    "必須正確呈現繁體中文，不可錯字、漏字、亂碼。"
+    "必須正確呈現繁體中文，不可錯字、漏字、亂碼，文字建議加上白色粗外框使其更醒目。",
+    "",
+    "【畫面與背景設定】",
+    "畫面尺寸："+d.dimension+" × "+d.dimension+" 像素（1:1 正方形構圖，角色與文字置中）",
+    "背景要求："+bgInfo.prompt,
+    "貼紙質感：角色與文字周圍帶有乾淨平滑的白色貼紙外描邊（White sticker border）。"
   ];
 
   if(currentTab==="animated"){
-    base.push("", "【動態 APNG 動畫指令】", "動畫效果：上下彈跳", "輸出多影格動畫素材，供 APNG 編碼使用。");
+    base.push("", "【動態 APNG 動畫指令】", "動畫效果：上下輕快彈跳、眨眼或手勢微動", "輸出多影格連續動畫素材，供 APNG 編碼使用。");
   } else {
-    base.push("", "【靜態 PNG 指令】", "輸出單張高解析度透明背景 PNG。");
+    base.push("", "【靜態 PNG 指令】", "輸出單張高解析度 PNG 圖像。");
   }
 
   $("prompt").value = base.join("\n");
@@ -705,6 +763,7 @@ function importSettings(file){
 function resetAll(){
   if(!confirm("確定要重設所有設定嗎？"))return;
   $("gender").selectedIndex=0;
+  $("background").selectedIndex=0;
   $("batchMode").checked=false;
   toggleBatchMode();
   handleGenderChange();
@@ -716,28 +775,63 @@ $("importFile").addEventListener("change", e => {
   if(e.target.files[0]) importSettings(e.target.files[0]);
 });
 
-function drawFrame(){
+function drawFrame(offsetY = 0){
   ctx.clearRect(0,0,512,512);
   const bg = val("background");
-  if(bg !== "transparent") {
-    ctx.fillStyle = bg === "white" ? "#ffffff" : "#ffe0eb";
+  const bgInfo = backgroundMap[bg] || backgroundMap.transparent;
+
+  // 繪製背景顏色
+  if(bgInfo.color === "gradient") {
+    const grad = ctx.createLinearGradient(0, 0, 512, 512);
+    grad.addColorStop(0, "#ffd6e7");
+    grad.addColorStop(1, "#d6f0ff");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,512,512);
+  } else if(bgInfo.color) {
+    ctx.fillStyle = bgInfo.color;
     ctx.fillRect(0,0,512,512);
   }
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  ctx.font="220px serif";
-  const gender = val("gender");
-  let emoji = "👧";
-  if(gender.includes("少年") || gender.includes("小男孩")) emoji = "👦";
-  else if(gender.includes("動物")) emoji = "🐶";
-  ctx.fillText(emoji, 256, 256);
+
+  // 繪製角色（自訂上傳圖片或預設示意圖）
+  if(uploadedReady && uploadedImage){
+    const scale = Math.min(300 / uploadedImage.width, 300 / uploadedImage.height);
+    const w = uploadedImage.width * scale;
+    const h = uploadedImage.height * scale;
+    ctx.drawImage(uploadedImage, (512 - w)/2, 60 + offsetY, w, h);
+  } else {
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.font="200px serif";
+    const gender = val("gender");
+    let emoji = "👧";
+    if(gender.includes("少年") || gender.includes("小男孩")) emoji = "👦";
+    else if(gender.includes("動物")) emoji = "🐶";
+    ctx.fillText(emoji, 256, 210 + offsetY);
+  }
+
+  // 繪製貼圖文字（含白邊描邊與選定文字顏色）
+  const text = val("stickerText");
+  if(text){
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const fontSize = text.length > 6 ? 44 : 60;
+    ctx.font = `900 ${fontSize}px "${val("font")}", sans-serif`;
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = "#ffffff";
+    ctx.strokeText(text, 256, 430 + offsetY * 0.5);
+    ctx.fillStyle = val("textColor");
+    ctx.fillText(text, 256, 430 + offsetY * 0.5);
+    ctx.restore();
+  }
 }
 
 function renderSticker(){
   const size = Number(val("dimension"));
   canvas.width = size; canvas.height = size;
   ctx.setTransform(size/512, 0, 0, size/512, 0, 0);
-  drawFrame();
+  drawFrame(0);
   makePrompt();
 }
 
@@ -758,15 +852,18 @@ async function downloadAPNG(){
     const size = Number(val("dimension"));
     const frames=[], delays=[];
     for(let i=0; i<12; i++){
-      drawFrame();
+      const bounce = Math.sin((i / 12) * Math.PI * 2) * 12;
+      ctx.setTransform(size/512, 0, 0, size/512, 0, 0);
+      drawFrame(bounce);
       frames.push(ctx.getImageData(0,0,size,size).data.buffer);
-      delays.push(180);
+      delays.push(120);
     }
     const apng = UPNG.encode(frames, size, size, 0, delays);
     const url = URL.createObjectURL(new Blob([apng], {type:"image/png"}));
     const a = document.createElement("a");
     a.href = url; a.download = "LINE_Sticker_Animated.png"; a.click();
     setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    renderSticker();
   }catch(e){alert("APNG 匯出失敗");}
 }
 
@@ -782,11 +879,17 @@ function randomAll(){
   $("pose").value = poseOpts[Math.floor(Math.random()*poseOpts.length)];
   const sceneOptions = [...$("scene").options];
   $("scene").value = sceneOptions[Math.floor(Math.random()*sceneOptions.length)].value;
+  const bgOptions = [...$("background").options];
+  $("background").value = bgOptions[Math.floor(Math.random()*bgOptions.length)].value;
   renderSticker();
 }
 
+// 確保所有欄位在輸入或切換選項時，同步更新預覽與指令
 document.querySelectorAll("input,select,textarea").forEach(el=>{
-  if(el.id !== "gender") el.addEventListener("input", renderSticker);
+  if(el.id !== "gender" && el.id !== "prompt") {
+    el.addEventListener("input", renderSticker);
+    el.addEventListener("change", renderSticker);
+  }
 });
 
 $("uploadImage").addEventListener("change", e => {
