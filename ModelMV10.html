@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎀 AI LINE 萌系文字表情貼圖生成器</title>
+<!-- 引入 Google Fonts 繁體中文手寫、圓體、毛筆、復古與漫畫字型 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=ChenYuluoyan&family=Fredoka:wght@700&family=Klee+One:wght@600&family=LXGW+WenKai+TC:wght@700&family=Noto+Sans+TC:wght@900&family=Noto+Serif+TC:wght@700&family=Shippori+Mincho:wght@800&family=Yuji+Syuku&family=Zen+Maru+Gothic:wght@900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/upng-js@2.1.0/UPNG.js"></script>
 <style>
 :root{
@@ -165,7 +169,7 @@ canvas{display:block;width:100%;height:auto}
 <body>
 <header>
   <h1>🎀 AI LINE 萌系文字表情貼圖生成器 🍓</h1>
-  <p>全能版</p>
+  <p>全能版（新增 12 款手寫／萌圓／毛筆字型庫）</p>
   <div class="badge-bar" id="statsBar"></div>
 </header>
 
@@ -174,7 +178,7 @@ canvas{display:block;width:100%;height:auto}
 <main class="panel">
 
   <div class="hint">
-    💡 <b>升級說明：</b>已將「女裝」與「男裝」各自擴充至 <b>300+ 套獨立服裝</b>（切換角色性別自動切換對應性別 300+ 套服裝），並新增<b>服裝關鍵字即時搜尋框</b>！同時保留 350+ 生活動作與右側即時 AI 指令同步顯示。
+    💡 <b>升級說明：</b>已將「女裝」與「男裝」各自擴充至 <b>300+ 套獨立服裝</b>，並新增 <b>12 款常用字型（包含多種手寫風、萌系圓體、書法毛筆風與漫畫粗黑體）</b>，即時預覽與匯出圖片皆可套用！
   </div>
 
   <div class="title">① 角色風格、髮型與 300+ 服裝庫 <span class="count-tag" id="charCountTag"></span></div>
@@ -325,12 +329,28 @@ canvas{display:block;width:100%;height:auto}
         </select>
       </div>
       <div class="group">
-        <label>文字字體風格</label>
+        <label>文字字體風格（12 款精選字型）</label>
         <select id="font">
-          <option value="Microsoft JhengHei">圓潤繁體中文字體</option>
-          <option value="DFKai-SB">標楷體</option>
-          <option value="sans-serif">簡潔黑體</option>
-          <option value="serif">優雅明體</option>
+          <optgroup label="✍️ 手寫與可愛風格（推薦）">
+            <option value="ChenYuluoyan">手寫風｜隨性原子筆手寫（辰宇落雁體）</option>
+            <option value="LXGW WenKai TC">手寫風｜溫柔文青手寫（霞鶩文楷）</option>
+            <option value="Klee One">手寫風｜少女可愛筆記體（Klee One）</option>
+            <option value="Zen Maru Gothic">萌系圓體｜Q版圓滾滾可愛字體</option>
+          </optgroup>
+          <optgroup label="💥 漫畫、毛筆與復古風格">
+            <option value="Noto Sans TC">粗黑撞色風｜超醒目漫畫粗黑體</option>
+            <option value="Yuji Syuku">藝術毛筆風｜豪邁書法毛筆字體</option>
+            <option value="Shippori Mincho">復古懷舊風｜昭和復古質感明體</option>
+          </optgroup>
+          <optgroup label="📄 經典繁體標準字型">
+            <option value="Microsoft JhengHei">俐落現代風｜圓潤繁體正黑字體</option>
+            <option value="DFKai-SB">傳統楷書風｜經典標準標楷體</option>
+            <option value="Noto Serif TC">優雅雜誌風｜氣質襯線明體</option>
+          </optgroup>
+          <optgroup label="🔤 英文與數字專屬趣味字型">
+            <option value="Fredoka">英文萌趣風｜圓潤童趣泡泡手繪體</option>
+            <option value="Bangers">英文美漫風｜美式漫畫熱血塗鴉體</option>
+          </optgroup>
         </select>
       </div>
     </div>
@@ -393,7 +413,7 @@ canvas{display:block;width:100%;height:auto}
   <div class="title">⑥ 貼圖即時預覽</div>
 
   <div class="canvas-area">
-    <div class="small">透明背景以棋盤格顯示。</div>
+    <div class="small">透明背景以棋盤格顯示（支援即時切換手寫/萌圓/毛筆字型）。</div>
     <div class="canvas-wrap">
       <canvas id="stickerCanvas" width="512" height="512"></canvas>
     </div>
@@ -427,6 +447,21 @@ let currentOutfitList = [];
 
 const canvas = $("stickerCanvas");
 const ctx = canvas.getContext("2d");
+
+const fontStyleDescMap = {
+  "ChenYuluoyan": "手寫風（隨性原子筆手寫體，親切自然可愛手寫感）",
+  "LXGW WenKai TC": "手寫風（溫柔文青楷書手寫體，手寫筆觸清晰有溫度）",
+  "Klee One": "手寫風（少女可愛筆記手寫體，柔和手繪質感）",
+  "Zen Maru Gothic": "萌系圓體（Q版圓滾滾可愛字體，線條圓潤飽滿）",
+  "Noto Sans TC": "粗黑撞色風（超醒目漫畫粗黑體，筆畫厚實有張力）",
+  "Yuji Syuku": "藝術毛筆風（豪邁書法毛筆字體，帶有飛白與筆鋒力量感）",
+  "Shippori Mincho": "復古懷舊風（昭和復古質感明體，帶有文藝與戲劇張力）",
+  "Microsoft JhengHei": "俐落現代風（圓潤繁體正黑字體，清晰現代易讀）",
+  "DFKai-SB": "傳統楷書風（經典標準標楷體，端正清晰）",
+  "Noto Serif TC": "優雅雜誌風（氣質襯線明體，精緻高級感）",
+  "Fredoka": "英文萌趣風（圓潤童趣泡泡手繪體，可愛立體感）",
+  "Bangers": "英文美漫風（美式漫畫熱血塗鴉體，充滿動感與戲劇張力）"
+};
 
 const backgroundMap = {
   transparent: { color: null, prompt: "去背透明背景（Transparent background），無雜物、方便直接製作 LINE 貼圖" },
@@ -720,6 +755,7 @@ function initStaticDropdowns() {
     <span class="badge">👔 男裝：${optionsData.boy.outfit.length} 套</span>
     <span class="badge">🔥 獨立動作：${masterPosesList.length} 種</span>
     <span class="badge">💬 貼圖文字：${totalTexts} 種</span>
+    <span class="badge">✍️ 精選字型：12 款</span>
   `;
 }
 
@@ -818,6 +854,7 @@ function makePrompt(){
   const count = $("batchCount") ? val("batchCount") : "24";
   const theme = $("batchTheme") ? val("batchTheme") : "daily";
   const bgInfo = backgroundMap[d.background] || backgroundMap.transparent;
+  const fontDesc = fontStyleDescMap[d.font] || d.font;
 
   if(isBatch) {
     const themeMap = {
@@ -846,7 +883,7 @@ function makePrompt(){
       "2. 動作需生動誇張有戲劇張力（包含生活細節道具如化妝鏡、口紅、機車安全帽、啤酒杯、翻桌特效等）。",
       "3. 保持同一位主角的外貌、髮型、服飾與美術風格 100% 完全一致。",
       "4. 每張貼圖搭配對應的繁體中文短文字（如：早安、完妝出門、翻桌啦、騎車中、乾杯、嗨起來等）。",
-      "5. 所有文字必須清晰易讀、字體風格一致，且為正確繁體中文。",
+      `5. 文字字體風格統一採用：${fontDesc}，所有文字必須清晰易讀且為正確繁體中文。`,
       "6. 畫面尺寸比例："+d.dimension+"×"+d.dimension+" 正方形構圖、主體置中、外圍加上乾淨白色貼紙描邊。",
       "7. 背景設定："+bgInfo.prompt+"，無多餘浮水印。"
     ];
@@ -874,7 +911,7 @@ function makePrompt(){
     "【貼圖文字】",
     "主要文字："+(d.stickerText||"無"),
     "文字顏色代碼："+d.textColor,
-    "字體風格："+d.font,
+    "字體風格："+fontDesc,
     "必須正確呈現繁體中文，不可錯字、漏字、亂碼，文字建議加上白色粗外框使其更醒目。",
     "",
     "【畫面與背景設定】",
@@ -942,6 +979,7 @@ function resetAll(){
   if(!confirm("確定要重設所有設定嗎？"))return;
   $("gender").selectedIndex=0;
   $("background").selectedIndex=0;
+  $("font").selectedIndex=0;
   $("poseSearch").value="";
   $("outfitSearch").value="";
   $("batchMode").checked=false;
@@ -997,10 +1035,17 @@ function drawFrame(offsetY = 0){
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const fontSize = text.length > 6 ? 44 : 60;
-    ctx.font = `900 ${fontSize}px "${val("font")}", sans-serif`;
+    const selectedFont = val("font");
+    // 手寫與毛筆字型視覺上稍細，適度放大字級讓筆觸更清楚
+    const isHandwriting = ["ChenYuluoyan", "LXGW WenKai TC", "Klee One", "Yuji Syuku"].includes(selectedFont);
+    const baseSize = isHandwriting ? 68 : 60;
+    const fontSize = text.length > 6 ? Math.round(baseSize * 0.75) : baseSize;
+    const fontWeight = ["ChenYuluoyan", "Yuji Syuku", "Fredoka", "Bangers"].includes(selectedFont) ? "400" : "900";
+    
+    ctx.font = `${fontWeight} ${fontSize}px "${selectedFont}", "Noto Sans TC", sans-serif`;
     ctx.lineJoin = "round";
-    ctx.lineWidth = 12;
+    ctx.lineCap = "round";
+    ctx.lineWidth = isHandwriting ? 10 : 12;
     ctx.strokeStyle = "#ffffff";
     ctx.strokeText(text, 256, 430 + offsetY * 0.5);
     ctx.fillStyle = val("textColor");
@@ -1009,7 +1054,13 @@ function drawFrame(offsetY = 0){
   }
 }
 
-function renderSticker(){
+async function renderSticker(){
+  const selectedFont = val("font");
+  if(document.fonts && selectedFont){
+    try{
+      await document.fonts.load(`40px "${selectedFont}"`);
+    }catch(e){}
+  }
   const size = Number(val("dimension"));
   canvas.width = size; canvas.height = size;
   ctx.setTransform(size/512, 0, 0, size/512, 0, 0);
@@ -1018,19 +1069,24 @@ function renderSticker(){
 }
 
 function downloadPNG(){
-  renderSticker();
-  canvas.toBlob(blob=>{
-    if(!blob)return;
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url; a.download="LINE_Sticker_Static.png"; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 1500);
-  },"image/png");
+  renderSticker().then(() => {
+    canvas.toBlob(blob=>{
+      if(!blob)return;
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url; a.download="LINE_Sticker_Static.png"; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    },"image/png");
+  });
 }
 
 async function downloadAPNG(){
   if(!window.UPNG){alert("APNG 編碼程式庫尚未載入。");return;}
   try{
+    const selectedFont = val("font");
+    if(document.fonts && selectedFont){
+      try{ await document.fonts.load(`40px "${selectedFont}"`); }catch(e){}
+    }
     const size = Number(val("dimension"));
     const frames=[], delays=[];
     for(let i=0; i<12; i++){
@@ -1068,6 +1124,9 @@ function randomAll(){
   const allTexts = Object.values(presetTextsGrouped).flat();
   $("stickerText").value = allTexts[Math.floor(Math.random()*allTexts.length)];
 
+  const fontOptions = [...$("font").options];
+  $("font").value = fontOptions[Math.floor(Math.random()*fontOptions.length)].value;
+
   const bgOptions = [...$("background").options];
   $("background").value = bgOptions[Math.floor(Math.random()*bgOptions.length)].value;
   renderSticker();
@@ -1091,6 +1150,10 @@ $("uploadImage").addEventListener("change", e => {
   };
   reader.readAsDataURL(file);
 });
+
+if(document.fonts){
+  document.fonts.ready.then(() => renderSticker());
+}
 
 initStaticDropdowns();
 handleGenderChange();
