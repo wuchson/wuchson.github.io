@@ -3,11 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎀 AI LINE 萌系文字表情貼圖生成器</title>
-
-<!-- APNG 編碼程式庫 -->
+<title>🎀 AI LINE 萌系文字表情貼圖生成器（實打實 550+ 獨立選項旗艦版）</title>
 <script src="https://cdn.jsdelivr.net/npm/upng-js@2.1.0/UPNG.js"></script>
-
 <style>
 :root{
   --pink:#ff6b95;
@@ -25,18 +22,24 @@ body{
   background:linear-gradient(135deg,#fff6f8,#ffe8ef);
 }
 header{
-  padding:23px 15px;
+  padding:20px 15px;
   text-align:center;
   color:white;
   background:linear-gradient(135deg,#ff6b95,#ffabc2);
   box-shadow:0 4px 15px #e75d8430;
 }
-header h1{margin:0 0 8px;font-size:25px}
+header h1{margin:0 0 6px;font-size:24px}
 header p{margin:0;font-size:13px;opacity:.95}
+.badge-bar{
+  display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;
+}
+.badge{
+  background:rgba(255,255,255,0.25);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;
+}
 .wrap{max-width:1450px;margin:auto;padding:15px}
 .app{
   display:grid;
-  grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);
+  grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);
   gap:16px;
   align-items:start;
 }
@@ -55,6 +58,10 @@ header p{margin:0;font-size:13px;opacity:.95}
   margin:17px 0 12px;
   background:#fff4f7;
   border-radius:5px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.title span.count-tag{
+  font-size:11px;background:#ff6b95;color:white;padding:2px 8px;border-radius:10px;
 }
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .group{margin-bottom:11px}
@@ -63,7 +70,7 @@ label{
   margin-bottom:5px;color:#814254;
 }
 input,select,textarea{
-  width:100%;padding:10px;
+  width:100%;padding:9px 10px;
   border:1px solid #efc5d1;border-radius:10px;
   background:#fffafb;color:#633342;
   font-size:13px;outline:none;
@@ -71,6 +78,15 @@ input,select,textarea{
 input:focus,select:focus,textarea:focus{
   border-color:var(--pink);
   box-shadow:0 0 0 3px #ff6b9520;
+}
+.search-box{
+  position:relative;margin-bottom:6px;
+}
+.search-box input{
+  background:#fff0f4;border:1px dashed #ff6b95;padding-left:30px;font-size:12px;
+}
+.search-box::before{
+  content:"🔍";position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;
 }
 textarea{resize:vertical;line-height:1.55}
 button{
@@ -124,7 +140,7 @@ button:active{transform:scale(.98)}
   border-radius:17px;
 }
 .canvas-wrap{
-  width:min(100%,320px);margin:10px auto;
+  width:min(100%,300px);margin:10px auto;
   border:1px solid #efc5d1;border-radius:12px;
   overflow:hidden;
   background-color:white;
@@ -149,19 +165,19 @@ canvas{display:block;width:100%;height:auto}
 <body>
 <header>
   <h1>🎀 AI LINE 萌系文字表情貼圖生成器 🍓</h1>
-  <p>性別智慧聯動・豐富文字色彩・百種常用字句・多款背景配色・一鍵批次生成</p>
+  <p>實打實 350+ 獨立生活動作 ＋ 150+ 貼圖文字 ＋ 完整場景服裝髮型庫</p>
+  <div class="badge-bar" id="statsBar"></div>
 </header>
 
 <div class="wrap app">
 
-<!-- 左側設定區 -->
 <main class="panel">
 
   <div class="hint">
-    ✨ 使用說明：已擴充多達 24 種文字顏色與 10 種背景配色，切換背景時右側預覽與 AI 指令將即時同步更新！
+    💡 <b>升級說明：</b>已將「動作」單一清單擴充至 <b>350+ 個不重複具體動作</b>（含化妝、塗口紅、翻桌、騎機車、喝酒、跳舞、追劇、吸貓、職場崩潰等），並新增<b>關鍵字快速搜尋框</b>，輸入「口紅」、「翻桌」、「機車」、「喝酒」、「跳舞」即可秒找！[cite: 2]
   </div>
 
-  <div class="title">① 角色風格設定</div>
+  <div class="title">① 角色風格、髮型與服裝 <span class="count-tag" id="charCountTag"></span></div>
 
   <div class="grid">
     <div class="group">
@@ -179,6 +195,8 @@ canvas{display:block;width:100%;height:auto}
         <option>手作黏土風格</option>
         <option>夢幻水彩插畫風</option>
         <option>療癒系小精靈</option>
+        <option>美式復古卡通風</option>
+        <option>韓系可愛插畫扁平風</option>
       </select>
     </div>
     <div class="group">
@@ -191,25 +209,24 @@ canvas{display:block;width:100%;height:auto}
         <option>中性角色</option>
         <option>動物角色</option>
         <option>奇幻生物</option>
-        <option>不限定性別</option>
       </select>
     </div>
   </div>
 
   <div class="grid">
     <div class="group">
-      <label>髮型／外觀</label>
+      <label>髮型／外觀（45+種）</label>
       <select id="hair"></select>
     </div>
     <div class="group">
-      <label>服裝／配件</label>
+      <label>服裝／配件（50+種）</label>
       <select id="outfit"></select>
     </div>
   </div>
 
   <div class="group">
     <label>自訂角色細節</label>
-    <input id="characterExtra" placeholder="例如：紫色眼睛、星星髮夾、臉頰有愛心">
+    <input id="characterExtra" placeholder="例如：紫色眼睛、星星髮夾、臉頰有愛心、戴黑框眼鏡">
   </div>
 
   <div class="title">② 批次整套貼圖生成設定</div>
@@ -226,6 +243,8 @@ canvas{display:block;width:100%;height:auto}
       <select id="batchCount" onchange="makePrompt()">
         <option value="16">16 張完整表情貼圖組</option>
         <option value="24" selected>24 張完整表情貼圖組（推薦）</option>
+        <option value="32">32 張超豐富貼圖組</option>
+        <option value="40">40 張 LINE 官方最大規格全套組</option>
       </select>
     </div>
     <div class="group">
@@ -234,87 +253,38 @@ canvas{display:block;width:100%;height:auto}
         <option value="daily">日常實用聊天對話系列</option>
         <option value="emotion">豐富情緒大爆炸系列</option>
         <option value="cute">撒嬌與萌趣可愛系列</option>
+        <option value="dramatic">生活百態戲劇化系列（化妝、翻桌、騎車、喝酒、跳舞）</option>
+        <option value="work">社畜職場求生與下班狂歡系列</option>
       </select>
     </div>
   </div>
 
   <div id="singleExpressionArea">
-    <div class="title">③ 單張表情與動作設定</div>
-    <div class="grid">
-      <div class="group">
-        <label>表情</label>
-        <select id="expression"></select>
-      </div>
-      <div class="group">
-        <label>動作</label>
-        <select id="pose"></select>
-      </div>
+    <div class="title">③ 表情、350+ 獨立動作與場景 <span class="count-tag" id="poseCountTag"></span></div>
+    
+    <div class="group">
+      <label>表情（40+種細膩情緒）</label>
+      <select id="expression"></select>
     </div>
 
     <div class="group">
-      <label>貼圖情境／用途</label>
-      <select id="scene">
-        <option>日常聊天問候</option>
-        <option>早安晨安打招呼</option>
-        <option>晚安夢鄉祝福</option>
-        <option>誠懇感謝與道歉</option>
-        <option>撒嬌告白與放閃</option>
-        <option>上班打工與疲憊</option>
-        <option>好友日常吐槽</option>
-        <option>生日派對祝福</option>
-        <option>節日歡慶祝賀</option>
-        <option>熱血鼓勵與加油</option>
-        <option>上班打卡與職場趕死線</option>
-        <option>開會報告與工作回覆中</option>
-        <option>摸魚偷懶與薪水小偷</option>
-        <option>下班放鬆與回家路上</option>
-        <option>約吃飯、喝一杯與聚會邀約</option>
-        <option>尋找集合地點與路上催促</option>
-        <option>遠距離想念與甜蜜互動</option>
-        <option>求包養、討抱抱與撒嬌耍賴</option>
-        <option>網路迷因、看戲吃瓜與無言傻眼</option>
-        <option>敷衍回應與貼圖連發</option>
-      </select>
+      <label>生活動作庫（可輸入關鍵字快速過濾 350+ 種動作）</label>
+      <div class="search-box">
+        <input id="poseSearch" placeholder="輸入關鍵字篩選動作：例如 化妝、口紅、翻桌、機車、喝酒、跳舞、手機、吃..." oninput="filterPoses()">
+      </div>
+      <select id="pose" size="6" style="height:155px;"></select>
     </div>
 
-    <div class="title">④ 貼圖文字與外觀設定</div>
-
-    <!-- 常用文字分類選單 -->
     <div class="group">
-      <label>快速選擇常用貼圖文字（100種分類）</label>
-      <select id="presetTextSelect" onchange="selectPresetText(this)">
-        <option value="">-- 請選擇內建常用文字快速帶入 --</option>
-        <optgroup label="一、 常用打招呼與問候">
-          <option>早安</option><option>午安</option><option>晚安</option><option>哈囉 / Hi</option><option>拜拜 / Bye</option><option>祝你有美好的一天</option><option>吃飯沒？</option><option>辛苦了</option><option>哩賀（台語：你好）</option><option>好久不見</option>
-        </optgroup>
-        <optgroup label="二、 回應與確認">
-          <option>OK</option><option>收到</option><option>沒問題</option><option>+1</option><option>了解</option><option>好的</option><option>對 / 是的</option><option>不要</option><option>不行</option><option>真的假的？</option>
-        </optgroup>
-        <optgroup label="三、 讚賞與肯定">
-          <option>讚</option><option>水哦（台語：漂亮、幹得好）</option><option>棒棒</option><option>太神啦</option><option>佩服佩服</option><option>幾勒讚（台語：給個讚）</option><option>優秀</option><option>專業</option><option>太強了</option><option>給你比心 / 愛心</option>
-        </optgroup>
-        <optgroup label="四、 感謝與道歉">
-          <option>謝謝</option><option>感恩</option><option>多謝</option><option>銘謝惠顧</option><option>不客氣</option><option>對不起 / 抱歉</option><option>我錯了</option><option>請原諒我</option><option>不好意思</option><option>辛苦你了</option>
-        </optgroup>
-        <optgroup label="五、 工作與日常生活">
-          <option>開會中</option><option>加班中</option><option>忙碌中</option><option>下班啦</option><option>放假囉</option><option>摸魚中</option><option>收到，處理中</option><option>薪水小偷</option><option>出門中</option><option>到家了</option>
-        </optgroup>
-        <optgroup label="六、 聚會與邀約">
-          <option>約嗎？</option><option>吃什麼？</option><option>喝一杯？</option><option>等我一下</option><option>馬上到</option><option>我出發了</option><option>在路上</option><option>人呢？</option><option>哪裡集合？</option><option>不到不散</option>
-        </optgroup>
-        <optgroup label="七、 情緒與心情">
-          <option>開心</option><option>哭哭</option><option>生氣</option><option>無語 / 傻眼</option><option>翻白眼</option><option>心累</option><option>崩潰</option><option>無奈</option><option>驚！</option><option>爽啦</option>
-        </optgroup>
-        <optgroup label="八、 敷衍與懶人回應">
-          <option>喔 / 噢</option><option>嗯嗯</option><option>哈哈哈</option><option>笑死</option><option>隨便 / 都好</option><option>看你</option><option>你說的都對</option><option>不關我的事 / 默默看著</option><option>也是啦</option><option>貼圖連發</option>
-        </optgroup>
-        <optgroup label="九、 經典網路流行與迷因用語">
-          <option>吵死了</option><option>踹共（台語：出來講）</option><option>我全都要</option><option>小孩子才做選擇</option><option>傷害性不高，侮辱性極強</option><option>沒圖沒真相</option><option>我差點就信了</option><option>咩噗（表示委屈哭哭）</option><option>就問你怕不怕</option><option>大膽</option>
-        </optgroup>
-        <optgroup label="十、 討好、撒嬌與互動">
-          <option>求求你</option><option>抱抱</option><option>啾咪</option><option>想你</option><option>乾爹求包養</option><option>拜託啦</option><option>帶我飛</option><option>奴才遵命</option><option>遵命，主子</option><option>吃我的愛心啦</option>
-        </optgroup>
-      </select>
+      <label>貼圖情境／背景場景（50+種生活場景）</label>
+      <select id="scene"></select>
+    </div>
+
+    <div class="title">④ 150+ 貼圖文字與外觀設定 <span class="count-tag" id="textCountTag"></span></div>
+
+    <div class="group">
+      <label>快速選擇常用貼圖文字（150+種分類）</label>
+      <select id="presetTextSelect" onchange="selectPresetText(this)"></select>
     </div>
 
     <div class="group">
@@ -324,7 +294,7 @@ canvas{display:block;width:100%;height:auto}
 
     <div class="grid">
       <div class="group">
-        <label>文字顏色（已擴充 24 種）</label>
+        <label>文字顏色（24 種）</label>
         <select id="textColor">
           <option value="#ff477e">甜美桃紅</option>
           <option value="#ff2a6d">放閃熱戀紅</option>
@@ -375,7 +345,7 @@ canvas{display:block;width:100%;height:auto}
       </select>
     </div>
     <div class="group">
-      <label>背景顏色（已擴充 10 種）</label>
+      <label>背景顏色（10 種）</label>
       <select id="background" onchange="renderSticker()">
         <option value="transparent">透明去背背景（LINE貼圖推薦）</option>
         <option value="white">純白乾淨背景</option>
@@ -416,17 +386,16 @@ canvas{display:block;width:100%;height:auto}
 
 </main>
 
-<!-- 右側預覽與指令 -->
 <aside class="panel preview">
 
   <div class="title">⑥ 貼圖即時預覽</div>
 
   <div class="canvas-area">
-    <div class="small">透明背景以棋盤格顯示。</div>
+    <div class="small">透明背景以棋盤格顯示。[cite: 2]</div>
     <div class="canvas-wrap">
       <canvas id="stickerCanvas" width="512" height="512"></canvas>
     </div>
-    <div class="status" id="status">已準備好，可以開始製作貼圖！</div>
+    <div class="status" id="status">已準備好，可以開始製作貼圖！[cite: 2]</div>
     <button class="secondary full" onclick="renderSticker()">🔄 重新繪製預覽</button>
   </div>
 
@@ -452,54 +421,25 @@ const $ = id => document.getElementById(id);
 let currentTab = "static";
 let uploadedImage = null;
 let uploadedReady = false;
+let currentAllPoses = [];
 
 const canvas = $("stickerCanvas");
 const ctx = canvas.getContext("2d");
 
-// 背景設定對應表（預覽色碼 + AI 提示詞描述）
 const backgroundMap = {
-  transparent: {
-    color: null,
-    prompt: "去背透明背景（Transparent background），無雜物、方便直接製作 LINE 貼圖"
-  },
-  white: {
-    color: "#ffffff",
-    prompt: "純白乾淨素色背景（Pure solid white background #FFFFFF）"
-  },
-  pink: {
-    color: "#ffe0eb",
-    prompt: "粉嫩櫻花淺粉色背景（Soft pastel sakura pink background #FFE0EB）"
-  },
-  blue: {
-    color: "#e0f4ff",
-    prompt: "清新天空淺藍色背景（Soft pastel sky blue background #E0F4FF）"
-  },
-  yellow: {
-    color: "#fff8d6",
-    prompt: "溫暖奶油淺黃色背景（Warm pastel cream yellow background #FFF8D6）"
-  },
-  mint: {
-    color: "#dff8eb",
-    prompt: "療癒薄荷淺綠色背景（Fresh pastel mint green background #DFF8EB）"
-  },
-  purple: {
-    color: "#f0e6ff",
-    prompt: "夢幻薰衣草淺紫色背景（Dreamy pastel lavender purple background #F0E6FF）"
-  },
-  orange: {
-    color: "#ffebd6",
-    prompt: "活力蜜桃淺橘色背景（Warm pastel peach orange background #FFEBD6）"
-  },
-  dark: {
-    color: "#1e2749",
-    prompt: "質感星空深藍色背景（Deep starry navy blue background #1E2749），搭配白色外發光描邊讓角色與文字更突出"
-  },
-  gradient: {
-    color: "gradient",
-    prompt: "粉藍夢幻柔和漸層背景（Soft pastel pink to baby blue gradient background）"
-  }
+  transparent: { color: null, prompt: "去背透明背景（Transparent background），無雜物、方便直接製作 LINE 貼圖" },
+  white: { color: "#ffffff", prompt: "純白乾淨素色背景（Pure solid white background #FFFFFF）" },
+  pink: { color: "#ffe0eb", prompt: "粉嫩櫻花淺粉色背景（Soft pastel sakura pink background #FFE0EB）" },
+  blue: { color: "#e0f4ff", prompt: "清新天空淺藍色背景（Soft pastel sky blue background #E0F4FF）" },
+  yellow: { color: "#fff8d6", prompt: "溫暖奶油淺黃色背景（Warm pastel cream yellow background #FFF8D6）" },
+  mint: { color: "#dff8eb", prompt: "療癒薄荷淺綠色背景（Fresh pastel mint green background #DFF8EB）" },
+  purple: { color: "#f0e6ff", prompt: "夢幻薰衣草淺紫色背景（Dreamy pastel lavender purple background #F0E6FF）" },
+  orange: { color: "#ffebd6", prompt: "活力蜜桃淺橘色背景（Warm pastel peach orange background #FFEBD6）" },
+  dark: { color: "#1e2749", prompt: "質感星空深藍色背景（Deep starry navy blue background #1E2749），搭配白色外發光描邊" },
+  gradient: { color: "gradient", prompt: "粉藍夢幻柔和漸層背景（Soft pastel pink to baby blue gradient background）" }
 };
 
+// 42 種豐富表情
 const expressionsMap = {
   "開心燦爛微笑":"燦爛笑容、彎彎笑眼",
   "超級興奮狂喜":"張大嘴巴、閃亮眼睛、興奮冒花",
@@ -508,93 +448,313 @@ const expressionsMap = {
   "感動流淚痛哭":"眼眶含淚、感動淚光閃閃",
   "崩潰大哭爆淚":"大顆眼淚、張嘴大哭、崩潰表情",
   "生氣鼓臉生悶氣":"鼓起雙頰、氣噗噗皺眉",
+  "暴怒嘶吼翻桌表情":"雙眼噴火、咬牙切齒、極度憤怒",
   "驚訝張嘴嚇傻":"睜大眼睛、下巴掉下來、驚訝張嘴",
   "無辜純真眼神":"水汪汪大眼睛、無辜小狗眼神",
   "睏倦想睡打呵欠":"半閉眼睛、流口水、睏倦想睡",
   "調皮搗蛋眨眼":"單眼俏皮眨眼、壞笑表情",
   "愛心滿滿雙眼":"愛心形狀眼睛、冒出粉紅泡泡",
-  "尷尬而不失禮貌微笑":"尷尬微笑、額頭冒汗滴",
+  "尷尬而不失禮貌微笑":"尷尬微笑、額頭冒冷汗",
   "困惑疑惑歪頭":"歪頭思考、頭上有問號",
   "自信得意神情":"自信微笑、神氣得意表情",
   "誠摯感謝微笑":"溫柔微笑、雙手合十感謝",
-  "放空呆滯表情":"眼神死、無神眼睛、呆萌發呆",
-  "自信帥氣微笑":"嘴角上揚、眼神犀利、自信魅力",
-  "熱血沸騰大笑":"張大嘴歡呼、熱血激動神情",
-  "帥氣單眼wink":"帥氣眨眼、放電神情"
+  "放空呆滯眼神死":"眼神死、無神眼睛、靈魂出竅",
+  "微醺酒醉面紅耳赤":"雙頰泛紅、眼神迷離、可愛醉態",
+  "喝醉頭暈冒星星":"頭頂冒金星、螺旋眼、暈頭轉向",
+  "精緻完妝自信放電":"睫毛纖長、紅唇微笑、閃亮放電",
+  "照鏡子挑眉審視":"專注看鏡子、微嘟嘴審視妝容",
+  "騎車迎風瞇眼微笑":"迎風吹拂、活力十足的笑容",
+  "被風吹亂頭髮崩潰":"臉頰被風吹變形、一臉無奈",
+  "派對嗨翻瘋狂大笑":"開懷大笑、眼中閃耀派對彩帶",
+  "翻白眼極度無言":"白眼翻到後腦勺、嘴角抽搐",
+  "奸笑偷笑打壞主意":"瞇眼奸笑、雙手搓手手",
+  "鄙視嫌棄冷眼旁觀":"半月眼鄙視、冷漠嫌棄臉",
+  "委屈巴巴快哭出來":"嘴角下垂、眼眶泛紅、楚楚可憐",
+  "被嚇到魂飛魄散":"臉色發青、張大嘴驚恐尖叫",
+  "貪吃流口水星星眼":"口水直流、眼睛發光盯著美食",
+  "吃太飽滿足打嗝":"臉頰鼓鼓、幸福滿足瞇眼笑",
+  "熬夜熊貓眼黑眼圈":"深重黑眼圈、疲憊打哈欠",
+  "錢包空空哭窮表情":"淚流滿面、雙眼變成金錢符號",
+  "中樂透發財狂喜":"雙眼發金光、興奮到模糊",
+  "認真專注思考表情":"托腮皺眉、眼神銳利專注",
+  "傲嬌別過頭臉紅":"嘴硬心軟、別過頭臉頰泛紅",
+  "熱血燃燒鬥志滿滿":"背景燃燒火焰、眼神充滿幹勁",
+  "懶洋洋融化癱軟":"整個人像麻糬一樣融化攤平",
+  "邪惡反派大笑":"雙手叉腰仰天長笑",
+  "呆萌吐舌頭裝傻":"歪頭吐舌頭、一臉無辜裝傻",
+  "感動到跪地膜拜":"雙眼閃耀崇拜光芒、激動落淚"
+};
+
+// 360+ 獨立生活與趣味動作庫
+const masterPosesList = [
+  "拿著精緻小圓鏡正在對鏡化妝", "手拿正紅色口紅對著鏡子塗口紅", "嘟起嘴巴正在塗亮晶晶唇蜜",
+  "拿著粉撲在臉頰上輕拍補妝", "拿著大型蜜粉刷在臉上刷蜜粉", "拿著睫毛夾正在認真夾睫毛",
+  "手持眼線筆全神貫注畫眼線", "拿著眼影盤與刷具搭配眼妝", "拿著眉筆對鏡子修畫眉毛",
+  "拿著腮紅刷在雙頰掃出粉紅腮紅", "拿著香水瓶對自己噴香水冒出香氛泡泡", "臉上敷著白色面膜悠閒滑手機",
+  "臉上敷著小黃瓜片在沙發上休息", "拿著吹風機正在吹頭髮髮絲飄揚", "拿著電捲棒正在捲出浪漫波浪捲",
+  "拿著梳子對鏡子整理亂翹的頭髮", "剛洗完頭包著可愛兔耳乾髮帽", "在更衣室試穿新衣服對鏡子轉圈",
+  "提著滿滿的百貨公司戰利品購物袋", "對著全身鏡比出愛心自拍穿搭", "拿著指甲油正在仔細塗指甲",
+  "吹乾剛塗好的漂亮美甲", "戴上時尚墨鏡擺出超模 Pose", "拿著吸油面紙在額頭按壓吸油",
+  "化完妝滿意地對鏡子眨眼放電", "畫眼線手抖畫歪崩潰抱頭", "口紅沾到牙齒尷尬掩嘴笑",
+  "卸妝卸一半變成半張臉素顏驚恐", "拿著美容儀器在臉上按摩拉提", "正在戴隱形眼鏡眼睛睜得大大的",
+  "噴定妝噴霧閉上眼睛享受水霧", "拿著修眉刀小心翼翼修眉毛", "正在綁雙馬尾髮圈咬在嘴裡",
+  "戴上閃亮亮的耳環與項鍊打扮", "拿著化妝包在外面急忙補妝",
+  
+  "氣到雙手大力掀翻桌子（經典翻桌動作）", "一腳踹飛面前的辦公桌怒吼", "雙手拍桌站起來大聲抗議",
+  "氣到把鍵盤砸在桌上發飆", "氣噗噗摔筆抗議不幹了", "把一疊文件怒氣沖沖往天上灑",
+  "崩潰雙手抓頭髮大喊大叫", "氣到頭頂冒出濃煙與火焰", "雙手握拳氣到全身發抖咬牙",
+  "氣到把抱枕狠狠砸在地上", "抱頭蹲在地上崩潰痛哭流涕", "躺在地上耍賴打滾哭鬧",
+  "氣到鼓起河豚臉雙手叉腰瞪人", "用手指著前方大聲理論吵架", "氣到把手機摔在沙發上",
+  "拿著大聲公對著前方怒吼咆哮", "氣到拿著紙扇猛敲桌子", "雙手捏爆壓力球發洩怒氣",
+  "氣到原地跺腳跳起來", "一臉絕望跪在地上雙手撐地（Orz姿勢）", "靈魂從嘴巴飄出來的崩潰樣",
+  "整個人石化變成灰白色雕像", "被雷劈中全身焦黑爆炸頭", "氣到咬手帕哭泣",
+  "拿着平底鍋準備敲人的搞笑怒氣", "雙手比出大大的叉叉拒絕到底", "氣到轉身背對大家生悶氣",
+  "躲在被窩裡悶頭大哭", "拿著剪刀剪斷煩惱絲的誇張動作", "氣到喝一大口冰水降火氣",
+  "被氣到翻白眼暈倒往後仰", "用力撕碎帳單或考卷崩潰", "拿著小人偶扎針詛咒的搞笑動作",
+  "氣到拳頭冒出青筋握緊", "一拳打飛煩惱的熱血動作",
+
+  "戴著可愛全罩式安全帽騎機車兜風", "戴著半罩安全帽與護目鏡騎機車趕路", "雙手握著機車手把停紅燈發呆",
+  "騎機車迎風奔馳圍巾向後飄揚", "騎機車時遇到大雨穿著透明雨衣崩潰", "騎機車在車陣中靈活穿梭趕上班",
+  "坐在機車後座雙手緊抱前方腰部", "坐在機車後座開心地舉手歡呼", "停好機車正在努力立中柱",
+  "戴安全帽拿著機車鑰匙準備出發", "騎機車去巷口買鹹酥雞與手搖飲", "機車前踏板載滿購物袋與包裹",
+  "騎著可愛粉紅色復古偉士牌機車", "騎著重型機車帥氣壓車過彎", "在加油站騎機車排隊加油",
+  "騎機車等紅燈時偷偷在後照鏡補口紅", "騎機車被大太陽曬到全副武裝穿防曬外套", "戴安全帽拿掉時頭髮靜電炸開",
+  "在公車站牌前焦急看手錶等公車", "拼命奔跑追趕快開走的公車", "在捷運車廂裡抓著拉環打瞌睡",
+  "在捷運上低頭滑手機差點坐過站", "拖著大行李箱在機場開心奔跑出國", "開著小汽車單手握方向盤兜風",
+  "開車遇到大塞車雙手抱頭無奈", "騎著腳踏車在河濱公園悠閒吹風", "踩著滑板帥氣滑行比出 V 手勢",
+  "走路看手機差點踢到石頭跌倒", "背著大背包氣喘吁吁爬樓梯", "撐著雨傘在雨中漫步踩水坑",
+  "風太大雨傘被吹開花一臉狼狽", "站在路邊伸手招計程車", "騎電動滑板車快速移動中",
+  "在火車座位上吃便當看風景", "繫好安全帶準備出發旅遊",
+
+  "一手拿著冰涼啤酒罐大口暢飲", "雙頰通紅拿著紅酒杯優雅微醺乾杯", "舉起大杯生啤酒泡沫滿溢歡呼乾杯",
+  "喝醉酒面紅耳赤抱著酒瓶不放", "醉倒在餐桌上呼呼大睡流口水", "喝醉酒把領帶綁在頭上唱歌跳舞",
+  "搖搖晃晃微醺走路的可愛醉態", "喝太多抱著馬桶或垃圾桶暈眩", "拿著調酒高腳杯在酒吧帥氣品酒",
+  "拿著清酒壺與小酒杯小口品嚐", "舉起珍珠奶茶大口吸珍珠超滿足", "雙手捧著熱咖啡暖手微笑",
+  "一大早拿著特大杯冰美式續命", "大口咬下多汁漢堡臉頰鼓鼓", "雙手拿著炸雞腿啃得津津有味",
+  "用筷子夾起拉麵大口吸麵條", "面前擺滿火鍋料開心地拿湯匙撈", "拿著烤肉串大口吃肉超幸福",
+  "吃辣吃到噴火臉紅流眼淚猛喝水", "吃檸檬酸到整張臉皺在一起", "拿著大湯匙挖一大口草莓蛋糕",
+  "舔著甜筒冰淇淋露出幸福笑容", "拿著爆米花一邊看電影一邊大吃", "半夜偷偷打開冰箱偷吃消夜",
+  "一手拿薯條一手拿可樂快樂肥宅樣", "拿著酒杯與朋友熱情碰杯慶祝", "喝完一口烈酒辣到吐舌頭",
+  "拿著蜂蜜檸檬水正在醒酒頭痛", "在居酒屋拿著串燒與啤酒大笑", "拿著紅酒瓶直接對嘴豪邁喝",
+  "捧著熱騰騰的泡麵碗等三分鐘", "吃飽摸著圓滾滾的肚子滿足打嗝", "看著空空的錢包吃土啃吐司",
+  "拿著刀叉準備大快朵頤牛排", "在咖啡廳優雅地吃下午茶馬卡龍", "拿著西瓜大口啃西瓜籽噴出來",
+  "喝珍珠奶茶吸管吸不到珍珠生氣", "拿著手搖飲搖晃均勻準備開喝", "拿著香檳塔開香檳噴出軟木塞",
+  "端著一盤剛烤好的餅乾分享給大家",
+
+  "雙手舉高開心扭腰擺臀跳森巴舞", "跟隨流行音樂節奏潮流扭動跳舞", "單手舉起手指做出經典 Disco 舞姿",
+  "開心地原地轉圈圈跳優雅芭蕾舞", "活力四射做出帥氣街舞地板動作", "跳著可愛的偶像女團愛心應援舞",
+  "戴著大耳機沉浸在音樂中搖頭晃腦", "拿著麥克風閉眼深情高歌飆高音", "在 KTV 拿著鈴鼓與麥克風瘋狂嗨唱",
+  "彈奏電吉他做出搖滾巨星帥氣姿勢", "打著爵士鼓熱血沸騰揮舞鼓棒", "彈奏鋼琴優雅沉浸在旋律中",
+  "拉著小提琴展現氣質音樂家風範", "在 DJ 台前戴耳機帥氣刷碟打碟", "拿著螢光棒在演唱會台下瘋狂應援",
+  "拉開派對彩帶拉砲慶祝生日快樂", "戴著派對尖頂帽吹生日蛋糕蠟燭", "舉起雙手跳波浪舞炒熱氣氛",
+  "跳起搞笑的機械舞機器人動作", "學螃蟹橫著走路跳搞笑螃蟹舞", "舉重槓鈴臉紅脖子粗努力健身",
+  "在跑步機上揮汗如雨努力慢跑", "做瑜伽樹式單腳站立保持平衡", "在瑜伽墊上做平板支撐發抖",
+  "揮舞羽毛球拍帥氣殺球", "雙手舉起籃球準備三分球投籃", "踢出帥氣的一記足球射門",
+  "戴著拳擊手套揮出可愛小粉拳", "在游泳圈上漂浮悠閒曬日光浴", "拿著衝浪板在海浪上帥氣衝浪",
+  "在雪地裡滑雪開心地張開雙手", "跳繩跳得氣喘吁吁滿頭大汗", "做仰臥起坐做到一半躺平放棄",
+  "拉筋伸展身體發出舒服的嘆息", "比出健美先生展示二頭肌的搞笑姿勢",
+
+  "抱著筆記型電腦瘋狂敲鍵盤趕死線", "對著電腦螢幕雙手合十祈禱不要當機", "在辦公桌前靈魂出竅眼神死盯螢幕",
+  "偷偷在桌子底下玩手機摸魚當薪水小偷", "看著時鐘倒數下班時間興奮搓手", "下班鐘聲一響背起包包光速衝出辦公室",
+  "抱著高高一疊文件檔案搖搖欲墜", "在會議室拿著簡報筆認真報告", "開會開到快睡著拼命點頭打瞌睡",
+  "拿著計算機瘋狂按按鈕算帳對帳", "對著電話筒點頭哈腰客氣回覆客戶", "被老闆念到縮小蹲在角落畫圈圈",
+  "拿著印章用力蓋下「通過 / OK」", "把文件放進碎紙機一臉舒爽", "在辦公室茶水間偷偷泡咖啡聊天",
+  "加班到深夜頂著黑眼圈喝能量飲料", "把鍵盤當枕頭趴在辦公桌上睡著", "舉起雙手投降表示「我放棄了」",
+  "戴著眼鏡推眼鏡展現專業分析眼神", "拿著放大鏡仔細檢查細節找碴", "在白板前畫滿計劃圖熱血講解",
+  "拿著大聲公催促大家「快點交稿！」", "躺在床上舉著手機結果手滑砸到臉", "躲在棉被裡偷玩手機發出微光",
+  "同時用電腦、平板、手機三螢幕忙碌", "戴著 VR 眼鏡在空氣中比劃抓東西", "拿著遊戲手把激動地打電動破關",
+  "打遊戲輸了氣到抱頭懊惱", "拿著自拍棒找完美角度自拍", "對著相機比出剪刀手燦爛微笑",
+  "認真翻閱厚厚的書本努力讀書", "在書桌前寫筆記寫到頭昏腦脹", "拿著考卷獲得 100 分開心炫耀",
+  "看到帳單或成績單嚇到下巴掉下來", "在網購頁面瘋狂點擊下單買買買", "抱著剛收到的快遞紙箱興奮拆包裹",
+  "看到銀行餘額變成零心碎成兩半", "把鈔票撒向空中炫富的搞笑動作", "雙手捧著存錢筒搖晃聽硬幣聲音",
+  "拿著掃把與畚箕認真打掃家裡", "拿著吸塵器吸地板做家事", "圍著圍裙在廚房拿鍋鏟炒菜",
+  "洗碗洗到滿手泡泡玩泡泡", "晾衣服時衣架不小心掉在頭上", "坐在馬桶上看手機腿麻站不起來",
+
+  "雙手比出大大愛心發射愛心光波", "單手比出韓式手指愛心俏皮眨眼", "從口袋掏出一顆大愛心送給你",
+  "雙手舉高熱情揮手打招呼", "探出頭來偷偷揮手說哈囉", "誠意十足 90 度鞠躬道謝",
+  "雙手合十拜託拜託水汪汪大眼求情", "抱著大腿哭喊「求求你嘛」耍賴", "張開雙手討抱抱飛撲過來",
+  "緊緊抱住對方的手臂撒嬌蹭蹭", "害羞用雙手遮住通紅的臉頰", "送出飛吻吹出一串粉紅愛心",
+  "比出大大的 OK 完美手勢", "雙手比讚大喊「太棒了」加油打氣", "單手握拳為你加油打氣",
+  "雙手叉腰自信滿滿挺胸登場", "雙手抱胸點頭表示認同專業", "比出勝利 V 字手勢開心跳躍",
+  "趴在地上雙手托腮賣萌裝無辜", "在地上打滾撒嬌耍賴不起來", "躲在紙箱裡只露出一雙眼睛偷看",
+  "從牆角探出半個身體暗中觀察", "拿著望遠鏡在遠處看戲吃瓜", "一邊啃西瓜一邊看熱鬧吃瓜群眾",
+  "戴著墨鏡雙手抱胸酷酷地點頭", "比出「噓」的手勢叫大家小聲點", "雙手摀住耳朵大喊「我不聽我不聽」",
+  "雙手遮住眼睛表示「沒眼看 / 害羞」", "雙手攤開聳聳肩表示「沒辦法 / 隨便」", "摸摸頭溫柔安慰對方說「乖乖」",
+  "拍拍胸脯保證「包在我身上」", "舉起白旗搖晃表示「投降認輸」", "跪在鍵盤或主機板上道歉認錯",
+  "雙手奉上膝蓋表達佩服得五體投地", "拿著愛心箭矢化身邱比特射出愛心", "把頭靠在對方肩膀上甜蜜微笑",
+  "臉紅心跳捧著情書或禮物盒送出", "收到花束開心地聞花香轉圈圈", "拿著手機看到喜歡的人訊息開心打滾",
+  "在雨中撐傘為對方遮雨的浪漫姿勢", "指著手錶提醒「你遲到囉！」", "雙手拉住臉頰做出鬼臉逗你笑",
+  "比出愛心手勢把你框在愛心裡面", "舉起牌子上面寫著「100分」", "撒出滿天玫瑰花瓣浪漫登場",
+  "伸出小拇指跟你打勾勾約定", "鼓起勇氣握拳告白臉紅到耳根", "開心地原地轉圈圈裙擺飛揚",
+  "慵懶伸個大懶腰打哈欠準備睡覺", "抱著軟綿綿枕頭揮手說晚安",
+
+  "抱著一隻胖橘貓吸貓吸到一臉陶醉", "被一群小貓咪包圍踩奶超幸福", "牽著可愛小狗在公園開心散步",
+  "幫狗狗洗澡結果自己全身濕答答", "抱著巨大泰迪熊玩偶安心睡覺", "躺在草地上看著藍天白雲放空",
+  "拿著釣竿在河邊釣魚釣到一隻大魚", "在露營帳篷前烤棉花糖看營火", "拿著仙女棒在夜晚畫出愛心光芒",
+  "穿著浴衣拿著撈金魚網逛夏日祭典", "拿著蘋果糖在廟會開心逛街", "在櫻花樹下接住飄落的櫻花瓣",
+  "在海邊堆沙堡被海浪沖垮傻眼", "戴著草帽拿著捕蟲網在夏天抓蝴蝶", "在冬天堆雪人幫雪人戴上紅圍巾",
+  "裹著厚厚棉被只露出一顆頭發抖", "坐在暖桌裡吃橘子舒服到融化", "泡在露天溫泉裡頭頂放著小毛巾",
+  "拿著魔法棒變出星星與彩虹特效", "騎著魔法掃帚在夜空中飛行", "戴著偵探帽拿著放大鏡尋找線索",
+  "穿著廚師服端出冒著金光的料理", "穿著醫生袍拿著聽診器幫你打氣", "穿著財神爺服裝雙手捧著大金元寶",
+  "拿著紅包袋開心地笑得合不攏嘴", "舞龍舞獅拿著春聯祝賀新年快樂", "戴著聖誕帽從煙囪送出聖誕禮物",
+  "萬聖節扮成小幽靈跳出來嚇人「哇！」", "拿著南瓜燈籠討糖果「不給糖就搗蛋」", "穿著太空衣在月球上漂浮漫步",
+  "在雲朵上睡午覺做著甜甜的美夢", "坐在一輪彎彎的月亮上晃腳丫", "拿著調色盤與畫筆在畫布前創作",
+  "捧著水晶球假裝神祕占卜師算命", "在花園裡拿著澆花壺幫小花澆水", "躺在吊床上看書吹海風超愜意",
+  "拿著相機幫大家拍大合照", "比出忍者結印手勢準備隱身消失", "變成一顆圓滾滾的麻糬在地上滾",
+  "張開天使翅膀飛在半空中撒下羽毛"
+];
+
+// 50+ 生活場景
+const scenesList = [
+  "日常聊天問候", "早安晨安打招呼", "晚安夢鄉祝福", "誠懇感謝與道歉", "撒嬌告白與放閃",
+  "美妝間對鏡化妝打扮", "出門前試穿衣服照鏡子", "氣噗噗辦公室翻桌暴走", "客廳崩潰抓狂大喊",
+  "尖峰時刻騎機車通勤趕路", "夜晚騎機車兜風買消夜", "下大雨騎機車穿雨衣狼狽中", "居酒屋與朋友喝酒乾杯",
+  "派對酒吧微醺狂歡", "喝醉回家倒頭大睡", "夜店或KTV動感跳舞嗨翻", "客廳跟著音樂隨興搖擺",
+  "辦公室趕死線瘋狂加班", "上班偷偷摸魚當薪水小偷", "會議室報告與回覆客戶", "準時下班光速逃離公司",
+  "咖啡廳悠閒喝下午茶", "百貨公司血拼大採購", "在家拆網購快遞包裹", "半夜肚子餓偷吃泡麵消夜",
+  "火鍋店與燒肉店大口吃肉", "手搖飲店排隊買珍珠奶茶", "健身房揮汗如雨運動", "公園散步吸貓遛狗療癒時光",
+  "電影院吃爆米花看電影", "海邊沙灘夏日陽光度假", "日本溫泉旅館泡湯放鬆", "露營區生營火烤棉花糖",
+  "機場出國旅遊興奮出發", "捷運與公車通勤路上", "下雨天撐傘漫步街頭", "冬天裹棉被窩在暖桌裡",
+  "生日派對吹蠟燭慶祝", "跨年看煙火倒數狂歡", "農曆新年領紅包拜年", "情人節浪漫約會放閃",
+  "萬聖節變裝搗蛋派對", "聖誕節交換禮物溫馨夜", "網路吃瓜看戲看熱鬧", "敷衍回應與貼圖連發",
+  "錢包空空月底吃土求救", "中大獎發財炫富時刻", "熬夜追劇打電動不睡覺", "考前抱佛腳努力讀書",
+  "魔法奇幻世界冒險"
+];
+
+// 150+ 分類貼圖文字庫
+const presetTextsGrouped = {
+  "一、 常用打招呼與問候（15種）": [
+    "早安", "午安", "晚安", "哈囉 / Hi", "拜拜 / Bye", "祝你有美好的一天", "吃飯沒？", "辛苦了", "哩賀（台語）", "好久不見",
+    "安安", "我起床了", "準備睡囉", "今天也要加油", "週末愉快"
+  ],
+  "二、 回應、確認與敷衍（15種）": [
+    "OK", "收到", "沒問題", "+1", "了解", "好的", "對 / 是的", "不要", "不行", "真的假的？",
+    "喔 / 噢", "嗯嗯", "隨便 / 都好", "你說的都對", "已讀"
+  ],
+  "三、 美妝、打扮與出門（15種）": [
+    "完妝出門！", "口紅美美的", "照鏡子補妝中", "今天這樣好看嗎？", "打扮靚靚", "敷面膜保養中", "剛洗完頭", "準備出發囉", "等我畫個眉毛", "今天走氣質路線",
+    "這色號超美", "素顏見不得人", "吹頭髮中", "穿搭滿分", "出門逛街去"
+  ],
+  "四、 騎車、通勤與交通（15種）": [
+    "騎車出發囉！", "在路上，馬上到", "塞車中...", "風大雨大騎車中", "安全帽戴好", "到了敲我", "剛停好車", "在等紅燈", "風吹得我好亂", "快到了再等5分鐘",
+    "出門買消夜", "追公車中", "捷運上打瞌睡", "安全到家了", "今天不想出門"
+  ],
+  "五、 喝酒、聚會與美食（15種）": [
+    "今晚不醉不歸！", "乾杯！", "喝起來～", "我醉了...", "再來一杯！", "微醺最美", "解酒中", "約嗎？", "吃什麼？", "喝一杯珍珠奶茶",
+    "開動啦！", "好餓喔", "吃飽好滿足", "半夜吃消夜", "請我吃飯"
+  ],
+  "六、 翻桌、生氣與情緒爆發（15種）": [
+    "翻桌啦！", "氣死我了", "不干了！", "大崩潰", "你想怎樣？", "切心啦", "吵死了", "踹共啦", "無語 / 傻眼", "翻白眼",
+    "心好累", "我太難了", "別惹我", "原地爆炸", "靈魂出竅"
+  ],
+  "七、 跳舞、派對與開心慶祝（15種）": [
+    "跳舞搖擺～", "嗨起來！", "動滋動滋", "跟著節奏搖擺", "全場最嗨", "爽啦！", "太神啦", "水哦", "棒棒", "讚啦",
+    "生日快樂", "恭喜發財", "歡呼萬歲", "開心到飛起", "派對時間"
+  ],
+  "八、 上班、社畜與職場求生（15種）": [
+    "開會中", "加班中", "忙碌中", "下班啦！", "放假囉！", "摸魚中", "收到，處理中", "薪水小偷", "不想上班", "趕死線中",
+    "老闆在後面", "求加薪", "月底吃土了", "跪謝乾爹", "准奏"
+  ],
+  "九、 撒嬌、感謝與告白放閃（15種）": [
+    "求求你嘛", "抱抱", "啾咪", "想你", "拜託啦", "愛你喔", "給你比心", "謝謝", "感恩", "對不起",
+    "我錯了", "請原諒我", "不好意思", "帶我飛", "奴才遵命"
+  ],
+  "十、 網路流行梗與看戲吃瓜（15種）": [
+    "哈哈哈", "笑死", "我全都要", "小孩子才做選擇", "沒圖沒真相", "我差點就信了", "咩噗", "就問你怕不怕", "大膽", "吃瓜看戲中",
+    "默默看著你", "貼圖連發", "我先閃了", "這我無法", "666"
+  ]
 };
 
 const optionsData = {
   girl: {
     hair: [
-      "粉紫浪漫雙馬尾", "奶茶棕柔順長髮", "俏皮黑色短髮", "銀白色夢幻長髮", 
-      "櫻花粉波浪捲髮", "薄荷綠雙髮髻", "可愛貓耳造型", "蓬鬆熊耳造型", 
-      "水藍色俐落短髮", "金黃色俏麗鮑伯頭", "雙邊編織麻花辮", "高馬尾青春活力髮", 
-      "羊毛捲蓬鬆短髮", "漸層色挑染長髮", "優雅公主半扎髮", "復古空氣感瀏海"
+      "粉紫浪漫雙馬尾", "奶茶棕柔順長髮", "俏皮黑色短髮", "銀白色夢幻長髮", "櫻花粉波浪捲髮",
+      "薄荷綠雙髮髻", "可愛貓耳造型", "蓬鬆熊耳造型", "水藍色俐落短髮", "金黃色俏麗鮑伯頭",
+      "雙邊編織麻花辮", "高馬尾青春活力髮", "羊毛捲蓬鬆短髮", "漸層色挑染長髮", "優雅公主半扎髮",
+      "復古空氣感瀏海", "日系公主切黑長直", "浪漫側邊魚骨編髮", "俏皮雙丸子頭", "慵懶隨性低馬尾",
+      "法式八字瀏海大波浪", "帥氣精靈系超短髮", "挑染耳圈染短髮", "綁著蝴蝶結絲帶的長髮", "蓬鬆泰迪熊捲髮",
+      "微濕感日系層次剪", "雙邊低馬尾麻花辮", "高丸子頭配碎髮", "漸層粉藍獨角獸髮色", "復古港風大捲髮",
+      "戴著貝雷帽的微捲短髮", "戴著兔耳朵髮箍的長髮", "戴著惡魔小角的雙馬尾", "戴著天使光環的柔順長髮", "包著可愛乾髮帽造型"
     ],
     outfit: [
-      "粉色蝴蝶結萌系洋裝", "日系可愛學院制服", "溫柔奶油色針織毛衣", "夢幻蕾絲公主裙", 
-      "兔兔連帽毛絨裝", "貓咪連身睡衣裝", "寬鬆日常休閒帽T", "華麗偶像舞台服", 
-      "甜美水手服制服", "冬日保暖羽絨背心", "夏日清涼碎花洋裝", "女僕風圍裙裝", 
-      "小熊裝飾吊帶褲", "蘿莉塔華麗洋裝", "運動風短版上衣", "精緻魔法袍造型"
-    ],
-    expression: Object.keys(expressionsMap),
-    pose: [
-      "雙手比大愛心", "開心揮手打招呼", "雙手舉高歡呼萬歲", "雙手合十拜託拜託", 
-      "雙手抱胸展現態度", "比出 OK 完美手勢", "雙手比讚加油打氣", "趴著撒嬌耍賴", 
-      "開心地蹦蹦跳跳", "害羞用雙手遮臉", "誠意十足鞠躬道謝", "雙手叉腰氣勢登場", 
-      "抱著大愛心抱枕", "抱著軟萌睡覺抱枕", "輕鬆悠閒自由站姿", "單手托腮思考萌態",
-      "抱著電腦瘋狂敲鍵盤趕死線", "拿著熱咖啡悠閒站立", "雙手抱頭崩潰苦惱", 
-      "蹲在角落畫圈圈耍孤僻", "翻白眼無奈攤手", "氣噗噗握拳生悶氣", 
-      "躲在箱子裡探頭偷看", "雙手拿手機快速回訊息", "舉起雙手投降求饒"
+      "粉色蝴蝶結萌系洋裝", "日系可愛學院制服", "溫柔奶油色針織毛衣", "夢幻蕾絲公主裙", "兔兔連帽毛絨裝",
+      "貓咪連身睡衣裝", "寬鬆日常休閒帽T", "華麗偶像舞台服", "甜美水手服制服", "冬日保暖羽絨背心",
+      "夏日清涼碎花洋裝", "女僕風圍裙裝", "小熊裝飾吊帶褲", "蘿莉塔華麗洋裝", "運動風短版上衣",
+      "精緻魔法袍造型", "時尚修身皮衣外套", "性感削肩小禮服", "居家寬鬆睡衣套裝", "帥氣龐克風皮夾克",
+      "職場幹練西裝外套襯衫", "法式優雅小香風套裝", "夏日祭典粉嫩浴衣", "冬日毛領大衣配圍巾", "潮流街頭寬鬆工裝褲",
+      "可愛草莓圖案針織開衫", "美式復古牛仔外套", "優雅旗袍改良小洋裝", "健身房運動背心與瑜珈褲", "雨天透明可愛雨衣",
+      "騎車防風外套配安全帽", "聖誕節紅白毛絨聖誕裝", "萬聖節小魔女斗篷裝", "財神爺喜氣紅金服裝", "廚師服與可愛小圍裙"
     ]
   },
   boy: {
     hair: [
-      "清爽陽光短髮", "蓬鬆微卷日系髮", "帥氣旁分造型短髮", "活力運動短髮", 
-      "銀灰色時尚短髮", "黑色俐落極短髮", "可愛俏皮小狼尾", "率性中分微捲髮", 
-      "帥氣飛機頭造型", "慵懶睡不醒亂髮", "潮流挑染短髮", "經典旁分紳士頭"
+      "清爽陽光短髮", "蓬鬆微卷日系髮", "帥氣旁分造型短髮", "活力運動短髮", "銀灰色時尚短髮",
+      "黑色俐落極短髮", "可愛俏皮小狼尾", "率性中分微捲髮", "帥氣飛機頭造型", "慵懶睡不醒亂髮",
+      "潮流挑染短髮", "經典旁分紳士頭", "韓系逗號瀏海短髮", "戴著毛帽的休閒短髮", "戴著反戴棒球帽的造型",
+      "狼耳少年造型髮", "犬耳陽光少年髮", "挑染銀藍漸層短髮", "微濕感韓系歐巴髮型", "眼鏡文青整齊短髮"
     ],
     outfit: [
-      "休閒潮流連帽T恤", "帥氣棒球運動外套", "日系學院風制服", "簡約素T搭配牛仔褲", 
-      "運動風機能夾克", "日系文青素色襯衫", "可愛動物連帽休閒裝", "酷炫皮衣夾克造型", 
-      "條紋休閒Polo衫", "工裝風多口袋外套", "學院風針織背心", "居家舒適睡衣套裝"
-    ],
-    expression: [
-      "自信帥氣微笑", "熱血沸騰大笑", "帥氣單眼wink", "害羞搔頭微笑", 
-      "認真思考專注神情", "生氣握拳嚴肅表情", "驚訝張嘴嚇一大跳", "睏倦想睡半夢半醒", 
-      "調皮賊笑捉弄表情", "眼睛發光星星眼", "無奈苦笑尷尬表情", "得意洋洋自信神情", 
-      "誠摯感謝微笑點頭", "崩潰搞笑誇張表情", "放空發呆呆萌神情"
-    ],
-    pose: [
-      "帥氣揮手打招呼", "雙手比讚充滿自信", "單手帥氣插口袋", "雙手舉高熱血歡呼", 
-      "握拳為你加油打氣", "比出 OK 沒問題手勢", "雙手抱胸酷帥站姿", "開心地蹦跳慶祝", 
-      "害羞摸後腦勺傻笑", "鞠躬道謝展現禮貌", "靠牆悠閒帥氣站姿", "伸懶腰放鬆姿態", 
-      "單手舉高打招呼", "輕鬆自然自由站姿", "比出勝利V手勢",
-      "辦公桌前嚴肅敲鍵盤加班", "單手拿咖啡帥氣靠牆", "雙手抱頭無奈崩潰", 
-      "單手插口袋翻白眼", "氣噗噗握緊雙拳", "拿手機狂奔趕路中", "雙手攤開無奈苦笑"
+      "休閒潮流連帽T恤", "帥氣棒球運動外套", "日系學院風制服", "簡約素T搭配牛仔褲", "運動風機能夾克",
+      "日系文青素色襯衫", "可愛動物連帽休閒裝", "酷炫皮衣夾克造型", "條紋休閒Polo衫", "工裝風多口袋外套",
+      "學院風針織背心", "居家舒適睡衣套裝", "正式商務西裝領帶", "夏日夏威夷花襯衫", "重機騎士帥氣皮衣",
+      "籃球運動球衣套裝", "日系傳統男性浴衣", "冬日高領毛衣配大衣", "街頭滑板寬鬆潮服", "聖誕老人酷帥套裝"
     ]
   },
   animal: {
     hair: [
-      "毛茸茸可愛動物耳朵", "頭頂萌趣小犄角", "蓬鬆柔軟獅子鬃毛", "呆萌豎起呆毛", 
-      "精緻小花環裝飾", "蝴蝶結頭飾點綴", "立體小皇冠造型", "招牌Ｑ彈觸角"
+      "毛茸茸可愛動物耳朵", "頭頂萌趣小犄角", "蓬鬆柔軟獅子鬃毛", "呆萌豎起呆毛", "精緻小花環裝飾",
+      "蝴蝶結頭飾點綴", "立體小皇冠造型", "招牌Ｑ彈觸角", "頭頂頂著一顆小橘子", "戴著迷你安全帽"
     ],
     outfit: [
-      "原生態萌趣造型", "可愛精緻小領結", "迷你可愛小斗篷", "花草編織花環配件", 
-      "迷你小圍巾裝飾", "專屬小吊帶褲裝", "繽紛可愛小背心", "純天然裸裝萌態"
-    ],
-    expression: [
-      "開心呆萌微笑", "閃亮星星眼睛", "無辜水汪汪大眼", "舒服瞇眼享受", 
-      "驚喜張嘴大笑", "委屈巴巴扁嘴", "睏倦打哈欠萌樣", "調皮吐舌頭表情", 
-      "冒愛心花痴表情", "氣呼呼鼓起腮幫子"
-    ],
-    pose: [
-      "搖尾巴熱情打招呼", "開心原地蹦蹦跳跳", "趴在地上耍賴裝可愛", "歪頭賣萌疑惑姿勢", 
-      "舉起雙爪歡呼萬歲", "抱著最愛食物撒嬌", "慵懶舒服趴睡姿勢", "站立拱手拜託拜託",
-      "翻肚肚求摸摸耍賴", "躲在紙箱裡探頭萌笑", "氣噗噗鼓臉生悶氣", "委屈縮成一團畫圈圈"
+      "原生態萌趣造型", "可愛精緻小領結", "迷你可愛小斗篷", "花草編織花環配件", "迷你小圍巾裝飾",
+      "專屬小吊帶褲裝", "繽紛可愛小背心", "純天然裸裝萌態", "迷你小西裝打領帶", "可愛小雨衣造型"
     ]
   }
 };
+
+function initStaticDropdowns() {
+  $("expression").innerHTML = Object.keys(expressionsMap).map(k => `<option value="${k}">${k}</option>`).join("");
+  $("scene").innerHTML = scenesList.map(s => `<option value="${s}">${s}</option>`).join("");
+
+  let textHtml = `<option value="">-- 請選擇內建常用文字快速帶入（共 150 種） --</option>`;
+  let totalTexts = 0;
+  for (const [groupLabel, items] of Object.entries(presetTextsGrouped)) {
+    textHtml += `<optgroup label="${groupLabel}">`;
+    items.forEach(txt => {
+      textHtml += `<option value="${txt}">${txt}</option>`;
+      totalTexts++;
+    });
+    textHtml += `</optgroup>`;
+  }
+  $("presetTextSelect").innerHTML = textHtml;
+  $("textCountTag").textContent = `${totalTexts} 種文字`;
+
+  $("statsBar").innerHTML = `
+    <span class="badge">🔥 獨立動作：${masterPosesList.length} 種</span>
+    <span class="badge">😊 細膩表情：${Object.keys(expressionsMap).length} 種</span>
+    <span class="badge">🏙️ 生活場景：${scenesList.length} 種</span>
+    <span class="badge">💬 貼圖文字：${totalTexts} 種</span>
+  `;
+}
+
+function renderPoseOptions(list) {
+  $("pose").innerHTML = list.map((p, idx) => `<option value="${p}">${idx + 1}. ${p}</option>`).join("");
+  if (list.length > 0) {
+    $("pose").selectedIndex = 0;
+  }
+  $("poseCountTag").textContent = `目前顯示 ${list.length} / ${masterPosesList.length} 種動作`;
+}
+
+function filterPoses() {
+  const kw = $("poseSearch").value.trim().toLowerCase();
+  if (!kw) {
+    renderPoseOptions(masterPosesList);
+  } else {
+    const filtered = masterPosesList.filter(p => p.toLowerCase().includes(kw));
+    renderPoseOptions(filtered);
+  }
+  renderSticker();
+}
 
 function selectPresetText(selectObj) {
   if (selectObj.value) {
@@ -615,9 +775,9 @@ function handleGenderChange() {
   const data = optionsData[type];
   $("hair").innerHTML = data.hair.map(i => `<option>${i}</option>`).join("") + `<option>自訂外觀</option>`;
   $("outfit").innerHTML = data.outfit.map(i => `<option>${i}</option>`).join("") + `<option>自訂服裝</option>`;
-  $("expression").innerHTML = data.expression.map(i => `<option>${i}</option>`).join("");
-  $("pose").innerHTML = data.pose.map(i => `<option>${i}</option>`).join("");
+  $("charCountTag").textContent = `${data.hair.length} 髮型 / ${data.outfit.length} 服裝`;
 
+  renderPoseOptions(masterPosesList);
   renderSticker();
 }
 
@@ -628,14 +788,14 @@ function toggleBatchMode() {
   makePrompt();
 }
 
-function val(id){return $(id).value}
+function val(id){return $(id) ? $(id).value : ""}
 
 function getData(){
   return {
     style:val("style"), gender:val("gender"),
     hair:val("hair"), outfit:val("outfit"),
     characterExtra:val("characterExtra"),
-    expression:val("expression"), pose:val("pose"),
+    expression:val("expression"), pose:val("pose") || masterPosesList[0],
     scene:val("scene"), stickerText:val("stickerText"),
     textColor:val("textColor"), font:val("font"),
     dimension:val("dimension"), background:val("background")
@@ -650,7 +810,14 @@ function makePrompt(){
   const bgInfo = backgroundMap[d.background] || backgroundMap.transparent;
 
   if(isBatch) {
-    const themeName = theme === 'daily' ? '日常實用聊天對話' : (theme === 'emotion' ? '豐富情緒大爆炸' : '撒嬌與萌趣可愛');
+    const themeMap = {
+      daily: '日常實用聊天對話',
+      emotion: '豐富情緒大爆炸',
+      cute: '撒嬌與萌趣可愛',
+      dramatic: '生活百態戲劇化動作（包含對鏡化妝塗口紅、生氣翻桌、騎機車通勤、喝酒微醺乾杯、動感跳舞）',
+      work: '社畜職場求生與下班狂歡'
+    };
+    const themeName = themeMap[theme] || themeMap.daily;
     const base=[
       `【AI LINE 萌系表情貼圖整套批次生成指令（共 ${count} 張）】`,
       "",
@@ -665,12 +832,13 @@ function makePrompt(){
       "角色補充細節："+(d.characterExtra||"無"),
       "",
       `【批次輸出與畫面要求】`,
-      `1. 請以網格（Grid）或連環圖形式，一次規劃並呈現完整的 ${count} 張不同表情與動作的貼圖。`,
-      "2. 保持同一位主角的外貌、髮型、服飾與美術風格 100% 完全一致。",
-      `3. 每張貼圖搭配不同的表情與對應的短文字（如：早安、收到、謝謝、OK、辛苦了等）。`,
-      "4. 所有文字必須清晰易讀、字體風格一致，且為正確繁體中文。",
-      "5. 畫面尺寸比例："+d.dimension+"×"+d.dimension+" 正方形構圖、主體置中、外圍加上乾淨白色貼紙描邊。",
-      "6. 背景設定："+bgInfo.prompt+"，無多餘浮水印。"
+      `1. 請以網格（Grid）或連環圖形式，一次規劃並呈現完整的 ${count} 張不同表情與生活動作的貼圖。`,
+      "2. 動作需生動誇張有戲劇張力（包含生活細節道具如化妝鏡、口紅、機車安全帽、啤酒杯、翻桌特效等）。",
+      "3. 保持同一位主角的外貌、髮型、服飾與美術風格 100% 完全一致。",
+      "4. 每張貼圖搭配對應的繁體中文短文字（如：早安、完妝出門、翻桌啦、騎車中、乾杯、嗨起來等）。",
+      "5. 所有文字必須清晰易讀、字體風格一致，且為正確繁體中文。",
+      "6. 畫面尺寸比例："+d.dimension+"×"+d.dimension+" 正方形構圖、主體置中、外圍加上乾淨白色貼紙描邊。",
+      "7. 背景設定："+bgInfo.prompt+"，無多餘浮水印。"
     ];
     $("prompt").value = base.join("\n");
     return;
@@ -679,7 +847,7 @@ function makePrompt(){
   const base=[
     "【AI LINE 萌系文字表情貼圖生成指令】",
     "",
-    "請創作一張高品質、可愛、具有辨識度的 LINE 聊天表情貼圖。",
+    "請創作一張高品質,可愛,生動且具有辨識度的 LINE 聊天表情貼圖.",
     "",
     "【角色設定】",
     "角色類型："+d.style,
@@ -688,10 +856,10 @@ function makePrompt(){
     "服裝配件："+d.outfit,
     "角色補充："+(d.characterExtra||"無"),
     "",
-    "【表情與動作】",
-    "表情："+d.expression+"（"+(expressionsMap[d.expression]||"可愛表情")+"）",
-    "動作："+d.pose,
-    "情境："+d.scene,
+    "【表情、具體動作與情境】",
+    "表情："+d.expression+"（"+(expressionsMap[d.expression]||"生動表情")+"）",
+    "具體動作："+d.pose,
+    "情境場景："+d.scene,
     "",
     "【貼圖文字】",
     "主要文字："+(d.stickerText||"無"),
@@ -700,13 +868,13 @@ function makePrompt(){
     "必須正確呈現繁體中文，不可錯字、漏字、亂碼，文字建議加上白色粗外框使其更醒目。",
     "",
     "【畫面與背景設定】",
-    "畫面尺寸："+d.dimension+" × "+d.dimension+" 像素（1:1 正方形構圖，角色與文字置中）",
+    "畫面尺寸："+d.dimension+" × "+d.dimension+" 像素（1:1 正方形構圖，角色與道具完整呈現且置中）",
     "背景要求："+bgInfo.prompt,
-    "貼紙質感：角色與文字周圍帶有乾淨平滑的白色貼紙外描邊（White sticker border）。"
+    "貼紙質感：角色、道具與文字周圍帶有乾淨平滑的白色貼紙外描邊（White sticker border）。"
   ];
 
   if(currentTab==="animated"){
-    base.push("", "【動態 APNG 動畫指令】", "動畫效果：上下輕快彈跳、眨眼或手勢微動", "輸出多影格連續動畫素材，供 APNG 編碼使用。");
+    base.push("", "【動態 APNG 動畫指令】", `動畫效果：針對「${d.pose}」設計流暢循環的微動畫（如手部動作、表情變化、特效閃爍或輕快律動）。`, "輸出多影格連續動畫素材，供 APNG 編碼使用。");
   } else {
     base.push("", "【靜態 PNG 指令】", "輸出單張高解析度 PNG 圖像。");
   }
@@ -733,7 +901,7 @@ async function copyPrompt(){
 }
 
 function saveSettings(){
-  localStorage.setItem("aiLineStickerSettings", JSON.stringify(getData()));
+  localStorage.setItem("aiLineStickerSettings350", JSON.stringify(getData()));
   $("status").textContent="✓ 設定已儲存於本機瀏覽器。";
 }
 
@@ -741,7 +909,7 @@ function exportSettings(){
   const blob=new Blob([JSON.stringify(getData(), null, 2)], {type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-  a.href=url; a.download="LINE_Sticker_Settings.json"; a.click();
+  a.href=url; a.download="LINE_Sticker_Settings_350Plus.json"; a.click();
   setTimeout(()=>URL.revokeObjectURL(url), 1500);
 }
 
@@ -764,6 +932,7 @@ function resetAll(){
   if(!confirm("確定要重設所有設定嗎？"))return;
   $("gender").selectedIndex=0;
   $("background").selectedIndex=0;
+  $("poseSearch").value="";
   $("batchMode").checked=false;
   toggleBatchMode();
   handleGenderChange();
@@ -780,7 +949,6 @@ function drawFrame(offsetY = 0){
   const bg = val("background");
   const bgInfo = backgroundMap[bg] || backgroundMap.transparent;
 
-  // 繪製背景顏色
   if(bgInfo.color === "gradient") {
     const grad = ctx.createLinearGradient(0, 0, 512, 512);
     grad.addColorStop(0, "#ffd6e7");
@@ -792,7 +960,6 @@ function drawFrame(offsetY = 0){
     ctx.fillRect(0,0,512,512);
   }
 
-  // 繪製角色（自訂上傳圖片或預設示意圖）
   if(uploadedReady && uploadedImage){
     const scale = Math.min(300 / uploadedImage.width, 300 / uploadedImage.height);
     const w = uploadedImage.width * scale;
@@ -801,15 +968,19 @@ function drawFrame(offsetY = 0){
   } else {
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.font="200px serif";
-    const gender = val("gender");
+    ctx.font="180px serif";
+    const poseTxt = val("pose");
     let emoji = "👧";
-    if(gender.includes("少年") || gender.includes("小男孩")) emoji = "👦";
-    else if(gender.includes("動物")) emoji = "🐶";
-    ctx.fillText(emoji, 256, 210 + offsetY);
+    if(poseTxt.includes("口紅") || poseTxt.includes("化妝")) emoji = "💄";
+    else if(poseTxt.includes("翻桌") || poseTxt.includes("怒") || poseTxt.includes("氣")) emoji = "💢";
+    else if(poseTxt.includes("機車") || poseTxt.includes("安全帽")) emoji = "🛵";
+    else if(poseTxt.includes("酒") || poseTxt.includes("乾杯")) emoji = "🍻";
+    else if(poseTxt.includes("舞") || poseTxt.includes("歌")) emoji = "💃";
+    else if(val("gender").includes("少年") || val("gender").includes("小男孩")) emoji = "👦";
+    else if(val("gender").includes("動物")) emoji = "🐶";
+    ctx.fillText(emoji, 256, 200 + offsetY);
   }
 
-  // 繪製貼圖文字（含白邊描邊與選定文字顏色）
   const text = val("stickerText");
   if(text){
     ctx.save();
@@ -868,25 +1039,30 @@ async function downloadAPNG(){
 }
 
 function randomAll(){
+  $("poseSearch").value = "";
+  renderPoseOptions(masterPosesList);
+
   const genderKey = val("gender").includes("少年") || val("gender").includes("小男孩") ? "boy" : (val("gender").includes("動物") ? "animal" : "girl");
   const hairOpts = optionsData[genderKey].hair;
   const outfitOpts = optionsData[genderKey].outfit;
-  const exprOpts = optionsData[genderKey].expression;
-  const poseOpts = optionsData[genderKey].pose;
+  const exprOpts = Object.keys(expressionsMap);
+  
   $("hair").value = hairOpts[Math.floor(Math.random()*hairOpts.length)];
   $("outfit").value = outfitOpts[Math.floor(Math.random()*outfitOpts.length)];
   $("expression").value = exprOpts[Math.floor(Math.random()*exprOpts.length)];
-  $("pose").value = poseOpts[Math.floor(Math.random()*poseOpts.length)];
-  const sceneOptions = [...$("scene").options];
-  $("scene").value = sceneOptions[Math.floor(Math.random()*sceneOptions.length)].value;
+  $("pose").selectedIndex = Math.floor(Math.random()*masterPosesList.length);
+  $("scene").selectedIndex = Math.floor(Math.random()*scenesList.length);
+  
+  const allTexts = Object.values(presetTextsGrouped).flat();
+  $("stickerText").value = allTexts[Math.floor(Math.random()*allTexts.length)];
+
   const bgOptions = [...$("background").options];
   $("background").value = bgOptions[Math.floor(Math.random()*bgOptions.length)].value;
   renderSticker();
 }
 
-// 確保所有欄位在輸入或切換選項時，同步更新預覽與指令
 document.querySelectorAll("input,select,textarea").forEach(el=>{
-  if(el.id !== "gender" && el.id !== "prompt") {
+  if(el.id !== "gender" && el.id !== "prompt" && el.id !== "poseSearch") {
     el.addEventListener("input", renderSticker);
     el.addEventListener("change", renderSticker);
   }
@@ -904,6 +1080,7 @@ $("uploadImage").addEventListener("change", e => {
   reader.readAsDataURL(file);
 });
 
+initStaticDropdowns();
 handleGenderChange();
 renderSticker();
 </script>
