@@ -14,15 +14,21 @@ header p{margin:8px 0 0;font-size:13px}
 .wrap{max-width:1400px;margin:auto}
 .app{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px}
 .panel{background:var(--panel);border:1px solid #dfcba8;border-radius:18px;padding:20px;box-shadow:0 6px 22px #43261612;min-width:0}
-.title{font-weight:900;border-bottom:2px solid #dfcba8;padding-bottom:9px;margin:18px 0 14px;color:#87332d}
+.title{font-weight:900;border-bottom:2px solid #dfcba8;padding-bottom:9px;margin:18px 0 14px;color:#87332d;display:flex;justify-content:space-between;align-items:center}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .group{margin-bottom:13px}
 label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
 select,input[type=text],textarea{width:100%;padding:10px;border:1px solid #d9c7ac;border-radius:10px;background:#fffaf1;color:#32251c;font:inherit;font-size:13px}
+select:disabled{background:#eee7dc;color:#9a8978;cursor:not-allowed}
 textarea{resize:vertical;line-height:1.6}
 .checks{display:flex;flex-wrap:wrap;gap:8px}
-.check{display:flex;align-items:center;gap:5px;background:#f6ecdd;border-radius:20px;padding:8px 10px;font-size:12px}
+.check{display:flex;align-items:center;gap:5px;background:#f6ecdd;border-radius:20px;padding:8px 10px;font-size:12px;cursor:pointer}
 .check input{accent-color:var(--a)}
+.vfx-box{background:#fbf4e8;border:1px solid #e4cca2;border-radius:12px;padding:12px;margin-bottom:13px}
+.vfx-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.vfx-toggle{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:900;color:#87332d;cursor:pointer}
+.vfx-toggle input{accent-color:var(--a);width:16px;height:16px}
+.vfx-hint{font-size:11px;color:#7a634b}
 button{border:0;border-radius:10px;padding:10px;cursor:pointer;font-weight:800;font-size:13px}
 button:active{transform:scale(.98)}
 .primary{background:var(--a);color:#fff}
@@ -45,7 +51,7 @@ canvas{width:100%;max-width:300px;height:350px;object-fit:contain;background:#29
 <body>
 <header>
 <h1>⚔️ 中國古裝武俠影視生成器</h1>
-<p>百大仙氣妝髮・頂級粉系絲綢服飾・雲海仙境場景</p>
+<p>百大仙氣妝髮・頂級粉系絲綢服飾・雲海仙境場景・百款神通武功特效</p>
 </header>
 <div class="wrap app">
 <main class="panel">
@@ -122,22 +128,37 @@ canvas{width:100%;max-width:300px;height:350px;object-fit:contain;background:#29
 </div>
 
 <div class="title">⑤ 劇情與武打動作</div>
+<div class="vfx-box">
+<div class="vfx-header">
+<label class="vfx-toggle"><input type="checkbox" id="useVfx" checked>⚡ 使出武功神通特效（勾選啟用 / 取消則為純寫實無特效）</label>
+<span class="vfx-hint">內建 100 款神通招式特效</span>
+</div>
+<div class="grid" style="margin-top:6px">
+<div class="group" style="margin-bottom:0"><label>武功特效款式（100款）</label><select id="vfx"></select></div>
+<div class="group" style="margin-bottom:0"><label>特效施放強度</label><select id="vfxPower">
+<option value="克制內斂，流光微閃，保持人物與絲綢細節清晰">克制流光（唯美不遮臉）</option>
+<option value="中等爆發，氣勁外放，光影映照衣袂與周遭環境">招式外放（電影標準特效）</option>
+<option value="全力催動，天地變色，震撼能量光效席捲全場">絕學大招（震撼滿屏特效）</option>
+</select></div>
+</div>
+</div>
+
 <div class="grid">
 <div class="group"><label>劇情類型</label><select id="plot"></select></div>
 <div class="group"><label>主要動作</label><select id="action"></select></div>
 <div class="group"><label>對手或互動</label><select id="opponent"></select></div>
 <div class="group"><label>情緒表演</label><select id="emotion"></select></div>
 <div class="group"><label>武打節奏</label><select id="pace">
-<option>仙俠飄逸，動作輕靈如燕，劍氣伴隨流光特效</option>
+<option>仙俠飄逸，動作輕靈如燕，身法如行雲流水</option>
 <option>慢動作拔劍，透明絲綢與髮絲在空中優雅定格</option>
 <option>輕功騰空，空中轉體，衣袂如雲霞般展開</option>
-<option>寫實俐落劍法，重心穩定，招式如行雲流水</option>
-<option>沉穩對峙，眼神交鋒後劍氣瞬間激盪</option>
+<option>寫實俐落劍法，重心穩定，招式乾脆有力</option>
+<option>沉穩對峙，眼神交鋒後內力氣場瞬間激盪</option>
 <option>御劍飛行，化作一道流光穿雲破霧</option>
 </select></div>
 <div class="group"><label>分鏡長度</label><select id="duration">
 <option>5 秒，一個完整仙姿動作</option><option>8 秒，兩段劍招銜接</option>
-<option>10 秒，含起手運氣、劍氣流轉與收勢</option>
+<option>10 秒，含起手運氣、招式流轉與收勢</option>
 <option>15 秒，完整仙俠短場景</option>
 <option>30 秒，多鏡頭仙俠劇情片段</option>
 </select></div>
@@ -381,6 +402,108 @@ const DB = {
     "上古神魔大戰遺留下的浮空破碎大陸殘骸", "隱藏在瀑布後方的神祕水簾洞府與石桌", "長滿發光靈草的幽暗深海龍宮遺跡寶殿", "由無數巨劍插成的劍墓深淵與沖天劍氣", "常年被雷霆覆蓋的紫色雷罰禁區山巔",
     "散發無盡生機與靈氣的上古神樹世界樹頂", "冰封千年的極北之地冰雪神殿祭壇廣場", "熔岩流淌的地心煉器坊與巨大煉丹銅爐", "充滿無數鏡子反射幻影的鏡花水月幻境", "最終超脫凡塵、直通天界的神祕飛升登仙梯"
   ],
+  vfx: [
+    "【雷電系】九霄紫極神雷：紫色閃電電弧纏繞劍身與周身，空氣劈啪作響",
+    "【雷電系】天罰雷網降臨：無數細密藍白色雷蛇在周遭交織成網，電光四射",
+    "【雷電系】掌心雷霆爆裂：雙掌凝聚耀眼藍白電球，釋放出狂暴閃電衝擊波",
+    "【雷電系】雷龍嘯天劍氣：劍鋒揮出巨型紫色雷電龍形光影，伴隨電火花飛濺",
+    "【雷電系】御雷步法殘影：腳踏金色閃電符文，移動軌跡留下滋滋跳動的電弧",
+    "【雷電系】紫電青霜雙弧：紅紫與青藍雙色閃電交錯纏繞，照亮半邊夜空",
+    "【雷電系】雷雲風暴領域：頭頂凝聚小型雷雲漩渦，細小電光垂落衣袂之間",
+    "【雷電系】千鳥鳴雷指勁：指尖凝聚高頻白熾電光，射出穿透力極強的雷光束",
+    "【雷電系】玄武鎮雷印：腳下浮現龜蛇雷紋光陣，紫金色雷柱沖天而起",
+    "【雷電系】劫雷淬體微光：皮膚與髮絲間跳動細微金色電弧，宛如神明降世",
+    "【防禦護罩】不動明王金光罩：半透明金色半球形梵文護罩籠罩全身，流光溢彩",
+    "【防禦護罩】太極兩儀陰陽盾：身前浮現旋轉的黑白流光太極圖，彈開一切外力",
+    "【防禦護罩】九宮八卦光幕陣：八面金色透明符文光盾環繞周身，古樸莊嚴",
+    "【防禦護罩】玄冰琉璃護體罩：晶瑩剔透的六角冰晶球形護罩，寒氣與雪花環繞",
+    "【防禦護罩】青蓮護體仙光壁：腳下綻放半透明碧綠蓮花光影，花瓣化作光幕護主",
+    "【防禦護罩】星辰流沙結界罩：無數金色星光粒子形成流動護盾，如銀河環繞",
+    "【防禦護罩】水幕天華柔波盾：透明流動的水波光罩環繞周身，表面泛起細膩漣漪",
+    "【防禦護罩】紫氣東來護身罡氣：淡紫色仙氣如雲霧般凝實，形成貼身流光鎧甲光暈",
+    "【防禦護罩】百花飛舞護心結界：無數發光桃花瓣與粉色靈光旋轉成球形屏障",
+    "【防禦護罩】真龍龍鱗金甲光罩：金色龍鱗紋路光盾在身前展開，發出低沉龍吟光波",
+    "【光波衝擊】排山倒海白金氣浪：雙掌推出肉眼可見的半透明白色空氣衝擊波與光環",
+    "【光波衝擊】太虛神光衝擊波：掌心射出璀璨奪目的乳白色高能光柱，照亮周遭雲霧",
+    "【光波衝擊】獅吼音波黃金漣漪：周身向外擴散一圈圈金色半透明聲波光環，震碎落葉",
+    "【光波衝擊】月華清輝新月光波：揮袖釋放出彎月形銀白色冷冽光波，劃破長空",
+    "【光波衝擊】烈陽焚天赤金光束：雙手合十釋放如太陽般耀眼的金紅色熾熱光波",
+    "【光波衝擊】幽冥九幽紫黑光波：掌心噴湧深邃紫黑色能量光束，周圍空間微微扭曲",
+    "【光波衝擊】碧海潮生青藍波紋：雙掌推動層層疊疊的青藍色水波光浪向前席捲",
+    "【光波衝擊】無相劫指破空光線：指尖彈出一道細長銳利的銀白色高能雷射般氣勁",
+    "【光波衝擊】星河倒掛七彩光瀑：自上而下傾瀉而出的夢幻星輝光波，粒子璀璨",
+    "【光波衝擊】震天撼地環形氣爆：以腳尖為中心向四周擴散的金色地面衝擊波光環",
+    "【劍氣刀罡】萬劍歸宗流光劍雨：身後懸浮數十把半透明青白色靈氣光劍，蓄勢待發",
+    "【劍氣刀罡】半月弧形青霜劍氣：長劍揮出巨大半透明青藍色月牙劍氣，拖曳流光尾跡",
+    "【劍氣刀罡】雪花六出冰藍劍芒：劍尖綻放精緻六角冰晶劍氣，所過之處凝結冰霜粒子",
+    "【劍氣刀罡】桃花影落粉霞劍氣：劍光化作漫天飛舞的發光粉色桃花瓣與流光絲帶",
+    "【劍氣刀罡】太上忘情無形劍域：周身空氣產生透明水波紋般的空間扭曲與無形劍意",
+    "【劍氣刀罡】赤霄烈焰火鳳劍氣：長劍燃起金紅色鳳凰真火，揮出展翅火鳳光影",
+    "【劍氣刀罡】墨染江山水墨劍氣：劍鋒劃出濃淡相宜的黑白水墨流光軌跡，詩意凌厲",
+    "【劍氣刀罡】星辰破碎銀河劍光：劍身星光璀璨，揮出如銀河星屑般閃耀的夢幻劍氣",
+    "【劍氣刀罡】修羅血海暗紅刀罡：刃鋒拖曳深紅色半透明血月刀氣，冷豔而具壓迫感",
+    "【劍氣刀罡】白虹貫日純白劍芒：劍尖射出一道筆直貫穿畫面的純白熾亮劍光",
+    "【火焰烈陽】南明離火金紅焰環：純淨金紅色神聖火焰環繞衣袖飛舞，不傷絲綢分毫",
+    "【火焰烈陽】紅蓮業火蓮台綻放：腳下與周身燃起妖豔赤紅蓮花狀火焰，火星四濺",
+    "【火焰烈陽】三昧真火掌心火蓮：掌心托起一朵旋轉的三色（金、白、赤）精緻火焰蓮花",
+    "【火焰烈陽】鳳凰涅槃羽翼火光：背後展開一對由金色烈焰與火星構成的半透明鳳凰光翼",
+    "【火焰烈陽】焚天煮海赤炎氣浪：周身散發熱浪扭曲空氣，伴隨橘紅色火舌與餘燼飄散",
+    "【火焰烈陽】幽冥鬼火幽藍焰苗：指尖與身側漂浮數朵神秘冷豔的幽藍色靈魂火焰",
+    "【火焰烈陽】流星火雨天降炎彈：空中凝聚數顆拖著長尾的金色火球墜落，光影絢麗",
+    "【火焰烈陽】金烏化虹烈日光輪：身後浮現一輪燃燒著金色日冕光焰的太陽神環",
+    "【火焰烈陽】丹火淬靈暖橙光暈：掌心升騰溫潤的橙金色煉丹靈火，映照精緻面容",
+    "【火焰烈陽】熾天使光焰劍陣：周身懸浮燃燒白色聖火的光劍，神聖莊嚴",
+    "【寒冰水浪】萬里冰封極寒雪霧：周身飄散晶瑩冰晶與淡藍色寒氣，地面凝結冰花紋路",
+    "【寒冰水浪】玄冥寒冰巨龍水柱：透明碧藍水流化作盤旋水龍環繞身側，水花晶瑩剔透",
+    "【寒冰水浪】冰魄銀針寒芒暴雨：空中凝結無數細小透明冰晶飛針，折射七彩冷光",
+    "【寒冰水浪】滄海一粟水墨浪濤：身後掀起半透明青藍色巨浪光影，水珠懸浮半空",
+    "【寒冰水浪】雪月風花冰晶光環：腳下展開精緻的雪花陣圖，冰藍色靈光向上升騰",
+    "【寒冰水浪】弱水三千流光水帶：透明水幕如絲綢般纏繞雙臂飛舞，微光閃爍",
+    "【寒冰水浪】極光冰幕天穹垂落：身後浮現夢幻的綠藍色極光光幕與飄落雪星",
+    "【寒冰水浪】寒梅傲雪冰晶花瓣：寒氣中凝結出半透明冰晶紅梅花瓣，隨劍氣飄散",
+    "【寒冰水浪】深海鮫珠碧藍水泡：周身漂浮發光的碧藍色水泡與流光水波紋",
+    "【寒冰水浪】絕對零度霜凍光環：以人物為中心擴散一圈冰藍色霜凍波紋，空氣凝霜",
+    "【風雲自然】御風九萬里青色風旋：透明青白色氣流旋渦環繞裙擺，捲起落葉與花瓣",
+    "【風雲自然】枯木逢春翡翠生機光：掌心散發柔和翠綠色生命光點，周圍草木發芽開花",
+    "【風雲自然】落英繽紛百花靈氣陣：無數發光的桃花、杏花瓣隨粉色靈氣風暴盤旋",
+    "【風雲自然】青龍木靈藤蔓光影：翠綠色半透明發光靈藤自地面升起，優雅纏繞",
+    "【風雲自然】飛沙走石大漠金風旋：金色流沙與狂風氣流在身側形成龍捲光影",
+    "【風雲自然】竹林聽風翠竹劍氣葉：無數泛著綠光的竹葉如利劍般懸浮周身",
+    "【風雲自然】蝴蝶效應幻彩靈蝶群：數十隻半透明發光的藍紫色靈蝶從衣袖間飛出",
+    "【風雲自然】雲海翻湧仙氣祥雲環：潔白發光的祥雲氣流腳下生蓮，托舉身形凌空",
+    "【風雲自然】秋楓蕭瑟紅楓旋風陣：火紅楓葉伴隨琥珀色流光氣勁在周圍飛舞",
+    "【風雲自然】山河社稷大地金脈光：地面裂縫透出溫暖的琥珀金色大地靈脈光芒",
+    "【陣法符文】周天星斗金色陣法盤：腳下與身前同時展開精密旋轉的金色幾何星象法陣",
+    "【陣法符文】道家金色敕令符咒飛舞：數十張發光的金黃色道家符箓環繞周身旋轉",
+    "【陣法符文】佛門梵文金蓮聖光陣：身後浮現金色梵文光輪，祥和神聖的佛光普照",
+    "【陣法符文】奇門遁甲八門光影陣：地面亮起青金色八卦方位光陣，符文流轉",
+    "【陣法符文】上古封印鎖鏈光影陣：金色半透明靈力鎖鏈從法陣中延伸而出，交織成網",
+    "【陣法符文】天機羅盤全息星圖陣：身前懸浮立體發光的青金色天文羅盤與星辰連線",
+    "【陣法符文】鎮妖玲瓏寶塔虛影陣：頭頂上方浮現半透明金色七層寶塔光影，垂下瑞氣",
+    "【陣法符文】河圖洛書古篆文字流：無數發光的金色上古篆字如流水般在空氣中環繞",
+    "【陣法符文】紫微帝星命盤光輪陣：深紫色與金色交織的華麗星盤在背後緩緩轉動",
+    "【陣法符文】結界展開六邊形蜂巢光壁：半透明青白色六角形能量陣法壁在身前顯現",
+    "【音律幻術】高山流水琴音金色聲浪：撥動琴弦釋放出可視化的金色五線譜般音律光波",
+    "【音律幻術】十面埋伏肅殺音波刃：琴音化作無數半透明銀白色月牙狀音波利刃射出",
+    "【音律幻術】鏡花水月幻影分身光：身側浮現兩道半透明流光殘影分身，如夢似幻",
+    "【音律幻術】夢蝶迷蹤紫霧幻境光：淡紫色夢幻光霧與閃爍星塵籠罩周遭，唯美迷離",
+    "【音律幻術】玉笛飛聲碧綠音符流：吹奏玉笛飄出翡翠色發光音符與清風光帶",
+    "【音律幻術】海市蜃樓空間折射波：空氣中出現如水晶稜鏡般的七彩折射光影波紋",
+    "【音律幻術】攝魂鈴音粉色漣漪光：手腕銀鈴搖動，擴散出溫柔卻迷幻的粉紫色光圈",
+    "【音律幻術】水墨丹青畫卷顯化光：揮毫之間空中浮現發光的立體山水墨跡與飛鳥光影",
+    "【音律幻術】千面幻形流光面具影：臉側閃過半透明銀色流光蝴蝶面具虛影，神秘莫測",
+    "【音律幻術】時空凝滯銀白靜止光：周身一丈內呈現銀白色慢動作光暈，雨滴與花瓣懸停",
+    "【神聖暗影】九天玄女七彩羽化仙光：周身散發柔和七彩霓虹仙光與純白羽毛光粒",
+    "【神聖暗影】暗夜影襲黑紫幽影氣焰：身後升騰如黑色水墨與紫光交織的暗影氣息",
+    "【神聖暗影】純白聖潔天使神光柱：一道溫暖明亮的乳白色天光從雲層灑落籠罩全身",
+    "【神聖暗影】修羅覺醒血紅瞳光氣場：雙眸閃爍微紅光芒，周身飄散細小血紅色光點",
+    "【神聖暗影】銀河星辰披風星屑流光：身後拖曳如深邃夜空與閃耀星辰般的流光氣場",
+    "【神聖暗影】陰陽雙魚黑白流光環：一黑一白兩道靈氣光魚在周身首尾相逐盤旋",
+    "【神聖暗影】真龍護體金龍盤繞虛影：半透明金色神龍光影盤旋在人物身後，威嚴霸氣",
+    "【神聖暗影】九尾天狐粉白靈尾虛影：身後隱約浮現九條半透明發光的粉白色狐尾光影",
+    "【神聖暗影】破碎虛空空間裂縫光：指尖劃過處留下一道閃爍銀藍色星光的空間裂痕",
+    "【神聖暗影】返璞歸真無垢琉璃仙光：周身僅有極致純淨、溫潤如玉的淡淡珍珠白微光"
+  ],
   plot: [
     "仙子奉師命下山歷練，御劍飛行穿梭於雲海之間", "清冷女劍客夜闖古寺，尋找失傳的上古劍譜", "兩派仙宗高手在雲海山巔對峙，決定宗門存亡", "女劍客護送受傷同伴穿越暴雨山道，施展強大劍氣", "仙門大師姐獨守山門，迎戰來犯的魔教強敵",
     "古城屋頂展開輕功追逐，仙子追捕神秘黑衣人", "雪山尋找靈藥途中遭遇伏擊，女劍客拔劍反擊冰雪怪物", "仙子在竹林客棧中發現暗號，揭開一場江湖驚天陰謀", "兩大絕頂高手在月下雲海之巔進行世紀生死決鬥", "仙門弟子在雲海山巔閉關練劍，最終感悟太上劍意",
@@ -404,7 +527,7 @@ const DB = {
     "緩緩拔劍，劍尖斜指地面，再抬眼凝視對手", "踏步前衝，橫劍格擋，旋身回斬後穩定收勢", "輕功躍上屋簷，踩瓦疾行，再落地半蹲", "長袖揮動，轉腕出劍，劍光掠過鏡頭前景", "後撤閃避，低身滑步，反手格開來襲兵器",
     "雙劍連續交錯攻防，步伐俐落且重心穩定", "躍過石欄，空中轉身，衣袂飛揚後輕巧落地", "側身避開暗器，拔劍擊落飛來物，再回身戒備", "慢動作抬手按劍，眼神變冷，瞬間向前出招", "單手持劍旋身，劍尖劃出清晰弧線，定格收勢",
     "運氣凝神，周身落葉被氣流帶起，緩緩睜眼", "與對手短兵相接，三次格擋後拉開距離", "從門後現身，收起暗器，抬頭直視敵人", "迎風站在懸崖邊，轉身收劍，披風隨風揚起", "疾步穿過竹林，跳躍避開障礙，回身拔劍",
-    "持劍刺出後迅速回收，腳步站穩並保持防禦姿勢", "揮袖施展奇幻劍氣，特效沿劍刃短暫流動", "跪地扶起受傷同伴，再起身面向追兵", "雙手結印運功，掌心泛起強烈氣場與光暈", "凌空翻滾三周半，居高臨下向下劈出致命一劍",
+    "持劍刺出後迅速回收，腳步站穩並保持防禦姿勢", "揮袖施展奇幻招式，特效沿劍刃與袖口流動", "跪地扶起受傷同伴，再起身面向追兵", "雙手結印運功，掌心泛起強烈氣場與光暈", "凌空翻滾三周半，居高臨下向下劈出致命一劍",
     "單膝跪地喘息，手中長劍插入地下支撐身體", "甩動長鞭纏繞敵方兵器，用力一拉將其奪下", "甩出袖中飛刀，準確擊碎迎面而來的暗器", "盤膝打坐調息，頭頂冒出微落白色蒸氣", "轉動手中摺扇，扇面帶出凌厲風刃切斷樹枝",
     "以極快速度連續刺出七劍，殘影連成一片", "側身飛踢敵方胸口，藉力向後凌空翻躍撤退", "雙手持槍橫掃千軍，掀起一陣地面塵土", "在水面上施展水上漂輕功，腳尖點水而過", "用劍鞘格擋攻擊，隨後反手一記肘擊震退對手",
     "將內力灌注於琴弦中，彈奏出肉眼可見的音波劍氣", "急速奔跑中突然急停轉身，長劍出鞘直指鏡頭", "從高空俯衝而下，雙劍合一如流星般墜落", "用雙刀交叉架住巨斧劈砍，咬牙切齒支撐", "側身閃過致命一擊，順勢用劍柄擊中對手腹部",
@@ -448,6 +571,26 @@ const $=id=>document.getElementById(id);
 const val=id=>$(id).value;
 const selectedChecks=()=>[...document.querySelectorAll('.check input:checked')].map(x=>x.value);
 
+function syncVfxState(){
+ const enabled = $("useVfx").checked;
+ $("vfx").disabled = !enabled;
+ $("vfxPower").disabled = !enabled;
+}
+
+function getVfxText(){
+ if(!$("useVfx").checked){
+  return "不使用奇幻光效（純寫實古裝武俠物理打鬥，無雷電、無光波、無氣罩）";
+ }
+ return `${val("vfx")}｜施放強度：${val("vfxPower")}`;
+}
+
+function getVfxEnglish(){
+ if(!$("useVfx").checked){
+  return "pure realistic wuxia martial arts without magical energy effects, natural lighting only";
+ }
+ return `unleashing mystical wuxia martial arts energy VFX: ${val("vfx")}, intensity: ${val("vfxPower")}`;
+}
+
 function init(){
  Object.entries(DB).forEach(([id,items])=>{
   const el = $(id);
@@ -460,10 +603,15 @@ function init(){
   el.addEventListener("change",makePrompt);
  });
  document.querySelectorAll(".check input").forEach(el=>el.addEventListener("change",makePrompt));
+ $("useVfx").addEventListener("change",()=>{
+  syncVfxState();
+  makePrompt();
+ });
  const importEl = $("importFile");
  if(importEl) importEl.addEventListener("change",importSettings);
  const imageEl = $("imageFile");
  if(imageEl) imageEl.addEventListener("change",previewImage);
+ syncVfxState();
  drawPlaceholder();
  makePrompt();
 }
@@ -482,7 +630,9 @@ function randomCharacter(){
 }
 function randomAll(){
  randomCharacter();
- randomIds(["scene","weather","camera","plot","action","opponent","emotion","pace","duration","framing"]);
+ $("useVfx").checked = true;
+ syncVfxState();
+ randomIds(["scene","weather","camera","vfx","vfxPower","plot","action","opponent","emotion","pace","duration","framing"]);
  makePrompt();
 }
 function identity(){
@@ -506,10 +656,11 @@ function commonQuality(){
   "場景環境："+val("scene"),
   "時間與天氣："+val("weather"),
   "鏡頭構圖："+val("framing"),
+  "武功神通特效："+getVfxText(),
   "畫面規格與張數："+val("ratio"),
   "一致性要求："+selectedChecks().join("；"),
   "補充設定："+(val("custom")||"無"),
-  "畫質與質感要求：頂級絲綢半透明質感，精細蠶絲紋理，清晰精緻五官與額間花鈿，完美人體比例，手指與劍柄結構正確，電影級景深與體積光，仙氣縹緲的流光特效，一次生成4張不同角度連發畫面 (Grid of 4 variations)."
+  "畫質與質感要求：頂級絲綢半透明質感，精細蠶絲紋理，清晰精緻五官與額間花鈿，完美人體比例，手指與劍柄結構正確，電影級景深與體積光，一次生成4張不同角度連發畫面 (Grid of 4 variations)."
  ].join("\n");
 }
 function makePrompt(){
@@ -524,14 +675,17 @@ function makePrompt(){
 【人物定妝與仙姿設定】
 ${ident}
 
+【武功招式與神通特效】
+${getVfxText()}
+
 【仙境場景與美術】
 ${quality}
 
 【英文生成提示詞 (Prompt with Grid 4x)】
-Ethereal xianxia heroine, fairy-like martial arts girl, ${val("role")}, ${val("temper")}, ${val("face")}, ${val("hair")}, high-end translucent silk hanfu costume with flowing ethereal ribbons, ${val("color")}, ${val("weapon")}, ${val("scene")}, ${val("weather")}, ${val("style")}, cinematic lighting, backlit translucent silk, glowing sword qi particles, elegant floating martial arts pose, highly detailed silk texture, clear facial features, flawless skin, consistent character design, generation grid of 4 unique variations, aspect ratio ${val("ratio")}.
+Ethereal xianxia heroine, fairy-like martial arts girl, ${val("role")}, ${val("temper")}, ${val("face")}, ${val("hair")}, high-end translucent silk hanfu costume with flowing ethereal ribbons, ${val("color")}, ${val("weapon")}, ${val("action")}, ${getVfxEnglish()}, ${val("scene")}, ${val("weather")}, ${val("style")}, cinematic lighting, backlit translucent silk, elegant martial arts pose, highly detailed silk texture, clear facial features, flawless skin, consistent character design, generation grid of 4 unique variations, aspect ratio ${val("ratio")}.
 
 【負面提示詞 (Negative Prompt)】
-low quality, blurry, deformed hands, extra fingers, extra limbs, distorted face, inconsistent costume, broken weapon, modern clothing, modern buildings, text, watermark, logo, heavy makeup, stiff fabric.`;
+low quality, blurry, deformed hands, extra fingers, extra limbs, distorted face, inconsistent costume, broken weapon, modern clothing, modern buildings, text, watermark, logo, heavy makeup, stiff fabric${$("useVfx").checked ? "" : ", lightning, energy beam, magic shield, glowing aura, fantasy VFX"}.`;
  }else if(currentTab==="story"){
   text=`【仙氣武俠短劇劇情與分鏡生成指令 (四格分鏡版)】
 
@@ -547,6 +701,9 @@ ${val("scene")}；${val("weather")}
 【主要動作】
 ${val("action")}
 
+【武功神通特效】
+${getVfxText()}
+
 【對手與互動】
 ${val("opponent")}
 
@@ -559,7 +716,7 @@ ${val("camera")}
 【四格分鏡規劃 (Grid 4-Panel)】
 面板一（起）：遠景交代宏大仙山雲海、天氣與人物御風而行的仙姿。
 面板二（承）：中景呈現人物輕功走位、絲綢衣袂隨風飄動與劍器細節。
-面板三（轉）：${val("action")}，動作輕靈流暢，劍氣伴隨光效，情緒：${val("emotion")}。
+面板三（轉）：${val("action")}，${$("useVfx").checked ? "同步施展「" + val("vfx") + "」，" : "純寫實招式交鋒，無奇幻光效，"}情緒：${val("emotion")}。
 面板四（合）：人物完成招式後凌空收勢，鏡頭定格於充滿詩意的仙俠畫面。
 
 【視覺統一】
@@ -581,9 +738,12 @@ ${val("plot")}
 天氣：${val("weather")}
 對手：${val("opponent")}
 
+【武功神通特效】
+${getVfxText()}
+
 【動作時間軸】
 0–2 秒：人物凌空微浮或自然呼吸，絲綢衣袂、披帛與髮絲依風向輕柔飄動，眼神清冷堅定。
-2–4 秒：${val("action")}
+2–4 秒：${val("action")}${$("useVfx").checked ? "，同時催動內力釋放「" + val("vfx") + "」（" + val("vfxPower") + "）" : "，全程維持純寫實物理動作，不產生任何魔法光效"}。
 4–6 秒：動作完成後保持優雅平衡重心，劍柄與手部位置正確，氣場收斂。
 影片長度選擇：${val("duration")}。請依所選長度流暢延展仙俠節奏。
 
@@ -595,7 +755,7 @@ ${val("plot")}
 
 【動態細節】
 ${selectedChecks().join("；")}
-絲綢衣物、透明披帛、長髮絲線與落花雪塵依雲海風向自然飄動，展現絲滑流暢的物理質感。劍氣軌跡清晰，不穿透身體。人物動作流暢，充滿仙俠飄逸美學。
+絲綢衣物、透明披帛、長髮絲線與落花雪塵依雲海風向自然飄動，展現絲滑流暢的物理質感。${$("useVfx").checked ? "武功特效光影自然映照在絲綢衣袂與周遭環境上，不遮擋人物五官。" : "純粹展現寫實身法與絲綢物理動態。"}
 
 【影視品質限制】
 保持單一連貫仙境場景，鏡頭運鏡平穩流暢。不新增多餘人物、不改變絲綢服裝、不更換仙劍、不改變角色面容、不突然切景、不生成字幕或水印。`;
@@ -618,15 +778,20 @@ async function copyPrompt(){
 function getSettings(){
  const data={};
  document.querySelectorAll("select,input[type=text],textarea").forEach(el=>data[el.id]=el.value);
+ data.useVfx = $("useVfx").checked;
  data.checks=selectedChecks();
  return data;
 }
 function applySettings(data){
  Object.entries(data).forEach(([id,value])=>{
-  if(id==="checks")return;
+  if(id==="checks" || id==="useVfx")return;
   const el=$(id);
   if(el)el.value=value;
  });
+ if(typeof data.useVfx === "boolean"){
+  $("useVfx").checked = data.useVfx;
+ }
+ syncVfxState();
  document.querySelectorAll(".check input").forEach(el=>el.checked=(data.checks||[]).includes(el.value));
  makePrompt();
 }
@@ -653,6 +818,8 @@ function resetAll(){
  document.querySelectorAll("select").forEach(el=>el.selectedIndex=0);
  document.querySelectorAll("input[type=text],textarea").forEach(el=>el.value="");
  document.querySelectorAll(".check input").forEach(el=>el.checked=true);
+ $("useVfx").checked = true;
+ syncVfxState();
  currentTab="img";
  switchTab("img");
 }
@@ -681,7 +848,6 @@ function previewImage(e){
  reader.readAsDataURL(file);
 }
 
-// 確保網頁完全載入後執行初始化
 window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
